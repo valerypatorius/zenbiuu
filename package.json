@@ -1,9 +1,9 @@
 {
   "name": "zenbiuu",
   "license": "GPL-3.0",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "productName": "Zenbiuu",
-  "description": "Desktop app for comfortable watching streams from Twitch",
+  "description": "Desktop app for comfortable streams watching",
   "author": "valerypatorius",
   "main": "packages/main/dist/index.cjs",
   "scripts": {
