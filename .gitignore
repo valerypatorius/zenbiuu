@@ -1,0 +1,20 @@
+# env variables
+.env
+
+# built files
+dist
+
+# npm packages
+node_modules
+
+# Yarn stuff
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Auto updater development
+dev-app-update.yml

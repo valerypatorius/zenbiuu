@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/src/*": [
+        "./src/*"
+      ],
+      "@/types/*": [
+        "../../types/*"
+      ],
+      "@/assets/*": [
+        "./assets/*"
+      ],
+    },
+    "lib": ["ESNext", "dom", "dom.iterable"]
+  },
+  "include": [
+    "src/**/*.vue",
+    "src/**/*.ts",
+    "../../types/**/*.ts"
+  ]
+}
