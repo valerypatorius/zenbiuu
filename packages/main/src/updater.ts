@@ -66,6 +66,10 @@ class AutoUpdater {
     ipcMain.on(HubChannel.DownloadAppUpdate, () => {
       this.download();
     });
+
+    ipcMain.on(HubChannel.InstallAppUpdate, () => {
+      this.install();
+    });
   }
 
   /**
