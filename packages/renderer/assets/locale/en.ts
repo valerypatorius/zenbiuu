@@ -53,6 +53,7 @@ export default {
       download: 'Download',
       downloading: 'Downloading',
       ready: 'Install',
+      macWarning: 'Sorry, but Zenbiuu does not support auto updates on MacOS at the moment. Please download latest version from GitHub manually',
     },
     logout: 'Logout',
   },

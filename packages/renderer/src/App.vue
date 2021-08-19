@@ -39,14 +39,23 @@ export default defineComponent({
   },
   data (): {
     interval: IntervalManagerItem | null;
-    tokenValidationInterval: number | null;
     isWindows: boolean;
     isMac: boolean;
     } {
     return {
+      /**
+       * Interval for token validation
+       */
       interval: null,
-      tokenValidationInterval: null,
+
+      /**
+       * Returns true, if current platform is Windows
+       */
       isWindows: isWindows(),
+
+      /**
+       * Returns true, if current platform is Mac
+       */
       isMac: isMac(),
     };
   },
@@ -347,7 +356,8 @@ export default defineComponent({
     margin-bottom: 0.6em;
   }
 
-  button {
+  button,
+  .button {
     border: 0;
     padding: 0 1.5rem;
     margin: 0;
@@ -366,12 +376,14 @@ export default defineComponent({
     white-space: nowrap;
   }
 
-  button:hover {
+  button:hover,
+  .button:hover {
     color: var(--color-background);
     background-color: var(--color-text);
   }
 
-  button:active {
+  button:active,
+  .button:active {
     transform: translateY(1px);
   }
 

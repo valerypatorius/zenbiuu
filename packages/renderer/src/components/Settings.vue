@@ -260,17 +260,18 @@ export default defineComponent({
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
+    gap: 24px;
   }
 
   .settings-action:not(:last-child) {
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
   }
 
-  .settings-action a {
+  .settings-action a:not(.button) {
     color: var(--color-text-secondary);
   }
 
-  .settings-action a:hover {
+  .settings-action a:not(.button):hover {
     color: var(--color-text);
   }
 </style>

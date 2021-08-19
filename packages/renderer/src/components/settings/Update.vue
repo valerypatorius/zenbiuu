@@ -1,11 +1,38 @@
 <template>
-  <div class="settings-section">
+  <div
+    v-if="isMac"
+    class="settings-section"
+  >
+    <div class="settings-action">
+      <div class="settings-action__main">
+        {{ $t('settings.update.macWarning') }}
+      </div>
+
+      <a
+        class="button"
+        href="https://github.com/valerypatorius/zenbiuu/releases"
+      >
+        {{ $t('settings.update.download') }}
+      </a>
+    </div>
+
+    <div
+      v-if="releaseNotes"
+      v-html="releaseNotes"
+    />
+  </div>
+
+  <div
+    v-else
+    class="settings-section"
+  >
     <div class="settings-action">
       <div class="settings-action__main">
         {{ $t('settings.update.available') }}
       </div>
 
       <button
+        v-if="buttonLabel"
         :disabled="isDownloading"
         @click="onActionButtonClick"
       >
@@ -24,10 +51,21 @@
 import marked from 'marked';
 import { defineComponent } from 'vue';
 import { state, downloadAppUpdate, installAppUpdate } from '@/src/utils/hub';
+import { isMac } from '@/src/utils/utils';
 import { AppUpdateStatus } from '@/types/hub';
 
 export default defineComponent({
   name: 'SettingsUpdate',
+  data (): {
+    isMac: boolean;
+    } {
+    return {
+      /**
+       * Returns true, if current platform is Mac
+       */
+      isMac: isMac(),
+    };
+  },
   computed: {
     /**
      * Current app update status
