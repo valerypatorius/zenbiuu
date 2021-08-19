@@ -23,6 +23,8 @@ export const downloadAppUpdate = window.hub.downloadAppUpdate;
 
 export const installAppUpdate = window.hub.installAppUpdate;
 
+export const clearSessionStorage = window.hub.clearSessionStorage;
+
 /**
  * Reactive version of hub state.
  * Used in vue components

@@ -26,8 +26,9 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { REVOKE_USER_ACCESS_TOKEN, TOGGLE_APP_SETTINGS } from '@/src/store/actions';
+import { REVOKE_USER_ACCESS_TOKEN, TOGGLE_APP_SETTINGS, RESET_LIBRARY } from '@/src/store/actions';
 import { RouteName } from '@/types/renderer/router';
+import { clearSessionStorage } from '@/src/utils/hub';
 
 export default defineComponent({
   name: 'SettingsAccount',
@@ -82,7 +83,10 @@ export default defineComponent({
       this.isLoading = false;
 
       this.$store.dispatch(TOGGLE_APP_SETTINGS);
+      this.$store.dispatch(RESET_LIBRARY);
       this.$router.replace({ name: RouteName.Auth });
+
+      clearSessionStorage();
     },
   },
 });

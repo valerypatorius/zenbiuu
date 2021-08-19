@@ -167,6 +167,13 @@ function handleRendererMessages (): void {
       appUpdateError: null,
     };
   });
+
+  /**
+   * Clear session storage data
+   */
+  ipcMain.on(HubChannel.ClearSessionStorage, () => {
+    session.defaultSession.clearStorageData();
+  });
 }
 
 /**

@@ -32,6 +32,9 @@ const fs = {
     set: (key: string, value: any): void => {
       ipcRenderer.send(HubChannel.LibrarySet, key, value);
     },
+    clear: (): void => {
+      ipcRenderer.send(HubChannel.LibraryClear);
+    },
   },
 };
 
@@ -129,6 +132,13 @@ function installAppUpdate (): void {
 }
 
 /**
+ * CLear session storage data
+ */
+function clearSessionStorage (): void {
+  ipcRenderer.send(HubChannel.ClearSessionStorage);
+}
+
+/**
  * Object with all available data and methods,
  * available in renderer process under window.hub
  */
@@ -142,6 +152,7 @@ const api: MainProcessApi = {
   checkAppUpdates,
   downloadAppUpdate,
   installAppUpdate,
+  clearSessionStorage,
   getState: () => state,
   getStringByteLength: (str: string) => Buffer.byteLength(str, 'utf8'),
 };

@@ -29,7 +29,7 @@ export function listenForConfigRequests (): void {
 
 /**
  * Listen for renderer process requests
- * to get value from or set value in library
+ * to get value from, set value in or clear library
  */
 export function listenForLibraryRequests (): void {
   ipcMain.handle(HubChannel.LibraryGet, async (event, key: string) => {
@@ -38,5 +38,9 @@ export function listenForLibraryRequests (): void {
 
   ipcMain.on(HubChannel.LibrarySet, (event, key: string, value: any) => {
     library.set(key, value);
+  });
+
+  ipcMain.on(HubChannel.LibraryClear, () => {
+    library.clear();
   });
 }

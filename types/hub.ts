@@ -14,11 +14,13 @@ export enum Channel {
 
   LibraryGet = 'libraryGet',
   LibrarySet = 'librarySet',
+  LibraryClear = 'libraryClear',
 
   SetNativeTheme = 'setNativeTheme',
   CallWindowMethod = 'callWindowMethod',
 
   RequestAccessToken = 'requestAccessToken',
+  ClearSessionStorage = 'clearSessionStorage',
 
   SetUpdateStatus = 'setUpdateStatus',
   SetUpdateError = 'setUpdateError',
@@ -69,6 +71,7 @@ export interface MainProcessApi {
     [StoreFilename.Library]: {
       get: (key?: string) => Promise<any>;
       set: (key: string, value: any) => void;
+      clear: () => void;
     };
   };
   env: Record<string, string>;
@@ -79,6 +82,7 @@ export interface MainProcessApi {
   checkAppUpdates: () => void;
   downloadAppUpdate: () => void;
   installAppUpdate: () => void;
+  clearSessionStorage: () => void;
   getState: () => State;
   getStringByteLength: (str: string) => number;
 }

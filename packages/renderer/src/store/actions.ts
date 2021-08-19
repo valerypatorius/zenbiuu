@@ -83,3 +83,5 @@ export const SET_USERS = 'SET_USERS';
 export const SET_STREAM_DATA = 'SET_STREAM_DATA';
 
 export const SET_ALWAYS_ON_TOP = 'SET_ALWAYS_ON_TOP';
+
+export const RESET_LIBRARY = 'RESET_LIBRARY';

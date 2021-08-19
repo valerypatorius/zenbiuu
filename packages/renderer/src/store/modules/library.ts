@@ -1,6 +1,6 @@
 import { ActionContext } from 'vuex';
 import { library } from '@/src/utils/hub';
-import { Module, RootState, ModuleState } from '@/types/schema';
+import { Module, RootState, ModuleState, schema } from '@/types/schema';
 import request from '@/src/utils/request';
 import { StreamType } from '@/types/renderer/library';
 import type {
@@ -282,6 +282,15 @@ const actions = {
     state.sorting = value;
 
     library.set('sorting', value);
+  },
+
+  /**
+   * Reset library to initial values
+   */
+  [actionType.RESET_LIBRARY] ({ state }: ActionContext<LibraryState, RootState>) {
+    Object.assign(state, schema[Module.Library]);
+
+    library.clear();
   },
 };
 
