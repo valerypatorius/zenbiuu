@@ -16,7 +16,7 @@ const isSingleInstance = app.requestSingleInstanceLock();
 /**
  * Do not allow creating multiple app instances
  */
-if (!isSingleInstance) {
+if (!isSingleInstance && env.MODE !== 'development') {
   app.quit();
 }
 
@@ -299,19 +299,21 @@ function handleCors (): void {
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
 /**
- * Allow only one running instance of the app
+ * Allow only one running instance of the app in production mode
  */
-app.on('second-instance', () => {
-  if (mainWindow === null) {
-    return;
-  }
+if (env.MODE === 'development') {
+  app.on('second-instance', () => {
+    if (mainWindow === null) {
+      return;
+    }
 
-  if (mainWindow.isMinimized()) {
-    mainWindow.restore();
-  }
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
 
-  mainWindow.focus();
-});
+    mainWindow.focus();
+  });
+}
 
 /**
  * Quit when all windows are closed, but leave the app active on Mac

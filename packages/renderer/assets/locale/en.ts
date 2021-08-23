@@ -93,4 +93,8 @@ export default {
   enable: 'Enable',
   disable: 'Disable',
   openInBrowser: 'Open in browser',
+  debug: {
+    title: 'Development',
+    openChannel: 'Open channel',
+  },
 };

@@ -45,6 +45,7 @@ const env = {
   APP_CLIENT_ID: import.meta.env.VITE_APP_CLIENT_ID,
   STREAM_CLIENT_ID: import.meta.env.VITE_STREAM_CLIENT_ID,
   REDIRECT_URL: import.meta.env.VITE_APP_REDIRECT_URL,
+  MODE: import.meta.env.MODE,
 };
 
 /**

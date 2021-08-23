@@ -22,24 +22,50 @@
       </button>
     </div>
   </div>
+
+  <div
+    v-if="isDevelopment"
+    class="settings-section"
+  >
+    <div class="settings-section__title">
+      {{ $t('debug.title') }}
+    </div>
+
+    <div class="settings-action">
+      <div class="settings-action__main">
+        {{ userName }}
+      </div>
+
+      <button @click="openLoginedUserChannel">
+        {{ $t('debug.openChannel') }}
+      </button>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { REVOKE_USER_ACCESS_TOKEN, TOGGLE_APP_SETTINGS, RESET_LIBRARY } from '@/src/store/actions';
 import { RouteName } from '@/types/renderer/router';
+import { isDevelopment } from '@/src/utils/utils';
 import { clearSessionStorage } from '@/src/utils/hub';
 
 export default defineComponent({
   name: 'SettingsAccount',
   data (): {
     isLoading: boolean;
+    isDevelopment: boolean;
     } {
     return {
       /**
        * True, if logout request is being processed
        */
       isLoading: false,
+
+      /**
+       * True, if app is in development mode
+       */
+      isDevelopment: isDevelopment(),
     };
   },
   computed: {
@@ -55,6 +81,13 @@ export default defineComponent({
      */
     userName (): string | null {
       return this.$store.state.user.name;
+    },
+
+    /**
+     * Logined user id
+     */
+    userId (): string | null {
+      return this.$store.state.user.id;
     },
 
     /**
@@ -87,6 +120,22 @@ export default defineComponent({
       this.$router.replace({ name: RouteName.Auth });
 
       clearSessionStorage();
+    },
+
+    /**
+     * Open logined user channel.
+     * Used for debug
+     */
+    openLoginedUserChannel (): void {
+      this.$store.dispatch(TOGGLE_APP_SETTINGS);
+
+      this.$router.replace({
+        name: RouteName.Channel,
+        params: {
+          name: this.userName,
+          id: this.userId,
+        },
+      });
     },
   },
 });

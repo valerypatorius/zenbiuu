@@ -93,4 +93,8 @@ export default {
   enable: 'Включить',
   disable: 'Отключить',
   openInBrowser: 'Открыть в браузере',
+  debug: {
+    title: 'Разработка',
+    openChannel: 'Перейти на канал',
+  },
 };
