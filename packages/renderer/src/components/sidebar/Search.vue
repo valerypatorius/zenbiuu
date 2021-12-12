@@ -68,7 +68,6 @@ export default defineComponent({
     padding-right: calc(var(--offset-x) + var(--size-icon) + var(--offset-icon));
     background-color: transparent;
     color: var(--color-text);
-    font-weight: 500;
     position: absolute;
     left: 0;
     background-color: var(--color-overlay-full);

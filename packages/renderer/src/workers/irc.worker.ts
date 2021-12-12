@@ -14,7 +14,7 @@ let queue: string[] = [];
  * Connect to Twitch IRC
  */
 function connect ({ url, token, name }: WorkerMessageData['data']): void {
-  if (socket != null) {
+  if (socket !== null) {
     return;
   }
 
@@ -23,7 +23,9 @@ function connect ({ url, token, name }: WorkerMessageData['data']): void {
   socket.addEventListener('open', function auth () {
     this.send(`PASS oauth:${token}`);
     this.send(`NICK ${name}`);
-    this.send('CAP REQ :twitch.tv/tags');
+    this.send('CAP REQ :twitch.tv/tags :twitch.tv/commands');
+    // this.send('CAP REQ :twitch.tv/membership :twitch.tv/tags :twitch.tv/commands');
+    // this.send(`USER ${name} 8 * :${name}`);
   });
 
   socket.addEventListener('message', function process (event) {
@@ -48,7 +50,7 @@ function connect ({ url, token, name }: WorkerMessageData['data']): void {
  * Close socket connection
  */
 function disconnect (code: number | undefined): void {
-  if (socket == null) {
+  if (socket === null) {
     return;
   }
 
@@ -62,7 +64,7 @@ function disconnect (code: number | undefined): void {
 function joinChannelChat (channel: string): void {
   const message = `JOIN #${channel}`;
 
-  if ((socket != null) && socket.readyState === 1) {
+  if ((socket !== null) && socket.readyState === 1) {
     socket.send(message);
     return;
   }
@@ -75,10 +77,25 @@ function joinChannelChat (channel: string): void {
  * Otherwise put message in queue
  */
 function leaveChannelChat (channel: string): void {
-  const message = `JOIN #${channel}`;
+  const message = `PART #${channel}`;
 
-  if ((socket != null) && socket.readyState === 1) {
-    socket.send(`PART #${channel}`);
+  if ((socket !== null) && socket.readyState === 1) {
+    socket.send(message);
+    return;
+  }
+
+  queue.push(message);
+}
+
+/**
+ * If socket is connected, send message text to Twitch chat.
+ * Otherwise put message in queue
+ */
+function postMessageToChat ({ channel, text, nonce }: WorkerMessageData['data']): void {
+  const message = `@client-nonce=${nonce} PRIVMSG #${channel} :${text}`;
+
+  if ((socket !== null) && socket.readyState === 1) {
+    socket.send(message);
     return;
   }
 
@@ -115,6 +132,9 @@ onmessage = ({ data }: MessageEvent<WorkerMessageData>) => {
       break;
     case 'leave':
       leaveChannelChat(data.data.channel);
+      break;
+    case 'message':
+      postMessageToChat(data.data);
       break;
     case 'runQueue':
       resolveQueue();

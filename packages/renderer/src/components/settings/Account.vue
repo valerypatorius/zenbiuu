@@ -36,7 +36,17 @@
         {{ userName }}
       </div>
 
-      <button @click="openLoginedUserChannel">
+      <button @click="openChannel(userName, userId)">
+        {{ $t('debug.openChannel') }}
+      </button>
+    </div>
+
+    <div class="settings-action">
+      <div class="settings-action__main">
+        zenbiuu
+      </div>
+
+      <button @click="openChannel('zenbiuu', '702891213')">
         {{ $t('debug.openChannel') }}
       </button>
     </div>
@@ -123,17 +133,17 @@ export default defineComponent({
     },
 
     /**
-     * Open logined user channel.
+     * Open channel by its name and id.
      * Used for debug
      */
-    openLoginedUserChannel (): void {
+    openChannel (channelName: string | null, channelId: string | null): void {
       this.$store.dispatch(TOGGLE_APP_SETTINGS);
 
       this.$router.replace({
         name: RouteName.Channel,
         params: {
-          name: this.userName,
-          id: this.userId,
+          name: channelName,
+          id: channelId,
         },
       });
     },

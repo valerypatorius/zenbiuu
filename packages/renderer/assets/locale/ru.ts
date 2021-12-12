@@ -60,6 +60,10 @@ export default {
   chat: {
     joinedAs: 'Вы вошли в чат как',
     scrollToBottom: 'Прокрутить вниз',
+    form: {
+      placeholder: 'Ваше сообщение',
+      pin: 'Закрепить %{emote}',
+    },
   },
   player: {
     mute: 'Отключить звук',

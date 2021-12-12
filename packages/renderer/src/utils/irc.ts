@@ -1,6 +1,6 @@
 import linkifyHtml from 'linkifyjs/html';
 import Worker from '@/src/workers/irc.worker.ts?worker';
-import type { ChatEmote, ChatMessage } from '@/types/renderer/chat';
+import type { ChatMessage } from '@/types/renderer/chat';
 import { escape } from '@/src/utils/utils';
 import * as endpoints from '@/src/store/endpoints';
 import log from '@/src/utils/log';
@@ -96,37 +96,37 @@ function parseMessage (raw: string): {command: string; text: string; channel: st
 /**
  * Parse message text for Twitch emotes
  */
-function parseEmotes (raw: string, messageText: string): {[key: string]: ChatEmote} | null {
-  if (!raw || !messageText) {
-    return null;
-  }
+// function parseEmotes (raw: string, messageText: string): {[key: string]: ChatEmote} | null {
+//   if (!raw || !messageText) {
+//     return null;
+//   }
 
-  const result: {[key: string]: ChatEmote} = {};
+//   const result: {[key: string]: ChatEmote} = {};
 
-  const data = Object.fromEntries(raw
-    .split('/')
-    .map((item) => item.split(':')).map(([id, pos]) => (
-      [
-        id,
-        pos
-          .split(',')
-          .map((p) => p.split('-').map((n) => parseInt(n, 10))),
-      ]
-    )));
+//   const data = Object.fromEntries(raw
+//     .split('/')
+//     .map((item) => item.split(':')).map(([id, pos]) => (
+//       [
+//         id,
+//         pos
+//           .split(',')
+//           .map((p) => p.split('-').map((n) => parseInt(n, 10))),
+//       ]
+//     )));
 
-  Object.entries(data).forEach(([id, positions]) => {
-    const [start, end] = positions[0];
-    const emoteNameFromText = messageText.slice(start, end + 1);
-    const size = window.devicePixelRatio > 1 ? '2.0' : '1.0';
+//   Object.entries(data).forEach(([id, positions]) => {
+//     const [start, end] = positions[0];
+//     const emoteNameFromText = messageText.slice(start, end + 1);
+//     const size = window.devicePixelRatio > 1 ? '2.0' : '1.0';
 
-    result[emoteNameFromText] = {
-      url: `https://static-cdn.jtvnw.net/emoticons/v1/${id}/${size}`,
-      height: 28,
-    };
-  });
+//     result[emoteNameFromText] = {
+//       url: `https://static-cdn.jtvnw.net/emoticons/v1/${id}/${size}`,
+//       height: 28,
+//     };
+//   });
 
-  return result;
-}
+//   return result;
+// }
 
 /**
  * Parse author badges tag
@@ -275,7 +275,7 @@ class IrcManager {
         if (parsed.tags != null) {
           data.id = parsed.tags.id;
           data.author = parsed.tags['display-name'];
-          data.emotes = parseEmotes(parsed.tags.emotes, data.text.value);
+          // data.emotes = parseEmotes(parsed.tags.emotes, data.text.value);
           data.badges = parseBadges(parsed.tags.badges);
           data.color = parsed.tags.color;
         }

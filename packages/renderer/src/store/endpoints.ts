@@ -38,6 +38,18 @@ export const USERS = 'https://api.twitch.tv/helix/users';
 export const SEARCH_CHANNELS = 'https://api.twitch.tv/helix/search/channels';
 
 /**
+ * Twitch API: get global emotes
+ * @link https://dev.twitch.tv/docs/api/reference#get-global-emotes
+ */
+export const TWITCH_GLOBAL_EMOTES = 'https://api.twitch.tv/helix/chat/emotes/global';
+
+/**
+ * Twitch API: get channel emotes
+ * @link https://dev.twitch.tv/docs/api/reference#get-channel-emotes
+ */
+export const TWITCH_CHANNEL_EMOTES = 'https://api.twitch.tv/helix/chat/emotes';
+
+/**
  * BTTV API: get global emotes
  */
 export const BTTV_GLOBAL_EMOTES = 'https://api.betterttv.net/3/cached/emotes/global';

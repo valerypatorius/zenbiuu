@@ -6,7 +6,7 @@ import irc, { COMMANDS as IRC_COMMANDS } from '@/src/utils/irc';
 import request from '@/src/utils/request';
 import * as endpoints from '../endpoints';
 import * as actionType from '../actions';
-import type {
+import {
   ChatMessage,
   BttvChannelEmotes,
   BttvEmoteDataDefault,
@@ -16,6 +16,10 @@ import type {
   FfzEmoteDataSimple,
   SevenTvEmoteDataSimple,
   SevenTvEmotes,
+  TwitchEmotesResponse,
+  TwitchEmote,
+  TwitchEmoteFormat,
+  TwitchChannelEmote,
 } from '@/types/renderer/chat';
 
 type ChatState = ModuleState<Module.Chat>;
@@ -97,16 +101,23 @@ const actions = {
     const emotedText = messageData.text.value
       .split(' ')
       .map((word: string) => {
-        if (messageData.emotes?.[word]) {
-          const emote = messageData.emotes[word];
+        // if (messageData.emotes?.[word]) {
+        //   const emote = messageData.emotes[word];
+        //   const { url, height } = emote;
+
+        //   return `<span class="emote" title="${word}">
+        //     <img src="${url}" alt="${word}" style="--height: ${height}px;">
+        //   </span>`;
+        // }
+
+        if (state.emotes.twitch[word]) {
+          const emote = state.emotes.twitch[word];
           const { url, height } = emote;
 
           return `<span class="emote" title="${word}">
             <img src="${url}" alt="${word}" style="--height: ${height}px;">
           </span>`;
-        }
-
-        if (state.emotes.bttv[word]) {
+        } else if (state.emotes.bttv[word]) {
           const emote = state.emotes.bttv[word];
           const { url, height } = emote;
 
@@ -171,12 +182,78 @@ const actions = {
   },
 
   /**
-   * Request third-party chat emotes
+   * Request chat emotes
    */
   [actionType.REQUEST_CHAT_EMOTES] (
-    { state }: ActionContext<ChatState, RootState>,
+    { state, rootState }: ActionContext<ChatState, RootState>,
     { channelName, channelId }: {channelName: string; channelId: string},
   ): void {
+    if (!rootState.user) {
+      return;
+    }
+
+    /**
+     * Twitch global emotes
+     */
+    const getTwitchGlobal = request.get(endpoints.TWITCH_GLOBAL_EMOTES, {
+      headers: {
+        Accept: 'application/vnd.twitchtv.v5+json',
+        Authorization: `Bearer ${rootState.user.token}`,
+        'Client-ID': rootState.clientId,
+      },
+    });
+
+    getTwitchGlobal.onload = (response: TwitchEmotesResponse<TwitchEmote>) => {
+      if (!response || (response.data.length === 0)) {
+        return;
+      }
+
+      response.data.forEach((emote: TwitchEmote) => {
+        const size = window.devicePixelRatio > 1 ? '2.0' : '1.0';
+        const format = emote.format.includes(TwitchEmoteFormat.Animated) ? TwitchEmoteFormat.Animated : TwitchEmoteFormat.Static;
+
+        state.emotes.twitch[emote.name] = {
+          url: response.template
+            .replace('{{id}}', emote.id)
+            .replace('{{format}}', format)
+            .replace('{{theme_mode}}', 'dark')
+            .replace('{{scale}}', size),
+          height: 28,
+        };
+      });
+    };
+
+    /**
+     * Twitch channel emotes
+     */
+    const getTwitchChannel = request.get(`${endpoints.TWITCH_CHANNEL_EMOTES}?broadcaster_id=${channelId}`, {
+      headers: {
+        Accept: 'application/vnd.twitchtv.v5+json',
+        Authorization: `Bearer ${rootState.user.token}`,
+        'Client-ID': rootState.clientId,
+      },
+    });
+
+    getTwitchChannel.onload = (response: TwitchEmotesResponse<TwitchChannelEmote>) => {
+      if (!response || (response.data.length === 0)) {
+        return;
+      }
+
+      response.data.forEach((emote: TwitchChannelEmote) => {
+        const size = window.devicePixelRatio > 1 ? '2.0' : '1.0';
+        const format = emote.format.includes(TwitchEmoteFormat.Animated) ? TwitchEmoteFormat.Animated : TwitchEmoteFormat.Static;
+
+        state.emotes.twitch[emote.name] = {
+          url: response.template
+            .replace('{{id}}', emote.id)
+            .replace('{{format}}', format)
+            .replace('{{theme_mode}}', 'dark')
+            .replace('{{scale}}', size),
+          height: 28,
+        };
+      });
+    };
+
     /**
      * BTTV global emotes
      */

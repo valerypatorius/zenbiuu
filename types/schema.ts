@@ -50,6 +50,7 @@ export interface ModulesSchema {
   [Module.Chat]: {
     messages: ChatMessage[];
     emotes: {
+      twitch: Record<string, ChatEmote>;
       bttv: Record<string, ChatEmote>;
       ffz: Record<string, ChatEmote>;
       seventv: Record<string, ChatEmote>;
@@ -142,6 +143,7 @@ export const schema: Schema = {
   [Module.Chat]: {
     messages: [],
     emotes: {
+      twitch: {},
       bttv: {},
       ffz: {},
       seventv: {},

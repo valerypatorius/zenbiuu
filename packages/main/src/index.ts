@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { randomBytes } from 'crypto';
 import { app, BrowserWindow, shell, session, nativeTheme, ipcMain } from 'electron';
 import { config, listenForConfigRequests, listenForLibraryRequests } from './fsStore';
 import { objectKeysToLowercase, getAccessTokenFromTwitchAuthUrl } from '@/src/utils';
@@ -173,6 +174,21 @@ function handleRendererMessages (): void {
    */
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
     session.defaultSession.clearStorageData();
+  });
+
+  /**
+   * Return unique secure token
+   */
+  ipcMain.handle(HubChannel.GetUniqueToken, () => {
+    return new Promise((resolve, reject) => {
+      randomBytes(64, (err, buffer) => {
+        if (!err) {
+          resolve(buffer.toString('hex'));
+        } else {
+          reject(err);
+        }
+      });
+    });
   });
 }
 

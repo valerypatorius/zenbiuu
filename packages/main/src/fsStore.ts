@@ -2,10 +2,12 @@ import { ipcMain } from 'electron';
 import ElectronStore from 'electron-store';
 import { schema, Module as StoreModule, StoreFilename } from '@/types/schema';
 import { Channel as HubChannel } from '@/types/hub';
+import migrations from './migrations';
 
 export const config = new ElectronStore({
   name: StoreFilename.Config,
   defaults: schema,
+  migrations,
 });
 
 export const library = new ElectronStore({

@@ -140,6 +140,13 @@ function clearSessionStorage (): void {
 }
 
 /**
+ * Request unique secure token
+ */
+function getUniqueToken (): Promise<string> {
+  return ipcRenderer.invoke(HubChannel.GetUniqueToken);
+}
+
+/**
  * Object with all available data and methods,
  * available in renderer process under window.hub
  */
@@ -154,6 +161,7 @@ const api: MainProcessApi = {
   downloadAppUpdate,
   installAppUpdate,
   clearSessionStorage,
+  getUniqueToken,
   getState: () => state,
   getStringByteLength: (str: string) => Buffer.byteLength(str, 'utf8'),
 };

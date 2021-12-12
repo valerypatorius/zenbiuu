@@ -11,12 +11,12 @@
       width: chatWidth,
       height: chatHeight,
     }"
-    @mouseenter="setChatPause(true)"
-    @mouseleave="setChatPause(false)"
   >
     <div
       ref="scrollable"
       class="chat__content scrollable"
+      @mouseenter="setChatPause(true)"
+      @mouseleave="setChatPause(false)"
     >
       <div class="chat__messages">
         <!-- Empty chat message -->
@@ -73,16 +73,16 @@
           class="chat__horizon"
         />
       </div>
-    </div>
 
-    <!-- "Scroll to bottom" button -->
-    <button
-      v-show="!isAtBottom && isReady"
-      class="chat__scrollToBottom"
-      @click="scrollToBottom"
-    >
-      {{ $t('chat.scrollToBottom') }}
-    </button>
+      <!-- "Scroll to bottom" button -->
+      <button
+        v-show="!isAtBottom && isReady"
+        class="chat__scrollToBottom"
+        @click="scrollToBottom"
+      >
+        {{ $t('chat.scrollToBottom') }}
+      </button>
+    </div>
 
     <!-- Chat width resizer -->
     <div
@@ -97,11 +97,18 @@
       class="chat__resizer chat__resizer--for-vertical"
       @mousedown="resize($event, Axis.Y)"
     />
+
+    <div class="chat__form">
+      <chat-form
+        :channel-name="channelName"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import ChatForm from '@/src/components/chat/Form.vue';
 import * as actions from '@/src/store/actions';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
@@ -126,6 +133,9 @@ enum ChatWidth {
 
 export default defineComponent({
   name: 'Chat',
+  components: {
+    ChatForm,
+  },
   props: {
     /**
      * Channel name
@@ -433,9 +443,15 @@ export default defineComponent({
 
 <style>
   .chat {
+    --list-offset: 1rem;
+    --item-offset-x: 1rem;
+    --item-offset-y: 0.7rem;
+
     min-height: 0;
     position: relative;
     overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto;
   }
 
   .chat--hidden {
@@ -483,7 +499,7 @@ export default defineComponent({
 
   /** Scroll to bottom */
   .chat__scrollToBottom {
-    position: absolute;
+    position: sticky;
     bottom: 2.5rem;
     left: 50%;
     transform: translateX(-50%);
@@ -505,16 +521,13 @@ export default defineComponent({
   }
 
   .chat__messages {
-    padding-left: 1rem;
-    padding-bottom: 1rem;
+    padding-left: var(--list-offset);
+    padding-bottom: var(--list-offset);
   }
 
   /** Message */
   .chat-message {
-    --offset-x: 1rem;
-    --offset-y: 0.7rem;
-
-    padding: var(--offset-y) var(--offset-x);
+    padding: var(--item-offset-y) var(--item-offset-x);
     user-select: text;
     overflow-wrap: break-word;
     color: var(--text-color);
@@ -567,6 +580,12 @@ export default defineComponent({
     vertical-align: middle;
     margin-right: 0.6rem;
     margin-top: -1px;
+  }
+
+  /** Form wrapper */
+  .chat__form {
+    padding: 0 var(--list-offset) var(--list-offset);
+    min-width: 0;
   }
 
   /** Author badges */
