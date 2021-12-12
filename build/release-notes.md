@@ -1,3 +1,8 @@
+## v1.0.2
+2021-12-12
+
+- Fix redirect handling after successfull authorization
+
 ## v1.0.1
 2021-08-19
 
