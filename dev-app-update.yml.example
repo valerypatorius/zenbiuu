@@ -1,5 +1,5 @@
 provider: github
-private: true
+private: false
 owner:
 repo:
 token:
