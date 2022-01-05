@@ -1,46 +1,39 @@
 <template>
   <div class="chat-form">
+    <!-- <div
+      :class="[
+        'chat-form__control',
+        {
+          'chat-form__control--active': isEmotesListVisible,
+        },
+      ]"
+      @click="toggleEmotesList"
+    >
+      <icon name="Emote" />
+    </div> -->
+
     <textarea
       ref="field"
       v-model.trim="message"
       rows="1"
-      :class="[
-        'chat-form__field',
-        {
-          'chat-form__field--empty': isMessageEmpty,
-        },
-      ]"
+      class="chat-form__field"
       :placeholder="$t('chat.form.placeholder')"
       @input="onInput"
       @keyup.ctrl.enter="submit"
     />
 
-    <div class="chat-form__actions">
-      <div
-        :class="[
-          'chat-form__control',
-          {
-            'chat-form__control--active': isEmotesListVisible,
-          },
-        ]"
-        @click="toggleEmotesList"
-      >
-        <icon name="Emote" />
-      </div>
-
-      <div
-        v-show="!isMessageEmpty"
-        class="chat-form__control"
-        @click="submit"
-      >
-        <icon name="ArrowUp" />
-      </div>
+    <div
+      v-show="!isMessageEmpty"
+      class="chat-form__control"
+      @click="submit"
+    >
+      <icon name="ArrowUp" />
     </div>
 
-    <chat-emotes
+    <!-- <chat-emotes
       v-show="isEmotesListVisible"
       @select="onEmoteSelect"
-    />
+    /> -->
   </div>
 </template>
 
@@ -78,7 +71,7 @@ export default defineComponent({
     } {
     return {
       message: '',
-      isEmotesListVisible: true,
+      isEmotesListVisible: false,
     };
   },
   computed: {
@@ -88,6 +81,10 @@ export default defineComponent({
 
     isMessageEmpty (): boolean {
       return this.message.length === 0;
+    },
+
+    userState () {
+      return this.$store.state.chat.userState;
     },
   },
   methods: {
@@ -126,27 +123,27 @@ export default defineComponent({
     async submit (): Promise<void> {
       console.log('Submit', this.message);
 
-      // const nonce = await getUniqueToken();
+      const nonce = await getUniqueToken();
 
-      // irc.post('message', {
-      //   channel: this.channelName,
-      //   text: this.messageText,
-      //   nonce: nonce.substr(0, 32),
-      // });
+      irc.post('message', {
+        channel: this.channelName,
+        text: this.message,
+        nonce: nonce.substring(0, 32),
+      });
 
-      // this.$store.dispatch(ADD_CHAT_MESSAGE, {
-      //   id: '',
-      //   author: this.userName,
-      //   color: '',
-      //   text: {
-      //     value: this.messageText,
-      //     isColored: false,
-      //   },
-      //   badges: [],
-      // });
+      this.$store.dispatch(ADD_CHAT_MESSAGE, {
+        id: nonce,
+        author: this.userName,
+        color: this.userState.color,
+        text: {
+          value: this.message,
+          isColored: false,
+        },
+        badges: this.userState.badges,
+      });
 
-      // this.messageText = '';
-      // (this.$refs.field as HTMLInputElement).value = '';
+      this.message = '';
+      (this.$refs.field as HTMLInputElement).value = '';
     },
   },
 });
@@ -157,15 +154,17 @@ export default defineComponent({
     --height-initial: 4rem;
 
     position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    background-color: var(--color-overlay-full);
+    border-radius: var(--border-radius);
   }
 
   .chat-form__field {
     flex: 1;
     min-height: var(--height-initial);
-    padding: 1rem 4rem;
-    background-color: var(--color-overlay-full);
-    border-radius: var(--border-radius);
+    background-color: transparent;
+    padding: 1rem var(--item-offset-x);
     overflow-wrap: break-word;
     resize: none;
     overflow: hidden;
@@ -179,17 +178,24 @@ export default defineComponent({
     color: var(--color-transparent);
   }
 
-  .chat-form__actions {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    bottom: 0;
-    right: 0;
+  .chat-form__control {
     display: flex;
-    pointer-events: none;
+    align-items: flex-end;
+    padding: var(--item-offset-x);
+    color: var(--color-text-secondary);
+    cursor: pointer;
   }
 
-  .chat-form__control {
+  .chat-form__control:hover,
+  .chat-form__control--active {
+    color: var(--color-text);
+  }
+
+  .chat-form__control .icon {
+    width: 2rem;
+  }
+
+  /* .chat-form__control {
     display: flex;
     align-items: flex-end;
     padding: var(--item-offset-x);
@@ -209,13 +215,13 @@ export default defineComponent({
 
   .chat-form__control:last-child {
     margin-left: auto;
-  }
+  } */
 
-  .chat-form .chat-emotes {
+  /* .chat-form .chat-emotes {
     position: absolute;
     bottom: 100%;
     left: 0;
     width: 100%;
     margin-bottom: 1rem;
-  }
+  } */
 </style>

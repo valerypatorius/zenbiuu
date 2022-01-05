@@ -23,6 +23,8 @@ export const COMMANDS = {
   join: 'JOIN',
   leave: 'PART',
   message: 'PRIVMSG',
+  globaluserstate: 'GLOBALUSERSTATE',
+  userstate: 'USERSTATE',
 };
 
 /**
@@ -267,13 +269,27 @@ class IrcManager {
       const data: Record<string, any> | ChatMessage = {};
 
       /**
+       * Pass some userstate data
+       */
+      if (
+        parsed.command === COMMANDS.globaluserstate ||
+        parsed.command === COMMANDS.userstate
+      ) {
+        if (parsed.tags != null) {
+          data.author = parsed.tags['display-name'];
+          data.badges = parseBadges(parsed.tags.badges);
+          data.color = parsed.tags.color;
+        }
+      }
+
+      /**
        * Prepare chat message data for display
        */
       if (parsed.command === COMMANDS.message) {
         data.text = parseText(parsed.text);
 
         if (parsed.tags != null) {
-          data.id = parsed.tags.id;
+          data.id = parsed.tags.id ?? '';
           data.author = parsed.tags['display-name'];
           // data.emotes = parseEmotes(parsed.tags.emotes, data.text.value);
           data.badges = parseBadges(parsed.tags.badges);

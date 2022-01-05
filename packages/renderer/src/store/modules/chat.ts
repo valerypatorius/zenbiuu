@@ -62,12 +62,23 @@ const actions = {
             dispatch(actionType.CLEAR_CHAT);
             resolve();
             break;
+          case IRC_COMMANDS.userstate:
+          case IRC_COMMANDS.globaluserstate:
+            dispatch(actionType.SET_IRC_USERSTATE, message);
+            break;
           case IRC_COMMANDS.message:
             dispatch(actionType.ADD_CHAT_MESSAGE, message);
             break;
         }
       };
     });
+  },
+
+  [actionType.SET_IRC_USERSTATE] (
+    { state }: ActionContext<ChatState, RootState>,
+    data: ChatState['userState'],
+  ) {
+    state.userState = data;
   },
 
   /**

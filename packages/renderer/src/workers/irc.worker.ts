@@ -21,11 +21,9 @@ function connect ({ url, token, name }: WorkerMessageData['data']): void {
   socket = new WebSocket(url);
 
   socket.addEventListener('open', function auth () {
+    this.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
     this.send(`PASS oauth:${token}`);
     this.send(`NICK ${name}`);
-    this.send('CAP REQ :twitch.tv/tags :twitch.tv/commands');
-    // this.send('CAP REQ :twitch.tv/membership :twitch.tv/tags :twitch.tv/commands');
-    // this.send(`USER ${name} 8 * :${name}`);
   });
 
   socket.addEventListener('message', function process (event) {
