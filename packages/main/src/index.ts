@@ -72,7 +72,7 @@ function getAuthToken (url: string): Promise<string> {
       backgroundColor: getWindowColor(),
     });
 
-    authWindow.webContents.on('will-redirect', (redirectEvent, redirectUrl) => {
+    authWindow.webContents.on('will-navigate', (redirectEvent, redirectUrl) => {
       /**
        * Do not throw an error here, because multiple redirects happen
        */

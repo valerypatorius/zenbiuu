@@ -13,7 +13,7 @@ const config = {
   ],
   publish: {
     provider: 'github',
-    private: true,
+    private: false,
   },
 };
 
