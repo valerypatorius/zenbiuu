@@ -74,6 +74,9 @@ const actions = {
     });
   },
 
+  /**
+   * Set irc state of user
+   */
   [actionType.SET_IRC_USERSTATE] (
     { state }: ActionContext<ChatState, RootState>,
     data: ChatState['userState'],

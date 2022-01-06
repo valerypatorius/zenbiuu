@@ -570,7 +570,9 @@ export default defineComponent({
 
   /** Allow some unique emotes to overlap others */
   .chat-message__content .emote + .emote[title="cvMask"],
-  .chat-message__content .emote + .emote[title="cvHazmat"] {
+  .chat-message__content .emote + .emote[title="cvHazmat"],
+  .chat-message__content .emote + .emote[title="SoSnowy"],
+  .chat-message__content .emote + .emote[title="IceCold"] {
     margin-left: -32px;
   }
 

@@ -19,10 +19,6 @@
         ]"
         @click="activeTab = tab.name"
       >
-        <icon
-          v-if="tab.icon"
-          :name="tab.icon"
-        />
         {{ tab.label ?? '' }}
       </div>
     </div>
@@ -43,14 +39,6 @@
               :alt="name"
               loading="lazy"
             >
-
-            <div
-              class="chat-emote__pin"
-              :title="$t('chat.form.pin', { emote: name })"
-              @click.stop="pinEmote"
-            >
-              <icon name="Heart" />
-            </div>
           </div>
         </div>
       </div>
@@ -60,18 +48,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Icon from '@/src/components/ui/Icon.vue';
-import { EmoteProvider, ChatEmote } from '@/types/renderer/chat';
+import { EmoteProvider } from '@/types/renderer/chat';
 
 export default defineComponent({
   name: 'ChatEmotes',
-  components: {
-    Icon,
-  },
-  // props: {
-  // },
   emits: ['select'],
-  data () {
+  data (): {
+    activeTab: keyof typeof EmoteProvider;
+    } {
     return {
       activeTab: 'twitch',
     };
@@ -93,21 +77,14 @@ export default defineComponent({
     },
 
     tabs () {
-      const availableProviders = Object.keys(this.customEmotes).filter((providerName) => Object.keys(this.customEmotes[providerName]).length).map((providerName) => ({
-        label: EmoteProvider[providerName],
-        name: providerName,
-      }));
+      const providers = Object.keys(this.customEmotes) as Array<keyof typeof EmoteProvider>;
 
-      return [
-        {
-          icon: 'Heart',
-        },
-        ...availableProviders,
-      ];
-    },
-  },
-  methods: {
-    pinEmote (event: MouseEvent) {
+      return providers
+        .filter((providerName) => Object.keys(this.customEmotes[providerName]).length)
+        .map((providerName) => ({
+          label: EmoteProvider[providerName],
+          name: providerName,
+        }));
     },
   },
 });

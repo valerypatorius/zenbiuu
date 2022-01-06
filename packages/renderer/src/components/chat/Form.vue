@@ -1,6 +1,6 @@
 <template>
   <div class="chat-form">
-    <!-- <div
+    <div
       :class="[
         'chat-form__control',
         {
@@ -10,7 +10,7 @@
       @click="toggleEmotesList"
     >
       <icon name="Emote" />
-    </div> -->
+    </div>
 
     <textarea
       ref="field"
@@ -30,15 +30,16 @@
       <icon name="ArrowUp" />
     </div>
 
-    <!-- <chat-emotes
+    <chat-emotes
       v-show="isEmotesListVisible"
+      ref="chatEmotes"
       @select="onEmoteSelect"
-    /> -->
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { ComponentPublicInstance, defineComponent } from 'vue';
 import Icon from '@/src/components/ui/Icon.vue';
 import ChatEmotes from '@/src/components/chat/Emotes.vue';
 import irc from '@/src/utils/irc';
@@ -110,10 +111,36 @@ export default defineComponent({
       this.purifyMessage();
 
       this.updateFieldHeight();
+
+      (this.$refs.field as HTMLInputElement).focus();
     },
 
     toggleEmotesList (): void {
       this.isEmotesListVisible = !this.isEmotesListVisible;
+
+      setTimeout(() => {
+        if (this.isEmotesListVisible) {
+          document.addEventListener('click', this.onOutsideClick);
+
+          (this.$refs.field as HTMLInputElement).focus();
+        } else {
+          document.removeEventListener('click', this.onOutsideClick);
+        }
+      }, 0);
+    },
+
+    onOutsideClick (event: Event): void {
+      const eventPath = event.composedPath();
+      const chatEmotesEl = (this.$refs?.chatEmotes as ComponentPublicInstance)?.$el;
+      const fieldEl = (this.$refs.field as HTMLInputElement);
+
+      if (eventPath.includes(chatEmotesEl) || eventPath.includes(fieldEl)) {
+        return;
+      }
+
+      this.isEmotesListVisible = false;
+
+      document.removeEventListener('click', this.onOutsideClick);
     },
 
     purifyMessage () {
@@ -155,7 +182,7 @@ export default defineComponent({
 
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr auto;
     background-color: var(--color-overlay-full);
     border-radius: var(--border-radius);
   }
@@ -164,7 +191,7 @@ export default defineComponent({
     flex: 1;
     min-height: var(--height-initial);
     background-color: transparent;
-    padding: 1rem var(--item-offset-x);
+    padding: 1rem 0;
     overflow-wrap: break-word;
     resize: none;
     overflow: hidden;
@@ -195,33 +222,11 @@ export default defineComponent({
     width: 2rem;
   }
 
-  /* .chat-form__control {
-    display: flex;
-    align-items: flex-end;
-    padding: var(--item-offset-x);
-    cursor: pointer;
-    color: var(--color-text-secondary);
-    pointer-events: auto;
-  }
-
-  .chat-form__control:hover,
-  .chat-form__control--active {
-    color: var(--color-text);
-  }
-
-  .chat-form__control .icon {
-    width: 2rem;
-  }
-
-  .chat-form__control:last-child {
-    margin-left: auto;
-  } */
-
-  /* .chat-form .chat-emotes {
+  .chat-form .chat-emotes {
     position: absolute;
     bottom: 100%;
     left: 0;
     width: 100%;
     margin-bottom: 1rem;
-  } */
+  }
 </style>
