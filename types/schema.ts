@@ -48,8 +48,14 @@ export interface ModulesSchema {
     interfaceSize: number;
   };
   [Module.Chat]: {
+    userState: {
+      author: string;
+      badges: string[];
+      color: string;
+    };
     messages: ChatMessage[];
     emotes: {
+      twitch: Record<string, ChatEmote>;
       bttv: Record<string, ChatEmote>;
       ffz: Record<string, ChatEmote>;
       seventv: Record<string, ChatEmote>;
@@ -140,8 +146,14 @@ export const schema: Schema = {
     interfaceSize: 10,
   },
   [Module.Chat]: {
+    userState: {
+      author: '',
+      badges: [],
+      color: '',
+    },
     messages: [],
     emotes: {
+      twitch: {},
       bttv: {},
       ffz: {},
       seventv: {},

@@ -392,6 +392,15 @@ export default defineComponent({
           this.initVideoBackground();
         });
       });
+
+      /**
+       * Handle errors
+       */
+      this.hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+          this.isOffline = true;
+        }
+      });
     },
 
     /**

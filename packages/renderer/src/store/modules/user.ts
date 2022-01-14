@@ -137,8 +137,8 @@ const actions = {
     const scopes = [
       'channel:read:subscriptions',
       'chat:read',
+      'chat:edit',
       'user:read:follows',
-      'channel:moderate',
     ];
     const url = `${endpoints.AUTH}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUrl)}&response_type=token&state=${timestamp}&scope=${scopes.join('+')}`;
     let result = false;

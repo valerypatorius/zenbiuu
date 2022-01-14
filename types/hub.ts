@@ -8,6 +8,7 @@ import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 export enum Channel {
   Initial = 'initial',
   StateChange = 'stateChange',
+  GetUniqueToken = 'GetUniqueToken',
 
   ConfigGet = 'configGet',
   ConfigSet = 'configSet',
@@ -83,6 +84,7 @@ export interface MainProcessApi {
   downloadAppUpdate: () => void;
   installAppUpdate: () => void;
   clearSessionStorage: () => void;
+  getUniqueToken: () => Promise<string>;
   getState: () => State;
   getStringByteLength: (str: string) => number;
 }

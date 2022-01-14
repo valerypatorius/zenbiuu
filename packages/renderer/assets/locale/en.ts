@@ -60,6 +60,10 @@ export default {
   chat: {
     joinedAs: 'Joined chat room as',
     scrollToBottom: 'Scroll to bottom',
+    form: {
+      placeholder: 'Your message',
+      pin: 'Pin %{emote}',
+    },
   },
   player: {
     mute: 'Mute',
@@ -93,4 +97,8 @@ export default {
   enable: 'Enable',
   disable: 'Disable',
   openInBrowser: 'Open in browser',
+  debug: {
+    title: 'Development',
+    openChannel: 'Open channel',
+  },
 };

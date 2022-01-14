@@ -287,6 +287,7 @@ export default defineComponent({
     outline: 0;
     font-family: inherit;
     font-size: inherit;
+    color: inherit;
   }
 
   img {

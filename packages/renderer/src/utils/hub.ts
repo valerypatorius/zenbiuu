@@ -25,6 +25,8 @@ export const installAppUpdate = window.hub.installAppUpdate;
 
 export const clearSessionStorage = window.hub.clearSessionStorage;
 
+export const getUniqueToken = window.hub.getUniqueToken;
+
 /**
  * Reactive version of hub state.
  * Used in vue components

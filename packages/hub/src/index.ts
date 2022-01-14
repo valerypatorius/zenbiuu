@@ -45,6 +45,7 @@ const env = {
   APP_CLIENT_ID: import.meta.env.VITE_APP_CLIENT_ID,
   STREAM_CLIENT_ID: import.meta.env.VITE_STREAM_CLIENT_ID,
   REDIRECT_URL: import.meta.env.VITE_APP_REDIRECT_URL,
+  MODE: import.meta.env.MODE,
 };
 
 /**
@@ -139,6 +140,13 @@ function clearSessionStorage (): void {
 }
 
 /**
+ * Request unique secure token
+ */
+function getUniqueToken (): Promise<string> {
+  return ipcRenderer.invoke(HubChannel.GetUniqueToken);
+}
+
+/**
  * Object with all available data and methods,
  * available in renderer process under window.hub
  */
@@ -153,6 +161,7 @@ const api: MainProcessApi = {
   downloadAppUpdate,
   installAppUpdate,
   clearSessionStorage,
+  getUniqueToken,
   getState: () => state,
   getStringByteLength: (str: string) => Buffer.byteLength(str, 'utf8'),
 };

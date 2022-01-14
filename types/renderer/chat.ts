@@ -1,3 +1,10 @@
+export enum EmoteProvider {
+  twitch = 'Twitch',
+  bttv = 'BTTV',
+  ffz = 'FFZ',
+  seventv = '7TV',
+};
+
 /**
  * Chat emote
  */
@@ -103,3 +110,32 @@ export interface SevenTvEmoteDataSimple {
  * 7tv response for emotes request
  */
 export type SevenTvEmotes = SevenTvEmoteDataSimple[];
+
+export enum TwitchEmoteFormat {
+  Static = 'static',
+  Animated = 'animated',
+}
+
+export interface TwitchEmote {
+  id: string;
+  name: string;
+  images: {
+    url_1x: string;
+    url_2x: string;
+    url_4x: string;
+  };
+  format: TwitchEmoteFormat[];
+  scale: string[];
+  theme_mode: string[];
+}
+
+export interface TwitchChannelEmote extends TwitchEmote {
+  tier: string;
+  emote_type: string;
+  emote_set_id: string;
+}
+
+export interface TwitchEmotesResponse<T> {
+  data: T[];
+  template: string;
+}

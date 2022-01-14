@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { randomBytes } from 'crypto';
 import { app, BrowserWindow, shell, session, nativeTheme, ipcMain } from 'electron';
 import { config, listenForConfigRequests, listenForLibraryRequests } from './fsStore';
 import { objectKeysToLowercase, getAccessTokenFromTwitchAuthUrl } from '@/src/utils';
@@ -16,7 +17,7 @@ const isSingleInstance = app.requestSingleInstanceLock();
 /**
  * Do not allow creating multiple app instances
  */
-if (!isSingleInstance) {
+if (!isSingleInstance && env.MODE !== 'development') {
   app.quit();
 }
 
@@ -174,6 +175,21 @@ function handleRendererMessages (): void {
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
     session.defaultSession.clearStorageData();
   });
+
+  /**
+   * Return unique secure token
+   */
+  ipcMain.handle(HubChannel.GetUniqueToken, () => {
+    return new Promise((resolve, reject) => {
+      randomBytes(64, (err, buffer) => {
+        if (!err) {
+          resolve(buffer.toString('hex'));
+        } else {
+          reject(err);
+        }
+      });
+    });
+  });
 }
 
 /**
@@ -299,19 +315,21 @@ function handleCors (): void {
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
 /**
- * Allow only one running instance of the app
+ * Allow only one running instance of the app in production mode
  */
-app.on('second-instance', () => {
-  if (mainWindow === null) {
-    return;
-  }
+if (env.MODE === 'development') {
+  app.on('second-instance', () => {
+    if (mainWindow === null) {
+      return;
+    }
 
-  if (mainWindow.isMinimized()) {
-    mainWindow.restore();
-  }
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore();
+    }
 
-  mainWindow.focus();
-});
+    mainWindow.focus();
+  });
+}
 
 /**
  * Quit when all windows are closed, but leave the app active on Mac

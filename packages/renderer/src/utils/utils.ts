@@ -1,4 +1,4 @@
-import { state, platform } from './hub';
+import { state, platform, env } from './hub';
 import { AppLocaleName } from '@/types/renderer/locale';
 
 /**
@@ -88,4 +88,11 @@ export function getAppLocale (): AppLocaleName {
  */
 export function capitalizeFirstChar (str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Returns true, if app is in development mode
+ */
+export function isDevelopment (): boolean {
+  return env.MODE === 'development';
 }
