@@ -15,12 +15,12 @@ export default defineConfig({
   },
   build: {
     sourcemap: isDev ? 'inline' : false,
-    target: 'chrome91',
+    target: 'chrome100',
     outDir: 'dist',
     assetsDir: '.',
     minify: isDev ? false : 'terser',
     terserOptions: {
-      ecma: 2020,
+      ecma: 2022,
       compress: {
         passes: 2,
       },

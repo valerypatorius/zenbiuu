@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-const { createServer, build, createLogger } = require('vite');
+const { createServer, build, createLogger, loadEnv } = require('vite');
 const { spawn } = require('child_process');
 const electronPath = require('electron');
 const { createInterface } = require('readline');
@@ -155,9 +155,14 @@ const setupHubPackageWatcher = (viteDevServer) => {
   });
 
   try {
+    /**
+     * Manually load variables defined in .env file
+     */
+    Object.assign(process.env, loadEnv(defaultConfig.mode, process.cwd()));
+
     const viteDevServer = await createServer({
-      ...defaultConfig,
       configFile: 'packages/renderer/vite.config.js',
+      ...defaultConfig,
     });
 
     await viteDevServer.listen();

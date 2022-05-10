@@ -20,7 +20,7 @@ export default defineConfig({
     assetsDir: '.',
     minify: isDev ? false : 'terser',
     terserOptions: {
-      ecma: 2020,
+      ecma: 2022,
       compress: {
         passes: 2,
       },

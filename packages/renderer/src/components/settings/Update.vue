@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import marked from 'marked';
+import { marked } from 'marked';
 import { defineComponent } from 'vue';
 import { state, downloadAppUpdate, installAppUpdate } from '@/src/utils/hub';
 import { isMac } from '@/src/utils/utils';
