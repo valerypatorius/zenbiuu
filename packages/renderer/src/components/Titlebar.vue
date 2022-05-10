@@ -3,8 +3,8 @@
     :class="[
       'titlebar',
       {
-        'titlebar--win': isWindows,
-        'titlebar--mac': !isWindows,
+        'titlebar--win': isWindowsBehavior,
+        'titlebar--mac': !isWindowsBehavior,
       },
     ]"
   >
@@ -35,7 +35,7 @@
 
     <!-- Window controls (win32 only) -->
     <div
-      v-if="isWindows"
+      v-if="isWindowsBehavior"
       class="titlebar__controls"
     >
       <WindowControls />
@@ -43,72 +43,46 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import { isWindows } from '@/src/utils/utils';
 import Icon from '@/src/components/ui/Icon.vue';
 import Loader from '@/src/components/ui/Loader.vue';
 import WindowControls from '@/src/components/ui/WindowControls.vue';
 import { getWindowTitle } from '@/src/router/index';
 import { RouteName } from '@/types/renderer/router';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'TitleBar',
-  components: {
-    Icon,
-    Loader,
-    WindowControls,
-  },
-  data (): {
-    isWindows: boolean;
-    } {
-    return {
-      /**
-       * Is current platform Windows or not
-       */
-      isWindows: isWindows(),
-    };
-  },
-  computed: {
-    /**
-     * Window title
-     */
-    title (): string {
-      return getWindowTitle(this.$route);
-    },
+/**
+ * Define store and router instances
+ */
+const store = useStore<RootSchema & ModulesSchema>();
+const route = useRoute();
+const router = useRouter();
 
-    /**
-     * Returns true, if app is loading something
-     */
-    isLoading (): boolean {
-      return this.$store.state.app.isLoading;
-    },
+/** Window title, based on current route */
+const title = computed(() => getWindowTitle(route));
 
-    /**
-     * Returns true, if current route is "library"
-     */
-    isLibrary (): boolean {
-      return this.$route.name === RouteName.Library;
-    },
+/** True, if current platform is Windows */
+const isWindowsBehavior = isWindows();
 
-    /**
-     * Returns true, if sidebar is hidden by user
-     */
-    isSidebarHidden (): boolean {
-      return this.$store.state.player.isHideSidebar;
-    },
-  },
-  methods: {
-    /**
-     * Open Library screen
-     */
-    openLibrary (): void {
-      if (!this.isLibrary) {
-        this.$router.replace({ name: 'Library' });
-      }
-    },
-  },
-});
+/** True, if app is loading something */
+const isLoading = computed(() => store.state.app.isLoading);
+
+/** True, if current route is "library" */
+const isLibrary = computed(() => route.name === RouteName.Library);
+
+/** True, if sidebar is hidden by user" */
+const isSidebarHidden = computed(() => store.state.player.isHideSidebar);
+
+/** Open Library screen */
+const openLibrary = () => {
+  if (!isLibrary.value) {
+    router.replace({ name: 'Library' });
+  }
+};
 </script>
 
 <style>
