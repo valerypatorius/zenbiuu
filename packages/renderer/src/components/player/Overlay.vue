@@ -6,7 +6,7 @@
       class="player-overlay__top"
     >
       <control
-        :size="ControlSize.Large"
+        size="large"
         :icon="isSidebarHidden ? 'ArrowFromLeft' : 'ArrowToLeft'"
         :title="isSidebarHidden ? $t('player.showSidebar') : $t('player.hideSidebar')"
         @click="toggleSidebar"
@@ -16,7 +16,7 @@
 
       <control
         v-if="isHorizontalLayout"
-        :size="ControlSize.Large"
+        size="large"
         :icon="isChatHidden ? 'ArrowFromRight' : 'ArrowToRight'"
         :title="isChatHidden ? $t('player.showChat') : $t('player.hideChat')"
         @click="toggleChat"
@@ -112,7 +112,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import Icon from '@/src/components/ui/Icon.vue';
-import Control, { Size as ControlSize } from '@/src/components/player/Control.vue';
+import Control from '@/src/components/player/Control.vue';
 import Picker, { PickerItem } from '@/src/components/player/Picker.vue';
 import Volume from '@/src/components/player/Volume.vue';
 import Duration from '@/src/components/Duration.vue';
@@ -190,16 +190,10 @@ export default defineComponent({
   },
   emits: ['change-quality', 'control-mouse-enter', 'control-mouse-leave'],
   data (): {
-    ControlSize: typeof ControlSize;
     isFullscreen: boolean;
     currentQualityLevel: number;
     } {
     return {
-      /**
-       * Available controls sizes
-       */
-      ControlSize,
-
       /**
        * Current fullscreen state
        */

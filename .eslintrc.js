@@ -9,7 +9,7 @@ const parserOptions = {
     './tsconfig.eslint.json',
     './packages/**/tsconfig.json',
   ],
-  ecmaVersion: 2020,
+  ecmaVersion: 2022,
   extraFileExtensions: ['.vue'],
 };
 
@@ -68,7 +68,23 @@ module.exports = {
     /** Require trailing comma for better git diffs */
     'comma-dangle': ['error', 'always-multiline'],
 
+    /** Disable because of not doing well with TS call Signatures */
+    'func-call-spacing': 'off',
+
     /** These cases are rare */
     'vue/no-v-html': 'off',
+
+    /** Allow props destructruringm when reactivityTransform is enabled */
+    'vue/no-setup-props-destructure': 'off',
+
+    /** Allow single-word component names */
+    'vue/multi-word-component-names': 'off',
+  },
+  env: {
+    /**
+     * Do not warn about undefined defineProps and defineEmits in <script setup>
+     * https://eslint.vuejs.org/user-guide/#compiler-macros-such-as-defineprops-and-defineemits-generate-no-undef-warnings
+     */
+    'vue/setup-compiler-macros': true,
   },
 };

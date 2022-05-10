@@ -14,7 +14,11 @@ export default defineConfig({
       '@/assets': join(root, 'assets'),
     },
   },
-  plugins: [vue()],
+  plugins: [
+    vue({
+      reactivityTransform: true,
+    }),
+  ],
   base: '',
   server: {
     fsServe: {
