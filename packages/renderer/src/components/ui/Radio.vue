@@ -15,101 +15,78 @@
   </label>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+withDefaults(defineProps<{
+  /** Input id */
+  id: string;
 
-export default defineComponent({
-  name: 'Radio',
-  components: {
-  },
-  props: {
-    /**
-     * Input id
-     */
-    id: {
-      type: String,
-      default: '',
-    },
+  /** Input model value */
+  value: string;
 
-    /**
-     * Input model value
-     */
-    value: {
-      type: String,
-      default: '',
-    },
+  /** Input name */
+  name: string;
 
-    /**
-     * Input name
-     */
-    name: {
-      type: String,
-      default: '',
-    },
-
-    /**
-     * Checked state
-     */
-    checked: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['change'],
-  methods: {
-    /**
-     * Emit "change" event
-     */
-    onChange (event: Event): void {
-      this.$emit('change', event);
-    },
-  },
+  /** Checked state */
+  checked: boolean;
+}>(), {
+  checked: false,
 });
+
+const emit = defineEmits<{
+  (name: 'change', payload: Event): void;
+}>();
+
+/**
+ * Emit "change" event when radio value is changed
+ * @param payload - event payload
+ */
+function onChange (payload: Event) {
+  emit('change', payload);
+}
 </script>
 
-<style>
+<style lang="postcss">
   .radio {
     display: flex;
     align-items: center;
     cursor: pointer;
-  }
 
-  .radio input {
-    display: none;
-  }
+    input {
+      display: none;
 
-  .radio input + span::before {
-    content: '';
-    width: 0.4rem;
-    height: 0.4rem;
-    background-color: var(--color-transparent);
-    border-radius: 50%;
-  }
+      + span::before {
+        content: '';
+        width: 0.4rem;
+        height: 0.4rem;
+        background-color: var(--color-transparent);
+        border-radius: 50%;
+      }
 
-  .radio input:checked + span {
-    background-color: var(--color-button);
-  }
+      &:checked + span {
+        background-color: var(--color-button);
 
-  .radio input:checked + span::before {
-    background-color: var(--color-button-text);
-  }
+        &::before {
+          background-color: var(--color-button-text);
+        }
+      }
+    }
 
-  .radio span {
-    --size: 2rem;
+    span {
+      --size: 2rem;
+      flex-shrink: 0;
+      width: var(--size);
+      height: var(--size);
+      background-color: var(--color-control-active);
+      border-radius: 50%;
+      margin-right: 1rem;
+      margin-top: 0.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-    flex-shrink: 0;
-    width: var(--size);
-    height: var(--size);
-    background-color: var(--color-control-active);
-    border-radius: 50%;
-    margin-right: 1rem;
-    margin-top: 0.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .radio:hover input:not(:checked) + span::before {
-    background-color: var(--color-text-tertiary);
+    &:hover input:not(:checked) + span::before {
+      background-color: var(--color-text-tertiary);
+    }
   }
 </style>
