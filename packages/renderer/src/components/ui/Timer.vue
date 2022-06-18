@@ -4,84 +4,56 @@
   </span>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import date, { now } from '@/src/utils/date';
 
-export default defineComponent({
-  name: 'Timer',
-  props: {
-    /**
-     * Duration in seconds
-     */
-    duration: {
-      type: Number,
-      required: true,
-    },
-  },
-  data (): {
-    value: number;
-    prevTime: number;
-    timer: ReturnType<typeof requestAnimationFrame> | null;
-    } {
-    return {
-      /**
-       * Timer value in ms
-       */
-      value: this.duration * date.Second,
+const props = defineProps<{
+  /** Duration in seconds */
+  duration: number;
+}>();
 
-      /**
-       * Time of previous value update
-       */
-      prevTime: 0,
+/** Timer value in ms */
+const currentValue = ref(props.duration * date.Second);
 
-      /**
-       * Id of animation frame request
-       */
-      timer: null,
-    };
-  },
-  computed: {
-    /**
-     * Displayed value string
-     */
-    displayedValue (): string {
-      return this.value ? Math.ceil(this.value / date.Second).toString() : '';
-    },
-  },
-  mounted () {
-    this.refresh();
-  },
-  beforeUnmount () {
-    if (this.timer) {
-      window.cancelAnimationFrame(this.timer);
+/** Time of previous value update */
+const prevTime = ref(0);
+
+/** Id of animation frame request */
+const timer = ref<ReturnType<typeof requestAnimationFrame> | null>(null);
+
+/** Displayed value string */
+const displayedValue = computed(() => currentValue.value ? Math.ceil(currentValue.value / date.Second).toString() : '');
+
+/** See how much time left from previous update and decrease timer value */
+function updateTimerValue () {
+  const currentTime = now();
+  const diff = prevTime.value ? currentTime - prevTime.value : 0;
+  const nextValue = currentValue.value - diff;
+
+  currentValue.value = nextValue > 0 ? nextValue : 0;
+  prevTime.value = currentTime;
+}
+
+/** Run updates */
+function run () {
+  timer.value = window.requestAnimationFrame(() => {
+    updateTimerValue();
+
+    if (currentValue.value > 0) {
+      run();
     }
-  },
-  methods: {
-    /**
-     * See how much time left from previous update and decrease timer value
-     */
-    updateTimerValue (): void {
-      const currentTime = now();
-      const diff = this.prevTime ? currentTime - this.prevTime : 0;
-      const nextValue = this.value - diff;
+  });
+}
 
-      this.value = nextValue > 0 ? nextValue : 0;
-      this.prevTime = currentTime;
-    },
+onMounted(() => {
+  run();
+});
 
-    /**
-     * Run updates
-     */
-    refresh (): void {
-      this.timer = window.requestAnimationFrame(() => {
-        this.updateTimerValue();
-
-        if (this.value > 0) {
-          this.refresh();
-        }
-      });
-    },
-  },
+onBeforeUnmount(() => {
+  if (timer.value) {
+    window.cancelAnimationFrame(timer.value);
+    timer.value = null;
+  }
 });
 </script>
