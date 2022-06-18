@@ -80,11 +80,4 @@ module.exports = {
     /** Allow single-word component names */
     'vue/multi-word-component-names': 'off',
   },
-  env: {
-    /**
-     * Do not warn about undefined defineProps and defineEmits in <script setup>
-     * https://eslint.vuejs.org/user-guide/#compiler-macros-such-as-defineprops-and-defineemits-generate-no-undef-warnings
-     */
-    'vue/setup-compiler-macros': true,
-  },
 };
