@@ -15,80 +15,76 @@
   </label>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
 import Icon from '@/src/components/ui/Icon.vue';
 
-export default defineComponent({
-  name: 'Checkbox',
-  components: {
-    Icon,
-  },
-  props: {
-    /**
-     * Input model value
-     */
-    value: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['change'],
-  methods: {
-    /**
-     * Emit "change" event
-     */
-    onChange (event: Event): void {
-      this.$emit('change', event);
-    },
-  },
+withDefaults(defineProps<{
+  /** Checkbox value */
+  value: boolean;
+}>(), {
+  value: false,
 });
+
+const emit = defineEmits<{
+  (name: 'change', payload: Event): void;
+}>();
+
+/**
+ * Emit "change" event when checkbox value is changed
+ * @param payload - event payload
+ */
+function onChange (payload: Event) {
+  emit('change', payload);
+}
 </script>
 
-<style>
+<style lang="postcss">
   .checkbox {
     display: flex;
     align-items: center;
     cursor: pointer;
-  }
 
-  .checkbox input {
-    display: none;
-  }
+    input {
+      display: none;
 
-  .checkbox input + span .icon {
-    color: var(--color-transparent);
-  }
+      + span .icon {
+        color: var(--color-transparent);
+      }
 
-  .checkbox input:checked + span {
-    background-color: var(--color-button);
-  }
+      &:checked {
+        + span {
+          background-color: var(--color-button);
 
-  .checkbox input:checked + span .icon {
-    color: var(--color-button-text);
-  }
+          .icon {
+            color: var(--color-button-text);
+          }
+        }
+      }
+    }
 
-  .checkbox span {
-    --size: 2rem;
+    span {
+      --size: 2rem;
+      flex-shrink: 0;
+      width: var(--size);
+      height: var(--size);
+      background-color: var(--color-control-active);
+      border-radius: 0.4rem;
+      margin-right: 1rem;
+      margin-top: 0.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-    flex-shrink: 0;
-    width: var(--size);
-    height: var(--size);
-    background-color: var(--color-control-active);
-    border-radius: 0.4rem;
-    margin-right: 1rem;
-    margin-top: 0.1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+      .icon {
+        width: 1.8rem;
+        margin-top: -0.2rem;
+      }
+    }
 
-  .checkbox span .icon {
-    width: 1.8rem;
-    margin-top: -0.2rem;
-  }
-
-  .checkbox:hover input:not(:checked) + span .icon {
-    color: var(--color-text-tertiary);
+    &:hover {
+      input:not(:checked) + span .icon {
+        color: var(--color-text-tertiary);
+      }
+    }
   }
 </style>
