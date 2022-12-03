@@ -76,111 +76,78 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
+import { useStore } from 'vuex';
 import Icon from '@/src/components/ui/Icon.vue';
 import Duration from '@/src/components/Duration.vue';
 import type { TwitchStream } from '@/types/renderer/library';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'Preview',
-  components: {
-    Icon,
-    Duration,
-  },
-  props: {
-    /**
-     * Stream data object
-     */
-    data: {
-      type: Object as PropType<TwitchStream>,
-      default: () => ({}),
-    },
+const props = withDefaults(defineProps<{
+  /** Stream data object */
+  data: TwitchStream;
 
-    /**
-     * If true, preview is displayed as loading
-     */
-    isLoading: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['click'],
-  data (): {
-    prevCover: string | null;
-    loadedCover: string | null;
-    } {
-    return {
-      /**
-       * Previous cover url
-       */
-      prevCover: null,
-
-      /**
-       * Cover url, loaded and ready for display
-       */
-      loadedCover: null,
-    };
-  },
-  computed: {
-    /**
-     * Returns true, if interface blur is enabled in settings
-     */
-    isBlurEnabled (): boolean {
-      return this.$store.state.app.settings.isBlurEnabled;
-    },
-
-    /**
-     * Viewers count, formatted
-     */
-    viewersCount (): string {
-      return this.data.viewer_count.toLocaleString();
-    },
-
-    /**
-     * Latest cover url, not ready for display
-     */
-    latestCover (): string {
-      const { lastUpdateTime } = this.$store.state.library;
-
-      return `${this.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
-    },
-
-    /**
-     * Channel logo image
-     */
-    channelLogo (): string {
-      const { users } = this.$store.state.library;
-      const data = users.find((user) => user.id === this.data.user_id);
-
-      return data ? data.profile_image_url : '';
-    },
-  },
-  watch: {
-    /**
-     * Watch for cover url timestamp change and reload image
-     */
-    latestCover (newCover: string, prevCover: string): void {
-      const image = new Image();
-
-      this.prevCover = prevCover;
-
-      image.onload = () => {
-        this.loadedCover = newCover;
-      };
-
-      image.src = newCover;
-    },
-  },
-  methods: {
-    /**
-     * Emit click event with channel name
-     */
-    onClick (): void {
-      this.$emit('click', this.data.user_name, this.data.user_id, this.latestCover);
-    },
-  },
+  /** If true, preview is displayed as loading */
+  isLoading: boolean;
+}>(), {
+  isLoading: false,
 });
+
+const emit = defineEmits<{
+  (e: 'click', name: string, id: string, latestCover: string): void;
+}>();
+
+const store = useStore<RootSchema & ModulesSchema>();
+
+/** Previous cover url */
+const prevCover = ref<string>();
+
+/** Cover url, loaded and ready for display */
+const loadedCover = ref<string>();
+
+/** Returns true, if interface blur is enabled in settings */
+const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+
+/** Viewers count, formatted */
+const viewersCount = computed(() => props.data.viewer_count.toLocaleString());
+
+/** Latest cover url, not ready for display */
+const latestCover = computed(() => {
+  const { lastUpdateTime } = store.state.library;
+
+  return `${props.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
+});
+
+/** Channel logo image */
+const channelLogo = computed(() => {
+  const { users } = store.state.library;
+  const data = users.find((user) => user.id === props.data.user_id);
+
+  return data ? data.profile_image_url : '';
+});
+
+/**
+ * Watch for cover url timestamp change and reload image
+ */
+watch(latestCover, (newValue, prevValue) => {
+  const image = new Image();
+
+  prevCover.value = prevValue;
+
+  image.onload = () => {
+    loadedCover.value = newValue;
+  };
+
+  image.src = newValue;
+});
+
+/**
+ * Emit click event with channel name
+ */
+function onClick () {
+  emit('click', props.data.user_name, props.data.user_id, latestCover.value);
+}
 </script>
 
 <style>
