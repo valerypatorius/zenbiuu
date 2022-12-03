@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Filters from '@/src/components/Filters.vue';
@@ -32,7 +32,6 @@ import { StreamType, TwitchStream, Sorting } from '@/types/renderer/library';
 import { SET_LIBRARY_SORTING } from '@/src/store/actions';
 import { unixtime } from '@/src/utils/date';
 import type { RootSchema, ModulesSchema } from '@/types/schema';
-import { computed } from '@vue/reactivity';
 
 /**
  * Define store and router instances
