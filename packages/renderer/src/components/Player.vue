@@ -27,7 +27,7 @@
     <!-- Blurred dynamic video background -->
     <canvas
       v-show="isBlurEnabled"
-      ref="videoBackground"
+      ref="canvas"
       :width="videoBackground.width"
       :height="videoBackground.height"
       class="player__video-background"
@@ -38,7 +38,7 @@
       v-if="!isVideoReady && !isOffline"
       class="player__loader"
     >
-      <loader />
+      <Loader />
     </div>
 
     <!-- Video player -->
@@ -48,7 +48,7 @@
     />
 
     <!-- Overlay with controls -->
-    <player-overlay
+    <PlayerOverlay
       v-if="isVideoReady && !isOffline"
       :elements="playerElements"
       :stream-info="info"
@@ -63,28 +63,45 @@
     />
 
     <!-- Additional info messages -->
-    <player-info
+    <PlayerInfo
       v-if="isVideoReady && hls"
       :hls="hls"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 import * as actions from '@/src/store/actions';
 import interval from '@/src/utils/interval';
 import date from '@/src/utils/date';
 import Hls, { HlsConfig } from 'hls.js';
-import { StreamType, TwitchStream } from '@/types/renderer/library';
+import { StreamType } from '@/types/renderer/library';
 import Loader from '@/src/components/ui/Loader.vue';
 import PlayerOverlay from '@/src/components/player/Overlay.vue';
 import PlayerInfo from '@/src/components/player/Info.vue';
 import type { Level } from 'hls.js';
 import type { IntervalManagerItem } from '@/src/utils/interval';
 import type { PlayerElements } from '@/types/renderer/player';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
 export type HlsInstance = InstanceType<typeof Hls>;
+
+const props = withDefaults(defineProps<{
+  /** Current channel name */
+  channelName: string;
+
+  /** Current channel id */
+  channelId: string;
+
+  /** Initial video cover */
+  cover: string;
+}>(), {
+  cover: '',
+});
+
+const store = useStore<RootSchema & ModulesSchema>();
 
 /**
  * Stats posting interval for earning channel points
@@ -107,475 +124,388 @@ const HLS_CONFIG: Partial<HlsConfig> = {
   liveMaxLatencyDurationCount: 3,
 };
 
-export default defineComponent({
-  name: 'Player',
-  components: {
-    Loader,
-    PlayerOverlay,
-    PlayerInfo,
-  },
-  props: {
-    /**
-     * Current channel name
-     */
-    channelName: {
-      type: String,
-      required: true,
-    },
+const player = ref<HTMLDivElement>();
 
-    /**
-     * Current channel id
-     */
-    channelId: {
-      type: String,
-      required: true,
-    },
+const canvas = ref<HTMLCanvasElement>();
 
-    /**
-     * Initial video cover
-     */
-    cover: {
-      type: String,
-      default: '',
-    },
-  },
-  data (): {
-    hls: HlsInstance | null;
-    isVideoReady: boolean;
-    qualityLevels: Level[];
-    statsInterval: IntervalManagerItem | null;
-    videoBackgroundInterval: ReturnType<typeof requestAnimationFrame> | null;
-    videoBackground: {
-      width: number;
-      height: number;
-    };
-    inactivityInterval: ReturnType<typeof setTimeout> | null;
-    isInactive: boolean;
-    isOffline: boolean;
-    isControlHovered: boolean;
-    playerElements: Partial<PlayerElements>;
-    } {
-    return {
-      /**
-       * Hls instance
-       */
-      hls: null,
+const video = ref<HTMLVideoElement>();
 
-      /**
-       * Is video ready to play
-       */
-      isVideoReady: false,
+/** Hls instance */
+const hls = ref<HlsInstance>();
 
-      /**
-       * Raw quality levels list
-       */
-      qualityLevels: [],
+/** Is video ready to play */
+const isVideoReady = ref(false);
 
-      /**
-       * Stats interval object
-       */
-      statsInterval: null,
+/** Raw quality levels list */
+const qualityLevels = ref<Level[]>([]);
 
-      /**
-       * Video background update interval object
-       */
-      videoBackgroundInterval: null,
+/** Stats interval object */
+const statsInterval = ref<IntervalManagerItem>();
 
-      /**
-       * Video background dimensions
-       */
-      videoBackground: {
-        width: 640,
-        height: 360,
-      },
+/** Video background update interval object */
+const videoBackgroundInterval = ref<ReturnType<typeof requestAnimationFrame>>();
 
-      /**
-       * Inactivity interval id
-       */
-      inactivityInterval: null,
-
-      /**
-       * If true, interface and cursor will be hidden
-       */
-      isInactive: false,
-
-      /**
-       * True, when both playlist and stream info are not available
-       */
-      isOffline: false,
-
-      /**
-       * True, if overlay control is hovered.
-       * Disables inactivity watcher
-       */
-      isControlHovered: false,
-
-      /**
-       * DOM-elements, which properties are modified
-       * by player and its child components
-       */
-      playerElements: {},
-    };
-  },
-  computed: {
-    /**
-     * Returns true, if interface blur is enabled in settings
-     */
-    isBlurEnabled (): boolean {
-      return this.$store.state.app.settings.isBlurEnabled;
-    },
-
-    /**
-     * Returns true, if sidebar is hidden by user
-     */
-    isSidebarHidden (): boolean {
-      return this.$store.state.player.isHideSidebar;
-    },
-
-    /**
-     * Returns true, if sidebar is chat by user
-     */
-    isChatHidden (): boolean {
-      return this.$store.state.player.isHideChat;
-    },
-
-    /**
-     * Current volume value
-     */
-    currentVolume (): number {
-      return this.$store.state.player.volume;
-    },
-
-    /**
-     * Returns true, if channel is followed
-     */
-    isFollowed (): boolean {
-      return !!this.$store.state.library.followed.find((item) => item.to_id === this.channelId.toString());
-    },
-
-    /**
-     * Stream info
-     */
-    info (): TwitchStream | undefined {
-      const streamType = this.isFollowed ? StreamType.Followed : StreamType.Found;
-
-      return this.$store.state.library.streams[streamType].find((stream) => stream.user_login === this.channelName);
-    },
-
-    /**
-     * Stream thumbnail url
-     */
-    thumbnail (): string {
-      if (this.cover) {
-        return this.cover;
-      }
-
-      if (!this.info) {
-        return '';
-      }
-
-      const { lastUpdateTime } = this.$store.state.library;
-
-      return `${this.info.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
-    },
-  },
-  mounted () {
-    /**
-     * Save rendered elements
-     */
-    this.playerElements.player = this.$refs.player as HTMLElement;
-    this.playerElements.video = this.$refs.video as HTMLVideoElement;
-    this.playerElements.videoBackground = this.$refs.videoBackground as HTMLCanvasElement;
-
-    /**
-     * Update stream info and send player stats every 1 minute
-     */
-    this.statsInterval = interval.start(STATS_POST_FREQUENCY);
-
-    this.statsInterval.onupdate = () => {
-      if (this.info) {
-        this.$store.dispatch(actions.SEND_PLAYER_STATS, this.info);
-      }
-
-      this.$store.dispatch(actions.REQUEST_STREAM_INFO, {
-        channel: this.channelName,
-        streamType: this.isFollowed ? StreamType.Followed : StreamType.Found,
-      }).catch(() => {
-        this.isOffline = true;
-      });
-    };
-
-    /**
-     * Start playback
-     */
-    this.initPlayer();
-    this.loadPlaylist(this.channelName);
-  },
-  beforeUnmount () {
-    /**
-     * Stop watching for cursor
-     */
-    if (this.inactivityInterval) {
-      clearTimeout(this.inactivityInterval);
-      this.inactivityInterval = null;
-    }
-
-    /**
-     * Stop sending stats
-     */
-    if (this.statsInterval) {
-      interval.stop(this.statsInterval);
-
-      this.statsInterval = null;
-    }
-
-    /**
-     * Stop updating video background
-     */
-    if (this.videoBackgroundInterval) {
-      cancelAnimationFrame(this.videoBackgroundInterval);
-      this.videoBackgroundInterval = null;
-    }
-
-    /**
-     * Destroy player
-     */
-    if (this.hls) {
-      this.hls.off(Hls.Events.MEDIA_ATTACHED);
-      this.hls.off(Hls.Events.MANIFEST_PARSED);
-      this.hls.off(Hls.Events.INIT_PTS_FOUND);
-      this.hls.destroy();
-      this.hls = null;
-    }
-  },
-  methods: {
-    /**
-     * When quality is changed via picker,
-     * set next video fragment quality
-     */
-    onQualityChange (index: number): void {
-      if (!this.hls) {
-        return;
-      }
-
-      this.hls.nextLevel = index;
-    },
-
-    /**
-     * Initialize player without requesting media source
-     */
-    initPlayer (): void {
-      const { video } = this.playerElements;
-
-      if (this.hls || !video) {
-        return;
-      }
-
-      video.volume = this.currentVolume;
-
-      this.hls = new Hls(HLS_CONFIG);
-      this.hls.attachMedia(video);
-
-      /**
-       * Wait for source
-       */
-      this.hls.on(Hls.Events.MEDIA_ATTACHED, () => {
-        this.hls?.on(Hls.Events.MANIFEST_PARSED, () => {
-          this.qualityLevels = this.hls?.levels ?? [];
-
-          video.play();
-        });
-
-        this.hls?.on(Hls.Events.INIT_PTS_FOUND, () => {
-          this.isVideoReady = true;
-
-          this.initVideoBackground();
-        });
-      });
-    },
-
-    /**
-     * Load playlist and pass it to hls
-     */
-    loadPlaylist (channel: string, headers = {}): void {
-      this.$store.dispatch(actions.REQUEST_CHANNEL_PLAYLIST, {
-        channel,
-        headers,
-      }).then((url) => {
-        this.hls?.loadSource(url);
-      });
-    },
-
-    /**
-     * Initialize video background
-     */
-    initVideoBackground (): void {
-      this.videoBackgroundInterval = window.requestAnimationFrame(this.updateVideoBackground);
-    },
-
-    /**
-     * Update video background via canvas image (if allowed by settings)
-     */
-    updateVideoBackground (): void {
-      if (!this.isBlurEnabled) {
-        this.videoBackgroundInterval = null;
-
-        return;
-      }
-
-      const { video, videoBackground } = this.playerElements;
-
-      if (!video || !videoBackground) {
-        return;
-      }
-
-      const { width, height } = this.videoBackground;
-      const ctx = videoBackground.getContext('2d');
-
-      if (!ctx) {
-        return;
-      }
-
-      ctx.drawImage(video, 0, 0, width, height);
-
-      this.videoBackgroundInterval = window.requestAnimationFrame(this.updateVideoBackground);
-    },
-
-    /**
-     * Force mousemove handler to handle some cases
-     * (e.g. when user comes from library screen without moving cursor)
-     */
-    onMouseEnter (): void {
-      this.onMouseMove();
-    },
-
-    /**
-     * Enable inactive state, if mouse is not moving
-     */
-    onMouseMove (): void {
-      if (this.isControlHovered) {
-        return;
-      }
-
-      this.disableInactivityWatcher();
-
-      this.inactivityInterval = setTimeout(() => {
-        this.isInactive = true;
-      }, INACTIVITY_DELAY);
-    },
-
-    /**
-     * Disable player inactive state
-     */
-    onMouseLeave (): void {
-      this.disableInactivityWatcher();
-    },
-
-    /**
-     * Stop watching for inactive state
-     */
-    disableInactivityWatcher (): void {
-      this.isInactive = false;
-
-      if (this.inactivityInterval) {
-        clearTimeout(this.inactivityInterval);
-      }
-    },
-
-    /**
-     * When overlay control is hovered,
-     * disable inactivity watcher
-     */
-    onControlMouseEnter (): void {
-      this.isControlHovered = true;
-
-      this.disableInactivityWatcher();
-    },
-
-    /**
-     * When overlay control is not hovered,
-     * resume inactivity watcher
-     */
-    onControlMouseLeave (): void {
-      this.isControlHovered = false;
-
-      this.onMouseMove();
-    },
-  },
+/** Video background dimensions */
+const videoBackground = reactive({
+  width: 640,
+  height: 360,
 });
+
+/** Inactivity interval id */
+const inactivityInterval = ref<ReturnType<typeof setTimeout>>();
+
+/** If true, interface and cursor will be hidden */
+const isInactive = ref(false);
+
+/** True, when both playlist and stream info are not available */
+const isOffline = ref(false);
+
+/**
+ * True, if overlay control is hovered.
+ * Disables inactivity watcher
+ */
+const isControlHovered = ref(false);
+
+/**
+ * DOM-elements, which properties are modified
+ * by player and its child components
+ */
+const playerElements = ref<Partial<PlayerElements>>({});
+
+/** Returns true, if interface blur is enabled in settings */
+const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+
+/** Returns true, if sidebar is hidden by user */
+const isSidebarHidden = computed(() => store.state.player.isHideSidebar);
+
+/** Returns true, if sidebar is chat by user */
+const isChatHidden = computed(() => store.state.player.isHideChat);
+
+/** Current volume value */
+const currentVolume = computed(() => store.state.player.volume);
+
+/** Returns true, if channel is followed */
+const isFollowed = computed(() => !!store.state.library.followed.find((item) => item.to_id === props.channelId));
+
+/** Stream info */
+const info = computed(() => {
+  const streamType = isFollowed.value ? StreamType.Followed : StreamType.Found;
+
+  return store.state.library.streams[streamType].find((stream) => stream.user_login === props.channelName);
+});
+
+/** Stream thumbnail url */
+const thumbnail = computed(() => {
+  if (props.cover) {
+    return props.cover;
+  }
+
+  if (!info.value) {
+    return '';
+  }
+
+  const { lastUpdateTime } = store.state.library;
+
+  return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
+});
+
+onMounted(() => {
+  /**
+   * Save rendered elements
+   */
+  playerElements.value.player = player.value;
+  playerElements.value.video = video.value;
+  playerElements.value.canvas = canvas.value;
+
+  /**
+   * Update stream info and send player stats every 1 minute
+   */
+  statsInterval.value = interval.start(STATS_POST_FREQUENCY);
+
+  statsInterval.value.onupdate = () => {
+    if (info.value) {
+      store.dispatch(actions.SEND_PLAYER_STATS, info.value);
+    }
+
+    store.dispatch(actions.REQUEST_STREAM_INFO, {
+      channel: props.channelName,
+      streamType: isFollowed.value ? StreamType.Followed : StreamType.Found,
+    }).catch(() => {
+      isOffline.value = true;
+    });
+  };
+
+  /**
+   * Start playback
+   */
+  initPlayer();
+  loadPlaylist(props.channelName);
+});
+
+onBeforeUnmount(() => {
+  /**
+   * Stop watching for cursor
+   */
+  if (inactivityInterval.value) {
+    clearTimeout(inactivityInterval.value);
+    inactivityInterval.value = undefined;
+  }
+
+  /**
+   * Stop sending stats
+   */
+  if (statsInterval.value) {
+    interval.stop(statsInterval.value);
+    statsInterval.value = undefined;
+  }
+
+  /**
+   * Stop updating video background
+   */
+  if (videoBackgroundInterval.value) {
+    cancelAnimationFrame(videoBackgroundInterval.value);
+    videoBackgroundInterval.value = undefined;
+  }
+
+  /**
+   * Destroy player
+   */
+  hls.value?.off(Hls.Events.MEDIA_ATTACHED);
+  hls.value?.off(Hls.Events.MANIFEST_PARSED);
+  hls.value?.off(Hls.Events.INIT_PTS_FOUND);
+  hls.value?.destroy();
+  hls.value = undefined;
+});
+
+/**
+ * When quality is changed via picker,
+ * set next video fragment quality
+ */
+function onQualityChange (index: number): void {
+  if (!hls.value) {
+    return;
+  }
+
+  hls.value.nextLevel = index;
+}
+
+/**
+ * Initialize player without requesting media source
+ */
+function initPlayer (): void {
+  const { video } = playerElements.value;
+
+  if (hls.value || !video) {
+    return;
+  }
+
+  video.volume = currentVolume.value;
+
+  hls.value = new Hls(HLS_CONFIG);
+  hls.value.attachMedia(video);
+
+  /**
+   * Wait for source
+   */
+  hls.value.on(Hls.Events.MEDIA_ATTACHED, () => {
+    hls.value?.on(Hls.Events.MANIFEST_PARSED, () => {
+      qualityLevels.value = hls.value?.levels ?? [];
+
+      video.play();
+    });
+
+    hls.value?.on(Hls.Events.INIT_PTS_FOUND, () => {
+      isVideoReady.value = true;
+
+      initVideoBackground();
+    });
+  });
+}
+
+/**
+ * Load playlist and pass it to hls
+ */
+function loadPlaylist (channel: string, headers = {}): void {
+  store.dispatch(actions.REQUEST_CHANNEL_PLAYLIST, {
+    channel,
+    headers,
+  }).then((url) => {
+    hls.value?.loadSource(url);
+  });
+}
+
+/**
+ * Initialize video background
+ */
+function initVideoBackground (): void {
+  videoBackgroundInterval.value = window.requestAnimationFrame(updateVideoBackground);
+}
+
+/**
+ * Update video background via canvas image (if allowed by settings)
+ */
+function updateVideoBackground (): void {
+  if (!isBlurEnabled.value) {
+    videoBackgroundInterval.value = undefined;
+
+    return;
+  }
+
+  const { video, canvas } = playerElements.value;
+
+  if (!video || !canvas) {
+    return;
+  }
+
+  const { width, height } = canvas;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    return;
+  }
+
+  ctx.drawImage(video, 0, 0, width, height);
+
+  videoBackgroundInterval.value = window.requestAnimationFrame(updateVideoBackground);
+}
+
+/**
+ * Force mousemove handler to handle some cases
+ * (e.g. when user comes from library screen without moving cursor)
+ */
+function onMouseEnter (): void {
+  onMouseMove();
+}
+
+/**
+ * Enable inactive state, if mouse is not moving
+ */
+function onMouseMove (): void {
+  if (isControlHovered.value) {
+    return;
+  }
+
+  disableInactivityWatcher();
+
+  inactivityInterval.value = setTimeout(() => {
+    isInactive.value = true;
+  }, INACTIVITY_DELAY);
+}
+
+/**
+ * Disable player inactive state
+ */
+function onMouseLeave (): void {
+  disableInactivityWatcher();
+}
+
+/**
+ * Stop watching for inactive state
+ */
+function disableInactivityWatcher (): void {
+  isInactive.value = false;
+
+  if (inactivityInterval.value) {
+    clearTimeout(inactivityInterval.value);
+  }
+}
+
+/**
+ * When overlay control is hovered,
+ * disable inactivity watcher
+ */
+function onControlMouseEnter (): void {
+  isControlHovered.value = true;
+
+  disableInactivityWatcher();
+}
+
+/**
+ * When overlay control is not hovered,
+ * resume inactivity watcher
+ */
+function onControlMouseLeave (): void {
+  isControlHovered.value = false;
+
+  onMouseMove();
+}
 </script>
 
-<style>
+<style lang="postcss">
   .player {
     position: relative;
     overflow: hidden;
     background-color: var(--color-overlay-full);
-  }
 
-  .player--with-sidebar {
-    border-top-left-radius: var(--border-radius);
-  }
+    &--with-sidebar {
+      border-top-left-radius: var(--border-radius);
+    }
 
-  .player--with-chat {
-    border-top-right-radius: var(--border-radius);
-  }
+    &--with-chat {
+      border-top-right-radius: var(--border-radius);
+    }
 
-  .player--inactive {
-    cursor: none;
-  }
+    &--inactive {
+      cursor: none;
+    }
 
-  .player:not(.player--inactive):hover .player-overlay {
-    visibility: visible;
-    opacity: 1;
-  }
+    &:not(.player--inactive):hover {
+      .player-overlay {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
 
-  .player__loader {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-  }
+    &--with-blur {
+      /** Blurred static background */
+      .player__thumbnail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        filter: blur(20px);
+        transform: scale(1.2);
+        opacity: 0.4;
+      }
 
-  .player__loader .loader {
-    --size-main: 3rem;
-    --size-border: 0.4rem;
-  }
+      /** Blurred video background */
+      .player__video-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(30px);
+        transform: scale(1.2);
+        opacity: 0.4;
+      }
+    }
 
-  .player video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+    &__loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
 
-  /** Blurred static background */
-  .player--with-blur .player__thumbnail {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: 50% 50%;
-    background-repeat: no-repeat;
-    filter: blur(20px);
-    transform: scale(1.2);
-    opacity: 0.4;
-  }
+      .loader {
+        --size-main: 3rem;
+        --size-border: 0.4rem;
+      }
+    }
 
-  /** Blurred video background */
-  .player--with-blur .player__video-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(30px);
-    transform: scale(1.2);
-    opacity: 0.4;
+    video {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
   }
 </style>

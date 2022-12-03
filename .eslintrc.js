@@ -52,6 +52,9 @@ module.exports = {
     /** Such patterns are not used */
     'node/no-callback-literal': 'off',
 
+    /** Buggy behavior */
+    'padded-blocks': 'off',
+
     /** Too much promises do not need to be handled */
     '@typescript-eslint/no-floating-promises': 'off',
 
