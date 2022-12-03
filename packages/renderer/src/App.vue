@@ -5,7 +5,7 @@
     <div class="window__main">
       <Sidebar />
 
-      <router-view :key="$route.path" />
+      <RouterView :key="route.path" />
 
       <Settings v-if="isSettingsActive" />
     </div>

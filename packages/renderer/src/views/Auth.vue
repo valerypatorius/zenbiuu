@@ -8,12 +8,12 @@
 
     <div class="auth__content">
       <div class="auth__title">
-        {{ $t('auth.title') }} {{ title }}
+        {{ t('auth.title') }} {{ title }}
       </div>
 
       <div class="auth__description">
-        <p>{{ $t('auth.description') }}</p>
-        <p>{{ $t('auth.disclaimer') }}</p>
+        <p>{{ t('auth.description') }}</p>
+        <p>{{ t('auth.disclaimer') }}</p>
       </div>
 
       <div class="auth__buttons">
@@ -22,7 +22,7 @@
           @click="requestAuth"
         >
           <icon name="Twitch" />
-          {{ $t('auth.loginWithTwitch') }}
+          {{ t('auth.loginWithTwitch') }}
         </button>
       </div>
     </div>
@@ -38,8 +38,10 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import { getAppName } from '@/src/utils/utils';
 import {
@@ -50,88 +52,52 @@ import {
   TOGGLE_APP_SETTINGS,
 } from '@/src/store/actions';
 import appIconPath from '@/assets/icon.svg';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useRouter } from 'vue-router';
 
-export default defineComponent({
-  name: 'Auth',
-  components: {
-    Icon,
-  },
-  emits: ['success'],
-  data (): {
-    title: string;
-    appIconPath: string;
-    isLoading: boolean;
-    } {
-    return {
-      /**
-       * Screen title
-       */
-      title: getAppName(),
+const store = useStore<RootSchema & ModulesSchema>();
+const router = useRouter();
+const { t } = useI18n();
 
-      /**
-       * Path to app icon
-       */
-      appIconPath,
+/** Screen title */
+const title = getAppName();
 
-      /**
-       * True, if auth is being processed.
-       * Prevents multiple buttons clicks
-       */
-      isLoading: false,
-    };
-  },
-  computed: {
-    /**
-     * App client id
-     */
-    clientId (): string | null {
-      return this.$store.state.clientId;
-    },
+/**
+ * True, if auth is being processed.
+ * Prevents multiple buttons clicks
+ */
+const isLoading = ref(false);
 
-    /**
-     * Url to redirect after auth
-     */
-    redirectUrl (): string | null {
-      return this.$store.state.redirectUrl;
-    },
-  },
-  methods: {
-    /**
-     * Toggle settings panel
-     */
-    toggleSettings () {
-      this.$store.dispatch(TOGGLE_APP_SETTINGS);
-    },
+/** Toggle settings panel */
+function toggleSettings () {
+  store.dispatch(TOGGLE_APP_SETTINGS);
+}
 
-    /**
-     * Request auth
-     */
-    async requestAuth (): Promise<void> {
-      if (this.isLoading) {
-        return;
-      }
+/** Request auth and go to library screen */
+async function requestAuth (): Promise<void> {
+  if (isLoading.value) {
+    return;
+  }
 
-      this.isLoading = true;
+  isLoading.value = true;
 
-      const isAuthSuccess = await this.$store.dispatch(REQUEST_USER_ACCESS_TOKEN, {
-        clientId: this.clientId,
-        redirectUrl: this.redirectUrl,
-      });
+  const isAuthSuccess = await store.dispatch(REQUEST_USER_ACCESS_TOKEN, {
+    clientId: store.state.clientId,
+    redirectUrl: store.state.redirectUrl,
+  });
 
-      this.isLoading = false;
+  isLoading.value = false;
 
-      if (!isAuthSuccess) {
-        return;
-      }
+  if (!isAuthSuccess) {
+    return;
+  }
 
-      this.$store.dispatch(GET_USER_FOLLOWS);
-      this.$store.dispatch(GET_USERS);
-      this.$store.dispatch(GET_STREAMS);
+  store.dispatch(GET_USER_FOLLOWS);
+  store.dispatch(GET_USERS);
+  store.dispatch(GET_STREAMS);
 
-      this.$router.replace({ name: 'Library' });
-    },
-  },
-});
+  router.replace({ name: 'Library' });
+}
 </script>
 
 <style>
