@@ -2,7 +2,7 @@
   <!-- Interface settings -->
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ $t('settings.interface.general') }}
+      {{ t('settings.interface.general') }}
     </div>
 
     <checkbox
@@ -11,14 +11,14 @@
       :value="setting.value"
       @change="toggleSetting(setting.name)"
     >
-      {{ $t(`settings.interface.${setting.name}`) }}
+      {{ t(`settings.interface.${setting.name}`) }}
     </checkbox>
   </div>
 
   <!-- Interface size -->
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ $t('settings.interface.size') }}
+      {{ t('settings.interface.size') }}
     </div>
 
     <div class="settings-slider">
@@ -53,7 +53,7 @@
   <!-- Color scheme -->
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ $t('settings.colorScheme.title') }}
+      {{ t('settings.colorScheme.title') }}
     </div>
 
     <radio
@@ -65,18 +65,20 @@
       name="theme"
       @change="setAppColorScheme(SchemeName)"
     >
-      {{ $t(`settings.colorScheme.${SchemeName}`) }}
+      {{ t(`settings.colorScheme.${SchemeName}`) }}
     </radio>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import Radio from '@/src/components/ui/Radio.vue';
 import Checkbox from '@/src/components/ui/Checkbox.vue';
 import { TOGGLE_APP_SETTING, SET_APP_COLOR_SCHEME, SET_APP_INTERFACE_SIZE } from '@/src/store/actions';
 import { AppColorScheme } from '@/types/color';
-import type { AppSettings } from '@/types/schema';
+import type { AppSettings, RootSchema, ModulesSchema } from '@/types/schema';
 
 /**
  * Interface size limits
@@ -86,103 +88,67 @@ enum InterfaceSize {
   Max = 16,
 }
 
-export default defineComponent({
-  name: 'SettingsInterface',
-  components: {
-    Radio,
-    Checkbox,
-  },
-  data (): {
-    AppColorScheme: typeof AppColorScheme;
-    InterfaceSize: typeof InterfaceSize;
-    } {
-    return {
-      /**
-       * Available app color schemes
-       */
-      AppColorScheme,
+const store = useStore<RootSchema & ModulesSchema>();
+const { t } = useI18n();
 
-      /**
-       * Interface size limits
-       */
-      InterfaceSize,
-    };
-  },
-  computed: {
-    /**
-     * Name of current color scheme
-     */
-    currentColorScheme (): AppColorScheme {
-      return this.$store.state.theme.name;
-    },
+/** Name of current color scheme */
+const currentColorScheme = computed(() => store.state.theme.name);
 
-    /**
-     * Current interface size
-     */
-    currentInterfaceSize (): number {
-      return this.$store.state.app.interfaceSize;
-    },
+/** Current interface size */
+const currentInterfaceSize = computed(() => store.state.app.interfaceSize);
 
-    /**
-     * Interface settings, available for change
-     */
-    interfaceSettings (): {
-      name: keyof AppSettings;
-      value: boolean;
-    }[] {
-      const list: (keyof AppSettings)[] = [
-        'isAlwaysOnTop',
-        'isBlurEnabled',
-      ];
+/** Interface settings, available for change */
+const interfaceSettings = computed(() => {
+  const list: (keyof AppSettings)[] = [
+    'isAlwaysOnTop',
+    'isBlurEnabled',
+  ];
 
-      return list.map((name) => ({
-        name,
-        value: this.$store.state.app.settings[name],
-      }));
-    },
-  },
-  methods: {
-    /**
-     * Toggle app setting by its name
-     */
-    toggleSetting (name: keyof AppSettings): void {
-      this.$store.dispatch(TOGGLE_APP_SETTING, name);
-    },
-
-    /**
-     * Set app color scheme
-     */
-    setAppColorScheme (value: AppColorScheme): void {
-      this.$store.dispatch(SET_APP_COLOR_SCHEME, value);
-    },
-
-    /**
-     * Set interface size
-     */
-    setInterfaceSize (value: number | null, event?: Event): void {
-      if (!value && !event) {
-        return;
-      }
-
-      let size = this.currentInterfaceSize;
-
-      if (value) {
-        size = value;
-      }
-
-      if (event) {
-        size = parseInt((event.target as HTMLInputElement).value);
-      }
-
-      document.documentElement.style.setProperty('--size-base', size.toString());
-
-      this.$store.dispatch(SET_APP_INTERFACE_SIZE, size);
-    },
-  },
+  return list.map((name) => ({
+    name,
+    value: store.state.app.settings[name],
+  }));
 });
+
+/**
+ * Toggle app setting by its name
+ */
+function toggleSetting (name: keyof AppSettings): void {
+  store.dispatch(TOGGLE_APP_SETTING, name);
+}
+
+/**
+ * Set app color scheme
+ */
+function setAppColorScheme (value: AppColorScheme): void {
+  store.dispatch(SET_APP_COLOR_SCHEME, value);
+}
+
+/**
+ * Set interface size
+ */
+function setInterfaceSize (value: number | null, event?: Event): void {
+  if (!value && !event) {
+    return;
+  }
+
+  let size = currentInterfaceSize.value;
+
+  if (value) {
+    size = value;
+  }
+
+  if (event) {
+    size = parseInt((event.target as HTMLInputElement).value);
+  }
+
+  document.documentElement.style.setProperty('--size-base', size.toString());
+
+  store.dispatch(SET_APP_INTERFACE_SIZE, size);
+}
 </script>
 
-<style>
+<style lang="postcss">
   .settings-slider {
     --size-width: 15rem;
     --size-bar: 0.4rem;
@@ -191,63 +157,64 @@ export default defineComponent({
     --size-shadow: 0.3rem;
 
     margin: 0 var(--size-shadow);
-  }
 
-  .settings-slider input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    background: transparent;
-  }
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: transparent;
 
-  .settings-slider input[type=range]::-webkit-slider-runnable-track {
-    width: 100%;
-    height: var(--size-bar);
-    cursor: pointer;
-    background-color: var(--color-control-active);
-    border-radius: var(--size-radius);
-  }
+      &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: var(--size-bar);
+        cursor: pointer;
+        background-color: var(--color-control-active);
+        border-radius: var(--size-radius);
+      }
 
-  .settings-slider input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: var(--size-thumb);
-    height: var(--size-thumb);
-    border-radius: 50%;
-    background-color: var(--color-text);
-    cursor: pointer;
-    margin-top: calc(var(--size-thumb) * -0.5 + var(--size-bar) * 0.5);
-    position: relative;
-    z-index: 1;
-  }
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: var(--size-thumb);
+        height: var(--size-thumb);
+        border-radius: 50%;
+        background-color: var(--color-text);
+        cursor: pointer;
+        margin-top: calc(var(--size-thumb) * -0.5 + var(--size-bar) * 0.5);
+        position: relative;
+        z-index: 1;
+      }
 
-  .settings-slider input[type=range]::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 0 var(--size-shadow) var(--color-text-tertiary);
-  }
+      &::-webkit-slider-thumb:hover {
+        box-shadow: 0 0 0 var(--size-shadow) var(--color-text-tertiary);
+      }
+    }
 
-  .settings-slider__values {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 1rem;
-  }
+    &__values {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
+    }
 
-  .settings-slider__value {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--size-thumb);
-    color: var(--color-text-secondary);
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
+    &__value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--size-thumb);
+      color: var(--color-text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
 
-  .settings-slider__value:hover,
-  .settings-slider__value--active {
-    color: var(--color-text);
-  }
+      &:hover,
+      &--active {
+        color: var(--color-text);
+      }
 
-  .settings-slider__value:nth-child(2n)::before {
-    content: '';
-    width: 1px;
-    height: 0.6rem;
-    background-color: var(--color-text-tertiary);
+      &:nth-child(2n)::before {
+        content: '';
+        width: 1px;
+        height: 0.6rem;
+        background-color: var(--color-text-tertiary);
+      }
+    }
   }
 </style>

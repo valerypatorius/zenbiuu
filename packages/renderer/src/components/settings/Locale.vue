@@ -1,7 +1,7 @@
 <template>
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ $t('settings.locale.change') }}
+      {{ t('settings.locale.change') }}
     </div>
 
     <radio
@@ -18,12 +18,16 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import Radio from '@/src/components/ui/Radio.vue';
 import { updateWindowTitle } from '@/src/router/index';
 import { SET_APP_LOCALE } from '@/src/store/actions';
 import { AppLocaleName, AppLocaleDisplayName } from '@/types/renderer/locale';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
 interface LocaleOption {
   name: AppLocaleName;
@@ -31,41 +35,34 @@ interface LocaleOption {
   checked: boolean;
 }
 
-export default defineComponent({
-  name: 'SettingsLocale',
-  components: {
-    Radio,
-  },
-  computed: {
-    /**
-     * Available locale options
-     */
-    localeOptions (): LocaleOption[] {
-      const result: LocaleOption[] = [];
+const store = useStore<RootSchema & ModulesSchema>();
+const { t, locale } = useI18n();
+const route = useRoute();
 
-      Object.entries(AppLocaleName).forEach(([key, name]) => {
-        const label = AppLocaleDisplayName[key as keyof typeof AppLocaleDisplayName];
+/** Available locale options */
+const localeOptions = computed(() => {
+  const result: LocaleOption[] = [];
 
-        result.push({
-          name,
-          label,
-          checked: name === this.$i18n.locale,
-        });
-      });
+  Object.entries(AppLocaleName).forEach(([key, name]) => {
+    const label = AppLocaleDisplayName[key as keyof typeof AppLocaleDisplayName];
 
-      return result;
-    },
-  },
-  methods: {
-    /**
-     * Set app locale and update window title
-     */
-    setAppLocale (value: AppLocaleName): void {
-      this.$i18n.locale = value;
-      this.$store.dispatch(SET_APP_LOCALE, value);
+    result.push({
+      name,
+      label,
+      checked: name === locale.value,
+    });
+  });
 
-      updateWindowTitle(this.$route);
-    },
-  },
+  return result;
 });
+
+/**
+ * Set app locale and update window title
+ */
+function setAppLocale (value: AppLocaleName): void {
+  locale.value = value;
+  store.dispatch(SET_APP_LOCALE, value);
+
+  updateWindowTitle(route);
+}
 </script>

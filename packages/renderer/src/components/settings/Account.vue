@@ -9,7 +9,7 @@
         {{ userName }}<br>
 
         <a href="https://www.twitch.tv/settings/profile">
-          {{ $t('settings.account.twitchSettings') }}
+          {{ t('settings.account.twitchSettings') }}
         </a>
       </div>
 
@@ -18,76 +18,59 @@
         :disabled="isLoading"
         @click="logout"
       >
-        {{ $t('settings.logout') }}
+        {{ t('settings.logout') }}
       </button>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { REVOKE_USER_ACCESS_TOKEN, TOGGLE_APP_SETTINGS, RESET_LIBRARY } from '@/src/store/actions';
 import { RouteName } from '@/types/renderer/router';
 import { clearSessionStorage } from '@/src/utils/hub';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'SettingsAccount',
-  data (): {
-    isLoading: boolean;
-    } {
-    return {
-      /**
-       * True, if logout request is being processed
-       */
-      isLoading: false,
-    };
-  },
-  computed: {
-    /**
-     * Twitch client ID
-     */
-    clientId (): string | null {
-      return this.$store.state.clientId;
-    },
+const store = useStore<RootSchema & ModulesSchema>();
+const { t } = useI18n();
+const router = useRouter();
 
-    /**
-     * Logined user name
-     */
-    userName (): string | null {
-      return this.$store.state.user.name;
-    },
+/** True, if logout request is being processed */
+const isLoading = ref(false);
 
-    /**
-     * Logined user access token
-     */
-    userAccessToken (): string | null {
-      return this.$store.state.user.token;
-    },
-  },
-  methods: {
-    /**
-     * Log out current user and go to auth screen
-     */
-    async logout (): Promise<void> {
-      if (this.isLoading) {
-        return;
-      }
+/** Twitch client ID */
+const clientId = computed(() => store.state.clientId);
 
-      this.isLoading = true;
+/** Logined user name */
+const userName = computed(() => store.state.user.name);
 
-      await this.$store.dispatch(REVOKE_USER_ACCESS_TOKEN, {
-        clientId: this.clientId,
-        token: this.userAccessToken,
-      });
+/** Logined user access token */
+const userAccessToken = computed(() => store.state.user.token);
 
-      this.isLoading = false;
+/**
+ * Log out current user and go to auth screen
+ */
+async function logout (): Promise<void> {
+  if (isLoading.value) {
+    return;
+  }
 
-      this.$store.dispatch(TOGGLE_APP_SETTINGS);
-      this.$store.dispatch(RESET_LIBRARY);
-      this.$router.replace({ name: RouteName.Auth });
+  isLoading.value = true;
 
-      clearSessionStorage();
-    },
-  },
-});
+  await store.dispatch(REVOKE_USER_ACCESS_TOKEN, {
+    clientId: clientId.value,
+    token: userAccessToken.value,
+  });
+
+  isLoading.value = false;
+
+  store.dispatch(TOGGLE_APP_SETTINGS);
+  store.dispatch(RESET_LIBRARY);
+  router.replace({ name: RouteName.Auth });
+
+  clearSessionStorage();
+}
 </script>
