@@ -1,4 +1,4 @@
-import linkifyHtml from 'linkifyjs/html';
+import linkifyHtml from 'linkify-html';
 import Worker from '@/src/workers/irc.worker.ts?worker';
 import type { ChatEmote, ChatMessage } from '@/types/renderer/chat';
 import { escape } from '@/src/utils/utils';

@@ -30,13 +30,7 @@ export default defineConfig({
     target: 'chrome100',
     outDir: 'dist',
     assetsDir: '.',
-    minify: isDev ? false : 'terser',
-    terserOptions: {
-      ecma: 2022,
-      compress: {
-        passes: 2,
-      },
-    },
+    minify: isDev ? false : 'esbuild',
     emptyOutDir: true,
   },
 });
