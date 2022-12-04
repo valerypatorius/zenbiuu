@@ -6,7 +6,7 @@
       class="player-info__message"
     >
       <icon name="Warning" />
-      {{ $t('player.ad') }}
+      {{ t('player.ad') }}
 
       <timer
         v-if="adDuration"
@@ -16,115 +16,91 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Hls from 'hls.js';
 import Icon from '@/src/components/ui/Icon.vue';
 import Timer from '@/src/components/ui/Timer.vue';
 import { parseFragTags } from '@/src/utils/m3u8';
 import interval from '@/src/utils/interval';
 import type { IntervalManagerItem } from '@/src/utils/interval';
-import type { HlsInstance } from '@/src/components/Player.vue';
 
-export default defineComponent({
-  name: 'PlayerInfo',
-  components: {
-    Icon,
-    Timer,
-  },
-  props: {
-    /**
-     * Hls instance
-     */
-    hls: {
-      type: Object,
-      required: true,
-    },
-  },
-  data (): {
-    adQuartileCurrent: number | null;
-    adDuration: number;
-    adInterval: IntervalManagerItem | null;
-    isAdActive: boolean;
-    } {
-    return {
-      /**
-       * Current ad quartile
-       */
-      adQuartileCurrent: null,
+const props = defineProps<{
+  /** Hls instance */
+  hls: Hls;
+}>();
 
-      /**
-       * Total ad duration
-       */
-      adDuration: 0,
+const { t } = useI18n();
 
-      /**
-       * Ad duration interval
-       */
-      adInterval: null,
+/** Current ad quartile */
+const adQuartileCurrent = ref<number>();
 
-      /**
-       * True, if ad is detected
-       */
-      isAdActive: false,
-    };
-  },
-  mounted () {
-    /**
-     * Parse loaded framgents and search for ad tags.
-     * If found, display message.
-     *
-     * Work in progress. Planning on bypassing ads after some research
-     */
-    (this.hls as HlsInstance).on(Hls.Events.FRAG_LOADED, (event, data) => {
-      const { tagList } = data.frag;
-      const parsedTags = parseFragTags(tagList);
-      const adStartTag = parsedTags.find((tag) => tag['EXT-X-DATERANGE'] && tag['EXT-X-DATERANGE'].CLASS === 'twitch-stitched-ad');
-      const adQuartileTag = parsedTags.find((tag) => tag['EXT-X-DATERANGE'] && tag['EXT-X-DATERANGE'].CLASS === 'twitch-ad-quartile');
+/** Total ad duration */
+const adDuration = ref(0);
 
-      if (!adStartTag && !adQuartileTag) {
-        return;
-      }
+/** Ad duration interval */
+const adInterval = ref<IntervalManagerItem>();
 
-      if (adStartTag) {
-        this.adDuration = parseFloat(adStartTag['EXT-X-DATERANGE'].DURATION);
+/** True, if ad is detected */
+const isAdActive = ref(false);
 
-        console.log('Ad is starting. Duration is', this.adDuration);
+onMounted(() => {
+  /**
+   * Parse loaded framgents and search for ad tags.
+   * If found, display message.
+   *
+   * Work in progress. Planning on bypassing ads after some research
+   */
+  props.hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+    const { tagList } = data.frag;
+    const parsedTags = parseFragTags(tagList);
+    const adStartTag = parsedTags.find((tag) => tag['EXT-X-DATERANGE'] && tag['EXT-X-DATERANGE'].CLASS === 'twitch-stitched-ad');
+    const adQuartileTag = parsedTags.find((tag) => tag['EXT-X-DATERANGE'] && tag['EXT-X-DATERANGE'].CLASS === 'twitch-ad-quartile');
 
-        this.isAdActive = true;
-        this.adInterval = interval.start(this.adDuration * 1000, false);
-
-        this.adInterval.onupdate = () => {
-          console.log('Ad is ended');
-
-          this.isAdActive = false;
-
-          if (this.adInterval) {
-            interval.stop(this.adInterval);
-            this.adInterval = null;
-          }
-        };
-      }
-
-      if (adQuartileTag) {
-        this.adQuartileCurrent = parseInt(adQuartileTag['EXT-X-DATERANGE']['X-TV-TWITCH-AD-QUARTILE'], 10);
-
-        console.log('Current ad quartile', this.adQuartileCurrent, adQuartileTag['EXT-X-DATERANGE']);
-      }
-    });
-  },
-  beforeUnmount () {
-    if (this.adInterval) {
-      interval.stop(this.adInterval);
-      this.adInterval = null;
+    if (!adStartTag && !adQuartileTag) {
+      return;
     }
 
-    (this.hls as HlsInstance).off(Hls.Events.FRAG_LOADED);
-  },
+    if (adStartTag) {
+      adDuration.value = parseFloat(adStartTag['EXT-X-DATERANGE'].DURATION);
+
+      console.log('Ad is starting. Duration is', adDuration.value);
+
+      isAdActive.value = true;
+      adInterval.value = interval.start(adDuration.value * 1000, false);
+
+      adInterval.value.onupdate = () => {
+        console.log('Ad is ended');
+
+        isAdActive.value = false;
+
+        if (adInterval.value) {
+          interval.stop(adInterval.value);
+          adInterval.value = undefined;
+        }
+      };
+    }
+
+    if (adQuartileTag) {
+      adQuartileCurrent.value = parseInt(adQuartileTag['EXT-X-DATERANGE']['X-TV-TWITCH-AD-QUARTILE'], 10);
+
+      console.log('Current ad quartile', adQuartileCurrent.value, adQuartileTag['EXT-X-DATERANGE']);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  if (adInterval.value) {
+    interval.stop(adInterval.value);
+    adInterval.value = undefined;
+  }
+
+  props.hls.off(Hls.Events.FRAG_LOADED);
 });
 </script>
 
-<style>
+<style lang="postcss">
   .player-info {
     pointer-events: none;
     position: absolute;
@@ -135,20 +111,20 @@ export default defineComponent({
     display: flex;
     align-items: center;
     padding: var(--offset-window);
-  }
 
-  .player-info__message {
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    gap: 1rem;
-    background-color: var(--color-overlay-full);
-    padding: 0.8rem 1.2rem;
-    border-radius: 2rem;
-    backdrop-filter: blur(20px);
-  }
+    &__message {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      gap: 1rem;
+      background-color: var(--color-overlay-full);
+      padding: 0.8rem 1.2rem;
+      border-radius: 2rem;
+      backdrop-filter: blur(20px);
 
-  .player-info__message .icon {
-    margin-top: 0.1rem;
+      .icon {
+        margin-top: 0.1rem;
+      }
+    }
   }
 </style>
