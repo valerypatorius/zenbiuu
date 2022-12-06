@@ -33,192 +33,184 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
 import Control from '@/src/components/player/Control.vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+
+const props = withDefaults(defineProps<{
+  /** Current volume value */
+  currentVolume: number;
+
+  /** Video element to use as source for audio compressor */
+  source: HTMLVideoElement;
+
+  /** Is compressor enabled */
+  isCompressorEnabled: boolean;
+}>(), {
+  currentVolume: 0.25,
+  isCompressorEnabled: false,
+});
+
+const emit = defineEmits<{
+  (e: 'change', value: number): void;
+  (e: 'compressor-toggle', isEnable: boolean): void;
+}>();
+
+/** Video element reference */
+const sourceRef = ref(props.source);
+
+/** Volume value to use when unmuted */
+const previousVolume = ref(0.25);
+
+/** Compressor object */
+const compressor = ref<{
+  ctx?: AudioContext;
+  sourceNode?: MediaElementAudioSourceNode;
+  compressorNode?: DynamicsCompressorNode;
+}>({});
+
+/** CSS styles for slider */
+const sliderStyles = computed(() => {
+  return {
+    '--progress': props.currentVolume * 100 + '%',
+  };
+});
 
 /**
- * Default volume value
+ * Emit "change" event, when volume changes
  */
-const DEFAULT_VOLUME = 0.25;
+function onVolumeChange (event: Event): void {
+  const { valueAsNumber } = event.target as HTMLInputElement;
 
-export default defineComponent({
-  name: 'Volume',
-  components: {
-    Control,
-  },
-  props: {
-    /**
-     * Current volume value
-     */
-    currentVolume: {
-      type: Number,
-      default: DEFAULT_VOLUME,
-    },
+  sourceRef.value.volume = valueAsNumber;
 
-    /**
-     * Video element to use as source for audio compressor
-     */
-    source: {
-      type: Object as PropType<HTMLVideoElement>,
-      required: true,
-    },
+  emit('change', valueAsNumber);
+}
 
-    /**
-     * Is compressor enabled
-     */
-    isCompressorEnabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['change', 'compressor-toggle'],
-  data (): {
-    sourceRef: HTMLVideoElement;
-    previousVolume: number;
-    compressor: {
-      ctx?: AudioContext;
-      source?: MediaElementAudioSourceNode;
-      compressor?: DynamicsCompressorNode;
-    };
-    } {
-    return {
-      /**
-       * Video element reference
-       */
-      sourceRef: this.source,
+/**
+ * Mute or unmute and emit "change" event
+ */
+function setMuted (isMute: boolean): void {
+  const value = isMute ? 0 : previousVolume.value;
 
-      /**
-       * Volume value to use when unmuted
-       */
-      previousVolume: DEFAULT_VOLUME,
+  if (isMute) {
+    previousVolume.value = props.currentVolume;
+  }
 
-      /**
-       * Compressor object
-       */
-      compressor: {},
-    };
-  },
-  computed: {
-    /**
-     * CSS styles for slider
-     */
-    sliderStyles () {
-      return {
-        ['--progress' as string]: this.currentVolume * 100 + '%',
-      };
-    },
-  },
-  mounted () {
-    this.initAudioCompressor(this.sourceRef);
-  },
-  beforeUnmount () {
-    this.compressor = {};
-  },
-  methods: {
-    /**
-     * Emit "change" event, when volume changes
-     */
-    onVolumeChange (event: Event): void {
-      const { valueAsNumber } = event.target as HTMLInputElement;
+  sourceRef.value.volume = value;
 
-      this.sourceRef.volume = valueAsNumber;
+  emit('change', value);
+}
 
-      this.$emit('change', valueAsNumber);
-    },
+/**
+ * Init audio compressor and enable, if needed
+ * @link https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createDynamicsCompressor#example
+ */
+function initAudioCompressor (mediaElement: HTMLVideoElement): void {
+  compressor.value = {
+    ctx: new AudioContext(),
+  };
 
-    /**
-     * Mute or unmute and emit "change" event
-     */
-    setMuted (isMute: boolean): void {
-      const value = isMute ? 0 : this.previousVolume;
+  const { ctx } = compressor.value;
 
-      if (isMute) {
-        this.previousVolume = this.currentVolume;
-      }
+  if (!ctx) {
+    return;
+  }
 
-      this.sourceRef.volume = value;
+  compressor.value.sourceNode = ctx.createMediaElementSource(mediaElement);
+  compressor.value.compressorNode = ctx.createDynamicsCompressor();
 
-      this.$emit('change', value);
-    },
+  const { sourceNode, compressorNode } = compressor.value;
 
-    /**
-     * Init audio compressor and enable, if needed
-     * @link https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createDynamicsCompressor#example
-     */
-    initAudioCompressor (mediaElement: HTMLVideoElement): void {
-      this.compressor = {
-        ctx: new AudioContext(),
-      };
+  if (!sourceNode || !compressorNode) {
+    return;
+  }
 
-      const { ctx } = this.compressor;
+  compressorNode.threshold.setValueAtTime(-50, ctx.currentTime);
+  compressorNode.knee.setValueAtTime(40, ctx.currentTime);
+  compressorNode.ratio.setValueAtTime(12, ctx.currentTime);
+  compressorNode.attack.setValueAtTime(0, ctx.currentTime);
+  compressorNode.release.setValueAtTime(0.25, ctx.currentTime);
 
-      if (!ctx) {
-        return;
-      }
+  sourceNode.connect(ctx.destination);
 
-      this.compressor.source = ctx.createMediaElementSource(mediaElement);
-      this.compressor.compressor = ctx.createDynamicsCompressor();
+  if (props.isCompressorEnabled) {
+    toggleCompressor(true);
+  }
+}
 
-      const { source, compressor } = this.compressor;
+/**
+ * Toggle compressor state and emit "compressor-toggle" event
+ */
+function toggleCompressor (isEnable: boolean): void {
+  const { ctx, sourceNode, compressorNode } = compressor.value;
 
-      if (!source || !compressor) {
-        return;
-      }
+  if (!ctx || !sourceNode || !compressorNode) {
+    return;
+  }
 
-      compressor.threshold.setValueAtTime(-50, ctx.currentTime);
-      compressor.knee.setValueAtTime(40, ctx.currentTime);
-      compressor.ratio.setValueAtTime(12, ctx.currentTime);
-      compressor.attack.setValueAtTime(0, ctx.currentTime);
-      compressor.release.setValueAtTime(0.25, ctx.currentTime);
+  if (isEnable) {
+    sourceNode.disconnect(ctx.destination);
+    sourceNode.connect(compressorNode);
+    compressorNode.connect(ctx.destination);
+  } else {
+    sourceNode.disconnect(compressorNode);
+    compressorNode.disconnect(ctx.destination);
+    sourceNode.connect(ctx.destination);
+  }
 
-      source.connect(ctx.destination);
+  emit('compressor-toggle', isEnable);
+}
 
-      if (this.isCompressorEnabled) {
-        this.toggleCompressor(true);
-      }
-    },
+onMounted(() => {
+  initAudioCompressor(sourceRef.value);
+});
 
-    /**
-     * Toggle compressor state and emit "compressor-toggle" event
-     */
-    toggleCompressor (isEnable: boolean): void {
-      const { ctx, source, compressor } = this.compressor;
-
-      if (!ctx || !source || !compressor) {
-        return;
-      }
-
-      if (isEnable) {
-        source.disconnect(ctx.destination);
-        source.connect(compressor);
-        compressor.connect(ctx.destination);
-      } else {
-        source.disconnect(compressor);
-        compressor.disconnect(ctx.destination);
-        source.connect(ctx.destination);
-      }
-
-      this.$emit('compressor-toggle', isEnable);
-    },
-  },
+onBeforeUnmount(() => {
+  compressor.value = {};
 });
 </script>
 
-<style>
+<style lang="postcss">
   .volume {
     --size-bar: 0.3rem;
     --size-thumb: 1.3rem;
 
     display: flex;
     align-items: center;
-  }
 
-  /** Reset default input styles */
-  .volume input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    background: transparent;
+    /** Reset default input styles */
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: transparent;
+
+      /** Volume bar */
+      &::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        background-color: transparent;
+      }
+
+      /** Volume thumb */
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: var(--size-thumb);
+        height: var(--size-thumb);
+        border-radius: var(--radius);
+        background-color: var(--color-text);
+        opacity: 0;
+        position: relative;
+        z-index: 2;
+        margin-top: 0;
+      }
+
+      &:hover::-webkit-slider-thumb {
+        opacity: 1;
+      }
+    }
   }
 
   /** Volume slider container */
@@ -236,54 +228,30 @@ export default defineComponent({
     flex: 1;
     margin: 0 1rem;
     transform: translate3d(0, 0, 0);
-  }
 
-  /** Volume bar */
-  .volume input[type=range]::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    background-color: transparent;
-  }
+    /** Volume bar */
+    &::before {
+      content: '';
+      width: 100%;
+      height: var(--height);
+      background-color: var(--color-control-active);
+      border-radius: var(--height);
+      position: absolute;
+      left: 0;
+      z-index: -2;
+    }
 
-  .volume-slider::before {
-    content: '';
-    width: 100%;
-    height: var(--height);
-    background-color: var(--color-control-active);
-    border-radius: var(--height);
-    position: absolute;
-    left: 0;
-    z-index: -2;
-  }
-
-  /** Volume bar for current value */
-  .volume-slider::after {
-    content: '';
-    width: var(--progress);
-    height: var(--height);
-    background-color: var(--color-text);
-    border-radius: var(--height);
-    position: absolute;
-    left: 0;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /** Volume thumb */
-  .volume input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: var(--size-thumb);
-    height: var(--size-thumb);
-    border-radius: var(--radius);
-    background-color: var(--color-text);
-    opacity: 0;
-    position: relative;
-    z-index: 2;
-    margin-top: 0;
-  }
-
-  .volume input[type=range]:hover::-webkit-slider-thumb {
-    opacity: 1;
+    /** Volume bar for current value */
+    &::after {
+      content: '';
+      width: var(--progress);
+      height: var(--height);
+      background-color: var(--color-text);
+      border-radius: var(--height);
+      position: absolute;
+      left: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
   }
 </style>
