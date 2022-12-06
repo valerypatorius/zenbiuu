@@ -15,7 +15,7 @@
   </label>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 withDefaults(defineProps<{
   /** Input id */
   id: string;

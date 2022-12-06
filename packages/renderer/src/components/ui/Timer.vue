@@ -4,7 +4,7 @@
   </span>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import date, { now } from '@/src/utils/date';
 

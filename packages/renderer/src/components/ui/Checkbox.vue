@@ -15,7 +15,7 @@
   </label>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import Icon from '@/src/components/ui/Icon.vue';
 
 withDefaults(defineProps<{
