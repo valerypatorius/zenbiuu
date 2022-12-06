@@ -6,7 +6,7 @@
         'popup-overlay--with-blur': isBlurEnabled,
       },
     ]"
-    @click.self="$emit('close')"
+    @click.self="emit('close')"
   >
     <div class="popup">
       <slot />
@@ -14,24 +14,22 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'Popup',
-  emits: ['close'],
-  computed: {
-    /**
-     * Returns true, if interface blur is enabled in settings
-     */
-    isBlurEnabled (): boolean {
-      return this.$store.state.app.settings.isBlurEnabled;
-    },
-  },
-});
+const store = useStore<RootSchema & ModulesSchema>();
+
+const emit = defineEmits<{
+  (name: 'close'): void;
+}>();
+
+/** Returns true, if interface blur is enabled in settings */
+const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
 </script>
 
-<style>
+<style lang="postcss">
   .popup-overlay {
     padding: var(--offset-window);
     display: grid;
@@ -47,10 +45,10 @@ export default defineComponent({
     z-index: 1000;
     background-color: var(--color-overlay-full);
     overflow: hidden;
-  }
 
-  .popup-overlay--with-blur {
-    backdrop-filter: blur(15px);
+    &--with-blur {
+      backdrop-filter: blur(15px);
+    }
   }
 
   .popup {

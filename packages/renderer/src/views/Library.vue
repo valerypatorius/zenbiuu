@@ -1,6 +1,6 @@
 <template>
   <div
-    ref="scrollable"
+    ref="scrollableNode"
     class="library scrollable"
   >
     <div class="library__content">
@@ -21,117 +21,104 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import Filters from '@/src/components/Filters.vue';
 import Preview from '@/src/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
 import { StreamType, TwitchStream, Sorting } from '@/types/renderer/library';
 import { SET_LIBRARY_SORTING } from '@/src/store/actions';
 import { unixtime } from '@/src/utils/date';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'Library',
-  components: {
-    Filters,
-    Preview,
-  },
-  data (): {
-    scroller: Scroller | null;
-    } {
-    return {
-      /**
-       * Scroller instance
-       */
-      scroller: null,
-    };
-  },
-  computed: {
-    /**
-     * Streams list
-     */
-    streams (): TwitchStream[] {
-      return this.$store.state.library.streams[StreamType.Followed];
-    },
+/**
+ * Define store and router instances
+ */
+const store = useStore<RootSchema & ModulesSchema>();
+const router = useRouter();
 
-    /**
-     * Returns true, if actual library content has been loaded
-     */
-    isLibraryReady (): boolean {
-      return this.$store.state.library.isReady;
-    },
+/** True, if actual library content has been loaded */
+const isLibraryReady = computed(() => store.state.library.isReady);
 
-    /**
-     * Current library sorting type
-     */
-    sorting (): Sorting {
-      return this.$store.state.library.sorting;
-    },
+/** Current library sorting type */
+const sorting = computed(() => store.state.library.sorting);
 
-    /**
-     * Sorting rule, based on current sorting type
-     */
-    sortingRule () {
-      switch (this.sorting) {
-        case Sorting.DurationAsc:
-          return (a: TwitchStream, b: TwitchStream) => unixtime(b.started_at) - unixtime(a.started_at);
-        case Sorting.DurationDesc:
-          return (a: TwitchStream, b: TwitchStream) => unixtime(a.started_at) - unixtime(b.started_at);
-        case Sorting.ChannelAsc:
-          return (a: TwitchStream, b: TwitchStream) => a.user_login.localeCompare(b.user_login);
-        case Sorting.ChannelDesc:
-          return (a: TwitchStream, b: TwitchStream) => b.user_login.localeCompare(a.user_login);
-        case Sorting.GameAsc:
-          return (a: TwitchStream, b: TwitchStream) => a.game_name.localeCompare(b.game_name);
-        case Sorting.GameDesc:
-          return (a: TwitchStream, b: TwitchStream) => b.game_name.localeCompare(a.game_name);
-        case Sorting.ViewersAsc:
-          return (a: TwitchStream, b: TwitchStream) => a.viewer_count - b.viewer_count;
-        case Sorting.ViewersDesc:
-        default:
-          return (a: TwitchStream, b: TwitchStream) => b.viewer_count - a.viewer_count;
-      }
-    },
-
-    /**
-     * Streams list, sorted by active rule
-     */
-    sortedStreams (): TwitchStream[] {
-      return [...this.streams].sort(this.sortingRule);
-    },
-  },
-  mounted () {
-    this.scroller = new Scroller(this.$refs.scrollable as HTMLElement);
-  },
-  beforeUnmount () {
-    if (this.scroller) {
-      this.scroller.destroy();
-      this.scroller = null;
-    }
-  },
-  methods: {
-    /**
-     * Open channel screen
-     */
-    onChannelSelect (name: string, id: number, cover: string) {
-      this.$router.replace({
-        name: 'Channel',
-        params: {
-          name,
-          id,
-          cover,
-        },
-      });
-    },
-
-    /**
-     * Set sorting type
-     */
-    setSorting (value: Sorting) {
-      this.$store.dispatch(SET_LIBRARY_SORTING, value);
-    },
-  },
+/** Sorting rule, based on current sorting type */
+const sortingRule = computed(() => {
+  switch (sorting.value) {
+    case Sorting.DurationAsc:
+      return (a: TwitchStream, b: TwitchStream) => unixtime(b.started_at) - unixtime(a.started_at);
+    case Sorting.DurationDesc:
+      return (a: TwitchStream, b: TwitchStream) => unixtime(a.started_at) - unixtime(b.started_at);
+    case Sorting.ChannelAsc:
+      return (a: TwitchStream, b: TwitchStream) => a.user_login.localeCompare(b.user_login);
+    case Sorting.ChannelDesc:
+      return (a: TwitchStream, b: TwitchStream) => b.user_login.localeCompare(a.user_login);
+    case Sorting.GameAsc:
+      return (a: TwitchStream, b: TwitchStream) => a.game_name.localeCompare(b.game_name);
+    case Sorting.GameDesc:
+      return (a: TwitchStream, b: TwitchStream) => b.game_name.localeCompare(a.game_name);
+    case Sorting.ViewersAsc:
+      return (a: TwitchStream, b: TwitchStream) => a.viewer_count - b.viewer_count;
+    case Sorting.ViewersDesc:
+    default:
+      return (a: TwitchStream, b: TwitchStream) => b.viewer_count - a.viewer_count;
+  }
 });
+
+/** Streams list */
+const streams = computed(() => store.state.library.streams[StreamType.Followed]);
+
+/** Streams list, sorted by active rule */
+const sortedStreams = computed(() => [...streams.value].sort(sortingRule.value));
+
+/** Set sorting type */
+const setSorting = (value: Sorting) => {
+  store.dispatch(SET_LIBRARY_SORTING, value);
+};
+
+/** Scroller instance */
+const scroller = ref<Scroller | null>(null);
+
+/** Scrollable library element */
+const scrollableNode = ref<HTMLElement | null>(null);
+
+/**
+ * Initialize scroller, when component is mounted
+ */
+onMounted(() => {
+  if (!scrollableNode.value) {
+    return;
+  }
+
+  scroller.value = new Scroller(scrollableNode.value);
+});
+
+/**
+ * Destroy scroller, when component is unmounted
+ */
+onBeforeUnmount(() => {
+  if (!scroller.value) {
+    return;
+  }
+
+  scroller.value.destroy();
+  scroller.value = null;
+});
+
+/** Open channel screen */
+const onChannelSelect = (name: string, id: number, cover: string) => {
+  router.replace({
+    name: 'Channel',
+    params: {
+      name,
+      id,
+      cover,
+    },
+  });
+};
 </script>
 
 <style>

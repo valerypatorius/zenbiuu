@@ -2,14 +2,6 @@
   <div class="loader" />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'Loader',
-});
-</script>
-
 <style>
   .loader {
     --size-main: 1.6rem;

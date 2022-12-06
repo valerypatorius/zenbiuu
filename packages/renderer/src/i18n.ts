@@ -17,6 +17,7 @@ if (!currentLocale) {
 }
 
 export default createI18n({
+  legacy: false,
   locale: currentLocale ?? defaultLocale,
   fallbackLocale: defaultLocale,
   messages: {

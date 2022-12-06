@@ -5,70 +5,47 @@
       'channel--' + layoutType,
     ]"
   >
-    <player
+    <Player
       :channel-name="channelName"
       :channel-id="channelId"
       :cover="playerCover"
     />
 
-    <chat
+    <Chat
       :channel-name="channelName"
       :channel-id="channelId"
     />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import Chat from '@/src/components/Chat.vue';
 import Player from '@/src/components/Player.vue';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'Channel',
-  components: {
-    Chat,
-    Player,
-  },
-  computed: {
-    /**
-     * Channel name in lowercase format
-     */
-    channelName (): string {
-      const nameParam = this.$route.params.name;
+/**
+ * Define store and router instances
+ */
+const store = useStore<RootSchema & ModulesSchema>();
+const route = useRoute();
 
-      return typeof nameParam === 'string'
-        ? nameParam.toLowerCase()
-        : nameParam[0].toLowerCase();
-    },
+/** Current route params */
+const { id, name, cover } = route.params;
 
-    /**
-     * Channel numeric id
-     */
-    channelId (): string {
-      const idParam = this.$route.params.id;
+/** Channel name in lowercase format */
+const channelName = Array.isArray(name) ? name[0].toLowerCase() : name.toLowerCase();
 
-      return typeof idParam === 'string'
-        ? idParam
-        : idParam[0];
-    },
+/** Channel numeric id */
+const channelId = Array.isArray(id) ? id[0] : id;
 
-    /**
-     * Player cover image
-     */
-    playerCover (): string {
-      const { cover } = this.$route.params;
+/** Player cover image */
+const playerCover = Array.isArray(cover) ? cover[0] : cover;
 
-      return Array.isArray(cover) ? cover[0] : cover;
-    },
-
-    /**
-     * Channel screen layout type
-     */
-    layoutType (): string {
-      return this.$store.state.player.layout;
-    },
-  },
-});
+/** Channel screen layout type */
+const layoutType = computed(() => store.state.player.layout);
 </script>
 
 <style>

@@ -9,9 +9,9 @@
       },
     ]"
     :title="title"
-    @click="$emit('click')"
+    @click="emit('click')"
   >
-    <icon
+    <Icon
       v-if="icon"
       :name="icon"
     />
@@ -20,66 +20,31 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType } from 'vue';
+<script setup lang="ts">
 import Icon from '@/src/components/ui/Icon.vue';
 
-/**
- * Available control sizes
- */
-export enum Size {
-  Default = 'default',
-  Large = 'large',
-}
+const {
+  size = 'default',
+} = defineProps<{
+  /** Control size */
+  size?: 'default' | 'large';
 
-export default defineComponent({
-  name: 'Control',
-  components: {
-    Icon,
-  },
-  props: {
-    /**
-     * Control size
-     */
-    size: {
-      type: String as PropType<Size>,
-      default: Size.Default,
-    },
+  /** Icon name */
+  icon?: string;
 
-    /**
-     * Icon name
-     */
-    icon: {
-      type: String,
-      default: '',
-    },
+  /** Title text for tooltip on hover */
+  title?: string;
 
-    /**
-     * Title text for tooltip on hover
-     */
-    title: {
-      type: String,
-      default: '',
-    },
+  /** If true, control is displayed as active */
+  isActive?: boolean;
 
-    /**
-     * If true, control is displayed as disabled, but remains clickable
-     */
-    isDisabled: {
-      type: Boolean,
-      default: false,
-    },
+  /** If true, control is displayed as disabled, but remains clickable */
+  isDisabled?: boolean;
+}>();
 
-    /**
-     * If true, control is displayed as active
-     */
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ['click'],
-});
+const emit = defineEmits<{
+  (e: 'click'): void;
+}>();
 </script>
 
 <style>

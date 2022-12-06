@@ -14,30 +14,32 @@
 
       <div class="settings__tabs">
         <div
-          v-for="(tab, tabName) in tabs"
+          v-for="(tabData, tabName) in availableTabs"
           :key="tabName"
           :class="[
             'settings-tab',
             {
-              'settings-tab--active': tabName === activeTab,
+              'settings-tab--active': tabName === activeTabName,
             },
           ]"
-          @click="activeTab = tabName"
+          @click="(activeTabName = tabName as TabName)"
         >
-          <icon :name="tab.icon" />
-          {{ tab.label }}
+          <icon :name="tabData.icon" />
+          {{ tabData.label }}
         </div>
       </div>
 
       <div class="settings__content scrollable">
-        <component :is="`settings-${activeTab}`" />
+        <component :is="Tab[activeTabName].component" />
       </div>
     </div>
   </popup>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import Popup from '@/src/components/ui/Popup.vue';
 import SettingsInterface from '@/src/components/settings/Interface.vue';
@@ -45,16 +47,13 @@ import SettingsLocale from '@/src/components/settings/Locale.vue';
 import SettingsAccount from '@/src/components/settings/Account.vue';
 import SettingsAbout from '@/src/components/settings/About.vue';
 import SettingsUpdate from '@/src/components/settings/Update.vue';
-import { capitalizeFirstChar } from '@/src/utils/utils';
 import { state } from '@/src/utils/hub';
 import { AppUpdateStatus } from '@/types/hub';
 import { TOGGLE_APP_SETTINGS } from '@/src/store/actions';
-import type { IconString } from '@/assets/icons';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
+import type { Component } from 'vue';
 
-/**
- * Available settings tabs
- */
-enum Tab {
+enum TabName {
   Interface = 'interface',
   Locale = 'locale',
   Account = 'account',
@@ -62,127 +61,129 @@ enum Tab {
   Update = 'update',
 }
 
-type Tabs = Record<Tab, {label: string; icon: IconString}>;
+interface TabData {
+  label: string;
+  icon: string;
+  component: Component;
+}
 
-export default defineComponent({
-  name: 'Settings',
-  components: {
-    Icon,
-    Popup,
-    SettingsInterface,
-    SettingsLocale,
-    SettingsAccount,
-    SettingsAbout,
-    SettingsUpdate,
-  },
-  data (): {
-    Tab: typeof Tab;
-    activeTab: Tab;
-    } {
-    return {
-      /**
-       * Available tabs names
-       */
-      Tab,
+const store = useStore<RootSchema & ModulesSchema>();
+const { t } = useI18n();
 
-      /**
-       * Currently active tab.
-       * If update is available, force "update" tab to be active
-       */
-      activeTab: state.appUpdateStatus === AppUpdateStatus.Available ? Tab.Update : Tab.Interface,
-    };
-  },
-  computed: {
-    /**
-     * Logined user access token
-     */
-    userAccessToken (): string | null {
-      return this.$store.state.user.token;
-    },
+/** Logined user access token */
+const userAccessToken = computed(() => store.state.user.token);
 
-    /**
-     * Returns true, if app update is available
-     */
-    isUpdateAvailable (): boolean {
-      return state.appUpdateStatus === AppUpdateStatus.Available ||
-        state.appUpdateStatus === AppUpdateStatus.Downloading ||
-        state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
-    },
-
-    /**
-     * Tabs list to render
-     */
-    tabs (): Tabs {
-      return Object.values(Tab).reduce((result: Tabs, name: Tab) => {
-        if (name === Tab.Account && !this.userAccessToken) {
-          return result;
-        }
-
-        if (name === Tab.Update && !this.isUpdateAvailable) {
-          return result;
-        }
-
-        result[name] = {
-          label: this.$t(`settings.${name}.title`),
-          icon: `Settings${capitalizeFirstChar(name)}`,
-        };
-
-        return result;
-      }, {} as Tabs);
-    },
-  },
-  methods: {
-    /**
-     * Close settings popup
-     */
-    closeSettings (): void {
-      this.$store.dispatch(TOGGLE_APP_SETTINGS);
-    },
-  },
+/** Returns true, if app update is available */
+const isUpdateAvailable = computed(() => {
+  return state.appUpdateStatus === AppUpdateStatus.Available ||
+    state.appUpdateStatus === AppUpdateStatus.Downloading ||
+    state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
 });
+
+const Tab = computed<Record<TabName, TabData>>(() => {
+  return {
+    [TabName.Interface]: {
+      label: t('settings.interface.title'),
+      icon: 'SettingsInterface',
+      component: SettingsInterface,
+    },
+    [TabName.Locale]: {
+      label: t('settings.locale.title'),
+      icon: 'SettingsLocale',
+      component: SettingsLocale,
+    },
+    [TabName.Account]: {
+      label: t('settings.account.title'),
+      icon: 'SettingsAccount',
+      component: SettingsAccount,
+    },
+    [TabName.About]: {
+      label: t('settings.about.title'),
+      icon: 'SettingsAbout',
+      component: SettingsAbout,
+    },
+    [TabName.Update]: {
+      label: t('settings.update.title'),
+      icon: 'SettingsUpdate',
+      component: SettingsUpdate,
+    },
+  };
+});
+
+/**
+ * Currently active tab.
+ * If update is available, force "update" tab to be active
+ */
+const activeTabName = ref(state.appUpdateStatus === AppUpdateStatus.Available ? TabName.Update : TabName.Interface);
+
+/** Tabs list to render */
+const availableTabs = computed(() => {
+  return Object.entries(Tab.value).reduce<Record<string, TabData>>((result, [tabName, tabData]) => {
+    if (tabName === TabName.Account && !userAccessToken.value) {
+      return result;
+    }
+
+    if (tabName === TabName.Update && !isUpdateAvailable.value) {
+      return result;
+    }
+
+    result[tabName as TabName] = tabData;
+
+    return result;
+  }, {});
+});
+
+/** Close settings popup */
+function closeSettings (): void {
+  store.dispatch(TOGGLE_APP_SETTINGS);
+}
 </script>
 
-<style>
+<style lang="postcss">
   .settings {
     display: grid;
     grid-template-columns: 20rem 1fr;
     grid-template-rows: auto 1fr;
     gap: 0 4rem;
     height: 100%;
-  }
 
-  .settings__header {
-    grid-column: span 2;
-    padding: 1.6rem 1.6rem 1.6rem 3rem;
-    font-weight: 500;
-    font-size: 1.6rem;
-    line-height: 1.5em;
-    color: var(--color-text-secondary);
-    display: flex;
-    align-items: center;
-  }
+    &__header {
+      grid-column: span 2;
+      padding: 1.6rem 1.6rem 1.6rem 3rem;
+      font-weight: 500;
+      font-size: 1.6rem;
+      line-height: 1.5em;
+      color: var(--color-text-secondary);
+      display: flex;
+      align-items: center;
+    }
 
-  .settings__tabs {
-    padding: 0 1.6rem 2rem;
-  }
+    &__tabs {
+      padding: 0 1.6rem 2rem;
+    }
 
-  .settings__content {
-    padding: 1rem 1.6rem 2rem 0;
-  }
+    &__content {
+      padding: 1rem 1.6rem 2rem 0;
+    }
 
-  .settings__close {
-    margin-left: auto;
-    cursor: pointer;
-    border-radius: var(--border-radius);
-    color: var(--color-text-tertiary)
-  }
+    &__close {
+      margin-left: auto;
+      cursor: pointer;
+      border-radius: var(--border-radius);
+      color: var(--color-text-tertiary);
 
-  .settings__close:hover {
-    background-color: var(--color-control-semiactive);
-  }
+      &:hover {
+        background-color: var(--color-control-semiactive);
+      }
 
-  .settings__close .icon {
-    width: 3rem;
+      .icon {
+        width: 3rem;
+      }
+    }
+
+    &__secondary {
+      color: var(--color-text-secondary);
+    }
   }
 
   /** Single tab appearance */
@@ -198,61 +199,59 @@ export default defineComponent({
     position: relative;
     z-index: 1;
     overflow: hidden;
-  }
 
-  .settings-tab:not(:last-child) {
-    margin-bottom: 0.6rem;
-  }
+    &:not(:last-child) {
+      margin-bottom: 0.6rem;
+    }
 
-  .settings-tab .icon {
-    width: 2rem;
-    margin-right: 1rem;
-    margin-top: 0.1rem;
-    color: var(--color-text-tertiary);
-  }
+    .icon {
+      width: 2rem;
+      margin-right: 1rem;
+      margin-top: 0.1rem;
+      color: var(--color-text-tertiary);
+    }
 
-  .settings-tab--active {
-    background-color: var(--color-control-active);
-    color: var(--color-text);
-    pointer-events: none;
-  }
+    &--active {
+      background-color: var(--color-control-active);
+      color: var(--color-text);
+      pointer-events: none;
 
-  .settings-tab--active .icon {
-    color: var(--color-text);
-  }
+      .icon {
+        color: var(--color-text);
+      }
+    }
 
-  .settings-tab:hover {
-    background-color: var(--color-control-semiactive);
+    &:hover {
+      background-color: var(--color-control-semiactive);
+    }
   }
 
   /** Common styles for sections blocks */
-  .settings-section:not(:last-child) {
-    margin-bottom: 3.2rem;
-  }
+  .settings-section {
+    &:not(:last-child) {
+      margin-bottom: 3.2rem;
+    }
 
-  .settings-section .checkbox:not(:last-child),
-  .settings-section .radio:not(:last-child) {
-    margin-bottom: 2rem;
-  }
+    .checkbox:not(:last-child),
+    .radio:not(:last-child) {
+      margin-bottom: 2rem;
+    }
 
-  .settings-section__title {
-    font-size: 1.4rem;
-    line-height: 1.6em;
-    color: var(--color-text-secondary);
-    margin-bottom: 1.6rem;
-    display: flex;
-    align-items: center;
-  }
+    &__title {
+      font-size: 1.4rem;
+      line-height: 1.6em;
+      color: var(--color-text-secondary);
+      margin-bottom: 1.6rem;
+      display: flex;
+      align-items: center;
+    }
 
-  .settings-section img {
-    --size: 12.8rem;
+    img {
+      --size: 12.8rem;
 
-    width: var(--size);
-    height: var(--size);
-  }
-
-  .settings__secondary {
-    color: var(--color-text-secondary);
+      width: var(--size);
+      height: var(--size);
+    }
   }
 
   /** Common styles for actions blocks */
@@ -261,17 +260,17 @@ export default defineComponent({
     grid-template-columns: 1fr auto;
     align-items: center;
     gap: 24px;
-  }
 
-  .settings-action:not(:last-child) {
-    margin-bottom: 3rem;
-  }
+    &:not(:last-child) {
+      margin-bottom: 3rem;
+    }
 
-  .settings-action a:not(.button) {
-    color: var(--color-text-secondary);
-  }
+    a:not(.button) {
+      color: var(--color-text-secondary);
 
-  .settings-action a:not(.button):hover {
-    color: var(--color-text);
+      &:hover {
+        color: var(--color-text);
+      }
+    }
   }
 </style>

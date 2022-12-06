@@ -14,7 +14,11 @@ export default defineConfig({
       '@/assets': join(root, 'assets'),
     },
   },
-  plugins: [vue()],
+  plugins: [
+    vue({
+      reactivityTransform: true,
+    }),
+  ],
   base: '',
   server: {
     fsServe: {
@@ -23,15 +27,10 @@ export default defineConfig({
   },
   build: {
     sourcemap: isDev,
-    target: 'chrome91',
+    target: 'chrome100',
     outDir: 'dist',
     assetsDir: '.',
-    terserOptions: {
-      ecma: 2020,
-      compress: {
-        passes: 2,
-      },
-    },
+    minify: isDev ? false : 'esbuild',
     emptyOutDir: true,
   },
 });

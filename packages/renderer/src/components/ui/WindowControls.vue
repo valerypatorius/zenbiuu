@@ -26,50 +26,23 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
 import { state, callWindowMethod } from '@/src/utils/hub';
 import Icon from '@/src/components/ui/Icon.vue';
 
 /**
  * Available window methods
  */
-enum Method {
+ enum Method {
   Minimize = 'minimize',
   Maximize = 'maximize',
   Unmaximize = 'unmaximize',
   Close = 'close',
 }
 
-export default defineComponent({
-  name: 'WindowControls',
-  components: {
-    Icon,
-  },
-  data (): {
-    Method: typeof Method;
-    } {
-    return {
-      Method,
-    };
-  },
-  computed: {
-    /**
-     * Returns current maximized state of app window
-     */
-    isMaximized (): boolean {
-      return state.isAppWindowMaximized;
-    },
-  },
-  methods: {
-    /**
-     * Call specified BrowserWindow method
-     */
-    callWindowMethod (methodName: string): void {
-      callWindowMethod(methodName);
-    },
-  },
-});
+/** Returns current maximized state of app window */
+const isMaximized = computed(() => state.isAppWindowMaximized);
 </script>
 
 <style>

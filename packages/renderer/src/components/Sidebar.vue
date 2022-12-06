@@ -30,7 +30,7 @@
       <section class="sidebar__section">
         <sidebar-item
           icon="Library"
-          :label="$t('router.library')"
+          :label="t('router.library')"
           :is-active="isLibrary"
           :is-secondary="!isLibrary"
           @click="openLibrary"
@@ -83,7 +83,7 @@
           <sidebar-item
             v-if="isLibraryReady && !searchQuery"
             :icon="isOfflineItemsShownAll ? 'ChevronUp' : 'ChevronDown'"
-            :label="isOfflineItemsShownAll ? $t('sidebar.hideOffline') : $t('sidebar.showOffline')"
+            :label="isOfflineItemsShownAll ? t('sidebar.hideOffline') : t('sidebar.showOffline')"
             :is-secondary="true"
             @click="toggleOffline"
           />
@@ -92,7 +92,7 @@
         <!-- Search error message -->
         <section v-if="isSearchError">
           <div class="sidebar__title">
-            {{ $t('sidebar.searchError') }}
+            {{ t('sidebar.searchError') }}
           </div>
         </section>
 
@@ -102,7 +102,7 @@
           class="sidebar__section"
         >
           <div class="sidebar__title">
-            {{ $t('sidebar.foundItems') }}
+            {{ t('sidebar.foundItems') }}
           </div>
 
           <sidebar-item
@@ -125,7 +125,7 @@
       <sidebar-item
         icon="Settings"
         :is-badge="isUpdateAvailable"
-        :title="isUpdateAvailable ? $t('settings.update.available') : undefined"
+        :title="isUpdateAvailable ? t('settings.update.available') : undefined"
         :is-secondary="true"
         @click="toggleSettings"
       />
@@ -133,8 +133,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import SidebarItem from '@/src/components/sidebar/Item.vue';
 import SidebarSearch from '@/src/components/sidebar/Search.vue';
 import * as actions from '@/src/store/actions';
@@ -155,6 +158,7 @@ import {
 } from '@/src/store/actions';
 import type { TwitchStream, TwitchUserFollow, TwitchChannelFromSearch } from '@/types/renderer/library';
 import type { IntervalManagerItem } from '@/src/utils/interval';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
 interface SidebarChannelItem {
   userId: string;
@@ -176,424 +180,341 @@ enum SidebarWidth {
   Max = 1000,
 }
 
-/**
- * Minimum visible offline items count
- */
+const route = useRoute();
+const router = useRouter();
+const store = useStore<RootSchema & ModulesSchema>();
+const { t } = useI18n();
+
+/** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;
 
-/**
- * Library reload interval
- */
+/** Library reload interval */
 const RELOAD_INTERVAL = 2 * date.Minute;
 
-/**
- * Search input delay in ms
- */
+/** Search input delay in ms */
 const SEARCH_INPUT_DELAY = 500;
 
-export default defineComponent({
-  name: 'Sidebar',
-  components: {
-    SidebarItem,
-    SidebarSearch,
-  },
-  data (): {
-    customSidebarWidth: number;
-    isShowOffline: boolean;
-    offlineItemsCount: number;
-    resizer: Resizer | null;
-    scroller: Scroller | null;
-    reloadInterval: IntervalManagerItem | null;
-    searchQuery: string;
-    searchTimeout: ReturnType<typeof setTimeout> | null;
-    searchResults: TwitchChannelFromSearch[];
-    isSearchError: boolean;
-    } {
-    return {
-      /**
-       * Current sidebar width, set by user
-       */
-      customSidebarWidth: this.$store.state.sidebar.width,
+const scrollable = ref<HTMLDivElement>();
 
-      /**
-       * True, if all offline items should be displayed
-       */
-      isShowOffline: false,
+const offlineItemsCount = ref(MIN_OFFLINE_ITEMS_COUNT);
 
-      /**
-       * Offline items count
-       */
-      offlineItemsCount: MIN_OFFLINE_ITEMS_COUNT,
+/** Current sidebar width, set by user */
+const customSidebarWidth = ref(store.state.sidebar.width);
 
-      /**
-       * Resizer instance
-       */
-      resizer: null,
+/** Resizer instance */
+const resizer = ref<Resizer>();
 
-      /**
-       * Scroller instance
-       */
-      scroller: null,
+/** Scroller instance */
+const scroller = ref<Scroller>();
 
-      /**
-       * Reload interval for channels in library
-       */
-      reloadInterval: null,
+/** Reload interval for channels in library */
+const reloadInterval = ref<IntervalManagerItem>();
 
-      /**
-       * Current search query.
-       * Used as search input model
-       */
-      searchQuery: '',
+/**
+ * Current search query.
+ * Used as search input model
+ */
+const searchQuery = ref('');
 
-      /**
-       * Typing timeout for search input
-       */
-      searchTimeout: null,
+/** Typing timeout for search input */
+const searchTimeout = ref<ReturnType<typeof setTimeout>>();
 
-      /**
-       * List of channels from search
-       */
-      searchResults: [],
+/** List of channels from search */
+const searchResults = ref<TwitchChannelFromSearch[]>([]);
 
-      /**
-       * True, if search error is present
-       */
-      isSearchError: false,
-    };
-  },
-  computed: {
-    /**
-     * Logined user access token
-     */
-    userAccessToken (): string | null {
-      return this.$store.state.user.token;
-    },
+/** True, if search error is present */
+const isSearchError = ref(false);
 
-    /**
-     * Returns true, if app update is available
-     */
-    isUpdateAvailable (): boolean {
-      return state.appUpdateStatus === AppUpdateStatus.Available ||
-        state.appUpdateStatus === AppUpdateStatus.Downloading ||
-        state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
-    },
+/** Logined user access token */
+const userAccessToken = computed(() => store.state.user.token);
 
-    /**
-     * Returns true, if current route is "library"
-     */
-    isLibrary (): boolean {
-      return this.$route.name === RouteName.Library;
-    },
-
-    /**
-     * Returns true, if actual library content has been loaded
-     */
-    isLibraryReady (): boolean {
-      return this.$store.state.library.isReady;
-    },
-
-    /**
-     * Returns true, if sidebar should be hidden
-     */
-    isSidebarHidden (): boolean {
-      if (this.$route.name === RouteName.Auth || !this.userAccessToken) {
-        return true;
-      }
-
-      return !this.isLibrary && this.$store.state.player.isHideSidebar;
-    },
-
-    /**
-     * List of ids, followed by logined user
-     */
-    followedIds (): string[] {
-      return this.$store.getters[FOLLOWED_IDS];
-    },
-
-    /**
-     * List of live channels to display
-     */
-    liveItems (): SidebarChannelItem[] {
-      const { streams, users } = this.$store.state.library;
-
-      return streams[StreamType.Followed]
-        .reduce((result: SidebarChannelItem[], stream: TwitchStream) => {
-          const userData = users.find((user) => user.id === stream.user_id);
-
-          if (userData) {
-            result.push({
-              userId: userData.id,
-              image: userData.profile_image_url,
-              name: userData.display_name,
-              isLive: true,
-              isActive: userData.display_name === this.$route.params.name,
-              stream: {
-                game: stream.game_name,
-                cover: stream.thumbnail_url,
-              },
-            });
-          }
-
-          return result;
-        }, [])
-        .filter((item) => this.isContainsSubstring(item.name, this.searchQuery));
-    },
-
-    /**
-     * List of all offline channels
-     */
-    offlineItems (): SidebarChannelItem[] {
-      const { followed, users } = this.$store.state.library;
-      const liveIds = this.liveItems.map((item) => item.userId);
-
-      return followed
-        .filter((followedItem) => !liveIds.includes(followedItem.to_id))
-        .reduce((result: SidebarChannelItem[], followedItem: TwitchUserFollow) => {
-          const userData = users.find((user) => user.id === followedItem.to_id);
-
-          if (userData) {
-            result.push({
-              userId: userData.id,
-              image: userData.profile_image_url,
-              name: userData.display_name,
-              isLive: false,
-            });
-          }
-
-          return result;
-        }, [])
-        .filter((item) => this.isContainsSubstring(item.name, this.searchQuery));
-    },
-
-    /**
-     * List of channels found in search
-     */
-    foundItems (): SidebarChannelItem[] {
-      const sortedFound = [...this.searchResults].sort((a, b) => (b.is_live ? 1 : 0) - (a.is_live ? 1 : 0));
-      const { streams } = this.$store.state.library;
-
-      return sortedFound
-        .filter((foundItem) => {
-          const isFollowedAndLive = this.liveItems.map((item) => item.userId).includes(foundItem.id);
-          const isFollowedAndOffline = this.offlineItems.map((item) => item.userId).includes(foundItem.id);
-
-          return !isFollowedAndLive && !isFollowedAndOffline;
-        })
-        .reduce((result: SidebarChannelItem[], foundItem: TwitchChannelFromSearch) => {
-          const data: SidebarChannelItem = {
-            userId: foundItem.id,
-            image: foundItem.thumbnail_url,
-            name: foundItem.display_name,
-            isLive: foundItem.is_live,
-            isActive: foundItem.display_name === this.$route.params.name,
-          };
-
-          if (foundItem.is_live) {
-            const stream = streams[StreamType.Found].find((item) => item.user_id === foundItem.id);
-
-            if (stream) {
-              data.stream = {
-                game: stream.game_name,
-                cover: stream.thumbnail_url,
-              };
-            }
-          }
-
-          result.push(data);
-
-          return result;
-        }, []);
-    },
-
-    /**
-     * Lizt of currently displayed offline channels
-     */
-    visibleOfflineItems (): SidebarChannelItem[] {
-      if (this.searchQuery) {
-        return this.offlineItems;
-      }
-
-      return this.offlineItems.slice(0, this.offlineItemsCount);
-    },
-
-    /**
-     * Count of currently hidden offline items
-     */
-    offlineItemsHiddenCount (): number {
-      return this.offlineItems.length - this.visibleOfflineItems.length;
-    },
-
-    /**
-     * Returns true, if all offline items are currently displayed
-     */
-    isOfflineItemsShownAll (): boolean {
-      return this.offlineItemsHiddenCount === 0;
-    },
-  },
-  watch: {
-    /**
-     * When followed ids list is updated,
-     * fetch library data
-     */
-    followedIds: {
-      handler (newValue: string[], oldValue: string[]): void {
-        const diff = newValue.filter((x) => !oldValue.includes(x));
-
-        if (diff.length) {
-          this.$store.dispatch(GET_STREAMS);
-          this.$store.dispatch(GET_USERS);
-        }
-      },
-      deep: true,
-    },
-  },
-  created () {
-    this.$store.dispatch(GET_USER_FOLLOWS);
-    this.$store.dispatch(GET_USERS);
-
-    /**
-     * Start interval to update streams list
-     */
-    this.reloadInterval = interval.start(RELOAD_INTERVAL);
-
-    this.reloadInterval.onupdate = () => {
-      this.$store.dispatch(GET_STREAMS);
-    };
-  },
-  mounted () {
-    /** Enable resizer */
-    this.resizer = new Resizer({
-      axis: Axis.X,
-      value: this.customSidebarWidth,
-      limit: {
-        min: SidebarWidth.Min,
-        max: SidebarWidth.Max,
-      },
-      multiplier: -1,
-      onResize: (value: number) => {
-        this.customSidebarWidth = value;
-      },
-      onStop: () => {
-        this.$store.dispatch(actions.SET_SIDEBAR_WIDTH, this.customSidebarWidth);
-      },
-    });
-
-    /** Listen for scroll */
-    this.scroller = new Scroller(this.$refs.scrollable as HTMLElement);
-  },
-  beforeUnmount () {
-    /** Disable resizer */
-    if (this.resizer) {
-      this.resizer.destroy();
-      this.resizer = null;
-    }
-
-    /** Stop listening for scroll */
-    if (this.scroller) {
-      this.scroller.destroy();
-      this.scroller = null;
-    }
-  },
-  methods: {
-    /**
-     * Open selected channel screen
-     */
-    selectChannel (item: SidebarChannelItem): void {
-      const { lastUpdateTime } = this.$store.state.library;
-      const cover = item.stream && item.stream.cover
-        ? `${item.stream.cover.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`
-        : '';
-
-      this.$router.replace({
-        name: 'Channel',
-        params: {
-          name: item.name,
-          id: item.userId,
-          cover,
-        },
-      });
-    },
-
-    /**
-     * Toggle settings panel
-     */
-    toggleSettings (): void {
-      this.$store.dispatch(actions.TOGGLE_APP_SETTINGS);
-    },
-
-    /**
-     * Open Library screen
-     */
-    openLibrary (): void {
-      if (!this.isLibrary) {
-        this.$router.replace({ name: 'Library' });
-      }
-    },
-
-    /**
-     * Change sidebar width
-     */
-    resize (event: MouseEvent): void {
-      if (this.resizer) {
-        this.resizer.start(event.clientX);
-      }
-    },
-
-    /**
-     * Show or hide offline items
-     */
-    toggleOffline (): void {
-      this.offlineItemsCount = this.isOfflineItemsShownAll ? MIN_OFFLINE_ITEMS_COUNT : this.offlineItems.length;
-    },
-
-    /**
-     * Perform search by query from input
-     */
-    onSearchInput (): void {
-      if (!this.searchQuery) {
-        this.searchResults = [];
-
-        return;
-      }
-
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout);
-      }
-
-      this.isSearchError = false;
-
-      this.searchTimeout = setTimeout(() => {
-        this.$store.dispatch(SEARCH_CHANNELS, this.searchQuery).then((list) => {
-          this.searchResults = list;
-        }).catch(() => {
-          this.searchResults = [];
-          this.isSearchError = true;
-        });
-      }, SEARCH_INPUT_DELAY);
-    },
-
-    /**
-     * Clear search results and query
-     */
-    onSearchClear (): void {
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout);
-      }
-
-      this.searchQuery = '';
-      this.searchResults = [];
-      this.isSearchError = false;
-    },
-
-    /**
-     * Returns true, if first string contains second substring
-     */
-    isContainsSubstring (str: string, substr: string): boolean {
-      return str.toLowerCase().includes(substr.toLowerCase());
-    },
-  },
+/** Returns true, if app update is available */
+const isUpdateAvailable = computed(() => {
+  return state.appUpdateStatus === AppUpdateStatus.Available ||
+    state.appUpdateStatus === AppUpdateStatus.Downloading ||
+    state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
 });
+
+/** Returns true, if current route is "library" */
+const isLibrary = computed(() => route.name === RouteName.Library);
+
+/** Returns true, if actual library content has been loaded */
+const isLibraryReady = computed(() => store.state.library.isReady);
+
+/**
+ * Returns true, if sidebar should be hidden
+ */
+const isSidebarHidden = computed(() => {
+  if (route.name === RouteName.Auth || !userAccessToken.value) {
+    return true;
+  }
+
+  return !isLibrary.value && store.state.player.isHideSidebar;
+});
+
+/** List of ids, followed by logined user */
+const followedIds = computed<string[]>(() => store.getters[FOLLOWED_IDS]);
+
+/**
+ * Returns true, if first string contains second substring
+ */
+function isContainsSubstring (str: string, substr: string): boolean {
+  return str.toLowerCase().includes(substr.toLowerCase());
+}
+
+/** List of live channels to display */
+const liveItems = computed(() => {
+  const { streams, users } = store.state.library;
+
+  return streams[StreamType.Followed]
+    .reduce((result: SidebarChannelItem[], stream: TwitchStream) => {
+      const userData = users.find((user) => user.id === stream.user_id);
+
+      if (userData) {
+        result.push({
+          userId: userData.id,
+          image: userData.profile_image_url,
+          name: userData.display_name,
+          isLive: true,
+          isActive: userData.display_name === route.params.name,
+          stream: {
+            game: stream.game_name,
+            cover: stream.thumbnail_url,
+          },
+        });
+      }
+
+      return result;
+    }, [])
+    .filter((item) => isContainsSubstring(item.name, searchQuery.value));
+});
+
+/**
+ * List of all offline channels
+ */
+const offlineItems = computed(() => {
+  const { followed, users } = store.state.library;
+  const liveIds = liveItems.value.map((item) => item.userId);
+
+  return followed
+    .filter((followedItem) => !liveIds.includes(followedItem.to_id))
+    .reduce((result: SidebarChannelItem[], followedItem: TwitchUserFollow) => {
+      const userData = users.find((user) => user.id === followedItem.to_id);
+
+      if (userData) {
+        result.push({
+          userId: userData.id,
+          image: userData.profile_image_url,
+          name: userData.display_name,
+          isLive: false,
+        });
+      }
+
+      return result;
+    }, [])
+    .filter((item) => isContainsSubstring(item.name, searchQuery.value));
+});
+
+/**
+ * List of channels found in search
+ */
+const foundItems = computed(() => {
+  const sortedFound = [...searchResults.value].sort((a, b) => (b.is_live ? 1 : 0) - (a.is_live ? 1 : 0));
+  const { streams } = store.state.library;
+
+  return sortedFound
+    .filter((foundItem) => {
+      const isFollowedAndLive = liveItems.value.map((item) => item.userId).includes(foundItem.id);
+      const isFollowedAndOffline = offlineItems.value.map((item) => item.userId).includes(foundItem.id);
+
+      return !isFollowedAndLive && !isFollowedAndOffline;
+    })
+    .reduce((result: SidebarChannelItem[], foundItem: TwitchChannelFromSearch) => {
+      const data: SidebarChannelItem = {
+        userId: foundItem.id,
+        image: foundItem.thumbnail_url,
+        name: foundItem.display_name,
+        isLive: foundItem.is_live,
+        isActive: foundItem.display_name === route.params.name,
+      };
+
+      if (foundItem.is_live) {
+        const stream = streams[StreamType.Found].find((item) => item.user_id === foundItem.id);
+
+        if (stream) {
+          data.stream = {
+            game: stream.game_name,
+            cover: stream.thumbnail_url,
+          };
+        }
+      }
+
+      result.push(data);
+
+      return result;
+    }, []);
+});
+
+/** List of currently displayed offline channels */
+const visibleOfflineItems = computed(() => {
+  if (searchQuery.value) {
+    return offlineItems.value;
+  }
+
+  return offlineItems.value.slice(0, offlineItemsCount.value);
+});
+
+/** Count of currently hidden offline items */
+const offlineItemsHiddenCount = computed(() => offlineItems.value.length - visibleOfflineItems.value.length);
+
+/** Returns true, if all offline items are currently displayed */
+const isOfflineItemsShownAll = computed(() => offlineItemsHiddenCount.value === 0);
+
+/**
+ * When followed ids list is updated,
+ * fetch library data
+ */
+watch(followedIds, (newValue, oldValue) => {
+  const diff = newValue.filter((x) => !oldValue.includes(x));
+
+  if (diff.length) {
+    store.dispatch(GET_STREAMS);
+    store.dispatch(GET_USERS);
+  }
+}, {
+  deep: true,
+});
+
+store.dispatch(GET_USER_FOLLOWS);
+store.dispatch(GET_USERS);
+
+/**
+ * Start interval to update streams list
+ */
+reloadInterval.value = interval.start(RELOAD_INTERVAL);
+
+reloadInterval.value.onupdate = () => {
+  store.dispatch(GET_STREAMS);
+};
+
+onMounted(() => {
+  resizer.value = new Resizer({
+    axis: Axis.X,
+    value: customSidebarWidth.value,
+    limit: {
+      min: SidebarWidth.Min,
+      max: SidebarWidth.Max,
+    },
+    multiplier: -1,
+    onResize: (value: number) => {
+      customSidebarWidth.value = value;
+    },
+    onStop: () => {
+      store.dispatch(actions.SET_SIDEBAR_WIDTH, customSidebarWidth.value);
+    },
+  });
+
+  /** Listen for scroll */
+  if (scrollable.value) {
+    scroller.value = new Scroller(scrollable.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  resizer.value?.destroy();
+  resizer.value = undefined;
+
+  scroller.value?.destroy();
+  scroller.value = undefined;
+});
+
+/**
+ * Open selected channel screen
+ */
+function selectChannel (item: SidebarChannelItem): void {
+  const { lastUpdateTime } = store.state.library;
+  const cover = item.stream && item.stream.cover
+    ? `${item.stream.cover.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`
+    : '';
+
+  router.replace({
+    name: 'Channel',
+    params: {
+      name: item.name,
+      id: item.userId,
+      cover,
+    },
+  });
+}
+
+/**
+ * Toggle settings panel
+ */
+function toggleSettings (): void {
+  store.dispatch(actions.TOGGLE_APP_SETTINGS);
+}
+
+/**
+ * Open Library screen
+ */
+function openLibrary (): void {
+  if (!isLibrary.value) {
+    router.replace({ name: 'Library' });
+  }
+}
+
+/**
+ * Change sidebar width
+ */
+function resize (event: MouseEvent): void {
+  resizer.value?.start(event.clientX);
+}
+
+/**
+ * Show or hide offline items
+ */
+function toggleOffline (): void {
+  offlineItemsCount.value = isOfflineItemsShownAll.value ? MIN_OFFLINE_ITEMS_COUNT : offlineItems.value.length;
+}
+
+/**
+ * Perform search by query from input
+ */
+function onSearchInput (): void {
+  if (!searchQuery.value) {
+    searchResults.value = [];
+
+    return;
+  }
+
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  isSearchError.value = false;
+
+  searchTimeout.value = setTimeout(() => {
+    store.dispatch(SEARCH_CHANNELS, searchQuery.value).then((list) => {
+      searchResults.value = list;
+    }).catch(() => {
+      searchResults.value = [];
+      isSearchError.value = true;
+    });
+  }, SEARCH_INPUT_DELAY);
+}
+
+/**
+ * Clear search results and query
+ */
+function onSearchClear (): void {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value);
+  }
+
+  searchQuery.value = '';
+  searchResults.value = [];
+  isSearchError.value = false;
+}
 </script>
 
 <style>

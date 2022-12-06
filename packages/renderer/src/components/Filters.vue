@@ -2,7 +2,7 @@
   <div class="filters">
     <div class="filters__label">
       <icon name="Filters" />
-      {{ $t('sorting.label') }}
+      {{ t('sorting.label') }}
     </div>
 
     <div
@@ -16,7 +16,7 @@
       ]"
       @click="setSorting(name, types)"
     >
-      {{ $t(`sorting.${name}`) }}
+      {{ t(`sorting.${name}`) }}
 
       <icon
         v-if="types.length > 1 && name === currentSorting.name"
@@ -26,94 +26,80 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import { Sorting, SortingType } from '@/types/renderer/library';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-export default defineComponent({
-  name: 'Filters',
-  components: {
-    Icon,
-  },
-  emits: ['change'],
-  data (): {
-    SortingType: typeof SortingType;
-    } {
-    return {
-      /**
-       * Available sorting types
-       */
-      SortingType,
-    };
-  },
-  computed: {
-    /**
-     * Current sorting params
-     */
-    currentSorting (): {name: string; type: string} {
-      const [name, type] = this.$store.state.library.sorting.split('-');
+const emit = defineEmits<{
+  (e: 'change', sorting: string): void;
+}>();
 
-      return {
-        name,
-        type,
-      };
-    },
+const store = useStore<RootSchema & ModulesSchema>();
+const { t } = useI18n();
 
-    /**
-     * Sorting controls
-     */
-    controls (): Record<string, SortingType[]> {
-      return Object.values(Sorting)
-        .reduce((result: Record<string, SortingType[]>, value: Sorting) => {
-          const [name, type] = value.split('-') as SortingType[];
+/** Current sorting params */
+const currentSorting = computed(() => {
+  const [name, type] = store.state.library.sorting.split('-');
 
-          if (Array.isArray(result[name])) {
-            result[name].push(type);
-          } else {
-            result[name] = [
-              type,
-            ];
-          }
-
-          return result;
-        }, {});
-    },
-  },
-  methods: {
-    /**
-     * Try to set sorting with specified params
-     */
-    setSorting (name: string, types: SortingType[]): void {
-      /**
-       * If name matches, but type is single, do not proceed
-       */
-      if (name === this.currentSorting.name && types.length < 2) {
-        return;
-      }
-
-      /**
-       * If name matches, toggle type
-       */
-      if (name === this.currentSorting.name) {
-        const newType = types.filter((type) => type !== this.currentSorting.type)[0];
-
-        if (!newType) {
-          return;
-        }
-
-        this.$emit('change', [name, newType].join('-'));
-
-        return;
-      }
-
-      /**
-       * Set new name with first type in list
-       */
-      this.$emit('change', [name, types[0]].join('-'));
-    },
-  },
+  return {
+    name,
+    type,
+  };
 });
+
+/** Sorting controls */
+const controls = computed(() => {
+  return Object.values(Sorting)
+    .reduce((result: Record<string, SortingType[]>, value: Sorting) => {
+      const [name, type] = value.split('-') as SortingType[];
+
+      if (Array.isArray(result[name])) {
+        result[name].push(type);
+      } else {
+        result[name] = [
+          type,
+        ];
+      }
+
+      return result;
+    }, {});
+});
+
+/**
+ * Try to set sorting with specified params
+ */
+function setSorting (name: string, types: SortingType[]): void {
+  /**
+   * If name matches, but type is single, do not proceed
+   */
+  if (name === currentSorting.value.name && types.length < 2) {
+    return;
+  }
+
+  /**
+   * If name matches, toggle type
+   */
+  if (name === currentSorting.value.name) {
+    const newType = types.filter((type) => type !== currentSorting.value.type)[0];
+
+    if (!newType) {
+      return;
+    }
+
+    emit('change', [name, newType].join('-'));
+
+    return;
+  }
+
+  /**
+   * Set new name with first type in list
+   */
+  emit('change', [name, types[0]].join('-'));
+}
 </script>
 
 <style>

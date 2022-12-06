@@ -5,15 +5,17 @@
     <div class="window__main">
       <Sidebar />
 
-      <router-view :key="$route.path" />
+      <RouterView :key="route.path" />
 
       <Settings v-if="isSettingsActive" />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watchEffect, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import { callWindowMethod, checkAppUpdates } from '@/src/utils/hub';
 import TitleBar from '@/src/components/Titlebar.vue';
 import Sidebar from '@/src/components/Sidebar.vue';
@@ -22,152 +24,80 @@ import { VALIDATE_USER_ACCESS_TOKEN } from '@/src/store/actions';
 import interval from '@/src/utils/interval';
 import date from '@/src/utils/date';
 import { RouteName } from '@/types/renderer/router';
-import { isWindows, isMac } from '@/src/utils/utils';
 import type { IntervalManagerItem } from '@/src/utils/interval';
+import type { RootSchema, ModulesSchema } from '@/types/schema';
 
 /**
- * User token update interval
+ * Define store and router instances
  */
+const store = useStore<RootSchema & ModulesSchema>();
+const route = useRoute();
+const router = useRouter();
+
+/** True, if settings overlay is active */
+const isSettingsActive = computed(() => store.state.app.isSettings);
+
+/** True, if app window is set always on top */
+const isAlwaysOnTop = computed(() => store.state.app.settings.isAlwaysOnTop);
+
+/**
+ * When "isAlwaysOnTop" setting is changed,
+ * update window state
+ */
+watchEffect(() => {
+  callWindowMethod('setAlwaysOnTop', isAlwaysOnTop.value);
+});
+
+/** Set initial interface size */
+document.documentElement.style.setProperty('--size-base', store.state.app.interfaceSize.toString());
+
+/** User token update interval */
 const TOKEN_UPDATE_INTERVAL = date.Hour;
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    Settings,
-    TitleBar,
-    Sidebar,
-  },
-  data (): {
-    interval: IntervalManagerItem | null;
-    isWindows: boolean;
-    isMac: boolean;
-    } {
-    return {
-      /**
-       * Interval for token validation
-       */
-      interval: null,
+/** Interval for token validation */
+const tokenInterval = ref<IntervalManagerItem | null>(null);
 
-      /**
-       * Returns true, if current platform is Windows
-       */
-      isWindows: isWindows(),
+/**
+ * Validate access token and update screen, if needed
+ */
+const validateAccessToken = () => {
+  const isAuthScreen = route.name === RouteName.Auth;
 
-      /**
-       * Returns true, if current platform is Mac
-       */
-      isMac: isMac(),
-    };
-  },
-  computed: {
-    /**
-     * Logined user access token
-     */
-    userAccessToken (): string | null {
-      return this.$store.state.user.token;
-    },
+  store.dispatch(VALIDATE_USER_ACCESS_TOKEN)
+    .then(() => {
+      if (!route.name) {
+        router.replace('Library');
+      }
+    })
+    .catch(() => {
+      if (!isAuthScreen) {
+        router.replace('Auth');
+      }
+    });
+};
 
-    /**
-     * Returns true, if settings overlay is active
-     */
-    isSettingsActive (): boolean {
-      return this.$store.state.app.isSettings;
-    },
-
-    /**
-     * Returns true, if current screen is auth screen
-     */
-    isAuthScreen (): boolean {
-      return this.$route.name === RouteName.Auth;
-    },
-
-    /**
-     * Returns true, if app window is set always on top
-     */
-    isAlwaysOnTop (): boolean {
-      return this.$store.state.app.settings.isAlwaysOnTop;
-    },
-
-    /**
-     * Returns current interface size
-     */
-    interfaceSize (): number {
-      return this.$store.state.app.interfaceSize;
-    },
-
-    /**
-     * Returns true, if current route is "library"
-     */
-    isLibrary (): boolean {
-      return this.$route.name === RouteName.Library;
-    },
-  },
-  watch: {
-    /**
-     * When "isAlwaysOnTop" setting is changed,
-     * update window state
-     */
-    isAlwaysOnTop (value: boolean) {
-      this.setAppWindowAlwaysOnTop(value);
-    },
-  },
-  created () {
-    /**
-     * Set app window on top (or not)
-     */
-    this.setAppWindowAlwaysOnTop(this.isAlwaysOnTop);
-
-    /**
-     * Set interface size
-     */
-    document.documentElement.style.setProperty('--size-base', this.interfaceSize.toString());
-
-    /**
-     * Check for updates
-     */
-    checkAppUpdates();
-  },
-  mounted () {
-    this.interval = interval.start(TOKEN_UPDATE_INTERVAL);
-
-    this.interval.onupdate = () => {
-      this.validateAccessToken();
-    };
-  },
-  beforeUnmount () {
-    if (this.interval) {
-      interval.stop(this.interval);
-
-      this.interval = null;
-    }
-  },
-
-  methods: {
-    /**
-     * Validate access token and update screen, if needed
-     */
-    validateAccessToken (): void {
-      this.$store.dispatch(VALIDATE_USER_ACCESS_TOKEN)
-        .then(() => {
-          if (!this.$route.name) {
-            this.$router.replace('Library');
-          }
-        })
-        .catch(() => {
-          if (!this.isAuthScreen) {
-            this.$router.replace('Auth');
-          }
-        });
-    },
-
-    /**
-     * Set app windows always on top value
-     */
-    setAppWindowAlwaysOnTop (value: boolean): void {
-      callWindowMethod('setAlwaysOnTop', value);
-    },
-  },
+/**
+ * Start token interval on mount
+ */
+onMounted(() => {
+  tokenInterval.value = interval.start(TOKEN_UPDATE_INTERVAL);
+  tokenInterval.value.onupdate = validateAccessToken;
 });
+
+/**
+ * Stop token interval on unmount
+ */
+onBeforeUnmount(() => {
+  if (!tokenInterval.value) {
+    return;
+  }
+
+  interval.stop(tokenInterval.value);
+  tokenInterval.value = null;
+});
+
+/** Check for updates */
+checkAppUpdates();
 </script>
 
 <style>

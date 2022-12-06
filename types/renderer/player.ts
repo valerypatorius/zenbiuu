@@ -12,7 +12,7 @@ export enum PlayerLayout {
 export interface PlayerElements {
   player: HTMLElement;
   video: HTMLVideoElement;
-  videoBackground: HTMLCanvasElement;
+  canvas: HTMLCanvasElement;
 }
 
 /**
