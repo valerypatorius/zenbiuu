@@ -44,10 +44,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Control from '@/src/components/player/Control.vue';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useApp } from '@/src/store/useApp';
 
 export interface PickerItem {
   index: number;
@@ -73,8 +72,8 @@ const emit = defineEmits<{
   (e: 'change', item: PickerItem): void;
 }>();
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: appState } = useApp();
 
 const picker = ref<HTMLElement>();
 
@@ -82,7 +81,7 @@ const picker = ref<HTMLElement>();
 const isListVisible = ref(false);
 
 /** Returns true, if interface blur is enabled in settings */
-const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
 
 /** Active item */
 const activeItem = computed(() => props.items.find((item) => item.index === props.active) || null);

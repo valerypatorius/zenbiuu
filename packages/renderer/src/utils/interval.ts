@@ -6,7 +6,7 @@ export interface IntervalManagerItem {
   managerId: string;
   frequency: number;
   isImmediate: boolean;
-  onupdate?: () => void;
+  onupdate?: (() => any) | (() => Promise<any>);
 };
 
 /**

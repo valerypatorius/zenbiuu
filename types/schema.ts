@@ -13,7 +13,7 @@ export enum StoreFilename {
 }
 
 /**
- * Vuex store modules names
+ * Store modules names
  */
 export enum Module {
   App = 'app',
@@ -42,8 +42,6 @@ export interface ModulesSchema {
   };
   [Module.App]: {
     locale: AppLocaleName | null;
-    isLoading: boolean;
-    isSettings: boolean;
     settings: AppSettings;
     interfaceSize: number;
   };
@@ -81,6 +79,7 @@ export interface ModulesSchema {
     isHideSidebar: boolean;
     isHideChat: boolean;
     layout: PlayerLayout;
+    cover?: string;
   };
   [Module.Sidebar]: {
     width: number;
@@ -97,7 +96,7 @@ export interface RootSchema {
 
 /**
  * General store structure.
- * Used by electron-store and Vuex
+ * Used by electron-store and local state
  */
 export type Schema = ModulesSchema & {
   windowBounds: {
@@ -105,18 +104,6 @@ export type Schema = ModulesSchema & {
     height: number;
   };
 };
-
-/**
- * Root state structure.
- * Used in Vuex actions
- */
-export type RootState = Partial<ModulesSchema> & RootSchema;
-
-/**
- * Store module structure constructor.
- * Used in Vuex modules
- */
-export type ModuleState<K extends Module> = Schema[K];
 
 /**
  * Default store state
@@ -131,8 +118,6 @@ export const schema: Schema = {
   },
   [Module.App]: {
     locale: null,
-    isLoading: false,
-    isSettings: false,
     settings: {
       isAlwaysOnTop: false,
       isBlurEnabled: true,
@@ -173,6 +158,7 @@ export const schema: Schema = {
     isHideSidebar: false,
     isHideChat: false,
     layout: PlayerLayout.Horizontal,
+    cover: undefined,
   },
   [Module.Sidebar]: {
     width: 300,

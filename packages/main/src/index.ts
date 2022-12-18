@@ -265,29 +265,29 @@ function handleCors (): void {
   const playerUrls = {
     urls: [
       'https://*.ttvnw.net/*',
-      'https://api.twitch.tv/api/channels/*',
+      'https://gql.twitch.tv/*',
     ],
   };
 
-  session.defaultSession.webRequest.onBeforeSendHeaders(playerUrls, (details, callback) => {
+  session.defaultSession.webRequest.onBeforeSendHeaders(playerUrls, (details, handler) => {
     const requestHeaders = {
       ...objectKeysToLowercase(details.requestHeaders),
-      origin: 'https://twitch.tv',
-      referer: 'https://twitch.tv',
+      origin: 'https://www.twitch.tv',
+      referer: 'https://www.twitch.tv',
     };
 
-    callback({
+    handler({
       requestHeaders,
     });
   });
 
-  session.defaultSession.webRequest.onHeadersReceived(playerUrls, (details, callback) => {
+  session.defaultSession.webRequest.onHeadersReceived(playerUrls, (details, handler) => {
     const responseHeaders = {
       ...objectKeysToLowercase(details?.responseHeaders ?? {}),
       'access-control-allow-origin': '*',
     };
 
-    callback({
+    handler({
       responseHeaders,
     });
   });

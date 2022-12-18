@@ -3,7 +3,7 @@
     <TitleBar />
 
     <div class="window__main">
-      <Sidebar />
+      <Sidebar v-if="userState.token" />
 
       <RouterView :key="route.path" />
 
@@ -13,32 +13,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watchEffect, onMounted, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
+import { computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { callWindowMethod, checkAppUpdates } from '@/src/utils/hub';
 import TitleBar from '@/src/components/Titlebar.vue';
 import Sidebar from '@/src/components/Sidebar.vue';
 import Settings from '@/src/components/Settings.vue';
-import { VALIDATE_USER_ACCESS_TOKEN } from '@/src/store/actions';
-import interval from '@/src/utils/interval';
-import date from '@/src/utils/date';
+import { useInterface } from '@/src/store/useInterface';
+import { useApp } from '@/src/store/useApp';
+import { useUser } from '@/src/store/useUser';
 import { RouteName } from '@/types/renderer/router';
-import type { IntervalManagerItem } from '@/src/utils/interval';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
 
-/**
- * Define store and router instances
- */
-const store = useStore<RootSchema & ModulesSchema>();
 const route = useRoute();
 const router = useRouter();
+const { state: interfaceState } = useInterface();
+const { state: appState } = useApp();
+const { state: userState, onValidateSuccess, onValidateError } = useUser();
 
 /** True, if settings overlay is active */
-const isSettingsActive = computed(() => store.state.app.isSettings);
+const isSettingsActive = computed(() => interfaceState.isSettingsActive);
 
 /** True, if app window is set always on top */
-const isAlwaysOnTop = computed(() => store.state.app.settings.isAlwaysOnTop);
+const isAlwaysOnTop = computed(() => appState.settings.isAlwaysOnTop);
 
 /**
  * When "isAlwaysOnTop" setting is changed,
@@ -49,51 +45,18 @@ watchEffect(() => {
 });
 
 /** Set initial interface size */
-document.documentElement.style.setProperty('--size-base', store.state.app.interfaceSize.toString());
+document.documentElement.style.setProperty('--size-base', appState.interfaceSize.toString());
 
-/** User token update interval */
-const TOKEN_UPDATE_INTERVAL = date.Hour;
-
-/** Interval for token validation */
-const tokenInterval = ref<IntervalManagerItem | null>(null);
-
-/**
- * Validate access token and update screen, if needed
- */
-const validateAccessToken = () => {
-  const isAuthScreen = route.name === RouteName.Auth;
-
-  store.dispatch(VALIDATE_USER_ACCESS_TOKEN)
-    .then(() => {
-      if (!route.name) {
-        router.replace('Library');
-      }
-    })
-    .catch(() => {
-      if (!isAuthScreen) {
-        router.replace('Auth');
-      }
-    });
-};
-
-/**
- * Start token interval on mount
- */
-onMounted(() => {
-  tokenInterval.value = interval.start(TOKEN_UPDATE_INTERVAL);
-  tokenInterval.value.onupdate = validateAccessToken;
+onValidateSuccess(() => {
+  if (!route.name) {
+    router.replace(RouteName.Library);
+  }
 });
 
-/**
- * Stop token interval on unmount
- */
-onBeforeUnmount(() => {
-  if (!tokenInterval.value) {
-    return;
+onValidateError(() => {
+  if (route.name !== RouteName.Auth) {
+    router.replace(RouteName.Auth);
   }
-
-  interval.stop(tokenInterval.value);
-  tokenInterval.value = null;
 });
 
 /** Check for updates */
@@ -127,7 +90,7 @@ checkAppUpdates();
     --width-scrollbar: 1rem;
 
     /** Border radius for most elements */
-    --border-radius: 0.5rem;
+    --border-radius: 0.85rem;
 
     /** Standart 16:9 ratio for videos */
     --ratio-video: 56.25%;
@@ -289,7 +252,7 @@ checkAppUpdates();
   button,
   .button {
     border: 0;
-    padding: 0 1.5rem;
+    padding: 0 1.8rem;
     margin: 0;
     outline: 0;
     background-color: transparent;
@@ -300,7 +263,7 @@ checkAppUpdates();
     background-color: var(--color-button);
     display: flex;
     align-items: center;
-    height: 4rem;
+    height: 3.6rem;
     cursor: pointer;
     border-radius: var(--border-radius);
     white-space: nowrap;

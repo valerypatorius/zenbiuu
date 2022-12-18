@@ -19,8 +19,15 @@ export interface PlayerElements {
  * Twitch response for playlist access token request
  */
 export interface AccessTokenResponse {
-  expires_at: string;
-  mobile_restricted: boolean;
-  sig: string;
-  token: string;
+  data: {
+    streamPlaybackAccessToken: {
+      signature: string;
+      value: string;
+    };
+  };
+  extensions: {
+    durationMilliseconds: number;
+    operationName: string;
+    requestID: string;
+  };
 }

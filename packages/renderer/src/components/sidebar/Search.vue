@@ -61,20 +61,23 @@ function onInput (event: Event): void {
       font-weight: 500;
       position: absolute;
       left: 0;
-      background-color: var(--color-overlay-full);
+      background-color: var(--color-overlay);
       border-radius: var(--border-radius);
 
       &::placeholder {
         color: var(--color-text-secondary);
       }
 
-      &:focus::placeholder {
-        color: var(--color-transparent);
-      }
+      &:focus {
+        background-color: var(--color-overlay-full);
 
-      /** Search icon */
-      &:focus + .icon {
-        color: var(--color-text);
+        &::placeholder {
+          color: var(--color-transparent);
+        }
+
+        + .icon {
+          color: var(--color-text);
+        }
       }
     }
 

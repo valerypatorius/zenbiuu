@@ -15,18 +15,17 @@
 </template>
 
 <script setup lang="ts">
+import { useApp } from '@/src/store/useApp';
 import { computed } from 'vue';
-import { useStore } from 'vuex';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
-
-const store = useStore<RootSchema & ModulesSchema>();
 
 const emit = defineEmits<{
   (name: 'close'): void;
 }>();
 
+const { state: appState } = useApp();
+
 /** Returns true, if interface blur is enabled in settings */
-const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
 </script>
 
 <style lang="postcss">

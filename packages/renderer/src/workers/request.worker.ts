@@ -1,4 +1,6 @@
-import { NOT_FOUND } from '@/src/store/errors';
+enum RequestError {
+  NotFound = 'Not found',
+}
 
 const context = self as any as Worker;
 
@@ -21,7 +23,7 @@ async function get (url: string, options = {}): Promise<void> {
     });
 
     if (response.status === Status.NotFound) {
-      throw new Error(NOT_FOUND);
+      throw new Error(RequestError.NotFound);
     }
 
     const data = response.status === Status.NoContent ? {} : await response.json();
@@ -55,7 +57,7 @@ async function post (url: string, options = {}, body = ''): Promise<void> {
     });
 
     if (response.status === Status.NotFound) {
-      throw new Error(NOT_FOUND);
+      throw new Error(RequestError.NotFound);
     }
 
     const isEmptyResponse = response.status === Status.NoContent || await response.clone().text() === '';

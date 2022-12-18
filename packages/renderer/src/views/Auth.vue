@@ -40,27 +40,22 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import { getAppName } from '@/src/utils/utils';
-import {
-  REQUEST_USER_ACCESS_TOKEN,
-  GET_USER_FOLLOWS,
-  GET_STREAMS,
-  GET_USERS,
-  TOGGLE_APP_SETTINGS,
-} from '@/src/store/actions';
 import appIconPath from '@/assets/icon.svg';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
 import { useRouter } from 'vue-router';
+import { useInterface } from '../store/useInterface';
+import { useUser } from '../store/useUser';
+import { RouteName } from '@/types/renderer/router';
 
-const store = useStore<RootSchema & ModulesSchema>();
 const router = useRouter();
 const { t } = useI18n();
 
 /** Screen title */
 const title = getAppName();
+const { state: interfaceState } = useInterface();
+const { authorize } = useUser();
 
 /**
  * True, if auth is being processed.
@@ -70,7 +65,7 @@ const isLoading = ref(false);
 
 /** Toggle settings panel */
 function toggleSettings () {
-  store.dispatch(TOGGLE_APP_SETTINGS);
+  interfaceState.isSettingsActive = !interfaceState.isSettingsActive;
 }
 
 /** Request auth and go to library screen */
@@ -81,22 +76,13 @@ async function requestAuth (): Promise<void> {
 
   isLoading.value = true;
 
-  const isAuthSuccess = await store.dispatch(REQUEST_USER_ACCESS_TOKEN, {
-    clientId: store.state.clientId,
-    redirectUrl: store.state.redirectUrl,
-  });
+  try {
+    await authorize();
 
-  isLoading.value = false;
-
-  if (!isAuthSuccess) {
-    return;
+    router.replace({ name: RouteName.Library });
+  } finally {
+    isLoading.value = false;
   }
-
-  store.dispatch(GET_USER_FOLLOWS);
-  store.dispatch(GET_USERS);
-  store.dispatch(GET_STREAMS);
-
-  router.replace({ name: 'Library' });
 }
 </script>
 

@@ -4,12 +4,12 @@
     class="library scrollable"
   >
     <div class="library__content">
-      <filters
+      <Filters
         @change="setSorting"
       />
 
       <div class="grid">
-        <preview
+        <Preview
           v-for="stream in sortedStreams"
           :key="stream.user_login"
           :is-loading="!isLibraryReady"
@@ -23,27 +23,28 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Filters from '@/src/components/Filters.vue';
 import Preview from '@/src/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
 import { StreamType, TwitchStream, Sorting } from '@/types/renderer/library';
-import { SET_LIBRARY_SORTING } from '@/src/store/actions';
 import { unixtime } from '@/src/utils/date';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useLibrary } from '../store/useLibrary';
+import { usePlayer } from '../store/usePlayer';
+import { RouteName } from '@/types/renderer/router';
 
 /**
  * Define store and router instances
  */
-const store = useStore<RootSchema & ModulesSchema>();
 const router = useRouter();
+const { state: libraryState } = useLibrary();
+const { state: playerState } = usePlayer();
 
 /** True, if actual library content has been loaded */
-const isLibraryReady = computed(() => store.state.library.isReady);
+const isLibraryReady = computed(() => libraryState.isReady);
 
 /** Current library sorting type */
-const sorting = computed(() => store.state.library.sorting);
+const sorting = computed(() => libraryState.sorting);
 
 /** Sorting rule, based on current sorting type */
 const sortingRule = computed(() => {
@@ -69,14 +70,14 @@ const sortingRule = computed(() => {
 });
 
 /** Streams list */
-const streams = computed(() => store.state.library.streams[StreamType.Followed]);
+const streams = computed(() => libraryState.streams[StreamType.Followed]);
 
 /** Streams list, sorted by active rule */
 const sortedStreams = computed(() => [...streams.value].sort(sortingRule.value));
 
 /** Set sorting type */
 const setSorting = (value: Sorting) => {
-  store.dispatch(SET_LIBRARY_SORTING, value);
+  libraryState.sorting = value;
 };
 
 /** Scroller instance */
@@ -109,15 +110,16 @@ onBeforeUnmount(() => {
 });
 
 /** Open channel screen */
-const onChannelSelect = (name: string, id: number, cover: string) => {
+const onChannelSelect = (name: string, id: string, cover: string) => {
   router.replace({
-    name: 'Channel',
+    name: RouteName.Channel,
     params: {
       name,
       id,
-      cover,
     },
   });
+
+  playerState.cover = cover;
 };
 </script>
 

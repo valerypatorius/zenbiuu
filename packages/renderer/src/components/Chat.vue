@@ -10,8 +10,8 @@
       width: chatWidth,
       height: chatHeight,
     }"
-    @mouseenter="setChatPause(true)"
-    @mouseleave="setChatPause(false)"
+    @mouseenter="pauseChat(true)"
+    @mouseleave="pauseChat(false)"
   >
     <div
       ref="scrollable"
@@ -101,14 +101,14 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import * as actions from '@/src/store/actions';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { PlayerLayout } from '@/types/renderer/player';
 import type { ChatMessage } from '@/types/renderer/chat';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useChat } from '../store/useChat';
+import { useUser } from '../store/useUser';
+import { usePlayer } from '../store/usePlayer';
 
 /**
  * Chat width limits
@@ -127,18 +127,20 @@ enum ChatWidth {
 }
 
 const props = withDefaults(defineProps<{
-    /** Channel name */
-    channelName: string;
+  /** Channel name */
+  channelName: string;
 
-    /** Channel id */
-    channelId: string;
-  }>(), {
+  /** Channel id */
+  channelId: string;
+}>(), {
   channelName: '',
   channelId: '',
 });
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: chatState, join: joinChat, leave: leaveChat, clear: clearChat, getEmotes, setWidth, setHeight, pause: pauseChat } = useChat();
+const { state: userState } = useUser();
+const { state: playerState } = usePlayer();
 
 /**
  * Messages horizon observer instance
@@ -149,13 +151,13 @@ const horizonObserver = ref<IntersectionObserver>();
  * Chat width in horizontal layout.
  * Can be changed by user
  */
-const customChatWidth = ref(store.state.chat.width);
+const customChatWidth = ref(chatState.width);
 
 /**
  * Chat height in vertical layout.
  * Can be changed by user
  */
-const customChatHeight = ref(store.state.chat.height);
+const customChatHeight = ref(chatState.height);
 
 /**
  * True, if messages list is scrolled to bottom
@@ -186,26 +188,23 @@ const horizon = ref<HTMLElement>();
  */
 const isReady = ref(false);
 
-/** Logined user id */
-const userId = computed(() => store.state.user.id);
-
 /** Logined user name */
-const userName = computed(() => store.state.user.name);
+const userName = computed(() => userState.name);
 
 /** Chat messages */
-const messages = computed(() => isReady.value ? store.state.chat.messages : []);
+const messages = computed(() => isReady.value ? chatState.messages : []);
 
 /** Last message */
-const lastMessage = computed(() => store.state.chat.messages.slice(-1)[0]);
+const lastMessage = computed(() => chatState.messages.slice(-1)[0]);
 
 /** Returns true, if current player layout is horizontal */
-const isHorizontalLayoutType = computed(() => store.state.player.layout === PlayerLayout.Horizontal);
+const isHorizontalLayoutType = computed(() => playerState.layout === PlayerLayout.Horizontal);
 
 /** True, if chat is hidden */
-const isChatHidden = computed(() => store.state.player.isHideChat);
+const isChatHidden = computed(() => playerState.isHideChat);
 
 /** Logined user id */
-const isPaused = computed(() => store.state.chat.isPaused);
+const isPaused = computed(() => chatState.isPaused);
 
 /** Chat CSS width, based on current layout type */
 const chatWidth = computed(() => isHorizontalLayoutType.value ? `${customChatWidth.value}px` : 'auto');
@@ -222,19 +221,12 @@ watch(lastMessage, () => {
 
 onMounted(() => {
   /** Join IRC */
-  store.dispatch(actions.JOIN_CHANNEL_CHAT, {
-    channelName: props.channelName,
-    channelId: props.channelId,
-    userId: userId.value,
-  }).then(() => {
+  joinChat(props.channelName).then(() => {
     isReady.value = true;
   });
 
   /** Request chat emotes */
-  store.dispatch(actions.REQUEST_CHAT_EMOTES, {
-    channelName: props.channelName,
-    channelId: props.channelId,
-  });
+  getEmotes(props.channelName, props.channelId);
 
   /** Start watching for horizon interesections */
   horizonObserver.value = new IntersectionObserver(onHorizonIntersection, {
@@ -259,7 +251,7 @@ onMounted(() => {
       customChatWidth.value = value;
     },
     onStop: () => {
-      store.dispatch(actions.SET_CHAT_WIDTH, customChatWidth.value);
+      setWidth(customChatWidth.value);
     },
   });
 
@@ -274,7 +266,7 @@ onMounted(() => {
       customChatHeight.value = value;
     },
     onStop: () => {
-      store.dispatch(actions.SET_CHAT_HEIGHT, customChatHeight.value);
+      setHeight(customChatHeight.value);
     },
   });
 
@@ -288,14 +280,10 @@ onBeforeUnmount(() => {
   isReady.value = false;
 
   /** Leave IRC */
-  store.dispatch(actions.LEAVE_CHANNEL_CHAT, {
-    channelName: props.channelName,
-    channelId: props.channelId,
-    userId: userId.value,
-  });
+  leaveChat(props.channelName);
 
   /** CLear chat messages */
-  store.dispatch(actions.CLEAR_CHAT);
+  clearChat();
 
   /** Stop watching for intersections */
   if (horizonObserver.value) {
@@ -327,13 +315,6 @@ function getChatMessageStyles (message: ChatMessage): Record<string, string> {
     '--color': color,
     '--text-color': text.isColored ? color : '',
   };
-}
-
-/**
- * Pause or unpause chat autoscroll
- */
-function setChatPause (value: boolean): void {
-  store.dispatch(actions.SET_CHAT_PAUSE, value);
 }
 
 /**

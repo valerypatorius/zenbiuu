@@ -8,7 +8,6 @@
     <Player
       :channel-name="channelName"
       :channel-id="channelId"
-      :cover="playerCover"
     />
 
     <Chat
@@ -20,20 +19,19 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import Chat from '@/src/components/Chat.vue';
 import Player from '@/src/components/Player.vue';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { usePlayer } from '../store/usePlayer';
 
 /**
  * Define store and router instances
  */
-const store = useStore<RootSchema & ModulesSchema>();
 const route = useRoute();
+const { state: playerState } = usePlayer();
 
 /** Current route params */
-const { id, name, cover } = route.params;
+const { id, name } = route.params;
 
 /** Channel name in lowercase format */
 const channelName = Array.isArray(name) ? name[0].toLowerCase() : name.toLowerCase();
@@ -41,11 +39,8 @@ const channelName = Array.isArray(name) ? name[0].toLowerCase() : name.toLowerCa
 /** Channel numeric id */
 const channelId = Array.isArray(id) ? id[0] : id;
 
-/** Player cover image */
-const playerCover = Array.isArray(cover) ? cover[0] : cover;
-
 /** Channel screen layout type */
-const layoutType = computed(() => store.state.player.layout);
+const layoutType = computed(() => playerState.layout);
 </script>
 
 <style>

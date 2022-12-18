@@ -35,6 +35,7 @@ const svg = computed<IconString>(() => icons[props.name]);
       width: 100%;
       height: auto;
       pointer-events: none;
+      opacity: var(--icon-opacity, 1);
     }
   }
 </style>

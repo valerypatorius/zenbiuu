@@ -26,29 +26,28 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { REVOKE_USER_ACCESS_TOKEN, TOGGLE_APP_SETTINGS, RESET_LIBRARY } from '@/src/store/actions';
 import { RouteName } from '@/types/renderer/router';
 import { clearSessionStorage } from '@/src/utils/hub';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useUser } from '@/src/store/useUser';
+import { useInterface } from '@/src/store/useInterface';
+import { useLibrary } from '@/src/store/useLibrary';
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
 const router = useRouter();
+const { state: userState, deauthorize } = useUser();
+const { state: interfaceState } = useInterface();
+const { reset: resetLibrary } = useLibrary();
 
 /** True, if logout request is being processed */
 const isLoading = ref(false);
 
-/** Twitch client ID */
-const clientId = computed(() => store.state.clientId);
-
 /** Logined user name */
-const userName = computed(() => store.state.user.name);
+const userName = computed(() => userState.name);
 
 /** Logined user access token */
-const userAccessToken = computed(() => store.state.user.token);
+const userAccessToken = computed(() => userState.token);
 
 /**
  * Log out current user and go to auth screen
@@ -60,15 +59,13 @@ async function logout (): Promise<void> {
 
   isLoading.value = true;
 
-  await store.dispatch(REVOKE_USER_ACCESS_TOKEN, {
-    clientId: clientId.value,
-    token: userAccessToken.value,
-  });
+  await deauthorize();
 
   isLoading.value = false;
+  interfaceState.isSettingsActive = false;
 
-  store.dispatch(TOGGLE_APP_SETTINGS);
-  store.dispatch(RESET_LIBRARY);
+  resetLibrary();
+
   router.replace({ name: RouteName.Auth });
 
   clearSessionStorage();

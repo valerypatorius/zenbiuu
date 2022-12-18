@@ -20,14 +20,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import Radio from '@/src/components/ui/Radio.vue';
 import { updateWindowTitle } from '@/src/router/index';
-import { SET_APP_LOCALE } from '@/src/store/actions';
 import { AppLocaleName, AppLocaleDisplayName } from '@/types/renderer/locale';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useApp } from '@/src/store/useApp';
 
 interface LocaleOption {
   name: AppLocaleName;
@@ -35,9 +33,9 @@ interface LocaleOption {
   checked: boolean;
 }
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t, locale } = useI18n();
 const route = useRoute();
+const { state: appState } = useApp();
 
 /** Available locale options */
 const localeOptions = computed(() => {
@@ -61,7 +59,7 @@ const localeOptions = computed(() => {
  */
 function setAppLocale (value: AppLocaleName): void {
   locale.value = value;
-  store.dispatch(SET_APP_LOCALE, value);
+  appState.locale = value;
 
   updateWindowTitle(route);
 }

@@ -2,8 +2,9 @@ import linkifyHtml from 'linkify-html';
 import Worker from '@/src/workers/irc.worker.ts?worker';
 import type { ChatEmote, ChatMessage } from '@/types/renderer/chat';
 import { escape } from '@/src/utils/utils';
-import * as endpoints from '@/src/store/endpoints';
 import log from '@/src/utils/log';
+
+const IrcEndpoint = 'wss://irc-ws.chat.twitch.tv:443';
 
 /**
  * Close codes types
@@ -198,7 +199,7 @@ class IrcManager {
     this.name = name;
 
     this.post('connect', {
-      url: endpoints.IRC,
+      url: IrcEndpoint,
       token,
       name,
     });

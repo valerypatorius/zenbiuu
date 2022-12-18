@@ -56,7 +56,7 @@
       :channel-name="channelName"
       :is-sidebar-hidden="isSidebarHidden"
       :is-chat-hidden="isChatHidden"
-      :quality-levels="qualityLevels"
+      :quality-levels="(qualityLevels as Level[])"
       @change-quality="onQualityChange"
       @control-mouse-enter="onControlMouseEnter"
       @control-mouse-leave="onControlMouseLeave"
@@ -72,8 +72,6 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
-import * as actions from '@/src/store/actions';
 import interval from '@/src/utils/interval';
 import date from '@/src/utils/date';
 import Hls, { HlsConfig } from 'hls.js';
@@ -84,24 +82,19 @@ import PlayerInfo from '@/src/components/player/Info.vue';
 import type { Level } from 'hls.js';
 import type { IntervalManagerItem } from '@/src/utils/interval';
 import type { PlayerElements } from '@/types/renderer/player';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { usePlayer } from '../store/usePlayer';
+import { useLibrary } from '../store/useLibrary';
+import { useApp } from '../store/useApp';
 
 export type HlsInstance = InstanceType<typeof Hls>;
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   /** Current channel name */
   channelName: string;
 
   /** Current channel id */
   channelId: string;
-
-  /** Initial video cover */
-  cover: string;
-}>(), {
-  cover: '',
-});
-
-const store = useStore<RootSchema & ModulesSchema>();
+}>();
 
 /**
  * Stats posting interval for earning channel points
@@ -123,6 +116,10 @@ const HLS_CONFIG: Partial<HlsConfig> = {
   liveSyncDurationCount: 1,
   liveMaxLatencyDurationCount: 3,
 };
+
+const { state: appState } = useApp();
+const { state: libraryState } = useLibrary();
+const { state: playerState, getStream, sendStats } = usePlayer();
 
 const player = ref<HTMLDivElement>();
 
@@ -173,40 +170,38 @@ const isControlHovered = ref(false);
 const playerElements = ref<Partial<PlayerElements>>({});
 
 /** Returns true, if interface blur is enabled in settings */
-const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
 
 /** Returns true, if sidebar is hidden by user */
-const isSidebarHidden = computed(() => store.state.player.isHideSidebar);
+const isSidebarHidden = computed(() => playerState.isHideSidebar);
 
 /** Returns true, if sidebar is chat by user */
-const isChatHidden = computed(() => store.state.player.isHideChat);
+const isChatHidden = computed(() => playerState.isHideChat);
 
 /** Current volume value */
-const currentVolume = computed(() => store.state.player.volume);
+const currentVolume = computed(() => playerState.volume);
 
 /** Returns true, if channel is followed */
-const isFollowed = computed(() => !!store.state.library.followed.find((item) => item.to_id === props.channelId));
+const isFollowed = computed(() => !!libraryState.followed.find((item) => item.to_id === props.channelId));
 
 /** Stream info */
 const info = computed(() => {
   const streamType = isFollowed.value ? StreamType.Followed : StreamType.Found;
 
-  return store.state.library.streams[streamType].find((stream) => stream.user_login === props.channelName);
+  return libraryState.streams[streamType].find((stream) => stream.user_login === props.channelName);
 });
 
 /** Stream thumbnail url */
 const thumbnail = computed(() => {
-  if (props.cover) {
-    return props.cover;
+  if (playerState.cover) {
+    return playerState.cover;
   }
 
   if (!info.value) {
     return '';
   }
 
-  const { lastUpdateTime } = store.state.library;
-
-  return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
+  return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${libraryState.lastUpdateTime}`;
 });
 
 onMounted(() => {
@@ -224,15 +219,11 @@ onMounted(() => {
 
   statsInterval.value.onupdate = () => {
     if (info.value) {
-      store.dispatch(actions.SEND_PLAYER_STATS, info.value);
+      sendStats({
+        broadcastId: info.value.id,
+        channeld: info.value.user_id,
+      });
     }
-
-    store.dispatch(actions.REQUEST_STREAM_INFO, {
-      channel: props.channelName,
-      streamType: isFollowed.value ? StreamType.Followed : StreamType.Found,
-    }).catch(() => {
-      isOffline.value = true;
-    });
   };
 
   /**
@@ -325,13 +316,10 @@ function initPlayer (): void {
 /**
  * Load playlist and pass it to hls
  */
-function loadPlaylist (channel: string, headers = {}): void {
-  store.dispatch(actions.REQUEST_CHANNEL_PLAYLIST, {
-    channel,
-    headers,
-  }).then((url) => {
-    hls.value?.loadSource(url);
-  });
+async function loadPlaylist (channel: string): Promise<void> {
+  const playlist = await getStream(channel);
+
+  hls.value?.loadSource(playlist);
 }
 
 /**

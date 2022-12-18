@@ -1,6 +1,9 @@
 import { env } from '@/src/utils/hub';
 import request from '@/src/utils/request';
+import { uid } from '@/src/utils/utils';
 import type { AccessTokenResponse } from '@/types/renderer/player';
+
+const DEVICE_ID = uid();
 
 /**
  * Form playlist url from passed data
@@ -37,24 +40,37 @@ function formPlaylistUrl ({
  * Get access token from loaded url.
  * Used to receive stream playlist
  */
-async function getAcessToken (channel: string, headers: {[key: string]: string}): Promise<any> {
+async function getAcessToken (channel: string): Promise<{ sig: string; token: string }> {
   return await new Promise((resolve, reject) => {
-    const playerType = 'site'; // picture-by-picture
-    const url = `https://api.twitch.tv/api/channels/${channel}/access_token?oauth_token=&platform=_&player_backend=mediaplayer&player_type=${playerType}`;
+    const url = 'https://gql.twitch.tv/gql';
 
-    const get = request.get(url, {
+    const post = request.post(url, {
       headers: {
-        Accept: 'application/vnd.twitchtv.v5+json',
-        'client-id': env.STREAM_CLIENT_ID,
-        ...headers,
+        'Client-ID': env.STREAM_CLIENT_ID,
+        'Device-ID': DEVICE_ID,
       },
-    });
+    }, JSON.stringify({
+      operationName: 'PlaybackAccessToken_Template',
+      query: 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}',
+      variables: {
+        isLive: true,
+        login: channel,
+        isVod: false,
+        vodID: '',
+        playerType: 'site',
+      },
+    }));
 
-    get.onload = (data: AccessTokenResponse) => {
-      resolve(data);
+    post.onload = (response: AccessTokenResponse) => {
+      const { value: token, signature: sig } = response.data.streamPlaybackAccessToken;
+
+      resolve({
+        sig,
+        token,
+      });
     };
 
-    get.onerror = (error) => {
+    post.onerror = (error) => {
       reject(new Error(error));
     };
   });
@@ -63,9 +79,9 @@ async function getAcessToken (channel: string, headers: {[key: string]: string})
 /**
  * Returns playlist url
  */
-export async function getStream (channel: string, headers: Record<string, string>): Promise<string> {
+export async function getPlaylist (channel: string, headers: Record<string, string>): Promise<string> {
   return await new Promise((resolve, reject) => {
-    getAcessToken(channel, headers)
+    getAcessToken(channel)
       .then(({ sig, token }) => {
         const playlistUrl = formPlaylistUrl({ channel, sig, token });
 
