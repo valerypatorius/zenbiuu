@@ -82,24 +82,19 @@ import PlayerInfo from '@/src/components/player/Info.vue';
 import type { Level } from 'hls.js';
 import type { IntervalManagerItem } from '@/src/utils/interval';
 import type { PlayerElements } from '@/types/renderer/player';
-import { usePlayerState } from '../store/usePlayerState';
-import { useLibraryState } from '../store/useLibraryState';
-import { useAppState } from '../store/useAppState';
+import { usePlayer } from '../store/usePlayer';
+import { useLibrary } from '../store/useLibrary';
+import { useApp } from '../store/useApp';
 
 export type HlsInstance = InstanceType<typeof Hls>;
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   /** Current channel name */
   channelName: string;
 
   /** Current channel id */
   channelId: string;
-
-  /** Initial video cover */
-  cover: string;
-}>(), {
-  cover: '',
-});
+}>();
 
 /**
  * Stats posting interval for earning channel points
@@ -122,9 +117,9 @@ const HLS_CONFIG: Partial<HlsConfig> = {
   liveMaxLatencyDurationCount: 3,
 };
 
-const { state: appState } = useAppState();
-const { state: libraryState } = useLibraryState();
-const { state: playerState, getStream, sendStats } = usePlayerState();
+const { state: appState } = useApp();
+const { state: libraryState } = useLibrary();
+const { state: playerState, getStream, sendStats } = usePlayer();
 
 const player = ref<HTMLDivElement>();
 
@@ -198,8 +193,8 @@ const info = computed(() => {
 
 /** Stream thumbnail url */
 const thumbnail = computed(() => {
-  if (props.cover) {
-    return props.cover;
+  if (playerState.cover) {
+    return playerState.cover;
   }
 
   if (!info.value) {

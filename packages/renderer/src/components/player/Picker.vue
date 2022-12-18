@@ -46,7 +46,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Control from '@/src/components/player/Control.vue';
-import { useAppState } from '@/src/store/useAppState';
+import { useApp } from '@/src/store/useApp';
 
 export interface PickerItem {
   index: number;
@@ -73,7 +73,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { state: appState } = useAppState();
+const { state: appState } = useApp();
 
 const picker = ref<HTMLElement>();
 

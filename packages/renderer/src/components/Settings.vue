@@ -49,8 +49,8 @@ import SettingsUpdate from '@/src/components/settings/Update.vue';
 import { state } from '@/src/utils/hub';
 import { AppUpdateStatus } from '@/types/hub';
 import type { Component } from 'vue';
-import { useUserState } from '../store/useUserState';
-import { useInterfaceState } from '../store/useInterfaceState';
+import { useUser } from '../store/useUser';
+import { useInterface } from '../store/useInterface';
 
 enum TabName {
   Interface = 'interface',
@@ -67,8 +67,8 @@ interface TabData {
 }
 
 const { t } = useI18n();
-const { state: userState } = useUserState();
-const { state: interfaceState } = useInterfaceState();
+const { state: userState } = useUser();
+const { state: interfaceState } = useInterface();
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);

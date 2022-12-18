@@ -25,7 +25,7 @@ import { useRoute } from 'vue-router';
 import Radio from '@/src/components/ui/Radio.vue';
 import { updateWindowTitle } from '@/src/router/index';
 import { AppLocaleName, AppLocaleDisplayName } from '@/types/renderer/locale';
-import { useAppState } from '@/src/store/useAppState';
+import { useApp } from '@/src/store/useApp';
 
 interface LocaleOption {
   name: AppLocaleName;
@@ -35,7 +35,7 @@ interface LocaleOption {
 
 const { t, locale } = useI18n();
 const route = useRoute();
-const { state: appState } = useAppState();
+const { state: appState } = useApp();
 
 /** Available locale options */
 const localeOptions = computed(() => {

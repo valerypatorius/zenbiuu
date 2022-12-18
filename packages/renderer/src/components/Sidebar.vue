@@ -146,11 +146,11 @@ import { StreamType } from '@/types/renderer/library';
 import { state } from '@/src/utils/hub';
 import { AppUpdateStatus } from '@/types/hub';
 import type { TwitchChannelFromSearch } from '@/types/renderer/library';
-import { useSidebarState } from '@/src/store/useSidebarState';
-import { useUserState } from '@/src/store/useUserState';
-import { useLibraryState } from '@/src/store/useLibraryState';
-import { useInterfaceState } from '../store/useInterfaceState';
-import { usePlayerState } from '../store/usePlayerState';
+import { useSidebar } from '@/src/store/useSidebar';
+import { useUser } from '@/src/store/useUser';
+import { useLibrary } from '@/src/store/useLibrary';
+import { useInterface } from '../store/useInterface';
+import { usePlayer } from '../store/usePlayer';
 
 interface SidebarChannelItem {
   userId: string;
@@ -175,11 +175,11 @@ enum SidebarWidth {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { state: interfaceState } = useInterfaceState();
-const { state: sidebarState, setWidth: setSidebarWidth } = useSidebarState();
-const { state: userState } = useUserState();
-const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibraryState();
-const { state: playerState } = usePlayerState();
+const { state: interfaceState } = useInterface();
+const { state: sidebarState, setWidth: setSidebarWidth } = useSidebar();
+const { state: userState } = useUser();
+const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibrary();
+const { state: playerState } = usePlayer();
 
 /** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;
@@ -192,7 +192,7 @@ const scrollable = ref<HTMLDivElement>();
 const offlineItemsCount = ref(MIN_OFFLINE_ITEMS_COUNT);
 
 /** Current sidebar width, set by user */
-const customSidebarWidth = ref(sidebarState.value.width);
+const customSidebarWidth = ref(sidebarState.width);
 
 /** Resizer instance */
 const resizer = ref<Resizer>();
@@ -396,7 +396,7 @@ function selectChannel (item: SidebarChannelItem): void {
     : '';
 
   router.replace({
-    name: 'Channel',
+    name: RouteName.Channel,
     params: {
       name: item.name,
       id: item.userId,
@@ -417,7 +417,7 @@ function toggleSettings (): void {
  */
 function openLibrary (): void {
   if (!isLibrary.value) {
-    router.replace({ name: 'Library' });
+    router.replace({ name: RouteName.Library });
   }
 }
 

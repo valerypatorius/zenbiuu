@@ -31,14 +31,14 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import { Sorting, SortingType } from '@/types/renderer/library';
-import { useLibraryState } from '../store/useLibraryState';
+import { useLibrary } from '../store/useLibrary';
 
 const emit = defineEmits<{
   (e: 'change', sorting: Sorting): void;
 }>();
 
 const { t } = useI18n();
-const { state: libraryState } = useLibraryState();
+const { state: libraryState } = useLibrary();
 
 /** Current sorting params */
 const currentSorting = computed(() => {

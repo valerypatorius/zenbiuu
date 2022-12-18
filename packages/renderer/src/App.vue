@@ -19,16 +19,16 @@ import { callWindowMethod, checkAppUpdates } from '@/src/utils/hub';
 import TitleBar from '@/src/components/Titlebar.vue';
 import Sidebar from '@/src/components/Sidebar.vue';
 import Settings from '@/src/components/Settings.vue';
-import { useInterfaceState } from '@/src/store/useInterfaceState';
-import { useAppState } from '@/src/store/useAppState';
-import { useUserState } from '@/src/store/useUserState';
+import { useInterface } from '@/src/store/useInterface';
+import { useApp } from '@/src/store/useApp';
+import { useUser } from '@/src/store/useUser';
 import { RouteName } from '@/types/renderer/router';
 
 const route = useRoute();
 const router = useRouter();
-const { state: interfaceState } = useInterfaceState();
-const { state: appState } = useAppState();
-const { state: userState, onValidateSuccess, onValidateError } = useUserState();
+const { state: interfaceState } = useInterface();
+const { state: appState } = useApp();
+const { state: userState, onValidateSuccess, onValidateError } = useUser();
 
 /** True, if settings overlay is active */
 const isSettingsActive = computed(() => interfaceState.isSettingsActive);
@@ -49,13 +49,13 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
 
 onValidateSuccess(() => {
   if (!route.name) {
-    router.replace('Library');
+    router.replace(RouteName.Library);
   }
 });
 
 onValidateError(() => {
   if (route.name !== RouteName.Auth) {
-    router.replace('Auth');
+    router.replace(RouteName.Auth);
   }
 });
 

@@ -4,7 +4,7 @@ import { config, setNativeTheme } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { AppColorScheme } from '@/types/color';
 
-export const useThemeState = createGlobalState(() => {
+export const useTheme = createGlobalState(() => {
   const refState = ref<ModulesSchema[Module.Theme]>({
     name: AppColorScheme.System,
   });

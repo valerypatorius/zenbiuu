@@ -45,16 +45,17 @@ import Icon from '@/src/components/ui/Icon.vue';
 import { getAppName } from '@/src/utils/utils';
 import appIconPath from '@/assets/icon.svg';
 import { useRouter } from 'vue-router';
-import { useInterfaceState } from '../store/useInterfaceState';
-import { useUserState } from '../store/useUserState';
+import { useInterface } from '../store/useInterface';
+import { useUser } from '../store/useUser';
+import { RouteName } from '@/types/renderer/router';
 
 const router = useRouter();
 const { t } = useI18n();
 
 /** Screen title */
 const title = getAppName();
-const { state: interfaceState } = useInterfaceState();
-const { authorize } = useUserState();
+const { state: interfaceState } = useInterface();
+const { authorize } = useUser();
 
 /**
  * True, if auth is being processed.
@@ -78,7 +79,7 @@ async function requestAuth (): Promise<void> {
   try {
     await authorize();
 
-    router.replace({ name: 'Library' });
+    router.replace({ name: RouteName.Library });
   } finally {
     isLoading.value = false;
   }

@@ -15,14 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { useAppState } from '@/src/store/useAppState';
+import { useApp } from '@/src/store/useApp';
 import { computed } from 'vue';
 
 const emit = defineEmits<{
   (name: 'close'): void;
 }>();
 
-const { state: appState } = useAppState();
+const { state: appState } = useApp();
 
 /** Returns true, if interface blur is enabled in settings */
 const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);

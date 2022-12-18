@@ -106,9 +106,9 @@ import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { PlayerLayout } from '@/types/renderer/player';
 import type { ChatMessage } from '@/types/renderer/chat';
-import { useChatState } from '../store/useChatState';
-import { useUserState } from '../store/useUserState';
-import { usePlayerState } from '../store/usePlayerState';
+import { useChat } from '../store/useChat';
+import { useUser } from '../store/useUser';
+import { usePlayer } from '../store/usePlayer';
 
 /**
  * Chat width limits
@@ -138,9 +138,9 @@ const props = withDefaults(defineProps<{
 });
 
 const { t } = useI18n();
-const { state: chatState, join: joinChat, leave: leaveChat, clear: clearChat, getEmotes, setWidth, setHeight, pause: pauseChat } = useChatState();
-const { state: userState } = useUserState();
-const { state: playerState } = usePlayerState();
+const { state: chatState, join: joinChat, leave: leaveChat, clear: clearChat, getEmotes, setWidth, setHeight, pause: pauseChat } = useChat();
+const { state: userState } = useUser();
+const { state: playerState } = usePlayer();
 
 /**
  * Messages horizon observer instance

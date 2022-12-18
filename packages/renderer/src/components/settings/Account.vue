@@ -30,15 +30,15 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { RouteName } from '@/types/renderer/router';
 import { clearSessionStorage } from '@/src/utils/hub';
-import { useUserState } from '@/src/store/useUserState';
-import { useInterfaceState } from '@/src/store/useInterfaceState';
-import { useLibraryState } from '@/src/store/useLibraryState';
+import { useUser } from '@/src/store/useUser';
+import { useInterface } from '@/src/store/useInterface';
+import { useLibrary } from '@/src/store/useLibrary';
 
 const { t } = useI18n();
 const router = useRouter();
-const { state: userState, deauthorize } = useUserState();
-const { state: interfaceState } = useInterfaceState();
-const { reset: resetLibrary } = useLibraryState();
+const { state: userState, deauthorize } = useUser();
+const { state: interfaceState } = useInterface();
+const { reset: resetLibrary } = useLibrary();
 
 /** True, if logout request is being processed */
 const isLoading = ref(false);

@@ -46,22 +46,22 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useInterfaceState } from '@/src/store/useInterfaceState';
+import { useInterface } from '@/src/store/useInterface';
 import { isWindows } from '@/src/utils/utils';
 import Icon from '@/src/components/ui/Icon.vue';
 import Loader from '@/src/components/ui/Loader.vue';
 import WindowControls from '@/src/components/ui/WindowControls.vue';
 import { getWindowTitle } from '@/src/router/index';
 import { RouteName } from '@/types/renderer/router';
-import { usePlayerState } from '../store/usePlayerState';
+import { usePlayer } from '../store/usePlayer';
 
 /**
  * Define store and router instances
  */
 const route = useRoute();
 const router = useRouter();
-const { state: interfaceState } = useInterfaceState();
-const { state: playerState } = usePlayerState();
+const { state: interfaceState } = useInterface();
+const { state: playerState } = usePlayer();
 
 /** Window title, based on current route */
 const title = computed(() => getWindowTitle(route));
@@ -81,7 +81,7 @@ const isSidebarHidden = computed(() => playerState.isHideSidebar);
 /** Open Library screen */
 const openLibrary = () => {
   if (!isLibrary.value) {
-    router.replace({ name: 'Library' });
+    router.replace({ name: RouteName.Library });
   }
 };
 </script>

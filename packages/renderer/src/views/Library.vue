@@ -29,13 +29,16 @@ import Preview from '@/src/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
 import { StreamType, TwitchStream, Sorting } from '@/types/renderer/library';
 import { unixtime } from '@/src/utils/date';
-import { useLibraryState } from '../store/useLibraryState';
+import { useLibrary } from '../store/useLibrary';
+import { usePlayer } from '../store/usePlayer';
+import { RouteName } from '@/types/renderer/router';
 
 /**
  * Define store and router instances
  */
 const router = useRouter();
-const { state: libraryState } = useLibraryState();
+const { state: libraryState } = useLibrary();
+const { state: playerState } = usePlayer();
 
 /** True, if actual library content has been loaded */
 const isLibraryReady = computed(() => libraryState.isReady);
@@ -109,13 +112,14 @@ onBeforeUnmount(() => {
 /** Open channel screen */
 const onChannelSelect = (name: string, id: string, cover: string) => {
   router.replace({
-    name: 'Channel',
+    name: RouteName.Channel,
     params: {
       name,
       id,
-      cover,
     },
   });
+
+  playerState.cover = cover;
 };
 </script>
 

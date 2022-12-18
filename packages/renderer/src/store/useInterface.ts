@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { createGlobalState } from '@vueuse/core';
 
-export const useInterfaceState = createGlobalState(() => {
+export const useInterface = createGlobalState(() => {
   const state = reactive({
     isLoading: false,
     isSettingsActive: false,

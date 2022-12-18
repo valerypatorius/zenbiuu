@@ -1,6 +1,6 @@
 import { watch, ref } from 'vue';
 import { createGlobalState, toReactive, tryOnBeforeUnmount, tryOnMounted, createEventHook } from '@vueuse/core';
-import { useInterfaceState } from './useInterfaceState';
+import { useInterface } from './useInterface';
 import { config, requestAccessToken } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import request from '@/src/utils/request';
@@ -30,7 +30,7 @@ enum UserEndpoint {
   Revoke = 'https://id.twitch.tv/oauth2/revoke',
 }
 
-export const useUserState = createGlobalState(() => {
+export const useUser = createGlobalState(() => {
   const refState = ref<ModulesSchema[Module.User]>({
     token: null,
     tokenDate: 0,
@@ -40,7 +40,7 @@ export const useUserState = createGlobalState(() => {
 
   const state = toReactive(refState);
 
-  const { state: interfaceState } = useInterfaceState();
+  const { state: interfaceState } = useInterface();
 
   /** Interval for token validation */
   const tokenInterval = ref<IntervalManagerItem | null>(null);

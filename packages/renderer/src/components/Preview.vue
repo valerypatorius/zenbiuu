@@ -81,8 +81,8 @@ import { computed, ref, watch } from 'vue';
 import Icon from '@/src/components/ui/Icon.vue';
 import Duration from '@/src/components/Duration.vue';
 import type { TwitchStream } from '@/types/renderer/library';
-import { useLibraryState } from '../store/useLibraryState';
-import { useAppState } from '../store/useAppState';
+import { useLibrary } from '../store/useLibrary';
+import { useApp } from '../store/useApp';
 
 const props = withDefaults(defineProps<{
   /** Stream data object */
@@ -98,8 +98,8 @@ const emit = defineEmits<{
   (e: 'click', name: string, id: string, latestCover: string): void;
 }>();
 
-const { state: libraryState } = useLibraryState();
-const { state: appState } = useAppState();
+const { state: libraryState } = useLibrary();
+const { state: appState } = useApp();
 
 /** Previous cover url */
 const prevCover = ref<string>();

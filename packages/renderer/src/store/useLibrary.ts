@@ -1,7 +1,7 @@
-import { computed, readonly, watch, ref } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
-import { useInterfaceState } from './useInterfaceState';
-import { useUserState, UserError } from './useUserState';
+import { useInterface } from './useInterface';
+import { useUser, UserError } from './useUser';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { Sorting, TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
@@ -27,7 +27,7 @@ enum LibraryEndpoint {
 /** Library reload interval */
 const RELOAD_INTERVAL = 2 * date.Minute;
 
-export const useLibraryState = createGlobalState(() => {
+export const useLibrary = createGlobalState(() => {
   const refState = ref<ModulesSchema[Module.Library]>({
     sorting: Sorting.ViewersDesc,
     followed: [],
@@ -42,8 +42,8 @@ export const useLibraryState = createGlobalState(() => {
 
   const state = toReactive(refState);
 
-  const { state: interfaceState } = useInterfaceState();
-  const { state: userState } = useUserState();
+  const { state: interfaceState } = useInterface();
+  const { state: userState } = useUser();
 
   const followedIds = computed(() => state.followed.map((user) => user.to_id));
 

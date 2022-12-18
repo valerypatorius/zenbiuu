@@ -79,6 +79,7 @@ export interface ModulesSchema {
     isHideSidebar: boolean;
     isHideChat: boolean;
     layout: PlayerLayout;
+    cover?: string;
   };
   [Module.Sidebar]: {
     width: number;
@@ -157,6 +158,7 @@ export const schema: Schema = {
     isHideSidebar: false,
     isHideChat: false,
     layout: PlayerLayout.Horizontal,
+    cover: undefined,
   },
   [Module.Sidebar]: {
     width: 300,

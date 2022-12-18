@@ -77,8 +77,8 @@ import Radio from '@/src/components/ui/Radio.vue';
 import Checkbox from '@/src/components/ui/Checkbox.vue';
 import { AppColorScheme } from '@/types/color';
 import type { AppSettings } from '@/types/schema';
-import { useAppState } from '@/src/store/useAppState';
-import { useThemeState } from '@/src/store/useThemeState';
+import { useApp } from '@/src/store/useApp';
+import { useTheme } from '@/src/store/useTheme';
 
 /**
  * Interface size limits
@@ -89,8 +89,8 @@ enum InterfaceSize {
 }
 
 const { t } = useI18n();
-const { state: appState } = useAppState();
-const { state: themeState } = useThemeState();
+const { state: appState } = useApp();
+const { state: themeState } = useTheme();
 
 /** Name of current color scheme */
 const currentColorScheme = computed(() => themeState.name);

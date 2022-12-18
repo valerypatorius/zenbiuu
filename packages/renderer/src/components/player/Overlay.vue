@@ -121,7 +121,7 @@ import { PlayerLayout } from '@/types/renderer/player';
 import type { TwitchStream } from '@/types/renderer/library';
 import type { PlayerElements } from '@/types/renderer/player';
 import type { Level } from 'hls.js';
-import { usePlayerState } from '@/src/store/usePlayerState';
+import { usePlayer } from '@/src/store/usePlayer';
 
 const props = defineProps<{
   /** Current channel name */
@@ -153,7 +153,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { state: playerState, toggleChat, toggleSidebar, toggleLayout, setVolume, setCompressor } = usePlayerState();
+const { state: playerState, toggleChat, toggleSidebar, toggleLayout, setVolume, setCompressor } = usePlayer();
 
 /** Current fullscreen state */
 const isFullscreen = ref(false);

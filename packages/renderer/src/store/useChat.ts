@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
-import { useUserState } from './useUserState';
+import { useUser } from './useUser';
 import irc, { COMMANDS as IRC_COMMANDS } from '@/src/utils/irc';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import request from '@/src/utils/request';
@@ -31,7 +31,7 @@ enum ChatEndpoint {
  */
 const LIMIT = 200;
 
-export const useChatState = createGlobalState(() => {
+export const useChat = createGlobalState(() => {
   const refState = ref<ModulesSchema[Module.Chat]>({
     messages: [],
     emotes: {
@@ -46,7 +46,7 @@ export const useChatState = createGlobalState(() => {
 
   const state = toReactive(refState);
 
-  const { state: userState } = useUserState();
+  const { state: userState } = useUser();
 
   init();
 

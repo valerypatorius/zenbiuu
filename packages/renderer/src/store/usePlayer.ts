@@ -1,28 +1,29 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
 import { config, getStringByteLength } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { PlayerLayout } from '@/types/renderer/player';
 import { getPlaylist } from '@/src/utils/m3u8';
-import { useUserState } from './useUserState';
+import { useUser } from './useUser';
 import request from '@/src/utils/request';
 
 enum PlayerEndpoint {
   Stats = 'https://spade.twitch.tv/track',
 }
 
-export const usePlayerState = createGlobalState(() => {
+export const usePlayer = createGlobalState(() => {
   const refState = ref<ModulesSchema[Module.Player]>({
     volume: 0.25,
     compressor: false,
     isHideSidebar: false,
     isHideChat: false,
     layout: PlayerLayout.Horizontal,
+    cover: undefined,
   });
 
   const state = toReactive(refState);
 
-  const { state: userState } = useUserState();
+  const { state: userState } = useUser();
 
   init();
 
@@ -92,10 +93,6 @@ export const usePlayerState = createGlobalState(() => {
         'Content-Length': getStringByteLength(body),
       },
     }, body);
-  }
-
-  async function getInfo (): Promise<void> {
-
   }
 
   return {
