@@ -1,8 +1,6 @@
-enum RequestError {
-  NotFound = 'Not found',
-}
+import { Method, RequestError } from './types.request.worker';
 
-const context = self as any as Worker;
+const context = self as unknown as Worker;
 
 const Status = {
   Success: 200,
@@ -14,7 +12,7 @@ const Status = {
  * Perform GET request to specified url
  */
 async function get (url: string, options = {}): Promise<void> {
-  const method = 'GET';
+  const method = Method.Get;
 
   try {
     const response = await fetch(url, {
@@ -47,7 +45,7 @@ async function get (url: string, options = {}): Promise<void> {
  * Perform POST request to specified url
  */
 async function post (url: string, options = {}, body = ''): Promise<void> {
-  const method = 'POST';
+  const method = Method.Post;
 
   try {
     const response = await fetch(url, {
@@ -82,14 +80,12 @@ context.onmessage = ({ data }: MessageEvent<WorkerMessageData>) => {
   const { url, options, body } = data.data;
 
   switch (data.action) {
-    case 'get':
+    case Method.Get:
       get(url, options);
       break;
-    case 'post':
+    case Method.Post:
       post(url, options, body);
       break;
     default:
   }
 };
-
-export {};
