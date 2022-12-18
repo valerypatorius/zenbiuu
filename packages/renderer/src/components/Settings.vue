@@ -159,6 +159,7 @@ function closeSettings (): void {
     }
 
     &__tabs {
+      --icon-opacity: 0.7;
       padding: 0 1.6rem 2rem;
     }
 

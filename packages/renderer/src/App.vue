@@ -90,7 +90,7 @@ checkAppUpdates();
     --width-scrollbar: 1rem;
 
     /** Border radius for most elements */
-    --border-radius: 0.5rem;
+    --border-radius: 0.85rem;
 
     /** Standart 16:9 ratio for videos */
     --ratio-video: 56.25%;
@@ -252,7 +252,7 @@ checkAppUpdates();
   button,
   .button {
     border: 0;
-    padding: 0 1.5rem;
+    padding: 0 1.8rem;
     margin: 0;
     outline: 0;
     background-color: transparent;
@@ -263,7 +263,7 @@ checkAppUpdates();
     background-color: var(--color-button);
     display: flex;
     align-items: center;
-    height: 4rem;
+    height: 3.6rem;
     cursor: pointer;
     border-radius: var(--border-radius);
     white-space: nowrap;

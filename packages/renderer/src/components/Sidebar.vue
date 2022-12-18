@@ -485,6 +485,7 @@ function onSearchClear (): void {
     --item-gap: 0.6rem;
     --size-icon: 2rem;
     --offset-icon: 1rem;
+    --icon-opacity: 0.7;
 
     width: var(--default-width);
     max-width: var(--max-width);
