@@ -1,6 +1,9 @@
 import { env } from '@/src/utils/hub';
 import request from '@/src/utils/request';
+import { uid } from '@/src/utils/utils';
 import type { AccessTokenResponse } from '@/types/renderer/player';
+
+const DEVICE_ID = uid();
 
 /**
  * Form playlist url from passed data
@@ -27,11 +30,6 @@ function formPlaylistUrl ({
     fast_bread: true,
     playlist_include_framerate: true,
     reassignments_supported: true,
-
-    // acmb: 'e30=',
-    // player_version: '1.16.0',
-    // player_backend: 'mediaplayer',
-    // cdm: 'wv',
   };
   const urlParams = Object.entries(params).map((param) => param.join('=')).join('&');
 
@@ -42,36 +40,14 @@ function formPlaylistUrl ({
  * Get access token from loaded url.
  * Used to receive stream playlist
  */
-async function getAcessToken (channel: string, headers: Record<string, any>): Promise<{ sig: string; token: string }> {
+async function getAcessToken (channel: string): Promise<{ sig: string; token: string }> {
   return await new Promise((resolve, reject) => {
     const url = 'https://gql.twitch.tv/gql';
 
-    // const test = request.post('https://gql.twitch.tv/integrity', {
-    //   headers: {
-    //     'Client-ID': env.STREAM_CLIENT_ID,
-    //   },
-    // }, '');
-
-    // test.onload = (r) => {
-    //   console.log('???', r);
-    // };
-
     const post = request.post(url, {
       headers: {
-        // Accept: '*/*',
-        // Authorization: `OAuth stl33hm73o7ov5km58lwzekh30kknf`,
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'en-US',
-        Authorization: undefined,
         'Client-ID': env.STREAM_CLIENT_ID,
-        Host: 'gql.twitch.tv',
-        Origin: 'https://player.twitch.tv',
-        Referer: 'https://player.twitch.tv/',
-        // 'Client-Integrity': '',
-        // 'Client-Session-Id': '',
-        // Host: 'gql.twitch.tv',
-        // Origin: 'https://www.twitch.tv',
-        // Referer: 'https://www.twitch.tv/',
+        'Device-ID': DEVICE_ID,
       },
     }, JSON.stringify({
       operationName: 'PlaybackAccessToken_Template',
@@ -88,16 +64,9 @@ async function getAcessToken (channel: string, headers: Record<string, any>): Pr
     post.onload = (response: AccessTokenResponse) => {
       const { value: token, signature: sig } = response.data.streamPlaybackAccessToken;
 
-      const tokenObj = JSON.parse(token);
-
-      // tokenObj.hide_ads = true;
-      // tokenObj.server_ads = false;
-      // tokenObj.show_ads = false;
-      // tokenObj.turbo = true;
-
       resolve({
         sig,
-        token: JSON.stringify(tokenObj),
+        token,
       });
     };
 
@@ -112,7 +81,7 @@ async function getAcessToken (channel: string, headers: Record<string, any>): Pr
  */
 export async function getPlaylist (channel: string, headers: Record<string, string>): Promise<string> {
   return await new Promise((resolve, reject) => {
-    getAcessToken(channel, headers)
+    getAcessToken(channel)
       .then(({ sig, token }) => {
         const playlistUrl = formPlaylistUrl({ channel, sig, token });
 
