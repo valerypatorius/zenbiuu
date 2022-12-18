@@ -1,11 +1,11 @@
-import { ActionContext } from 'vuex';
+import { ref } from 'vue';
+import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
-import { Module, RootState, ModuleState } from '@/types/schema';
-import { getColorForChatAuthor } from '@/src/utils/color';
+import { Module, ModulesSchema } from '@/types/schema';
+import { useUserState } from './useUserState';
 import irc, { COMMANDS as IRC_COMMANDS } from '@/src/utils/irc';
+import { getColorForChatAuthor } from '@/src/utils/color';
 import request from '@/src/utils/request';
-import * as endpoints from '../endpoints';
-import * as actionType from '../actions';
 import type {
   ChatMessage,
   BttvChannelEmotes,
@@ -18,82 +18,81 @@ import type {
   SevenTvEmotes,
 } from '@/types/renderer/chat';
 
-type ChatState = ModuleState<Module.Chat>;
+enum ChatEndpoint {
+  BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
+  BttvChannel = 'https://api.betterttv.net/3/cached/users/twitch',
+  FfzChannel = 'https://api.frankerfacez.com/v1/room',
+  SevenTvGlobal = 'https://api.7tv.app/v2/emotes/global',
+  SevenTvChannel = 'https://api.7tv.app/v2/users',
+}
 
 /**
  * Max number of messages in chat
  */
 const LIMIT = 200;
 
-const defaultState = await config.get('chat');
-
-const actions = {
-  /**
-   * Join channel IRC
-   */
-  [actionType.JOIN_CHANNEL_CHAT] (
-    { dispatch, rootState }: ActionContext<ChatState, RootState>,
-    {
-      channelName,
-      channelId,
-      userId,
-    }: {
-      channelName: string;
-      channelId: string;
-      userId: string;
+export const useChatState = createGlobalState(() => {
+  const refState = ref<ModulesSchema[Module.Chat]>({
+    messages: [],
+    emotes: {
+      bttv: {},
+      ffz: {},
+      seventv: {},
     },
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!rootState.user || !rootState.user.token) {
+    width: 300,
+    height: 500,
+    isPaused: false,
+  });
+
+  const state = toReactive(refState);
+
+  const { state: userState } = useUserState();
+
+  init();
+
+  async function init (): Promise<void> {
+    refState.value = await config.get(Module.Chat);
+
+    // watch(state, () => {
+    //   config.set(Module.Player, state);
+    // });
+  }
+
+  async function join (channel: string): Promise<void> {
+    return await new Promise((resolve, reject) => {
+      if (!userState.token) {
         return;
       }
 
       irc.post('join', {
-        channel: channelName,
+        channel,
       });
 
       irc.onmessage = (type, message) => {
         switch (type) {
           case IRC_COMMANDS.join:
-            dispatch(actionType.CLEAR_CHAT);
+            clear();
             resolve();
             break;
           case IRC_COMMANDS.message:
-            dispatch(actionType.ADD_CHAT_MESSAGE, message);
+            addMessage(message as ChatMessage);
             break;
         }
       };
     });
-  },
+  }
 
-  /**
-   * Leave channel IRC and stop listening for moderation events
-   */
-  [actionType.LEAVE_CHANNEL_CHAT] (
-    { dispatch, rootState }: ActionContext<ChatState, RootState>,
-    {
-      channelName,
-      channelId,
-      userId,
-    }: {
-      channelName: string;
-      channelId: string;
-      userId: string;
-    },
-  ): void {
-    dispatch(actionType.CLEAR_CHAT);
+  function leave (channel: string): void {
+    clear();
 
     irc.post('leave', {
-      channel: channelName,
+      channel,
     });
 
     irc.onmessage = null;
-  },
+  }
 
-  /**
-   * Add new message to chat
-   */
-  [actionType.ADD_CHAT_MESSAGE] ({ state }: ActionContext<ChatState, RootState>, messageData: ChatMessage): void {
+  function addMessage (messageData: ChatMessage): void {
     const emotedText = messageData.text.value
       .split(' ')
       .map((word: string) => {
@@ -148,39 +147,17 @@ const actions = {
     if (state.messages.length > LIMIT && !state.isPaused) {
       state.messages.splice(0, state.messages.length - LIMIT);
     }
-  },
+  }
 
-  /**
-   * Mark chat message as removed
-   */
-  [actionType.REMOVE_CHAT_MESSAGE] ({ state }: ActionContext<ChatState, RootState>, removedId: string): void {
-    const message = state.messages.find((item) => item.id === removedId);
-
-    if (!message) {
-      return;
-    }
-
-    message.isRemoved = true;
-  },
-
-  /**
-   * Remove all messages from chat
-   */
-  [actionType.CLEAR_CHAT] ({ state }: ActionContext<ChatState, RootState>): void {
+  function clear (): void {
     state.messages = [];
-  },
+  }
 
-  /**
-   * Request third-party chat emotes
-   */
-  [actionType.REQUEST_CHAT_EMOTES] (
-    { state }: ActionContext<ChatState, RootState>,
-    { channelName, channelId }: {channelName: string; channelId: string},
-  ): void {
+  function getEmotes (channelName: string, channelId: string): void {
     /**
      * BTTV global emotes
      */
-    const getBttvGlobal = request.get(endpoints.BTTV_GLOBAL_EMOTES);
+    const getBttvGlobal = request.get(ChatEndpoint.BttvGlobal);
 
     getBttvGlobal.onload = (response: BttvGlobalEmotes) => {
       if (!response || (response.length === 0)) {
@@ -200,7 +177,7 @@ const actions = {
     /**
      * BTTV channel emotes
      */
-    const getBttvChannel = request.get(`${endpoints.BTTV_CHANNEL_EMOTES}/${channelId}`);
+    const getBttvChannel = request.get(`${ChatEndpoint.BttvChannel}/${channelId}`);
 
     getBttvChannel.onload = (data: BttvChannelEmotes) => {
       const { channelEmotes, sharedEmotes } = data;
@@ -221,7 +198,7 @@ const actions = {
     };
 
     /** FFZ channel emotes */
-    const getFfzChannel = request.get(`${endpoints.FFZ_CHANNEL_EMOTES}/${channelName}`);
+    const getFfzChannel = request.get(`${ChatEndpoint.FfzChannel}/${channelName}`);
 
     getFfzChannel.onload = (response: FfzChannelEmotes) => {
       Object.values(response.sets).forEach((set) => {
@@ -238,7 +215,7 @@ const actions = {
     };
 
     /** 7tv global emotes */
-    const get7tvGlobal = request.get(endpoints.SEVENTV_GLOBAL_EMOTES);
+    const get7tvGlobal = request.get(ChatEndpoint.SevenTvGlobal);
 
     get7tvGlobal.onload = (response: SevenTvEmotes) => {
       if (!response || (response.length === 0)) {
@@ -256,7 +233,7 @@ const actions = {
     };
 
     /** 7tv channel emotes */
-    const get7tvChannel = request.get(`${endpoints.SEVENTV_CHANNEL_EMOTES}/${channelName}/emotes`);
+    const get7tvChannel = request.get(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`);
 
     get7tvChannel.onload = (response: SevenTvEmotes) => {
       if (!Array.isArray(response)) {
@@ -276,38 +253,28 @@ const actions = {
         };
       });
     };
-  },
+  }
 
-  /**
-   * Set chat paused state.
-   * Prevents autoscrolling
-   */
-  [actionType.SET_CHAT_PAUSE] ({ state }: ActionContext<ChatState, RootState>, value = true): void {
+  function pause (value: boolean): void {
     state.isPaused = value;
-  },
+  }
 
-  /**
-   * Set chat container width in horizontal layout.
-   * Saved in config file
-   */
-  [actionType.SET_CHAT_WIDTH] ({ state }: ActionContext<ChatState, RootState>, value: number): void {
+  function setWidth (value: number): void {
     state.width = value;
+  }
 
-    config.set('chat.width', value);
-  },
-
-  /**
-   * Set chat container width in vertical layout.
-   * Saved in config file
-   */
-  [actionType.SET_CHAT_HEIGHT] ({ state }: ActionContext<ChatState, RootState>, value: number): void {
+  function setHeight (value: number): void {
     state.height = value;
+  }
 
-    config.set('chat.height', value);
-  },
-};
-
-export default {
-  state: defaultState,
-  actions,
-};
+  return {
+    state,
+    join,
+    leave,
+    clear,
+    getEmotes,
+    setWidth,
+    setHeight,
+    pause,
+  };
+});

@@ -14,7 +14,7 @@ const Type: {[key: string]: LogTypeMessage} = {
  */
 const Location: {[key: string]: string} = {
   Time: 'Time',
-  Vuex: 'Vuex',
+  State: 'State',
   IrcManager: 'IrcManager',
   RequestManager: 'RequestManager',
 };
@@ -26,7 +26,7 @@ function getEmoji (type: LogTypeMessage | LogTypeWarning, loc: string): string {
   switch (loc) {
     case Location.Time:
       return '⌛';
-    case Location.Vuex:
+    case Location.State:
       return '📦';
     case Location.IrcManager:
       return '💬';

@@ -134,31 +134,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import SidebarItem from '@/src/components/sidebar/Item.vue';
 import SidebarSearch from '@/src/components/sidebar/Search.vue';
-import * as actions from '@/src/store/actions';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { RouteName } from '@/types/renderer/router';
 import { StreamType } from '@/types/renderer/library';
-import { FOLLOWED_IDS } from '@/src/store/getters';
-import date from '@/src/utils/date';
-import interval from '@/src/utils/interval';
 import { state } from '@/src/utils/hub';
 import { AppUpdateStatus } from '@/types/hub';
-import {
-  GET_USER_FOLLOWS,
-  GET_STREAMS,
-  GET_USERS,
-  SEARCH_CHANNELS,
-} from '@/src/store/actions';
-import type { TwitchStream, TwitchUserFollow, TwitchChannelFromSearch } from '@/types/renderer/library';
-import type { IntervalManagerItem } from '@/src/utils/interval';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import type { TwitchChannelFromSearch } from '@/types/renderer/library';
+import { useSidebarState } from '@/src/store/useSidebarState';
+import { useUserState } from '@/src/store/useUserState';
+import { useLibraryState } from '@/src/store/useLibraryState';
+import { useInterfaceState } from '../store/useInterfaceState';
+import { usePlayerState } from '../store/usePlayerState';
 
 interface SidebarChannelItem {
   userId: string;
@@ -182,14 +174,15 @@ enum SidebarWidth {
 
 const route = useRoute();
 const router = useRouter();
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: interfaceState } = useInterfaceState();
+const { state: sidebarState, setWidth: setSidebarWidth } = useSidebarState();
+const { state: userState } = useUserState();
+const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibraryState();
+const { state: playerState } = usePlayerState();
 
 /** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;
-
-/** Library reload interval */
-const RELOAD_INTERVAL = 2 * date.Minute;
 
 /** Search input delay in ms */
 const SEARCH_INPUT_DELAY = 500;
@@ -199,16 +192,13 @@ const scrollable = ref<HTMLDivElement>();
 const offlineItemsCount = ref(MIN_OFFLINE_ITEMS_COUNT);
 
 /** Current sidebar width, set by user */
-const customSidebarWidth = ref(store.state.sidebar.width);
+const customSidebarWidth = ref(sidebarState.value.width);
 
 /** Resizer instance */
 const resizer = ref<Resizer>();
 
 /** Scroller instance */
 const scroller = ref<Scroller>();
-
-/** Reload interval for channels in library */
-const reloadInterval = ref<IntervalManagerItem>();
 
 /**
  * Current search query.
@@ -226,7 +216,7 @@ const searchResults = ref<TwitchChannelFromSearch[]>([]);
 const isSearchError = ref(false);
 
 /** Logined user access token */
-const userAccessToken = computed(() => store.state.user.token);
+const userAccessToken = computed(() => userState.token);
 
 /** Returns true, if app update is available */
 const isUpdateAvailable = computed(() => {
@@ -239,7 +229,7 @@ const isUpdateAvailable = computed(() => {
 const isLibrary = computed(() => route.name === RouteName.Library);
 
 /** Returns true, if actual library content has been loaded */
-const isLibraryReady = computed(() => store.state.library.isReady);
+const isLibraryReady = computed(() => libraryState.isReady);
 
 /**
  * Returns true, if sidebar should be hidden
@@ -249,11 +239,8 @@ const isSidebarHidden = computed(() => {
     return true;
   }
 
-  return !isLibrary.value && store.state.player.isHideSidebar;
+  return !isLibrary.value && playerState.isHideSidebar;
 });
-
-/** List of ids, followed by logined user */
-const followedIds = computed<string[]>(() => store.getters[FOLLOWED_IDS]);
 
 /**
  * Returns true, if first string contains second substring
@@ -264,11 +251,9 @@ function isContainsSubstring (str: string, substr: string): boolean {
 
 /** List of live channels to display */
 const liveItems = computed(() => {
-  const { streams, users } = store.state.library;
-
-  return streams[StreamType.Followed]
-    .reduce((result: SidebarChannelItem[], stream: TwitchStream) => {
-      const userData = users.find((user) => user.id === stream.user_id);
+  return libraryState.streams[StreamType.Followed]
+    .reduce<SidebarChannelItem[]>((result, stream) => {
+      const userData = libraryState.users.find((user) => user.id === stream.user_id);
 
       if (userData) {
         result.push({
@@ -293,13 +278,12 @@ const liveItems = computed(() => {
  * List of all offline channels
  */
 const offlineItems = computed(() => {
-  const { followed, users } = store.state.library;
   const liveIds = liveItems.value.map((item) => item.userId);
 
-  return followed
+  return libraryState.followed
     .filter((followedItem) => !liveIds.includes(followedItem.to_id))
-    .reduce((result: SidebarChannelItem[], followedItem: TwitchUserFollow) => {
-      const userData = users.find((user) => user.id === followedItem.to_id);
+    .reduce<SidebarChannelItem[]>((result, followedItem) => {
+      const userData = libraryState.users.find((user) => user.id === followedItem.to_id);
 
       if (userData) {
         result.push({
@@ -320,7 +304,6 @@ const offlineItems = computed(() => {
  */
 const foundItems = computed(() => {
   const sortedFound = [...searchResults.value].sort((a, b) => (b.is_live ? 1 : 0) - (a.is_live ? 1 : 0));
-  const { streams } = store.state.library;
 
   return sortedFound
     .filter((foundItem) => {
@@ -339,7 +322,7 @@ const foundItems = computed(() => {
       };
 
       if (foundItem.is_live) {
-        const stream = streams[StreamType.Found].find((item) => item.user_id === foundItem.id);
+        const stream = libraryState.streams[StreamType.Found].find((item) => item.user_id === foundItem.id);
 
         if (stream) {
           data.stream = {
@@ -370,32 +353,7 @@ const offlineItemsHiddenCount = computed(() => offlineItems.value.length - visib
 /** Returns true, if all offline items are currently displayed */
 const isOfflineItemsShownAll = computed(() => offlineItemsHiddenCount.value === 0);
 
-/**
- * When followed ids list is updated,
- * fetch library data
- */
-watch(followedIds, (newValue, oldValue) => {
-  const diff = newValue.filter((x) => !oldValue.includes(x));
-
-  if (diff.length) {
-    store.dispatch(GET_STREAMS);
-    store.dispatch(GET_USERS);
-  }
-}, {
-  deep: true,
-});
-
-store.dispatch(GET_USER_FOLLOWS);
-store.dispatch(GET_USERS);
-
-/**
- * Start interval to update streams list
- */
-reloadInterval.value = interval.start(RELOAD_INTERVAL);
-
-reloadInterval.value.onupdate = () => {
-  store.dispatch(GET_STREAMS);
-};
+updateLibrary();
 
 onMounted(() => {
   resizer.value = new Resizer({
@@ -410,7 +368,7 @@ onMounted(() => {
       customSidebarWidth.value = value;
     },
     onStop: () => {
-      store.dispatch(actions.SET_SIDEBAR_WIDTH, customSidebarWidth.value);
+      setSidebarWidth(customSidebarWidth.value);
     },
   });
 
@@ -432,7 +390,7 @@ onBeforeUnmount(() => {
  * Open selected channel screen
  */
 function selectChannel (item: SidebarChannelItem): void {
-  const { lastUpdateTime } = store.state.library;
+  const { lastUpdateTime } = libraryState;
   const cover = item.stream && item.stream.cover
     ? `${item.stream.cover.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`
     : '';
@@ -451,7 +409,7 @@ function selectChannel (item: SidebarChannelItem): void {
  * Toggle settings panel
  */
 function toggleSettings (): void {
-  store.dispatch(actions.TOGGLE_APP_SETTINGS);
+  interfaceState.isSettingsActive = !interfaceState.isSettingsActive;
 }
 
 /**
@@ -493,13 +451,13 @@ function onSearchInput (): void {
 
   isSearchError.value = false;
 
-  searchTimeout.value = setTimeout(() => {
-    store.dispatch(SEARCH_CHANNELS, searchQuery.value).then((list) => {
-      searchResults.value = list;
-    }).catch(() => {
+  searchTimeout.value = setTimeout(async () => {
+    try {
+      searchResults.value = await searchChannels(searchQuery.value);
+    } catch (error) {
       searchResults.value = [];
       isSearchError.value = true;
-    });
+    }
   }, SEARCH_INPUT_DELAY);
 }
 

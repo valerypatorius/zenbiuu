@@ -38,7 +38,6 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import Popup from '@/src/components/ui/Popup.vue';
@@ -49,9 +48,9 @@ import SettingsAbout from '@/src/components/settings/About.vue';
 import SettingsUpdate from '@/src/components/settings/Update.vue';
 import { state } from '@/src/utils/hub';
 import { AppUpdateStatus } from '@/types/hub';
-import { TOGGLE_APP_SETTINGS } from '@/src/store/actions';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
 import type { Component } from 'vue';
+import { useUserState } from '../store/useUserState';
+import { useInterfaceState } from '../store/useInterfaceState';
 
 enum TabName {
   Interface = 'interface',
@@ -67,11 +66,12 @@ interface TabData {
   component: Component;
 }
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: userState } = useUserState();
+const { state: interfaceState } = useInterfaceState();
 
 /** Logined user access token */
-const userAccessToken = computed(() => store.state.user.token);
+const userAccessToken = computed(() => userState.token);
 
 /** Returns true, if app update is available */
 const isUpdateAvailable = computed(() => {
@@ -135,7 +135,7 @@ const availableTabs = computed(() => {
 
 /** Close settings popup */
 function closeSettings (): void {
-  store.dispatch(TOGGLE_APP_SETTINGS);
+  interfaceState.isSettingsActive = false;
 }
 </script>
 

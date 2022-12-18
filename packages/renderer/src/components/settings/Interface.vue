@@ -72,13 +72,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Radio from '@/src/components/ui/Radio.vue';
 import Checkbox from '@/src/components/ui/Checkbox.vue';
-import { TOGGLE_APP_SETTING, SET_APP_COLOR_SCHEME, SET_APP_INTERFACE_SIZE } from '@/src/store/actions';
 import { AppColorScheme } from '@/types/color';
-import type { AppSettings, RootSchema, ModulesSchema } from '@/types/schema';
+import type { AppSettings } from '@/types/schema';
+import { useAppState } from '@/src/store/useAppState';
+import { useThemeState } from '@/src/store/useThemeState';
 
 /**
  * Interface size limits
@@ -88,14 +88,15 @@ enum InterfaceSize {
   Max = 16,
 }
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: appState } = useAppState();
+const { state: themeState } = useThemeState();
 
 /** Name of current color scheme */
-const currentColorScheme = computed(() => store.state.theme.name);
+const currentColorScheme = computed(() => themeState.name);
 
 /** Current interface size */
-const currentInterfaceSize = computed(() => store.state.app.interfaceSize);
+const currentInterfaceSize = computed(() => appState.interfaceSize);
 
 /** Interface settings, available for change */
 const interfaceSettings = computed(() => {
@@ -106,7 +107,7 @@ const interfaceSettings = computed(() => {
 
   return list.map((name) => ({
     name,
-    value: store.state.app.settings[name],
+    value: appState.settings[name],
   }));
 });
 
@@ -114,14 +115,14 @@ const interfaceSettings = computed(() => {
  * Toggle app setting by its name
  */
 function toggleSetting (name: keyof AppSettings): void {
-  store.dispatch(TOGGLE_APP_SETTING, name);
+  appState.settings[name] = !appState.settings[name];
 }
 
 /**
  * Set app color scheme
  */
 function setAppColorScheme (value: AppColorScheme): void {
-  store.dispatch(SET_APP_COLOR_SCHEME, value);
+  themeState.name = value;
 }
 
 /**
@@ -144,7 +145,7 @@ function setInterfaceSize (value: number | null, event?: Event): void {
 
   document.documentElement.style.setProperty('--size-base', size.toString());
 
-  store.dispatch(SET_APP_INTERFACE_SIZE, size);
+  appState.interfaceSize = size;
 }
 </script>
 

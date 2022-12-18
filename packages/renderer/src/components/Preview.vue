@@ -78,11 +78,11 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useStore } from 'vuex';
 import Icon from '@/src/components/ui/Icon.vue';
 import Duration from '@/src/components/Duration.vue';
 import type { TwitchStream } from '@/types/renderer/library';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useLibraryState } from '../store/useLibraryState';
+import { useAppState } from '../store/useAppState';
 
 const props = withDefaults(defineProps<{
   /** Stream data object */
@@ -98,7 +98,8 @@ const emit = defineEmits<{
   (e: 'click', name: string, id: string, latestCover: string): void;
 }>();
 
-const store = useStore<RootSchema & ModulesSchema>();
+const { state: libraryState } = useLibraryState();
+const { state: appState } = useAppState();
 
 /** Previous cover url */
 const prevCover = ref<string>();
@@ -107,22 +108,19 @@ const prevCover = ref<string>();
 const loadedCover = ref<string>();
 
 /** Returns true, if interface blur is enabled in settings */
-const isBlurEnabled = computed(() => store.state.app.settings.isBlurEnabled);
+const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
 
 /** Viewers count, formatted */
 const viewersCount = computed(() => props.data.viewer_count.toLocaleString());
 
 /** Latest cover url, not ready for display */
 const latestCover = computed(() => {
-  const { lastUpdateTime } = store.state.library;
-
-  return `${props.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`;
+  return `${props.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${libraryState.lastUpdateTime}`;
 });
 
 /** Channel logo image */
 const channelLogo = computed(() => {
-  const { users } = store.state.library;
-  const data = users.find((user) => user.id === props.data.user_id);
+  const data = libraryState.users.find((user) => user.id === props.data.user_id);
 
   return data ? data.profile_image_url : '';
 });

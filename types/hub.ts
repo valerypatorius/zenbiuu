@@ -1,4 +1,4 @@
-import { StoreFilename } from './schema';
+import { StoreFilename, Module, ModulesSchema } from './schema';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 
 /**
@@ -65,11 +65,11 @@ export interface State {
 export interface MainProcessApi {
   fs: {
     [StoreFilename.Config]: {
-      get: (key?: string) => Promise<any>;
-      set: (key: string, value: any) => void;
+      get: <T extends Module>(key?: T) => Promise<ModulesSchema[T]>;
+      set: <T extends Module>(key: T, value: ModulesSchema[T]) => Promise<void>;
     };
     [StoreFilename.Library]: {
-      get: (key?: string) => Promise<any>;
+      get: () => Promise<ModulesSchema[Module.Library]>;
       set: (key: string, value: any) => void;
       clear: () => void;
     };

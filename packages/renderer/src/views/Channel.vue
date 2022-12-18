@@ -20,17 +20,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import Chat from '@/src/components/Chat.vue';
 import Player from '@/src/components/Player.vue';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { usePlayerState } from '../store/usePlayerState';
 
 /**
  * Define store and router instances
  */
-const store = useStore<RootSchema & ModulesSchema>();
 const route = useRoute();
+const { state: playerState } = usePlayerState();
 
 /** Current route params */
 const { id, name, cover } = route.params;
@@ -45,7 +44,7 @@ const channelId = Array.isArray(id) ? id[0] : id;
 const playerCover = Array.isArray(cover) ? cover[0] : cover;
 
 /** Channel screen layout type */
-const layoutType = computed(() => store.state.player.layout);
+const layoutType = computed(() => playerState.layout);
 </script>
 
 <style>

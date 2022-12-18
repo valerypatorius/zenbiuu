@@ -27,6 +27,11 @@ function formPlaylistUrl ({
     fast_bread: true,
     playlist_include_framerate: true,
     reassignments_supported: true,
+
+    // acmb: 'e30=',
+    // player_version: '1.16.0',
+    // player_backend: 'mediaplayer',
+    // cdm: 'wv',
   };
   const urlParams = Object.entries(params).map((param) => param.join('=')).join('&');
 
@@ -37,24 +42,66 @@ function formPlaylistUrl ({
  * Get access token from loaded url.
  * Used to receive stream playlist
  */
-async function getAcessToken (channel: string, headers: {[key: string]: string}): Promise<any> {
+async function getAcessToken (channel: string, headers: Record<string, any>): Promise<{ sig: string; token: string }> {
   return await new Promise((resolve, reject) => {
-    const playerType = 'site'; // picture-by-picture
-    const url = `https://api.twitch.tv/api/channels/${channel}/access_token?oauth_token=&platform=_&player_backend=mediaplayer&player_type=${playerType}`;
+    const url = 'https://gql.twitch.tv/gql';
 
-    const get = request.get(url, {
+    // const test = request.post('https://gql.twitch.tv/integrity', {
+    //   headers: {
+    //     'Client-ID': env.STREAM_CLIENT_ID,
+    //   },
+    // }, '');
+
+    // test.onload = (r) => {
+    //   console.log('???', r);
+    // };
+
+    const post = request.post(url, {
       headers: {
-        Accept: 'application/vnd.twitchtv.v5+json',
-        'client-id': env.STREAM_CLIENT_ID,
-        ...headers,
+        // Accept: '*/*',
+        // Authorization: `OAuth stl33hm73o7ov5km58lwzekh30kknf`,
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US',
+        Authorization: undefined,
+        'Client-ID': env.STREAM_CLIENT_ID,
+        Host: 'gql.twitch.tv',
+        Origin: 'https://player.twitch.tv',
+        Referer: 'https://player.twitch.tv/',
+        // 'Client-Integrity': '',
+        // 'Client-Session-Id': '',
+        // Host: 'gql.twitch.tv',
+        // Origin: 'https://www.twitch.tv',
+        // Referer: 'https://www.twitch.tv/',
       },
-    });
+    }, JSON.stringify({
+      operationName: 'PlaybackAccessToken_Template',
+      query: 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}',
+      variables: {
+        isLive: true,
+        login: channel,
+        isVod: false,
+        vodID: '',
+        playerType: 'site',
+      },
+    }));
 
-    get.onload = (data: AccessTokenResponse) => {
-      resolve(data);
+    post.onload = (response: AccessTokenResponse) => {
+      const { value: token, signature: sig } = response.data.streamPlaybackAccessToken;
+
+      const tokenObj = JSON.parse(token);
+
+      // tokenObj.hide_ads = true;
+      // tokenObj.server_ads = false;
+      // tokenObj.show_ads = false;
+      // tokenObj.turbo = true;
+
+      resolve({
+        sig,
+        token: JSON.stringify(tokenObj),
+      });
     };
 
-    get.onerror = (error) => {
+    post.onerror = (error) => {
       reject(new Error(error));
     };
   });
@@ -63,7 +110,7 @@ async function getAcessToken (channel: string, headers: {[key: string]: string})
 /**
  * Returns playlist url
  */
-export async function getStream (channel: string, headers: Record<string, string>): Promise<string> {
+export async function getPlaylist (channel: string, headers: Record<string, string>): Promise<string> {
   return await new Promise((resolve, reject) => {
     getAcessToken(channel, headers)
       .then(({ sig, token }) => {

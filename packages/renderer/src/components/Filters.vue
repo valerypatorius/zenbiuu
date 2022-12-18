@@ -28,22 +28,21 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import { Sorting, SortingType } from '@/types/renderer/library';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { useLibraryState } from '../store/useLibraryState';
 
 const emit = defineEmits<{
-  (e: 'change', sorting: string): void;
+  (e: 'change', sorting: Sorting): void;
 }>();
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: libraryState } = useLibraryState();
 
 /** Current sorting params */
 const currentSorting = computed(() => {
-  const [name, type] = store.state.library.sorting.split('-');
+  const [name, type] = libraryState.sorting.split('-');
 
   return {
     name,
@@ -90,7 +89,7 @@ function setSorting (name: string, types: SortingType[]): void {
       return;
     }
 
-    emit('change', [name, newType].join('-'));
+    emit('change', [name, newType].join('-') as Sorting);
 
     return;
   }
@@ -98,7 +97,7 @@ function setSorting (name: string, types: SortingType[]): void {
   /**
    * Set new name with first type in list
    */
-  emit('change', [name, types[0]].join('-'));
+  emit('change', [name, types[0]].join('-') as Sorting);
 }
 </script>
 

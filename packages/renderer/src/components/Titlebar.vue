@@ -45,22 +45,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useInterfaceState } from '@/src/store/useInterfaceState';
 import { isWindows } from '@/src/utils/utils';
 import Icon from '@/src/components/ui/Icon.vue';
 import Loader from '@/src/components/ui/Loader.vue';
 import WindowControls from '@/src/components/ui/WindowControls.vue';
 import { getWindowTitle } from '@/src/router/index';
 import { RouteName } from '@/types/renderer/router';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { usePlayerState } from '../store/usePlayerState';
 
 /**
  * Define store and router instances
  */
-const store = useStore<RootSchema & ModulesSchema>();
 const route = useRoute();
 const router = useRouter();
+const { state: interfaceState } = useInterfaceState();
+const { state: playerState } = usePlayerState();
 
 /** Window title, based on current route */
 const title = computed(() => getWindowTitle(route));
@@ -69,13 +70,13 @@ const title = computed(() => getWindowTitle(route));
 const isWindowsBehavior = isWindows();
 
 /** True, if app is loading something */
-const isLoading = computed(() => store.state.app.isLoading);
+const isLoading = computed(() => interfaceState.isLoading);
 
 /** True, if current route is "library" */
 const isLibrary = computed(() => route.name === RouteName.Library);
 
 /** True, if sidebar is hidden by user" */
-const isSidebarHidden = computed(() => store.state.player.isHideSidebar);
+const isSidebarHidden = computed(() => playerState.isHideSidebar);
 
 /** Open Library screen */
 const openLibrary = () => {

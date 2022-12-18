@@ -111,7 +111,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/components/ui/Icon.vue';
 import Control from '@/src/components/player/Control.vue';
@@ -119,34 +118,33 @@ import Picker, { PickerItem } from '@/src/components/player/Picker.vue';
 import Volume from '@/src/components/player/Volume.vue';
 import Duration from '@/src/components/Duration.vue';
 import { PlayerLayout } from '@/types/renderer/player';
-import { TOGGLE_PLAYER_SIDEBAR, TOGGLE_PLAYER_CHAT, TOGGLE_PLAYER_LAYOUT, SET_PLAYER_VOLUME, SET_PLAYER_AUDIO_COMPRESSOR } from '@/src/store/actions';
 import type { TwitchStream } from '@/types/renderer/library';
 import type { PlayerElements } from '@/types/renderer/player';
 import type { Level } from 'hls.js';
-import type { RootSchema, ModulesSchema } from '@/types/schema';
+import { usePlayerState } from '@/src/store/usePlayerState';
 
 const props = defineProps<{
-    /** Current channel name */
-    channelName: string;
+  /** Current channel name */
+  channelName: string;
 
-    /** Active stream info, if available */
-    streamInfo?: TwitchStream;
+  /** Active stream info, if available */
+  streamInfo?: TwitchStream;
 
-    /** Current player volume */
-    currentVolume: number;
+  /** Current player volume */
+  currentVolume: number;
 
-    /** Available quality levels. Raw */
-    qualityLevels: Level[];
+  /** Available quality levels. Raw */
+  qualityLevels: Level[];
 
-    /** True, if app sidebar is hidden */
-    isSidebarHidden: boolean;
+  /** True, if app sidebar is hidden */
+  isSidebarHidden: boolean;
 
-    /** True, if chat is hidden */
-    isChatHidden: boolean;
+  /** True, if chat is hidden */
+  isChatHidden: boolean;
 
-    /** Player DOM-elements list */
-    elements: Partial<PlayerElements>;
-  }>();
+  /** Player DOM-elements list */
+  elements: Partial<PlayerElements>;
+}>();
 
 const emit = defineEmits<{
   (e: 'change-quality', index: number): void;
@@ -154,8 +152,8 @@ const emit = defineEmits<{
   (e: 'control-mouse-leave'): void;
 }>();
 
-const store = useStore<RootSchema & ModulesSchema>();
 const { t } = useI18n();
+const { state: playerState, toggleChat, toggleSidebar, toggleLayout, setVolume, setCompressor } = usePlayerState();
 
 /** Current fullscreen state */
 const isFullscreen = ref(false);
@@ -164,10 +162,10 @@ const isFullscreen = ref(false);
 const currentQualityLevel = ref(-1);
 
 /** Returns true, if current player layout is "horizontal" */
-const isHorizontalLayout = computed(() => store.state.player.layout === PlayerLayout.Horizontal);
+const isHorizontalLayout = computed(() => playerState.layout === PlayerLayout.Horizontal);
 
 /** Returns true, if audio compressor is enabled */
-const isCompressorEnabled = computed(() => store.state.player.compressor);
+const isCompressorEnabled = computed(() => playerState.compressor);
 
 /** Twitch channel url */
 const channelUrl = computed(() => `https://twitch.tv/${props.channelName}`);
@@ -229,20 +227,6 @@ onBeforeUnmount(() => {
 });
 
 /**
- * Toggle sidebar visibility
- */
-function toggleSidebar (): void {
-  store.dispatch(TOGGLE_PLAYER_SIDEBAR);
-}
-
-/**
- * Toggle chat visibility
- */
-function toggleChat (): void {
-  store.dispatch(TOGGLE_PLAYER_CHAT);
-}
-
-/**
  * Toggle fullscreen mode
  */
 function toggleFullscreen (): void {
@@ -256,13 +240,6 @@ function toggleFullscreen (): void {
 }
 
 /**
- * Set specified player layout
- */
-function toggleLayout (): void {
-  store.dispatch(TOGGLE_PLAYER_LAYOUT);
-}
-
-/**
  * Update current fullscreen state, based on document state
  */
 function onFullscreenChange (): void {
@@ -273,14 +250,14 @@ function onFullscreenChange (): void {
  * Set player volume in settings
  */
 function onVolumeChange (value: number): void {
-  store.dispatch(SET_PLAYER_VOLUME, value);
+  setVolume(value);
 }
 
 /**
  * Set compressor state in settings
  */
 function onAudioCompressorToggle (isEnabled: boolean): void {
-  store.dispatch(SET_PLAYER_AUDIO_COMPRESSOR, isEnabled);
+  setCompressor(isEnabled);
 }
 
 /**

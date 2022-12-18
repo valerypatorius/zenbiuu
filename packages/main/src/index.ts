@@ -265,7 +265,6 @@ function handleCors (): void {
   const playerUrls = {
     urls: [
       'https://*.ttvnw.net/*',
-      'https://api.twitch.tv/api/channels/*',
     ],
   };
 
