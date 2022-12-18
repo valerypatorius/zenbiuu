@@ -60,10 +60,6 @@ export const useChat = createGlobalState(() => {
 
   async function join (channel: string): Promise<void> {
     return await new Promise((resolve, reject) => {
-      if (!userState.token) {
-        return;
-      }
-
       irc.post('join', {
         channel,
       });
