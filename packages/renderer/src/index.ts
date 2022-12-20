@@ -21,4 +21,4 @@ createApp(App)
 
 timer.end = performance.now();
 
-log.message(log.Location.Time, 'Startup', timer.diff);
+log.message(log.Type.Time, 'Startup', timer.diff);

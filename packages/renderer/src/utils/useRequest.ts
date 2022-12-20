@@ -4,9 +4,15 @@ import { useUser } from '../store/useUser';
 import { Method } from '@/src/workers/types.request.worker';
 import RequestWorker from '@/src/workers/request.worker.ts?worker';
 import { useInterface } from '../store/useInterface';
+import log from './log';
 
 enum RequestError {
   Queued = 'Request still processing',
+}
+
+interface QueueHandlers {
+  resolve: (value: any) => void;
+  reject: (error: Error) => void;
 }
 
 export const useRequest = createSharedComposable(() => {
@@ -16,9 +22,9 @@ export const useRequest = createSharedComposable(() => {
   const { state: userState } = useUser();
   const { state: interfaceState } = useInterface();
 
-  const queue = reactive(new Map<string, { resolve: (value: any) => void; reject: (error: Error) => void }>());
+  const queue = reactive(new Map<string, QueueHandlers>());
 
-  const requestHeaders = computed(() => ({
+  const requestHeaders = computed<Record<string, string>>(() => ({
     Accept: 'application/vnd.twitchtv.v5+json',
     Authorization: `Bearer ${userState.token}`,
     'Client-ID': import.meta.env.VITE_APP_CLIENT_ID,
@@ -32,23 +38,26 @@ export const useRequest = createSharedComposable(() => {
 
   watch(workerData, () => {
     const promise = queue.get(workerData.value.url);
+    const url = new URL(workerData.value.url);
 
     if (promise === undefined) {
       return;
     }
 
     if (workerData.value.error) {
-      console.error(workerData.value.error);
+      log.warning(log.Type.Request, `${url.hostname}${url.pathname}`, workerData.value.error);
 
       promise.reject(workerData.value.error);
     } else {
+      log.message(log.Type.Request, `${url.hostname}${url.pathname}`);
+
       promise.resolve(workerData.value.data);
     }
 
     queue.delete(workerData.value.url);
   });
 
-  function get<T> (url: string): Promise<T> {
+  function get<T> (url: string, headers = requestHeaders.value): Promise<T> {
     return new Promise((resolve, reject) => {
       if (queue.has(url)) {
         reject(RequestError.Queued);
@@ -66,7 +75,33 @@ export const useRequest = createSharedComposable(() => {
         data: {
           url,
           options: {
-            headers: requestHeaders.value,
+            headers,
+          },
+        },
+      });
+    });
+  }
+
+  function post<T> (url: string, data?: any, headers = requestHeaders.value): Promise<T> {
+    return new Promise((resolve, reject) => {
+      if (queue.has(url)) {
+        reject(RequestError.Queued);
+
+        return;
+      }
+
+      queue.set(url, {
+        resolve,
+        reject,
+      });
+
+      postMessage({
+        action: Method.Post,
+        data: {
+          url,
+          body: typeof data === 'string' ? data : JSON.stringify(data),
+          options: {
+            headers,
           },
         },
       });
@@ -75,6 +110,7 @@ export const useRequest = createSharedComposable(() => {
 
   return {
     get,
+    post,
     isLoading,
   };
 });

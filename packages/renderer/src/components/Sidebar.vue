@@ -400,9 +400,10 @@ function selectChannel (item: SidebarChannelItem): void {
     params: {
       name: item.name,
       id: item.userId,
-      cover,
     },
   });
+
+  playerState.cover = cover;
 }
 
 /**

@@ -1,14 +1,42 @@
 import { ref, watch } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
-import { config, getStringByteLength } from '@/src/utils/hub';
+import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
-import { PlayerLayout } from '@/types/renderer/player';
-import { getPlaylist } from '@/src/utils/m3u8';
+import { AccessTokenResponse, PlayerLayout } from '@/types/renderer/player';
 import { useUser } from './useUser';
-import request from '@/src/utils/request';
+import { useRequest } from '../utils/useRequest';
+import { uid } from '../utils/utils';
 
 enum PlayerEndpoint {
+  GraphApi = 'https://gql.twitch.tv/gql',
   Stats = 'https://spade.twitch.tv/track',
+}
+
+interface PlaylistAccess {
+  sig: string;
+  token: string;
+}
+
+const DEVICE_ID = uid();
+
+function formPlaylistUrl (channel: string, { sig, token }: PlaylistAccess): string {
+  const params = {
+    sig,
+    type: 'any',
+    p: Math.floor(Math.random() * 999999),
+    token: encodeURIComponent(token),
+    player: 'twitchweb',
+    allow_source: true,
+    allow_audio_only: true,
+    allow_spectre: false,
+    fast_bread: true,
+    playlist_include_framerate: true,
+    reassignments_supported: true,
+  };
+
+  const query = Object.entries(params).map((param) => param.join('=')).join('&');
+
+  return `https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8?${query}`;
 }
 
 export const usePlayer = createGlobalState(() => {
@@ -24,6 +52,7 @@ export const usePlayer = createGlobalState(() => {
   const state = toReactive(refState);
 
   const { state: userState } = useUser();
+  const { post } = useRequest();
 
   init();
 
@@ -35,14 +64,53 @@ export const usePlayer = createGlobalState(() => {
     // });
   }
 
-  async function getStream (channelName: string): Promise<string> {
-    const headers = {
-      Authorization: `OAuth ${userState.token}`,
+  async function getAcessToken (channel: string): Promise<PlaylistAccess> {
+    const response = await post<AccessTokenResponse>(PlayerEndpoint.GraphApi, {
+      operationName: 'PlaybackAccessToken_Template',
+      query: 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}',
+      variables: {
+        isLive: true,
+        login: channel,
+        isVod: false,
+        vodID: '',
+        playerType: 'site',
+      },
+    }, {
+      'Client-ID': import.meta.env.VITE_STREAM_CLIENT_ID,
+      'Device-ID': DEVICE_ID,
+    });
+
+    return {
+      sig: response.data.streamPlaybackAccessToken.signature,
+      token: response.data.streamPlaybackAccessToken.value,
     };
+  }
 
-    const url = await getPlaylist(channelName, headers);
+  async function getPlaylist (channel: string): Promise<string> {
+    const access = await getAcessToken(channel);
 
-    return url;
+    return formPlaylistUrl(channel, access);
+  }
+
+  async function sendStats ({ broadcastId, channeld }: { broadcastId: string; channeld: string }): Promise<void> {
+    const data = [
+      {
+        event: 'minute-watched',
+        properties: {
+          broadcast_id: broadcastId,
+          channel_id: channeld,
+          login: userState.name,
+          platform: 'web',
+          player: 'site',
+        },
+      },
+    ];
+
+    await post(PlayerEndpoint.Stats, {
+      data: btoa(JSON.stringify(data)),
+    }, {
+      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    });
   }
 
   function toggleSidebar (): void {
@@ -67,37 +135,9 @@ export const usePlayer = createGlobalState(() => {
     state.compressor = value;
   }
 
-  function sendStats ({ broadcastId, channeld }: { broadcastId: string; channeld: string }): void {
-    if (!userState.token) {
-      return;
-    }
-
-    const data = [
-      {
-        event: 'minute-watched',
-        properties: {
-          broadcast_id: broadcastId,
-          channel_id: channeld,
-          login: userState.name,
-          platform: 'web',
-          player: 'site',
-        },
-      },
-    ];
-
-    const body = `data=${btoa(JSON.stringify(data))}`;
-
-    request.post(PlayerEndpoint.Stats, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Content-Length': getStringByteLength(body),
-      },
-    }, body);
-  }
-
   return {
     state,
-    getStream,
+    getPlaylist,
     toggleSidebar,
     toggleChat,
     toggleLayout,

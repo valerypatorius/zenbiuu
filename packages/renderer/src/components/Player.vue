@@ -119,7 +119,7 @@ const HLS_CONFIG: Partial<HlsConfig> = {
 
 const { state: appState } = useApp();
 const { state: libraryState } = useLibrary();
-const { state: playerState, getStream, sendStats } = usePlayer();
+const { state: playerState, getPlaylist, sendStats } = usePlayer();
 
 const player = ref<HTMLDivElement>();
 
@@ -317,7 +317,7 @@ function initPlayer (): void {
  * Load playlist and pass it to hls
  */
 async function loadPlaylist (channel: string): Promise<void> {
-  const playlist = await getStream(channel);
+  const playlist = await getPlaylist(channel);
 
   hls.value?.loadSource(playlist);
 }

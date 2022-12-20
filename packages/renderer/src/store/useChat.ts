@@ -2,21 +2,10 @@ import { ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
-import { useUser } from './useUser';
-import irc, { COMMANDS as IRC_COMMANDS } from '@/src/utils/irc';
 import { getColorForChatAuthor } from '@/src/utils/color';
-import request from '@/src/utils/request';
-import type {
-  ChatMessage,
-  BttvChannelEmotes,
-  BttvEmoteDataDefault,
-  BttvEmoteDataShared,
-  BttvGlobalEmotes,
-  FfzChannelEmotes,
-  FfzEmoteDataSimple,
-  SevenTvEmoteDataSimple,
-  SevenTvEmotes,
-} from '@/types/renderer/chat';
+import { useRequest } from '../utils/useRequest';
+import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
+import { Command, useIrc } from '../utils/useIrc';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
@@ -46,7 +35,8 @@ export const useChat = createGlobalState(() => {
 
   const state = toReactive(refState);
 
-  const { state: userState } = useUser();
+  const { get } = useRequest();
+  const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
 
   init();
 
@@ -58,34 +48,27 @@ export const useChat = createGlobalState(() => {
     // });
   }
 
-  async function join (channel: string): Promise<void> {
-    return await new Promise((resolve, reject) => {
-      irc.post('join', {
-        channel,
-      });
+  function messageHandler ({ command, data }: { command: Command; data: ChatMessage | Record<string, any> }): void {
+    switch (command) {
+      case Command.Join:
+        clear();
+        break;
+      case Command.Message:
+        addMessage(data as ChatMessage);
+        break;
+    }
+  }
 
-      irc.onmessage = (type, message) => {
-        switch (type) {
-          case IRC_COMMANDS.join:
-            clear();
-            resolve();
-            break;
-          case IRC_COMMANDS.message:
-            addMessage(message as ChatMessage);
-            break;
-        }
-      };
-    });
+  async function join (channelName: string): Promise<void> {
+    joinChannel(channelName);
+    onMessage(messageHandler);
   }
 
   function leave (channel: string): void {
     clear();
 
-    irc.post('leave', {
-      channel,
-    });
-
-    irc.onmessage = null;
+    leaveChannel(channel);
+    offMessage(messageHandler);
   }
 
   function addMessage (messageData: ChatMessage): void {
@@ -149,106 +132,84 @@ export const useChat = createGlobalState(() => {
     state.messages = [];
   }
 
-  function getEmotes (channelName: string, channelId: string): void {
-    /**
-     * BTTV global emotes
-     */
-    const getBttvGlobal = request.get(ChatEndpoint.BttvGlobal);
+  async function getBttvGlobalEmotes (): Promise<void> {
+    const response = await get<BttvGlobalEmotes>(ChatEndpoint.BttvGlobal, {});
 
-    getBttvGlobal.onload = (response: BttvGlobalEmotes) => {
-      if (!response || (response.length === 0)) {
-        return;
-      }
+    response.forEach((emote) => {
+      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      response.forEach((emote: BttvEmoteDataDefault) => {
-        const size = window.devicePixelRatio > 1 ? '2x' : '1x';
+      state.emotes.bttv[emote.code] = {
+        url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
+        height: 28,
+      };
+    });
+  }
 
-        state.emotes.bttv[emote.code] = {
-          url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
-          height: 28,
+  async function getBttvChannelEmotes (channelId: string): Promise<void> {
+    const response = await get<BttvChannelEmotes>(`${ChatEndpoint.BttvChannel}/${channelId}`, {});
+    const { channelEmotes, sharedEmotes } = response;
+    const emotes = [...channelEmotes, ...sharedEmotes];
+
+    emotes.forEach((emote) => {
+      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
+
+      state.emotes.bttv[emote.code] = {
+        url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
+        height: 28,
+      };
+    });
+  }
+
+  async function getFfzChannelEmotes (channelName: string): Promise<void> {
+    const response = await get<FfzChannelEmotes>(`${ChatEndpoint.FfzChannel}/${channelName}`, {});
+
+    Object.values(response.sets).forEach((set) => {
+      set.emoticons.forEach((emote) => {
+        const size = window.devicePixelRatio > 1 ? 2 : 1;
+        const url = emote.urls[size] || emote.urls[1];
+
+        state.emotes.ffz[emote.name] = {
+          url: `https:${url}`,
+          height: emote.height,
         };
       });
-    };
+    });
+  }
 
-    /**
-     * BTTV channel emotes
-     */
-    const getBttvChannel = request.get(`${ChatEndpoint.BttvChannel}/${channelId}`);
+  async function getSevenTvGlobalEmotes (): Promise<void> {
+    const response = await get<SevenTvEmotes>(ChatEndpoint.SevenTvGlobal, {});
 
-    getBttvChannel.onload = (data: BttvChannelEmotes) => {
-      const { channelEmotes, sharedEmotes } = data;
-      const emotes = [...channelEmotes, ...sharedEmotes];
+    response.forEach((emote) => {
+      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      if (emotes.length === 0) {
-        return;
-      }
+      state.emotes.seventv[emote.name] = {
+        url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
+        height: 28,
+      };
+    });
+  }
 
-      emotes.forEach((emote: BttvEmoteDataDefault | BttvEmoteDataShared) => {
-        const size = window.devicePixelRatio > 1 ? '2x' : '1x';
+  async function getSevenTvChannelEmotes (channelName: string): Promise<void> {
+    const response = await get<SevenTvEmotes>(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`, {});
 
-        state.emotes.bttv[emote.code] = {
-          url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
-          height: 28,
-        };
-      });
-    };
+    response.forEach((emote) => {
+      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-    /** FFZ channel emotes */
-    const getFfzChannel = request.get(`${ChatEndpoint.FfzChannel}/${channelName}`);
+      state.emotes.seventv[emote.name] = {
+        url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
+        height: 28,
+      };
+    });
+  }
 
-    getFfzChannel.onload = (response: FfzChannelEmotes) => {
-      Object.values(response.sets).forEach((set) => {
-        set.emoticons.forEach((emote: FfzEmoteDataSimple) => {
-          const size = window.devicePixelRatio > 1 ? 2 : 1;
-          const url = emote.urls[size] || emote.urls[1];
+  function getEmotes ({ id, name }: { id: string; name: string }): void {
+    getBttvGlobalEmotes();
 
-          state.emotes.ffz[emote.name] = {
-            url: `https:${url}`,
-            height: emote.height,
-          };
-        });
-      });
-    };
+    getBttvChannelEmotes(id);
+    getFfzChannelEmotes(name);
 
-    /** 7tv global emotes */
-    const get7tvGlobal = request.get(ChatEndpoint.SevenTvGlobal);
-
-    get7tvGlobal.onload = (response: SevenTvEmotes) => {
-      if (!response || (response.length === 0)) {
-        return;
-      }
-
-      response.forEach((emote: SevenTvEmoteDataSimple) => {
-        const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-        state.emotes.seventv[emote.name] = {
-          url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
-          height: 28,
-        };
-      });
-    };
-
-    /** 7tv channel emotes */
-    const get7tvChannel = request.get(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`);
-
-    get7tvChannel.onload = (response: SevenTvEmotes) => {
-      if (!Array.isArray(response)) {
-        return;
-      }
-
-      if (!response || (response.length === 0)) {
-        return;
-      }
-
-      response.forEach((emote: SevenTvEmoteDataSimple) => {
-        const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-        state.emotes.seventv[emote.name] = {
-          url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
-          height: 28,
-        };
-      });
-    };
+    getSevenTvGlobalEmotes();
+    getSevenTvChannelEmotes(name);
   }
 
   function pause (value: boolean): void {
