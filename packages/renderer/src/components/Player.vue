@@ -215,7 +215,7 @@ onMounted(() => {
   /**
    * Update stream info and send player stats every 1 minute
    */
-  startInterval(() => {
+  stopStatsInterval.value = startInterval(() => {
     if (info.value === undefined) {
       return;
     }
