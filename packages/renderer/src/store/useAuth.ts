@@ -5,12 +5,11 @@ import { requestAccessToken } from '@/src/utils/hub';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
 import { TwitchTokenValidationResponse } from '@/types/renderer/user';
-import interval from '@/src/utils/interval';
-import type { IntervalManagerItem } from '../utils/interval';
 import { RouteName } from '@/types/renderer/router';
 import { useRequest } from '../utils/useRequest';
 import { useUser } from './useUser';
 import { useIrc } from '../utils/useIrc';
+import { useInterval } from '../utils/useInterval';
 
 /**
  * Max lifetime of auth token before validation is required
@@ -36,28 +35,28 @@ export const useAuth = createGlobalState(() => {
   const router = useRouter();
   const { get, post } = useRequest();
   const { connect: connectToIrc, disconnect: disconnectFromIrc } = useIrc();
+  const { start: startInterval } = useInterval();
 
-  /** Interval for token validation */
-  const tokenInterval = ref<IntervalManagerItem | null>(null);
+  /** Stop function for token validation interval */
+  const stopTokenInterval = ref<() => void>();
 
   /**
    * Start token interval on mount
    */
   tryOnMounted(() => {
-    tokenInterval.value = interval.start(TOKEN_UPDATE_INTERVAL);
-    tokenInterval.value.onupdate = validate;
+    stopTokenInterval.value = startInterval(validate, TOKEN_UPDATE_INTERVAL, {
+      immediate: true,
+    });
   });
 
   /**
    * Stop token interval on unmount
    */
   tryOnBeforeUnmount(() => {
-    if (!tokenInterval.value) {
-      return;
+    if (stopTokenInterval.value !== undefined) {
+      stopTokenInterval.value();
+      stopTokenInterval.value = undefined;
     }
-
-    interval.stop(tokenInterval.value);
-    tokenInterval.value = null;
   });
 
   /**

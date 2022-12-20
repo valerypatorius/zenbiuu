@@ -6,10 +6,9 @@ import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { Sorting, TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
 import date from '@/src/utils/date';
-import interval from '@/src/utils/interval';
 import { getCurrentUnixTime } from '@/src/utils/utils';
-import type { IntervalManagerItem } from '../utils/interval';
 import { useRequest } from '@/src/utils/useRequest';
+import { useInterval } from '../utils/useInterval';
 
 enum LibraryError {
   EmptySearchQuery = 'Search query is empty',
@@ -47,10 +46,9 @@ export const useLibrary = createGlobalState(() => {
   const { state: interfaceState } = useInterface();
   const { state: userState } = useUser();
   const { get } = useRequest();
+  const { start: startInterval } = useInterval();
 
   const followedIds = computed(() => state.followed.map((user) => user.to_id));
-
-  const reloadInterval = ref<IntervalManagerItem>();
 
   init();
 
@@ -115,15 +113,11 @@ export const useLibrary = createGlobalState(() => {
 
     getFollowedChannelsData();
 
-    if (reloadInterval.value !== undefined) {
-      return;
-    }
-
-    reloadInterval.value = interval.start(RELOAD_INTERVAL);
-
-    reloadInterval.value.onupdate = () => {
+    startInterval(() => {
       getStreams(followedIds.value);
-    };
+    }, RELOAD_INTERVAL, {
+      immediate: true,
+    });
   }
 
   /**
