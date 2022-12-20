@@ -1,13 +1,16 @@
-import { reactive } from 'vue';
+import { ref, computed } from 'vue';
 import { createGlobalState } from '@vueuse/core';
+import { useRequest } from '@/src/utils/useRequest';
 
 export const useInterface = createGlobalState(() => {
-  const state = reactive({
-    isLoading: false,
-    isSettingsActive: false,
-  });
+  const { isLoading: isRequestLoading } = useRequest();
+
+  const isLoading = computed(() => isRequestLoading.value);
+
+  const isSettingsActive = ref(false);
 
   return {
-    state,
+    isLoading,
+    isSettingsActive,
   };
 });

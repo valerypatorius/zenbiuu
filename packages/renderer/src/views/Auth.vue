@@ -54,7 +54,7 @@ const { t } = useI18n();
 
 /** Screen title */
 const title = getAppName();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 const { authorize } = useAuth();
 
 /**
@@ -65,7 +65,7 @@ const isLoading = ref(false);
 
 /** Toggle settings panel */
 function toggleSettings () {
-  interfaceState.isSettingsActive = !interfaceState.isSettingsActive;
+  isSettingsActive.value = !isSettingsActive.value;
 }
 
 /** Request auth and go to library screen */

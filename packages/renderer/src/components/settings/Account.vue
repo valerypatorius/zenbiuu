@@ -39,7 +39,7 @@ const { t } = useI18n();
 const router = useRouter();
 const { state: userState } = useUser();
 const { deauthorize } = useAuth();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 const { reset: resetLibrary } = useLibrary();
 
 /** True, if logout request is being processed */
@@ -64,7 +64,7 @@ async function logout (): Promise<void> {
   await deauthorize();
 
   isLoading.value = false;
-  interfaceState.isSettingsActive = false;
+  isSettingsActive.value = false;
 
   resetLibrary();
 

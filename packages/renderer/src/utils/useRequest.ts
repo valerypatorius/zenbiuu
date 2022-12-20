@@ -1,30 +1,30 @@
 import { reactive, watch, computed } from 'vue';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
 import { useUser } from '../store/useUser';
-import { Method } from '@/src/workers/types.request.worker';
+import { RequestAction, RequestError, RequestResponse, RequestPayload } from '@/src/workers/types.request.worker';
 import RequestWorker from '@/src/workers/request.worker.ts?worker';
-import { useInterface } from '../store/useInterface';
 import log from './log';
 
-enum RequestError {
-  Queued = 'Request still processing',
+interface QueueHandlers<T = any> {
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason: Error) => void;
 }
 
-interface QueueHandlers {
-  resolve: (value: any) => void;
-  reject: (error: Error) => void;
+interface RequestHandlerPayload {
+  url: string;
+  body?: any;
+  headers?: Record<string, string>;
 }
 
 export const useRequest = createSharedComposable(() => {
   const worker = new RequestWorker();
 
-  const { data: workerData, post: postMessage } = useWebWorker(worker);
+  const { data: workerData, post: postMessage } = useWebWorker<RequestResponse>(worker);
   const { state: userState } = useUser();
-  const { state: interfaceState } = useInterface();
 
   const queue = reactive(new Map<string, QueueHandlers>());
 
-  const requestHeaders = computed<Record<string, string>>(() => ({
+  const defaultHeaders = computed<Record<string, string>>(() => ({
     Accept: 'application/vnd.twitchtv.v5+json',
     Authorization: `Bearer ${userState.token}`,
     'Client-ID': import.meta.env.VITE_APP_CLIENT_ID,
@@ -32,79 +32,73 @@ export const useRequest = createSharedComposable(() => {
 
   const isLoading = computed(() => queue.size > 0);
 
-  watch(isLoading, () => {
-    interfaceState.isLoading = isLoading.value;
-  });
-
   watch(workerData, () => {
-    const promise = queue.get(workerData.value.url);
-    const url = new URL(workerData.value.url);
+    const handlers = queue.get(workerData.value.url);
+    const urlObject = new URL(workerData.value.url);
 
-    if (promise === undefined) {
+    if (handlers === undefined) {
       return;
     }
 
     if (workerData.value.error) {
-      log.warning(log.Type.Request, `${url.hostname}${url.pathname}`, workerData.value.error);
+      log.warning(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`, workerData.value.error);
 
-      promise.reject(workerData.value.error);
+      handlers.reject(workerData.value.error);
     } else {
-      log.message(log.Type.Request, `${url.hostname}${url.pathname}`);
+      log.message(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`);
 
-      promise.resolve(workerData.value.data);
+      handlers.resolve(workerData.value.data);
     }
 
     queue.delete(workerData.value.url);
   });
 
-  function get<T> (url: string, headers = requestHeaders.value): Promise<T> {
+  function handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {
     return new Promise((resolve, reject) => {
-      if (queue.has(url)) {
+      if (queue.has(payload.url)) {
         reject(RequestError.Queued);
 
         return;
       }
 
-      queue.set(url, {
+      queue.set(payload.url, {
         resolve,
         reject,
       });
 
+      const data: RequestPayload = {
+        url: payload.url,
+      };
+
+      if (action === RequestAction.Post && payload.body !== undefined) {
+        data.body = typeof payload.body === 'string' ? payload.body : JSON.stringify(payload.body);
+      }
+
+      if (payload.headers !== undefined) {
+        data.options = {
+          headers: payload.headers,
+        };
+      }
+
       postMessage({
-        action: Method.Get,
-        data: {
-          url,
-          options: {
-            headers,
-          },
-        },
+        action,
+        data,
       });
     });
   }
 
-  function post<T> (url: string, data?: any, headers = requestHeaders.value): Promise<T> {
-    return new Promise((resolve, reject) => {
-      if (queue.has(url)) {
-        reject(RequestError.Queued);
+  async function get<T> (url: string, headers = defaultHeaders.value): Promise<T> {
+    return await handle<T>(RequestAction.Get, {
+      url,
+      headers,
+    });
+  }
 
-        return;
-      }
-
-      queue.set(url, {
-        resolve,
-        reject,
-      });
-
-      postMessage({
-        action: Method.Post,
-        data: {
-          url,
-          body: typeof data === 'string' ? data : JSON.stringify(data),
-          options: {
-            headers,
-          },
-        },
-      });
+  async function post<T> (url: string, body?: any, headers = defaultHeaders.value): Promise<T> {
+    return await handle<T>(RequestAction.Post, {
+      url,
+      body,
+      headers,
     });
   }
 

@@ -1,6 +1,5 @@
 import { computed, ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
-import { useInterface } from './useInterface';
 import { useUser } from './useUser';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
@@ -43,7 +42,6 @@ export const useLibrary = createGlobalState(() => {
 
   const state = toReactive(refState);
 
-  const { state: interfaceState } = useInterface();
   const { state: userState } = useUser();
   const { get } = useRequest();
   const { start: startInterval } = useInterval();
@@ -95,8 +93,6 @@ export const useLibrary = createGlobalState(() => {
     const liveIds = data.filter((item) => item.is_live).map((item) => item.id);
 
     if (!liveIds.length) {
-      interfaceState.isLoading = false;
-
       return await Promise.reject(LibraryError.EmptySearchResult);
     }
 

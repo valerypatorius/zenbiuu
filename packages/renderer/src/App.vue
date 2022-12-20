@@ -27,12 +27,9 @@ import { useAuth } from '@/src/store/useAuth';
 useAuth();
 
 const route = useRoute();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
 const { state: userState } = useUser();
-
-/** True, if settings overlay is active */
-const isSettingsActive = computed(() => interfaceState.isSettingsActive);
 
 /** True, if app window is set always on top */
 const isAlwaysOnTop = computed(() => appState.settings.isAlwaysOnTop);
