@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';

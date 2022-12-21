@@ -6,8 +6,8 @@ import { Module, ModulesSchema } from '@/types/schema';
 import { Sorting, TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
 import date from '@/src/utils/date';
 import { getCurrentUnixTime } from '@/src/utils/utils';
-import { useRequest } from '@/src/utils/useRequest';
-import { useInterval } from '../utils/useInterval';
+import { useRequest } from '@/src/infrastructure/request/useRequest';
+import { useInterval } from '@/src/infrastructure/interval/useInterval';
 
 enum LibraryError {
   EmptySearchQuery = 'Search query is empty',

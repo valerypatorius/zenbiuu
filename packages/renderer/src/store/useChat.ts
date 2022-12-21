@@ -3,10 +3,10 @@ import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { getColorForChatAuthor } from '@/src/utils/color';
-import { useRequest } from '../utils/useRequest';
+import { useRequest } from '@/src/infrastructure/request/useRequest';
 import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
-import { useIrc } from '../utils/useIrc';
-import { IrcCommand } from '../workers/types.irc.worker';
+import { useIrc } from '@/src/infrastructure/irc/useIrc';
+import { IrcCommand } from '@/src/infrastructure/irc/types.irc.worker';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',

@@ -6,10 +6,10 @@ import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
 import { TwitchTokenValidationResponse } from '@/types/renderer/user';
 import { RouteName } from '@/types/renderer/router';
-import { useRequest } from '../utils/useRequest';
-import { useUser } from './useUser';
-import { useIrc } from '../utils/useIrc';
-import { useInterval } from '../utils/useInterval';
+import { useRequest } from '@/src/infrastructure/request/useRequest';
+import { useUser } from '@/src/store/useUser';
+import { useIrc } from '@/src/infrastructure/irc/useIrc';
+import { useInterval } from '@/src/infrastructure/interval/useInterval';
 
 /**
  * Max lifetime of auth token before validation is required
@@ -83,7 +83,7 @@ export const useAuth = createGlobalState(() => {
       userState.tokenDate &&
       tokenTimePassed < TOKEN_LIFETIME
     ) {
-      connectToIrc(userState.name, userState.token);
+      connectToIrc();
 
       if (!route.name) {
         router.replace(RouteName.Library);
@@ -102,7 +102,7 @@ export const useAuth = createGlobalState(() => {
       userState.id = response.user_id;
       userState.name = response.login;
 
-      connectToIrc(userState.name, userState.token);
+      connectToIrc();
     } catch (error) {
       userState.token = undefined;
     }
