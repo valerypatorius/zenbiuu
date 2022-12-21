@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
-import App from './App.vue';
+import App from '@/src/modules/core/App.vue';
 import router from './router';
-import i18n from './i18n';
+import i18n from '@/src/infrastructure/i18n/i18n';
 import log from './utils/log';
 
 const timer = {

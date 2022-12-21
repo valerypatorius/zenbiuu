@@ -1,8 +1,8 @@
 import { RouteRecordRaw } from 'vue-router';
-import Auth from '@/src/views/Auth.vue';
-import Library from '@/src/views/Library.vue';
-import Channel from '@/src/views/Channel.vue';
-import i18n from '@/src/i18n';
+import Auth from '@/src/modules/auth/Auth.vue';
+import Library from '@/src/modules/library/Library.vue';
+import Channel from '@/src/modules/channel/Channel.vue';
+import i18n from '@/src/infrastructure/i18n/i18n';
 import { RouteName } from '@/types/renderer/router';
 
 const routes: RouteRecordRaw[] = [

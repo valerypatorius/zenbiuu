@@ -1,10 +1,10 @@
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { createGlobalState, toReactive } from '@vueuse/core';
 import { config } from '@/src/utils/hub';
 import { Module, ModulesSchema } from '@/types/schema';
 import { AccessTokenResponse, PlayerLayout } from '@/types/renderer/player';
 import { useUser } from './useUser';
-import { useRequest } from '../utils/useRequest';
+import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { uid } from '../utils/utils';
 
 enum PlayerEndpoint {
