@@ -5,8 +5,8 @@ declare global {
     hub: MainProcessApi;
   }
 
-  interface WorkerMessageData {
-    action: string;
-    data: Record<string, any>;
+  interface WorkerMessageData<ActionType = string, DataType = Record<string, any>> {
+    action: ActionType;
+    data: DataType;
   }
 }

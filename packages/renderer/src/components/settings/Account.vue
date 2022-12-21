@@ -31,13 +31,15 @@ import { useRouter } from 'vue-router';
 import { RouteName } from '@/types/renderer/router';
 import { clearSessionStorage } from '@/src/utils/hub';
 import { useUser } from '@/src/store/useUser';
+import { useAuth } from '@/src/store/useAuth';
 import { useInterface } from '@/src/store/useInterface';
 import { useLibrary } from '@/src/store/useLibrary';
 
 const { t } = useI18n();
 const router = useRouter();
-const { state: userState, deauthorize } = useUser();
-const { state: interfaceState } = useInterface();
+const { state: userState } = useUser();
+const { deauthorize } = useAuth();
+const { isSettingsActive } = useInterface();
 const { reset: resetLibrary } = useLibrary();
 
 /** True, if logout request is being processed */
@@ -62,7 +64,7 @@ async function logout (): Promise<void> {
   await deauthorize();
 
   isLoading.value = false;
-  interfaceState.isSettingsActive = false;
+  isSettingsActive.value = false;
 
   resetLibrary();
 

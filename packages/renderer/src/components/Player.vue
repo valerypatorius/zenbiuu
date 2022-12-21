@@ -72,7 +72,6 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
-import interval from '@/src/utils/interval';
 import date from '@/src/utils/date';
 import Hls, { HlsConfig } from 'hls.js';
 import { StreamType } from '@/types/renderer/library';
@@ -80,11 +79,11 @@ import Loader from '@/src/components/ui/Loader.vue';
 import PlayerOverlay from '@/src/components/player/Overlay.vue';
 import PlayerInfo from '@/src/components/player/Info.vue';
 import type { Level } from 'hls.js';
-import type { IntervalManagerItem } from '@/src/utils/interval';
 import type { PlayerElements } from '@/types/renderer/player';
 import { usePlayer } from '../store/usePlayer';
 import { useLibrary } from '../store/useLibrary';
 import { useApp } from '../store/useApp';
+import { useInterval } from '../utils/useInterval';
 
 export type HlsInstance = InstanceType<typeof Hls>;
 
@@ -119,7 +118,8 @@ const HLS_CONFIG: Partial<HlsConfig> = {
 
 const { state: appState } = useApp();
 const { state: libraryState } = useLibrary();
-const { state: playerState, getStream, sendStats } = usePlayer();
+const { state: playerState, getPlaylist, sendStats } = usePlayer();
+const { start: startInterval } = useInterval();
 
 const player = ref<HTMLDivElement>();
 
@@ -136,8 +136,8 @@ const isVideoReady = ref(false);
 /** Raw quality levels list */
 const qualityLevels = ref<Level[]>([]);
 
-/** Stats interval object */
-const statsInterval = ref<IntervalManagerItem>();
+/** Function to stop stats interval */
+const stopStatsInterval = ref<() => void>();
 
 /** Video background update interval object */
 const videoBackgroundInterval = ref<ReturnType<typeof requestAnimationFrame>>();
@@ -215,16 +215,16 @@ onMounted(() => {
   /**
    * Update stream info and send player stats every 1 minute
    */
-  statsInterval.value = interval.start(STATS_POST_FREQUENCY);
-
-  statsInterval.value.onupdate = () => {
-    if (info.value) {
-      sendStats({
-        broadcastId: info.value.id,
-        channeld: info.value.user_id,
-      });
+  stopStatsInterval.value = startInterval(() => {
+    if (info.value === undefined) {
+      return;
     }
-  };
+
+    sendStats({
+      broadcastId: info.value.id,
+      channeld: info.value.user_id,
+    });
+  }, STATS_POST_FREQUENCY);
 
   /**
    * Start playback
@@ -245,9 +245,9 @@ onBeforeUnmount(() => {
   /**
    * Stop sending stats
    */
-  if (statsInterval.value) {
-    interval.stop(statsInterval.value);
-    statsInterval.value = undefined;
+  if (stopStatsInterval.value) {
+    stopStatsInterval.value();
+    stopStatsInterval.value = undefined;
   }
 
   /**
@@ -317,7 +317,7 @@ function initPlayer (): void {
  * Load playlist and pass it to hls
  */
 async function loadPlaylist (channel: string): Promise<void> {
-  const playlist = await getStream(channel);
+  const playlist = await getPlaylist(channel);
 
   hls.value?.loadSource(playlist);
 }

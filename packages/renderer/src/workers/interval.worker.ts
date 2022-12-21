@@ -1,53 +1,43 @@
-import type { IntervalManagerItem } from '@/src/utils/interval';
+import { IntervalAction, IntervalWorkerMessage } from './types.interval.worker';
 
-const context = self as any as Worker;
+const context = self as unknown as Worker;
 
-/**
- * List of active interval ids
- */
-const list: Array<ReturnType<typeof setInterval>> = [];
+const intervalsIds = new Map<string, ReturnType<typeof setInterval>>();
 
-/**
- * Start interval and push id to list
- */
-function start (initialData: IntervalManagerItem): void {
+function start (id: string, frequency: number, isImmediate = false): void {
   const intervalId = setInterval(() => {
-    context.postMessage(initialData);
-  }, initialData.frequency);
+    context.postMessage(id);
+  }, frequency);
 
-  context.postMessage({
-    ...initialData,
-    intervalId,
-  });
-
-  list.push(intervalId);
-}
-
-/**
- * Stop active interval by its id
- */
-function stop (id: ReturnType<typeof setInterval>): void {
-  clearInterval(id);
-
-  const index = list.indexOf(id);
-
-  if (index > -1) {
-    list.splice(index, 1);
+  if (isImmediate) {
+    context.postMessage(id);
   }
+
+  intervalsIds.set(id, intervalId);
 }
 
-context.onmessage = ({ data }: MessageEvent<WorkerMessageData>) => {
-  const { initialData, intervalId }: any = data.data;
+function stop (id: string): void {
+  const intervalId = intervalsIds.get(id);
 
-  switch (data.action) {
-    case 'start':
-      start(initialData);
+  if (intervalId === undefined) {
+    return;
+  }
+
+  clearInterval(intervalId);
+
+  intervalsIds.delete(id);
+}
+
+context.onmessage = ({ data: messageData }: IntervalWorkerMessage) => {
+  const { id, frequency, isImmediate } = messageData.data;
+
+  switch (messageData.action) {
+    case IntervalAction.Start:
+      start(id, frequency, isImmediate);
       break;
 
-    case 'stop':
-      stop(intervalId);
+    case IntervalAction.Stop:
+      stop(id);
       break;
-
-    default:
   }
 };

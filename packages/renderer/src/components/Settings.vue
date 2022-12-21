@@ -68,7 +68,7 @@ interface TabData {
 
 const { t } = useI18n();
 const { state: userState } = useUser();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);
@@ -135,7 +135,7 @@ const availableTabs = computed(() => {
 
 /** Close settings popup */
 function closeSettings (): void {
-  interfaceState.isSettingsActive = false;
+  isSettingsActive.value = false;
 }
 </script>
 

@@ -23,8 +23,7 @@ import Hls from 'hls.js';
 import Icon from '@/src/components/ui/Icon.vue';
 import Timer from '@/src/components/ui/Timer.vue';
 import { parseFragTags } from '@/src/utils/m3u8';
-import interval from '@/src/utils/interval';
-import type { IntervalManagerItem } from '@/src/utils/interval';
+import { useInterval } from '@/src/utils/useInterval';
 
 const props = defineProps<{
   /** Hls instance */
@@ -32,6 +31,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { start: startInterval } = useInterval();
 
 /** Current ad quartile */
 const adQuartileCurrent = ref<number>();
@@ -39,8 +39,8 @@ const adQuartileCurrent = ref<number>();
 /** Total ad duration */
 const adDuration = ref(0);
 
-/** Ad duration interval */
-const adInterval = ref<IntervalManagerItem>();
+/** Function to stop ad duration interval */
+const stopAdInterval = ref<() => void>();
 
 /** True, if ad is detected */
 const isAdActive = ref(false);
@@ -68,18 +68,17 @@ onMounted(() => {
       console.log('Ad is starting. Duration is', adDuration.value);
 
       isAdActive.value = true;
-      adInterval.value = interval.start(adDuration.value * 1000, false);
 
-      adInterval.value.onupdate = () => {
+      stopAdInterval.value = startInterval(() => {
         console.log('Ad is ended');
 
         isAdActive.value = false;
 
-        if (adInterval.value) {
-          interval.stop(adInterval.value);
-          adInterval.value = undefined;
+        if (stopAdInterval.value !== undefined) {
+          stopAdInterval.value();
+          stopAdInterval.value = undefined;
         }
-      };
+      }, adDuration.value * 1000);
     }
 
     if (adQuartileTag) {
@@ -91,9 +90,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  if (adInterval.value) {
-    interval.stop(adInterval.value);
-    adInterval.value = undefined;
+  if (stopAdInterval.value) {
+    stopAdInterval.value();
+    stopAdInterval.value = undefined;
   }
 
   props.hls.off(Hls.Events.FRAG_LOADED);

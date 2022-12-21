@@ -57,10 +57,10 @@ export interface ModulesSchema {
     isPaused: boolean;
   };
   [Module.User]: {
-    token: string | null;
+    token?: string;
     tokenDate: number;
-    id: string | null;
-    name: string | null;
+    id?: string;
+    name?: string;
   };
   [Module.Library]: {
     followed: TwitchUserFollow[];
@@ -136,10 +136,10 @@ export const schema: Schema = {
     isPaused: false,
   },
   [Module.User]: {
-    token: null,
+    token: undefined,
     tokenDate: 0,
-    id: null,
-    name: null,
+    id: undefined,
+    name: undefined,
   },
   [Module.Library]: {
     followed: [],

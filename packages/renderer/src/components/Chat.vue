@@ -226,7 +226,10 @@ onMounted(() => {
   });
 
   /** Request chat emotes */
-  getEmotes(props.channelName, props.channelId);
+  getEmotes({
+    id: props.channelId,
+    name: props.channelName,
+  });
 
   /** Start watching for horizon interesections */
   horizonObserver.value = new IntersectionObserver(onHorizonIntersection, {

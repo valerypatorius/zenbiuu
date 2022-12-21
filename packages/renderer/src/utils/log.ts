@@ -1,37 +1,26 @@
-type LogTypeMessage = string;
-type LogTypeWarning = string;
-
-/**
- * Log types
- */
-const Type: {[key: string]: LogTypeMessage} = {
-  Message: 'message',
-  Warning: 'warning',
-};
-
 /**
  * Log locations types
  */
-const Location: {[key: string]: string} = {
-  Time: 'Time',
-  State: 'State',
-  IrcManager: 'IrcManager',
-  RequestManager: 'RequestManager',
+enum Type {
+  Time = 'Time',
+  State = 'State',
+  Irc = 'IRC',
+  Request = 'Request',
 };
 
 /**
  * Get emoji for message by its type and location
  */
-function getEmoji (type: LogTypeMessage | LogTypeWarning, loc: string): string {
-  switch (loc) {
-    case Location.Time:
+function getEmoji (type: Type): string {
+  switch (type) {
+    case Type.Time:
       return '⌛';
-    case Location.State:
+    case Type.State:
       return '📦';
-    case Location.IrcManager:
+    case Type.Irc:
       return '💬';
-    case Location.RequestManager:
-      return type === Type.Message ? '👍' : '👎';
+    case Type.Request:
+      return '📫';
     default:
       return '';
   }
@@ -40,9 +29,9 @@ function getEmoji (type: LogTypeMessage | LogTypeWarning, loc: string): string {
 /**
  * Log common message
  */
-function message (loc: string, ...args: any[]): void {
+function message (type: Type, ...args: any[]): void {
   const data = [
-    `${getEmoji(Type.Message, loc)} %c${loc}`,
+    `${getEmoji(type)} %c${type}`,
     'color: #2ecc71;',
     ...args,
   ];
@@ -53,9 +42,9 @@ function message (loc: string, ...args: any[]): void {
 /**
  * Log warning message
  */
-function warning (loc: string, ...args: any[]): void {
+function warning (type: Type, ...args: any[]): void {
   const data = [
-    `${getEmoji(Type.Warning, loc)} %c${loc}`,
+    `${getEmoji(type)} %c${type}`,
     'color: #e67e22;',
     ...args,
   ];
@@ -64,7 +53,7 @@ function warning (loc: string, ...args: any[]): void {
 }
 
 export default {
-  Location,
+  Type,
   message,
   warning,
 };

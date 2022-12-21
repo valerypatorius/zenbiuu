@@ -46,7 +46,7 @@ import { getAppName } from '@/src/utils/utils';
 import appIconPath from '@/assets/icon.svg';
 import { useRouter } from 'vue-router';
 import { useInterface } from '../store/useInterface';
-import { useUser } from '../store/useUser';
+import { useAuth } from '../store/useAuth';
 import { RouteName } from '@/types/renderer/router';
 
 const router = useRouter();
@@ -54,8 +54,8 @@ const { t } = useI18n();
 
 /** Screen title */
 const title = getAppName();
-const { state: interfaceState } = useInterface();
-const { authorize } = useUser();
+const { isSettingsActive } = useInterface();
+const { authorize } = useAuth();
 
 /**
  * True, if auth is being processed.
@@ -65,7 +65,7 @@ const isLoading = ref(false);
 
 /** Toggle settings panel */
 function toggleSettings () {
-  interfaceState.isSettingsActive = !interfaceState.isSettingsActive;
+  isSettingsActive.value = !isSettingsActive.value;
 }
 
 /** Request auth and go to library screen */

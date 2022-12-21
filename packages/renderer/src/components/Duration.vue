@@ -4,14 +4,15 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import intervalManager from '@/src/utils/interval';
 import date from '@/src/utils/date';
-import type { IntervalManagerItem } from '@/src/utils/interval';
+import { useInterval } from '../utils/useInterval';
 
 const props = defineProps<{
   /** Start time */
   start: string;
 }>();
+
+const { start: startInterval } = useInterval();
 
 /** Duration update interval */
 const UPDATE_INTERVAL = date.Minute;
@@ -19,8 +20,8 @@ const UPDATE_INTERVAL = date.Minute;
 /** Current time */
 const now = ref<Date>();
 
-/** Duration update interval id */
-const interval = ref<IntervalManagerItem>();
+/** Function to stop update interval */
+const stopUpdateInterval = ref<() => void>();
 
 /** Formatted diff between start and current time */
 const duration = computed<string>(() => {
@@ -48,18 +49,18 @@ const duration = computed<string>(() => {
 
 onMounted(() => {
   now.value = new Date();
-  interval.value = intervalManager.start(UPDATE_INTERVAL);
 
-  interval.value.onupdate = () => {
+  stopUpdateInterval.value = startInterval(() => {
     now.value = new Date();
-  };
+  }, UPDATE_INTERVAL, {
+    immediate: true,
+  });
 });
 
 onBeforeUnmount(() => {
-  if (interval.value) {
-    intervalManager.stop(interval.value);
-
-    interval.value = undefined;
+  if (stopUpdateInterval.value !== undefined) {
+    stopUpdateInterval.value();
+    stopUpdateInterval.value = undefined;
   }
 });
 </script>

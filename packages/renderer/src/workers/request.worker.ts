@@ -1,95 +1,75 @@
-enum RequestError {
-  NotFound = 'Not found',
-}
+import { RequestAction, RequestError, RequestStatusCode, RequestWorkerMessage, RequestResponse, RequestPayload } from './types.request.worker';
 
-const context = self as any as Worker;
-
-const Status = {
-  Success: 200,
-  NoContent: 204,
-  NotFound: 404,
-};
+const context = self as unknown as Worker;
 
 /**
- * Perform GET request to specified url
+ * Handle request to a specified url
+ * @param method - method for request
+ * @param options - payload for request
  */
-async function get (url: string, options = {}): Promise<void> {
-  const method = 'GET';
+async function handle (method: string, payload: RequestPayload): Promise<void> {
+  const message: RequestResponse = {
+    url: payload.url,
+  };
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(payload.url, {
       method,
-      ...options,
+      body: payload.body,
+      ...payload.options,
     });
 
-    if (response.status === Status.NotFound) {
+    /**
+     * If response is not found, do not proceed
+     */
+    if (response.status === RequestStatusCode.NotFound) {
       throw new Error(RequestError.NotFound);
     }
 
-    const data = response.status === Status.NoContent ? {} : await response.json();
-    const error = data.error || data.status !== Status.Success ? data.message : false;
+    /**
+     * Make response string to check if it can be empty
+     */
+    const responseText = await response.clone().text();
 
-    context.postMessage({
-      method,
-      url,
-      data,
-      error,
-    });
-  } catch (error) {
-    context.postMessage({
-      url,
-      error,
-    });
-  }
-}
+    /**
+     * If response should be empty and it is, post message and do not proceed
+     */
+    if (response.status === RequestStatusCode.NoContent && responseText.length === 0) {
+      context.postMessage(message);
 
-/**
- * Perform POST request to specified url
- */
-async function post (url: string, options = {}, body = ''): Promise<void> {
-  const method = 'POST';
-
-  try {
-    const response = await fetch(url, {
-      method,
-      body,
-      ...options,
-    });
-
-    if (response.status === Status.NotFound) {
-      throw new Error(RequestError.NotFound);
+      return;
     }
 
-    const isEmptyResponse = response.status === Status.NoContent || await response.clone().text() === '';
-    const data = isEmptyResponse ? {} : await response.clone().json();
-    const error = data.error || data.status !== Status.Success ? data.message : false;
+    /**
+     * Make response data object
+     */
+    const responseData = await response.clone().json();
 
-    context.postMessage({
-      method,
-      url,
-      data,
-      error,
-    });
+    /**
+     * If response is successfull and error field is not present in it,
+     * add data to message and post it
+     */
+    if (response.status === RequestStatusCode.Success && !responseData.error) {
+      message.data = responseData;
+
+      context.postMessage(message);
+    }
+
+    throw new Error(responseData.message || RequestError.Unknown);
   } catch (error) {
-    context.postMessage({
-      url,
-      error,
-    });
+    message.error = error as Error;
+
+    context.postMessage(message);
   }
 }
 
-context.onmessage = ({ data }: MessageEvent<WorkerMessageData>) => {
-  const { url, options, body } = data.data;
-
-  switch (data.action) {
-    case 'get':
-      get(url, options);
+context.onmessage = ({ data: messageData }: RequestWorkerMessage) => {
+  switch (messageData.action) {
+    case RequestAction.Get:
+      handle('GET', messageData.data);
       break;
-    case 'post':
-      post(url, options, body);
+    case RequestAction.Post:
+      handle('POST', messageData.data);
       break;
-    default:
   }
 };
-
-export {};

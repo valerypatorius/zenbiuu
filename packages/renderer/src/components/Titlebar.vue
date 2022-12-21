@@ -60,7 +60,7 @@ import { usePlayer } from '../store/usePlayer';
  */
 const route = useRoute();
 const router = useRouter();
-const { state: interfaceState } = useInterface();
+const { isLoading } = useInterface();
 const { state: playerState } = usePlayer();
 
 /** Window title, based on current route */
@@ -68,9 +68,6 @@ const title = computed(() => getWindowTitle(route));
 
 /** True, if current platform is Windows */
 const isWindowsBehavior = isWindows();
-
-/** True, if app is loading something */
-const isLoading = computed(() => interfaceState.isLoading);
 
 /** True, if current route is "library" */
 const isLibrary = computed(() => route.name === RouteName.Library);

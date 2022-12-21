@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { callWindowMethod, checkAppUpdates } from '@/src/utils/hub';
 import TitleBar from '@/src/components/Titlebar.vue';
 import Sidebar from '@/src/components/Sidebar.vue';
@@ -22,16 +22,14 @@ import Settings from '@/src/components/Settings.vue';
 import { useInterface } from '@/src/store/useInterface';
 import { useApp } from '@/src/store/useApp';
 import { useUser } from '@/src/store/useUser';
-import { RouteName } from '@/types/renderer/router';
+import { useAuth } from '@/src/store/useAuth';
+
+useAuth();
 
 const route = useRoute();
-const router = useRouter();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
-const { state: userState, onValidateSuccess, onValidateError } = useUser();
-
-/** True, if settings overlay is active */
-const isSettingsActive = computed(() => interfaceState.isSettingsActive);
+const { state: userState } = useUser();
 
 /** True, if app window is set always on top */
 const isAlwaysOnTop = computed(() => appState.settings.isAlwaysOnTop);
@@ -46,18 +44,6 @@ watchEffect(() => {
 
 /** Set initial interface size */
 document.documentElement.style.setProperty('--size-base', appState.interfaceSize.toString());
-
-onValidateSuccess(() => {
-  if (!route.name) {
-    router.replace(RouteName.Library);
-  }
-});
-
-onValidateError(() => {
-  if (route.name !== RouteName.Auth) {
-    router.replace(RouteName.Auth);
-  }
-});
 
 /** Check for updates */
 checkAppUpdates();

@@ -175,7 +175,7 @@ enum SidebarWidth {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { state: interfaceState } = useInterface();
+const { isSettingsActive } = useInterface();
 const { state: sidebarState, setWidth: setSidebarWidth } = useSidebar();
 const { state: userState } = useUser();
 const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibrary();
@@ -400,16 +400,17 @@ function selectChannel (item: SidebarChannelItem): void {
     params: {
       name: item.name,
       id: item.userId,
-      cover,
     },
   });
+
+  playerState.cover = cover;
 }
 
 /**
  * Toggle settings panel
  */
 function toggleSettings (): void {
-  interfaceState.isSettingsActive = !interfaceState.isSettingsActive;
+  isSettingsActive.value = !isSettingsActive.value;
 }
 
 /**
