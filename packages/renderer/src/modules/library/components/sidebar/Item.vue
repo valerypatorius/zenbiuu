@@ -5,7 +5,7 @@
       {
         'sidebar-item--with-details': details?.length,
         'sidebar-item--with-badge': isBadge,
-        'sidebar-item--only-icon': !label?.length && !details?.length,
+        'sidebar-item--only-icon': isOnlyIcon,
         'sidebar-item--active': isActive,
         'sidebar-item--loading': isLoading,
         'sidebar-item--disabled': isDisabled,
@@ -53,9 +53,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
-defineProps<{
+const props = defineProps<{
   /** Main text label string */
   label?: string;
 
@@ -87,6 +88,8 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'click'): void;
 }>();
+
+const isOnlyIcon = computed(() => !props.label?.length && !props.details?.length);
 </script>
 
 <style lang="postcss">

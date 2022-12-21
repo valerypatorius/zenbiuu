@@ -105,6 +105,7 @@ function setSorting (name: string, types: SortingType[]): void {
   .filters {
     --height: 4rem;
     --gap: 0.8rem;
+    --icon-opacity: 0.7;
 
     height: var(--height);
     display: flex;
