@@ -5,7 +5,8 @@ import { Module, ModulesSchema } from '@/types/schema';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import { useRequest } from '../utils/useRequest';
 import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
-import { Command, useIrc } from '../utils/useIrc';
+import { useIrc } from '../utils/useIrc';
+import { IrcCommand } from '../workers/types.irc.worker';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
@@ -48,12 +49,12 @@ export const useChat = createGlobalState(() => {
     // });
   }
 
-  function messageHandler ({ command, data }: { command: Command; data: ChatMessage | Record<string, any> }): void {
+  function messageHandler ({ command, data }: { command: IrcCommand; data?: ChatMessage }): void {
     switch (command) {
-      case Command.Join:
+      case IrcCommand.Join:
         clear();
         break;
-      case Command.Message:
+      case IrcCommand.Message:
         addMessage(data as ChatMessage);
         break;
     }

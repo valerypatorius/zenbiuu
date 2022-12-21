@@ -41,7 +41,7 @@ export const useRequest = createSharedComposable(() => {
     }
 
     if (workerData.value.error) {
-      log.warning(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`, workerData.value.error);
+      log.warning(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`);
 
       handlers.reject(workerData.value.error);
     } else {

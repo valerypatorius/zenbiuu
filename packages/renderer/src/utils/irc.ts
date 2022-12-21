@@ -73,9 +73,9 @@ export function parseMessage (raw: string): {command: string; text: string; chan
 /**
  * Parse message text for Twitch emotes
  */
-export function parseEmotes (raw: string, messageText: string): {[key: string]: ChatEmote} | null {
+export function parseEmotes (raw: string, messageText: string): Record<string, ChatEmote> | undefined {
   if (!raw || !messageText) {
-    return null;
+    return undefined;
   }
 
   const result: {[key: string]: ChatEmote} = {};

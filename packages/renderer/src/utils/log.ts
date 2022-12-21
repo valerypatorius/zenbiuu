@@ -20,7 +20,7 @@ function getEmoji (type: Type): string {
     case Type.Irc:
       return '💬';
     case Type.Request:
-      return '🌍';
+      return '📫';
     default:
       return '';
   }
