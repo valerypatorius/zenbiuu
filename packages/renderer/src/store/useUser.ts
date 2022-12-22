@@ -1,29 +1,19 @@
-import { ref } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
-import { config } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
+import { createSharedComposable } from '@vueuse/core';
+import { useStore } from './__useStore';
+import { UserStoreName, defaultUserState } from '@/store/user';
 
-export const useUser = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.User]>({
-    token: undefined,
-    id: undefined,
-    name: undefined,
-    tokenDate: 0,
-  });
+export const useUser = createSharedComposable(() => {
+  const { state } = useStore(UserStoreName, defaultUserState);
 
-  const state = toReactive(refState);
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.User);
-
-    // watch(state, () => {
-    //   config.set(Module.User, state);
-    // });
+  function clear (): void {
+    state.id = undefined;
+    state.name = undefined;
+    state.token = undefined;
+    state.tokenDate = 0;
   }
 
   return {
     state,
+    clear,
   };
 });

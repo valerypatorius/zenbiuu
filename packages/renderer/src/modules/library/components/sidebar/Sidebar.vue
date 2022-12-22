@@ -176,7 +176,7 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { isSettingsActive } = useInterface();
-const { state: sidebarState, setWidth: setSidebarWidth } = useSidebar();
+const { state: sidebarState } = useSidebar();
 const { state: userState } = useUser();
 const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibrary();
 const { state: playerState } = usePlayer();
@@ -368,7 +368,7 @@ onMounted(() => {
       customSidebarWidth.value = value;
     },
     onStop: () => {
-      setSidebarWidth(customSidebarWidth.value);
+      sidebarState.width = customSidebarWidth.value;
     },
   });
 

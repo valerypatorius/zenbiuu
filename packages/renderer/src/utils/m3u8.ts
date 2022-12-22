@@ -5,7 +5,7 @@ export function parseFragTags (tagList: string[][]): Array<Record<string, any>> 
   const filteredTags = tagList.reduce((result: Array<Record<string, string[]>>, item) => {
     const tagName = item.shift();
 
-    if (tagName) {
+    if (tagName !== undefined) {
       result.push({
         [tagName]: item,
       });

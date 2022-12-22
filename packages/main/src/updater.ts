@@ -77,7 +77,7 @@ class AutoUpdater {
    */
   check (): void {
     this.updateStatus(AppUpdateStatus.Checking);
-    this.autoUpdater.checkForUpdates();
+    void this.autoUpdater.checkForUpdates();
   }
 
   /**
@@ -86,7 +86,7 @@ class AutoUpdater {
    */
   download (): void {
     this.updateStatus(AppUpdateStatus.Downloading);
-    this.autoUpdater.downloadUpdate();
+    void this.autoUpdater.downloadUpdate();
   }
 
   /**

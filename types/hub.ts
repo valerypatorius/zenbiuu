@@ -1,5 +1,6 @@
-import { StoreFilename, Module, ModulesSchema } from './schema';
+import { Schema } from '../store/schema';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
+import { AppColorScheme } from './color';
 
 /**
  * Available channels for communication
@@ -63,20 +64,13 @@ export interface State {
  * Hub data and methods, available in renderer process via window.hub
  */
 export interface MainProcessApi {
-  fs: {
-    [StoreFilename.Config]: {
-      get: <T extends Module>(key?: T) => Promise<ModulesSchema[T]>;
-      set: <T extends Module>(key: T, value: ModulesSchema[T]) => Promise<void>;
-    };
-    [StoreFilename.Library]: {
-      get: () => Promise<ModulesSchema[Module.Library]>;
-      set: (key: string, value: any) => void;
-      clear: () => void;
-    };
+  store: {
+    get: <T extends keyof Schema>(key?: T) => Promise<Schema[T]>;
+    set: <T extends keyof Schema>(key: T, value: Schema[T]) => void;
   };
   env: Record<string, string>;
   platform: string;
-  setNativeTheme: (value: string) => Promise<void>;
+  setNativeTheme: (value: AppColorScheme) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
   requestAccessToken: (url: string) => Promise<string>;
   checkAppUpdates: () => void;

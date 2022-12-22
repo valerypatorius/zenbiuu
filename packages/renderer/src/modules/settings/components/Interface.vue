@@ -76,7 +76,6 @@ import { useI18n } from 'vue-i18n';
 import Radio from '@/src/modules/ui/components/Radio.vue';
 import Checkbox from '@/src/modules/ui/components/Checkbox.vue';
 import { AppColorScheme } from '@/types/color';
-import type { AppSettings } from '@/types/schema';
 import { useApp } from '@/src/store/useApp';
 import { useTheme } from '@/src/store/useTheme';
 
@@ -100,7 +99,7 @@ const currentInterfaceSize = computed(() => appState.interfaceSize);
 
 /** Interface settings, available for change */
 const interfaceSettings = computed(() => {
-  const list: (keyof AppSettings)[] = [
+  const list: (keyof typeof appState.settings)[] = [
     'isAlwaysOnTop',
     'isBlurEnabled',
   ];
@@ -114,7 +113,7 @@ const interfaceSettings = computed(() => {
 /**
  * Toggle app setting by its name
  */
-function toggleSetting (name: keyof AppSettings): void {
+function toggleSetting (name: (keyof typeof appState.settings)): void {
   appState.settings[name] = !appState.settings[name];
 }
 

@@ -5,9 +5,7 @@ export const env = window.hub.env;
 
 export const platform = window.hub.platform;
 
-export const config = window.hub.fs.config;
-
-export const library = window.hub.fs.library;
+export const store = window.hub.store;
 
 export const setNativeTheme = window.hub.setNativeTheme;
 

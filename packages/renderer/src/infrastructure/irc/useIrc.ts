@@ -32,7 +32,7 @@ export const useIrc = createSharedComposable(() => {
     /**
      * If close marker was not provided, do not proceed just in case
      */
-    if (!workerData.value.close) {
+    if (workerData.value.close !== true) {
       return;
     }
 
@@ -42,7 +42,10 @@ export const useIrc = createSharedComposable(() => {
 
     const isReconnect = workerData.value.code !== IrcCloseCode.Manual;
 
-    if (isReconnect) {
+    /**
+     * If connection is lost, but user token is present, try to reconnect
+     */
+    if (isReconnect && userState.token !== undefined) {
       log.message(log.Type.Irc, 'Reconnecting');
 
       connect();

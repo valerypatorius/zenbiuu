@@ -1,10 +1,12 @@
 import { join } from 'path';
 import { app, BrowserWindow, shell, session, nativeTheme, ipcMain } from 'electron';
-import { config, listenForConfigRequests, listenForLibraryRequests } from './fsStore';
+import { store, listenForConfigRequests } from './fsStore';
 import { objectKeysToLowercase, getAccessTokenFromTwitchAuthUrl } from '@/src/utils';
 import { Channel as HubChannel, State as HubState } from '@/types/hub';
 import { AppColorScheme } from '@/types/color';
 import autoUpdater from '@/src/updater';
+import { WindowStoreName } from '@/store/window';
+import { ThemeStoreName } from '@/store/theme';
 
 const env: ImportMetaEnv = import.meta.env;
 
@@ -60,8 +62,8 @@ function setNativeTheme (value: AppColorScheme): {
 /**
  * Open auth window to receive access token
  */
-function getAuthToken (url: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+async function getAuthToken (url: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
     let authWindow: BrowserWindow | null = null;
 
     authWindow = new BrowserWindow({
@@ -81,7 +83,7 @@ function getAuthToken (url: string): Promise<string> {
 
       const token = getAccessTokenFromTwitchAuthUrl(redirectUrl);
 
-      if (token) {
+      if (token !== null) {
         resolve(token);
       } else {
         reject(new Error('Token is missing'));
@@ -106,7 +108,7 @@ function getAuthToken (url: string): Promise<string> {
       authWindow = null;
     });
 
-    authWindow.loadURL(url);
+    void authWindow.loadURL(url);
   });
 }
 
@@ -115,7 +117,6 @@ function getAuthToken (url: string): Promise<string> {
  */
 function handleRendererMessages (): void {
   listenForConfigRequests();
-  listenForLibraryRequests();
 
   /**
    * Set app theme and return its current state
@@ -139,7 +140,7 @@ function handleRendererMessages (): void {
    * Call window method, when renderer process requests it
    */
   ipcMain.handle(HubChannel.CallWindowMethod, async (event, methodName: keyof BrowserWindow, ...args: any[]): Promise<boolean> => {
-    if (mainWindow && typeof mainWindow[methodName] === 'function') {
+    if (mainWindow !== null && typeof mainWindow[methodName] === 'function') {
       (mainWindow[methodName] as CallableFunction)(...args);
 
       return true;
@@ -158,7 +159,7 @@ function handleRendererMessages (): void {
       appLocale: app.getLocale(),
       appVersion: app.getVersion(),
       appName: app.getName(),
-      isAppWindowMaximized: mainWindow ? mainWindow.isMaximized() : false,
+      isAppWindowMaximized: mainWindow !== null ? mainWindow.isMaximized() : false,
       themeSource,
       shouldUseDarkColors,
       appUpdateStatus: autoUpdater.status,
@@ -172,7 +173,7 @@ function handleRendererMessages (): void {
    * Clear session storage data
    */
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
-    session.defaultSession.clearStorageData();
+    void session.defaultSession.clearStorageData();
   });
 }
 
@@ -182,8 +183,8 @@ function handleRendererMessages (): void {
 function createWindow (): void {
   mainWindow = new BrowserWindow({
     show: false,
-    width: config.get('windowBounds.width'),
-    height: config.get('windowBounds.height'),
+    width: store.get(WindowStoreName).width,
+    height: store.get(WindowStoreName).height,
     backgroundColor: getWindowColor(),
     frame: false,
     titleBarStyle: 'hiddenInset',
@@ -218,7 +219,10 @@ function createWindow (): void {
 
     const { width, height } = mainWindow.getBounds();
 
-    config.set('windowBounds', { width, height });
+    store.set(WindowStoreName, {
+      width,
+      height,
+    });
   });
 
   /**
@@ -233,7 +237,7 @@ function createWindow (): void {
    */
   mainWindow.webContents.on('will-navigate', (event, url) => {
     event.preventDefault();
-    shell.openExternal(url);
+    void shell.openExternal(url);
   });
 
   /**
@@ -255,7 +259,7 @@ function createWindow (): void {
     ? env.VITE_DEV_SERVER_URL
     : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
 
-  mainWindow.loadURL(pageUrl);
+  void mainWindow.loadURL(pageUrl);
 }
 
 /**
@@ -336,7 +340,7 @@ app.on('activate', () => {
  */
 app.whenReady()
   .then(() => {
-    setNativeTheme(config.get('theme.name'));
+    setNativeTheme(store.get(ThemeStoreName).name);
     handleRendererMessages();
     handleCors();
     createWindow();

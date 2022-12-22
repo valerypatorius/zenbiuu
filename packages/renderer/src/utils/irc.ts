@@ -74,7 +74,7 @@ export function parseMessage (raw: string): {command: string; text: string; chan
  * Parse message text for Twitch emotes
  */
 export function parseEmotes (raw: string, messageText: string): Record<string, ChatEmote> | undefined {
-  if (!raw || !messageText) {
+  if (raw.length === 0 || messageText.length === 0) {
     return undefined;
   }
 

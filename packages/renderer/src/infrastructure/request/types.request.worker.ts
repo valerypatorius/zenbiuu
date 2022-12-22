@@ -5,6 +5,7 @@ export enum RequestAction {
 
 export enum RequestError {
   NotFound = 'Not found',
+  NotAuthorized = 'Authorization required',
   Queued = 'Request still processing',
   Unknown = 'Unknown error',
 }
@@ -12,6 +13,7 @@ export enum RequestError {
 export enum RequestStatusCode {
   Success = 200,
   NoContent = 204,
+  NotAuthorized = 401,
   NotFound = 404,
 }
 
@@ -24,7 +26,7 @@ export interface RequestPayload {
 export interface RequestResponse<T = any> {
   url: string;
   data?: T;
-  error?: Error;
+  error?: Error & { cause?: RequestStatusCode };
 }
 
 export type RequestWorkerMessage = MessageEvent<WorkerMessageData<RequestAction, RequestPayload>>;

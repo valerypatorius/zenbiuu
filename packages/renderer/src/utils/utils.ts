@@ -72,11 +72,11 @@ export function getAppName (): string {
 export function getAppLocale (): AppLocaleName {
   const locale = state.appLocale;
 
-  if (locale.includes('en')) {
+  if (locale.includes('en') === true) {
     return AppLocaleName.En;
   }
 
-  if (locale.includes('ru')) {
+  if (locale.includes('ru') === true) {
     return AppLocaleName.Ru;
   }
 

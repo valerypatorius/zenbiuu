@@ -1,12 +1,12 @@
 import { ref } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
-import { config } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
+import { createSharedComposable } from '@vueuse/core';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { IrcCommand } from '@/src/infrastructure/irc/types.irc.worker';
+import { useStore } from './__useStore';
+import { ChatStoreName, defaultChatState } from '@/store/chat';
+import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
@@ -21,33 +21,12 @@ enum ChatEndpoint {
  */
 const LIMIT = 200;
 
-export const useChat = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.Chat]>({
-    messages: [],
-    emotes: {
-      bttv: {},
-      ffz: {},
-      seventv: {},
-    },
-    width: 300,
-    height: 500,
-    isPaused: false,
-  });
-
-  const state = toReactive(refState);
-
+export const useChat = createSharedComposable(() => {
+  const { state } = useStore(ChatStoreName, defaultChatState);
   const { get } = useRequest();
   const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.Chat);
-
-    // watch(state, () => {
-    //   config.set(Module.Player, state);
-    // });
-  }
+  const messages = ref<ChatMessage[]>([]);
+  const isPaused = ref(false);
 
   function messageHandler ({ command, data }: { command: IrcCommand; data?: ChatMessage }): void {
     switch (command) {
@@ -76,7 +55,7 @@ export const useChat = createGlobalState(() => {
     const emotedText = messageData.text.value
       .split(' ')
       .map((word: string) => {
-        if (messageData.emotes?.[word]) {
+        if (messageData.emotes?.[word] !== undefined) {
           const emote = messageData.emotes[word];
           const { url, height } = emote;
 
@@ -85,21 +64,21 @@ export const useChat = createGlobalState(() => {
           </span>`;
         }
 
-        if (state.emotes.bttv[word]) {
+        if (state.emotes.bttv[word] !== undefined) {
           const emote = state.emotes.bttv[word];
           const { url, height } = emote;
 
           return `<span class="emote" title="${word}">
             <img src="${url}" alt="${word}" style="--height: ${height}px;">
           </span>`;
-        } else if (state.emotes.ffz[word]) {
+        } else if (state.emotes.ffz[word] !== undefined) {
           const emote = state.emotes.ffz[word];
           const { url, height } = emote;
 
           return `<span class="emote" title="${word}">
             <img src="${url}" alt="${word}" style="--height: ${height}px;">
           </span>`;
-        } else if (state.emotes.seventv[word]) {
+        } else if (state.emotes.seventv[word] !== undefined) {
           const emote = state.emotes.seventv[word];
           const { url, height } = emote;
 
@@ -122,15 +101,15 @@ export const useChat = createGlobalState(() => {
       },
     };
 
-    state.messages.push(message);
+    messages.value.push(message);
 
-    if (state.messages.length > LIMIT && !state.isPaused) {
-      state.messages.splice(0, state.messages.length - LIMIT);
+    if (messages.value.length > LIMIT && !isPaused.value) {
+      messages.value.splice(0, messages.value.length - LIMIT);
     }
   }
 
   function clear (): void {
-    state.messages = [];
+    messages.value = [];
   }
 
   async function getBttvGlobalEmotes (): Promise<void> {
@@ -167,7 +146,7 @@ export const useChat = createGlobalState(() => {
     Object.values(response.sets).forEach((set) => {
       set.emoticons.forEach((emote) => {
         const size = window.devicePixelRatio > 1 ? 2 : 1;
-        const url = emote.urls[size] || emote.urls[1];
+        const url = emote.urls[size] ?? emote.urls[1];
 
         state.emotes.ffz[emote.name] = {
           url: `https:${url}`,
@@ -204,35 +183,27 @@ export const useChat = createGlobalState(() => {
   }
 
   function getEmotes ({ id, name }: { id: string; name: string }): void {
-    getBttvGlobalEmotes();
+    void getBttvGlobalEmotes();
 
-    getBttvChannelEmotes(id);
-    getFfzChannelEmotes(name);
+    void getBttvChannelEmotes(id);
+    void getFfzChannelEmotes(name);
 
-    getSevenTvGlobalEmotes();
-    getSevenTvChannelEmotes(name);
+    void getSevenTvGlobalEmotes();
+    void getSevenTvChannelEmotes(name);
   }
 
   function pause (value: boolean): void {
-    state.isPaused = value;
-  }
-
-  function setWidth (value: number): void {
-    state.width = value;
-  }
-
-  function setHeight (value: number): void {
-    state.height = value;
+    isPaused.value = value;
   }
 
   return {
     state,
+    messages,
     join,
     leave,
     clear,
     getEmotes,
-    setWidth,
-    setHeight,
     pause,
+    isPaused,
   };
 });

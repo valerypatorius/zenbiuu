@@ -9,11 +9,18 @@
     @mousedown="onClick"
   >
     <div
+      ref="screen"
       class="preview__screen"
       :style="{
         backgroundImage: `url(${prevCover || latestCover}), url(${loadedCover || latestCover})`,
       }"
     >
+      <Light
+        v-if="screen"
+        :parent="screen"
+        :size="20"
+      />
+
       <div class="preview__counters">
         <!-- Viewers counter -->
         <div
@@ -79,6 +86,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import Icon from '@/src/modules/ui/components/Icon.vue';
+import Light from '@/src/modules/ui/components/Light.vue';
 import Duration from '@/src/modules/ui/components/Duration.vue';
 import { useLibrary } from '@/src/store/useLibrary';
 import { useApp } from '@/src/store/useApp';
@@ -106,6 +114,9 @@ const prevCover = ref<string>();
 
 /** Cover url, loaded and ready for display */
 const loadedCover = ref<string>();
+
+/** Screen element */
+const screen = ref<HTMLElement>();
 
 /** Returns true, if interface blur is enabled in settings */
 const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
@@ -160,11 +171,8 @@ function onClick () {
     opacity: 0.2;
   }
 
-  .preview:hover .preview__screen {
-    filter: brightness(1.15);
-  }
-
   .preview__screen {
+    --color-light: rgba(var(--rgb-white), 0.1);
     width: 100%;
     background-color: var(--color-overlay-full);
     background-repeat: no-repeat;
@@ -173,6 +181,7 @@ function onClick () {
     border-radius: var(--border-radius);
     position: relative;
     margin-bottom: 1.5rem;
+    overflow: hidden;
   }
 
   .preview__screen::before {
@@ -194,6 +203,7 @@ function onClick () {
   }
 
   .preview__counters {
+    --icon-opacity: 0.6;
     display: flex;
     align-items: center;
     width: 100%;

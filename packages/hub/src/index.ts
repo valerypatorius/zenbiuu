@@ -6,42 +6,21 @@ import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 const { platform } = process;
 
 /**
- * Get and set data in electron-store config files
+ * Get and set data in store file
  */
-const fs = {
-  config: {
-    get: (key?: string): Promise<any> => {
-      return new Promise((resolve, reject) => {
-        ipcRenderer.invoke(HubChannel.ConfigGet, key).then((value) => {
-          resolve(value);
-        });
-      });
-    },
-    set: (key: string, value: any): void => {
-      ipcRenderer.send(HubChannel.ConfigSet, key, value);
-    },
+const store: MainProcessApi['store'] = {
+  get: async (key) => {
+    return await ipcRenderer.invoke(HubChannel.ConfigGet, key);
   },
-  library: {
-    get: (key?: string): Promise<any> => {
-      return new Promise((resolve, reject) => {
-        ipcRenderer.invoke(HubChannel.LibraryGet, key).then((value) => {
-          resolve(value);
-        });
-      });
-    },
-    set: (key: string, value: any): void => {
-      ipcRenderer.send(HubChannel.LibrarySet, key, value);
-    },
-    clear: (): void => {
-      ipcRenderer.send(HubChannel.LibraryClear);
-    },
+  set: (key, value) => {
+    ipcRenderer.send(HubChannel.ConfigSet, key, value);
   },
 };
 
 /**
  * Values from .env file
  */
-const env = {
+const env: MainProcessApi['env'] = {
   APP_CLIENT_ID: import.meta.env.VITE_APP_CLIENT_ID,
   STREAM_CLIENT_ID: import.meta.env.VITE_STREAM_CLIENT_ID,
   REDIRECT_URL: import.meta.env.VITE_APP_REDIRECT_URL,
@@ -66,34 +45,29 @@ const state: HubState = {
 /**
  * Set app theme
  */
-function setNativeTheme (value: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    ipcRenderer.invoke(HubChannel.SetNativeTheme, value).then((themeState) => {
-      Object.entries(themeState).forEach(([key, value]) => {
-        state[key] = value;
-      });
+async function setNativeTheme (value: AppColorScheme): Promise<void> {
+  const themeState: {
+    themeSource: string;
+    shouldUseDarkColors: boolean;
+  } = await ipcRenderer.invoke(HubChannel.SetNativeTheme, value);
 
-      resolve();
-    });
+  Object.entries(themeState).forEach(([key, value]) => {
+    state[key] = value;
   });
 }
 
 /**
  * Call app window method
  */
-function callWindowMethod (methodName: string, ...args: any[]): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    ipcRenderer.invoke(HubChannel.CallWindowMethod, methodName, ...args).then((isSuccess: boolean) => {
-      resolve(isSuccess);
-    });
-  });
+async function callWindowMethod (methodName: string, ...args: any[]): Promise<boolean> {
+  return await ipcRenderer.invoke(HubChannel.CallWindowMethod, methodName, ...args);
 }
 
 /**
  * Request access token by opening window with specified url
  */
-function requestAccessToken (url: string): Promise<string> {
-  return ipcRenderer.invoke(HubChannel.RequestAccessToken, url);
+async function requestAccessToken (url: string): Promise<string> {
+  return await ipcRenderer.invoke(HubChannel.RequestAccessToken, url);
 }
 
 /**
@@ -143,7 +117,7 @@ function clearSessionStorage (): void {
  * available in renderer process under window.hub
  */
 const api: MainProcessApi = {
-  fs,
+  store,
   env,
   platform,
   setNativeTheme,
@@ -165,7 +139,7 @@ contextBridge.exposeInMainWorld('hub', api);
 /**
  * Request initial data from main process
  */
-ipcRenderer.invoke(HubChannel.Initial).then((initialState: HubState) => {
+void ipcRenderer.invoke(HubChannel.Initial).then((initialState: HubState) => {
   Object.entries(initialState).forEach(([key, value]) => {
     state[key] = value;
   });
@@ -190,11 +164,11 @@ ipcRenderer.on(HubChannel.StateChange, (event, receivedState: HubState) => {
 ipcRenderer.on(HubChannel.SetUpdateStatus, (event, status: AppUpdateStatus, updateData?: UpdateInfo, progressData?: ProgressInfo) => {
   state.appUpdateStatus = status;
 
-  if (updateData) {
+  if (updateData !== undefined) {
     state.appUpdateData = updateData;
   }
 
-  if (progressData) {
+  if (progressData !== undefined) {
     state.appUpdateProgress = progressData;
   }
 

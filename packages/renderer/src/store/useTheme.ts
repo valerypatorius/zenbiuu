@@ -1,27 +1,14 @@
-import { ref, watch } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
-import { config, setNativeTheme } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
-import { AppColorScheme } from '@/types/color';
+import { createSharedComposable } from '@vueuse/core';
+import { useStore } from './__useStore';
+import { ThemeStoreName, defaultThemeState } from '@/store/theme';
+import { setNativeTheme } from '@/src/utils/hub';
 
-export const useTheme = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.Theme]>({
-    name: AppColorScheme.System,
+export const useTheme = createSharedComposable(() => {
+  const { state, onUpdate } = useStore(ThemeStoreName, defaultThemeState);
+
+  onUpdate(() => {
+    setNativeTheme(state.name);
   });
-
-  const state = toReactive(refState);
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.Theme);
-
-    watch(state, () => {
-      // config.set(Module.User, state);
-
-      setNativeTheme(state.name);
-    });
-  }
 
   return {
     state,

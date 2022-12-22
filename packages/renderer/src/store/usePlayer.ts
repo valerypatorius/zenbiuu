@@ -1,11 +1,10 @@
-import { ref } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
-import { config } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
+import { createSharedComposable } from '@vueuse/core';
 import { AccessTokenResponse, PlayerLayout } from '@/types/renderer/player';
 import { useUser } from './useUser';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { uid } from '../utils/utils';
+import { useStore } from './__useStore';
+import { PlayerStoreName, defaultPlayerState } from '@/store/player';
 
 enum PlayerEndpoint {
   GraphApi = 'https://gql.twitch.tv/gql',
@@ -39,30 +38,11 @@ function formPlaylistUrl (channel: string, { sig, token }: PlaylistAccess): stri
   return `https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8?${query}`;
 }
 
-export const usePlayer = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.Player]>({
-    volume: 0.25,
-    compressor: false,
-    isHideSidebar: false,
-    isHideChat: false,
-    layout: PlayerLayout.Horizontal,
-    cover: undefined,
-  });
-
-  const state = toReactive(refState);
+export const usePlayer = createSharedComposable(() => {
+  const { state } = useStore(PlayerStoreName, defaultPlayerState);
 
   const { state: userState } = useUser();
   const { post } = useRequest();
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.Player);
-
-    // watch(state, () => {
-    //   config.set(Module.Player, state);
-    // });
-  }
 
   async function getAcessToken (channel: string): Promise<PlaylistAccess> {
     const response = await post<AccessTokenResponse>(PlayerEndpoint.GraphApi, {
@@ -108,17 +88,15 @@ export const usePlayer = createGlobalState(() => {
 
     await post(PlayerEndpoint.Stats, {
       data: btoa(JSON.stringify(data)),
-    }, {
-      // 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    });
+    }, {});
   }
 
   function toggleSidebar (): void {
-    state.isHideSidebar = !state.isHideSidebar;
+    state.isHideSidebar = state.isHideSidebar === false;
   }
 
   function toggleChat (): void {
-    state.isHideChat = !state.isHideChat;
+    state.isHideChat = state.isHideChat === false;
   }
 
   function toggleLayout (): void {

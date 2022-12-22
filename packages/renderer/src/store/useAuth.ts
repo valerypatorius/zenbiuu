@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { createGlobalState, tryOnBeforeUnmount, tryOnMounted } from '@vueuse/core';
+import { createSharedComposable, tryOnBeforeUnmount, tryOnMounted } from '@vueuse/core';
 import { requestAccessToken } from '@/src/utils/hub';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
@@ -29,8 +29,8 @@ enum UserEndpoint {
   Revoke = 'https://id.twitch.tv/oauth2/revoke',
 }
 
-export const useAuth = createGlobalState(() => {
-  const { state: userState } = useUser();
+export const useAuth = createSharedComposable(() => {
+  const { state: userState, clear: clearUser } = useUser();
   const route = useRoute();
   const router = useRouter();
   const { get, post } = useRequest();
@@ -63,30 +63,30 @@ export const useAuth = createGlobalState(() => {
    * Validate user access token
    */
   async function validate (): Promise<void> {
-    if (!userState.token) {
+    if (userState.token === undefined) {
       if (route.name !== RouteName.Auth) {
-        router.replace(RouteName.Auth);
+        void router.replace(RouteName.Auth);
       }
 
       return await Promise.reject(UserError.MissingAuthToken);
     }
 
     const now = getCurrentUnixTime();
-    const tokenTimePassed = now - userState.tokenDate;
+    const tokenTimePassed = now - (userState.tokenDate ?? 0);
 
     /**
      * If user data exist and token is considered fresh, skip validation
      */
     if (
-      userState.id &&
-      userState.name &&
-      userState.tokenDate &&
+      userState.id !== undefined &&
+      userState.name !== undefined &&
+      userState.tokenDate !== undefined &&
       tokenTimePassed < TOKEN_LIFETIME
     ) {
       connectToIrc();
 
-      if (!route.name) {
-        router.replace(RouteName.Library);
+      if (route.name === undefined) {
+        void router.replace(RouteName.Library);
       }
 
       return;
@@ -104,7 +104,7 @@ export const useAuth = createGlobalState(() => {
 
       connectToIrc();
     } catch (error) {
-      userState.token = undefined;
+      clearUser();
     }
   }
 
@@ -128,6 +128,11 @@ export const useAuth = createGlobalState(() => {
     const token = await requestAccessToken(`${UserEndpoint.Authorize}?${query}`);
 
     userState.token = token;
+
+    /**
+     * Call validation to receive user name and id
+     */
+    await validate();
   }
 
   /**
@@ -141,14 +146,10 @@ export const useAuth = createGlobalState(() => {
 
     const query = Object.entries(params).map(([key, string]) => `${key}=${string}`).join('&');
 
-    await post(`${UserEndpoint.Revoke}?${query}`);
+    await post(`${UserEndpoint.Revoke}?${query}`, undefined, {});
 
     disconnectFromIrc();
-
-    userState.id = undefined;
-    userState.name = undefined;
-    userState.token = undefined;
-    userState.tokenDate = 0;
+    clearUser();
   }
 
   return {

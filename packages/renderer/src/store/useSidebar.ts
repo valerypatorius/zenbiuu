@@ -1,31 +1,11 @@
-import { ref } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
-import { config } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
+import { createSharedComposable } from '@vueuse/core';
+import { useStore } from './__useStore';
+import { SidebarStoreName, defaultSidebarState } from '@/store/sidebar';
 
-export const useSidebar = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.Sidebar]>({
-    width: 300,
-  });
-
-  const state = toReactive(refState);
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.Sidebar);
-
-    // watch(state, () => {
-    //   config.set(Module.Player, state);
-    // });
-  }
-
-  function setWidth (value: number): void {
-    state.width = value;
-  }
+export const useSidebar = createSharedComposable(() => {
+  const { state } = useStore(SidebarStoreName, defaultSidebarState);
 
   return {
     state,
-    setWidth,
   };
 });
