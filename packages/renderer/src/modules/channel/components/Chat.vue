@@ -138,9 +138,18 @@ const props = withDefaults(defineProps<{
 });
 
 const { t } = useI18n();
-const { state: chatState, join: joinChat, leave: leaveChat, clear: clearChat, getEmotes, setWidth, setHeight, pause: pauseChat } = useChat();
 const { state: userState } = useUser();
 const { state: playerState } = usePlayer();
+const {
+  state: chatState,
+  messages: chatMessages,
+  join: joinChat,
+  leave: leaveChat,
+  clear: clearChat,
+  getEmotes,
+  pause: pauseChat,
+  isPaused,
+} = useChat();
 
 /**
  * Messages horizon observer instance
@@ -192,19 +201,16 @@ const isReady = ref(false);
 const userName = computed(() => userState.name);
 
 /** Chat messages */
-const messages = computed(() => isReady.value ? chatState.messages : []);
+const messages = computed(() => isReady.value ? chatMessages.value : []);
 
 /** Last message */
-const lastMessage = computed(() => chatState.messages.slice(-1)[0]);
+const lastMessage = computed(() => chatMessages.value.slice(-1)[0]);
 
 /** Returns true, if current player layout is horizontal */
 const isHorizontalLayoutType = computed(() => playerState.layout === PlayerLayout.Horizontal);
 
 /** True, if chat is hidden */
 const isChatHidden = computed(() => playerState.isHideChat);
-
-/** Logined user id */
-const isPaused = computed(() => chatState.isPaused);
 
 /** Chat CSS width, based on current layout type */
 const chatWidth = computed(() => isHorizontalLayoutType.value ? `${customChatWidth.value}px` : 'auto');
@@ -254,7 +260,7 @@ onMounted(() => {
       customChatWidth.value = value;
     },
     onStop: () => {
-      setWidth(customChatWidth.value);
+      chatState.width = customChatWidth.value;
     },
   });
 
@@ -269,7 +275,7 @@ onMounted(() => {
       customChatHeight.value = value;
     },
     onStop: () => {
-      setHeight(customChatHeight.value);
+      chatState.height = customChatHeight.value;
     },
   });
 

@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
@@ -24,6 +25,8 @@ export const useChat = createSharedComposable(() => {
   const { state } = useStore(ChatStoreName, defaultChatState);
   const { get } = useRequest();
   const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
+  const messages = ref<ChatMessage[]>([]);
+  const isPaused = ref(false);
 
   function messageHandler ({ command, data }: { command: IrcCommand; data?: ChatMessage }): void {
     switch (command) {
@@ -98,15 +101,15 @@ export const useChat = createSharedComposable(() => {
       },
     };
 
-    state.messages.push(message);
+    messages.value.push(message);
 
-    if (state.messages.length > LIMIT && state.isPaused === false) {
-      state.messages.splice(0, state.messages.length - LIMIT);
+    if (messages.value.length > LIMIT && !isPaused.value) {
+      messages.value.splice(0, messages.value.length - LIMIT);
     }
   }
 
   function clear (): void {
-    state.messages = [];
+    messages.value = [];
   }
 
   async function getBttvGlobalEmotes (): Promise<void> {
@@ -190,25 +193,17 @@ export const useChat = createSharedComposable(() => {
   }
 
   function pause (value: boolean): void {
-    state.isPaused = value;
-  }
-
-  function setWidth (value: number): void {
-    state.width = value;
-  }
-
-  function setHeight (value: number): void {
-    state.height = value;
+    isPaused.value = value;
   }
 
   return {
     state,
+    messages,
     join,
     leave,
     clear,
     getEmotes,
-    setWidth,
-    setHeight,
     pause,
+    isPaused,
   };
 });

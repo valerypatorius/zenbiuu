@@ -11,11 +11,12 @@ export default defineConfig({
     alias: {
       '@/src/': join(root, 'src') + '/',
       '@/types/': join(root, '../../', 'types') + '/',
+      '@/store/': join(root, '../../', 'store') + '/',
     },
   },
   build: {
     sourcemap: isDev ? 'inline' : false,
-    target: 'node16',
+    target: 'node19',
     outDir: 'dist',
     assetsDir: '.',
     minify: isDev ? false : 'esbuild',

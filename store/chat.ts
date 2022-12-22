@@ -1,9 +1,6 @@
-import { ChatMessage, ChatEmote } from '../types/renderer/chat';
+import { ChatEmote } from '../types/renderer/chat';
 
 export interface ChatStoreSchema {
-  /** Chat messages */
-  messages: ChatMessage[];
-
   /** Available chat emotes sets */
   emotes: {
     /** BTTV emotes */
@@ -21,15 +18,11 @@ export interface ChatStoreSchema {
 
   /** Chat height in vertical layout */
   height: number;
-
-  /** True, if automatic chat scroll should be paused */
-  isPaused: boolean;
 }
 
 export const ChatStoreName = 'chat';
 
 export const defaultChatState: ChatStoreSchema = {
-  messages: [],
   emotes: {
     bttv: {},
     ffz: {},
@@ -37,5 +30,4 @@ export const defaultChatState: ChatStoreSchema = {
   },
   width: 300,
   height: 500,
-  isPaused: false,
 };

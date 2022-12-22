@@ -63,7 +63,7 @@ export const useAuth = createSharedComposable(() => {
    * Validate user access token
    */
   async function validate (): Promise<void> {
-    if (userState.token !== undefined) {
+    if (userState.token === undefined) {
       if (route.name !== RouteName.Auth) {
         void router.replace(RouteName.Auth);
       }
@@ -85,7 +85,7 @@ export const useAuth = createSharedComposable(() => {
     ) {
       connectToIrc();
 
-      if (route.name !== undefined) {
+      if (route.name === undefined) {
         void router.replace(RouteName.Library);
       }
 

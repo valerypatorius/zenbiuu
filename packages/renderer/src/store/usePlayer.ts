@@ -88,7 +88,7 @@ export const usePlayer = createSharedComposable(() => {
 
     await post(PlayerEndpoint.Stats, {
       data: btoa(JSON.stringify(data)),
-    });
+    }, {});
   }
 
   function toggleSidebar (): void {
