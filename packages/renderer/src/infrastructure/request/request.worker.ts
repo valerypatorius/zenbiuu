@@ -23,7 +23,18 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response is not found, do not proceed
      */
     if (response.status === RequestStatusCode.NotFound) {
-      throw new Error(RequestError.NotFound);
+      throw new Error(RequestError.NotFound, {
+        cause: RequestStatusCode.NotFound,
+      });
+    }
+
+    /**
+     * If authorization is required, do not proceed
+     */
+    if (response.status === RequestStatusCode.NotAuthorized) {
+      throw new Error(RequestError.NotAuthorized, {
+        cause: RequestStatusCode.NotAuthorized,
+      });
     }
 
     /**
@@ -34,7 +45,10 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
     /**
      * If response should be empty and it is, post message and do not proceed
      */
-    if (response.status === RequestStatusCode.NoContent && responseText.length === 0) {
+    if (
+      (response.status === RequestStatusCode.Success || response.status === RequestStatusCode.NoContent) &&
+      responseText.length === 0
+    ) {
       context.postMessage(message);
 
       return;
@@ -57,7 +71,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
 
     throw new Error(responseData.message || RequestError.Unknown);
   } catch (error) {
-    message.error = error as Error;
+    message.error = error as Error & { cause?: RequestStatusCode };
 
     context.postMessage(message);
   }

@@ -23,7 +23,15 @@ export const useUser = createGlobalState(() => {
     // });
   }
 
+  function clear (): void {
+    state.id = undefined;
+    state.name = undefined;
+    state.token = undefined;
+    state.tokenDate = 0;
+  }
+
   return {
     state,
+    clear,
   };
 });

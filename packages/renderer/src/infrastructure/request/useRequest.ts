@@ -1,9 +1,11 @@
 import { reactive, watch, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
 import { useUser } from '@/src/store/useUser';
 import log from '@/src/utils/log';
 import RequestWorker from './request.worker.ts?worker';
-import { RequestAction, RequestError, RequestResponse, RequestPayload } from './types.request.worker';
+import { RequestAction, RequestError, RequestResponse, RequestPayload, RequestStatusCode } from './types.request.worker';
+import { RouteName } from '@/types/renderer/router';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -20,7 +22,8 @@ export const useRequest = createSharedComposable(() => {
   const worker = new RequestWorker();
 
   const { data: workerData, post: postMessage } = useWebWorker<RequestResponse>(worker);
-  const { state: userState } = useUser();
+  const { state: userState, clear: clearUser } = useUser();
+  const router = useRouter();
 
   const queue = reactive(new Map<string, QueueHandlers>());
 
@@ -32,25 +35,34 @@ export const useRequest = createSharedComposable(() => {
 
   const isLoading = computed(() => queue.size > 0);
 
-  watch(workerData, () => {
-    const handlers = queue.get(workerData.value.url);
-    const urlObject = new URL(workerData.value.url);
+  watch(workerData, (data) => {
+    const handlers = queue.get(data.url);
+    const urlObject = new URL(data.url);
 
     if (handlers === undefined) {
       return;
     }
 
-    if (workerData.value.error) {
+    if (data.error) {
       log.warning(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`);
 
-      handlers.reject(workerData.value.error);
+      /**
+       * Clear logined user data and open auth screen,
+       * if server responded with 401
+       */
+      if (data.error.cause === RequestStatusCode.NotAuthorized) {
+        clearUser();
+        router.replace(RouteName.Auth);
+      }
+
+      handlers.reject(data.error);
     } else {
       log.message(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`);
 
-      handlers.resolve(workerData.value.data);
+      handlers.resolve(data.data);
     }
 
-    queue.delete(workerData.value.url);
+    queue.delete(data.url);
   });
 
   function handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {

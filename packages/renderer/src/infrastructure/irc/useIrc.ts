@@ -42,7 +42,10 @@ export const useIrc = createSharedComposable(() => {
 
     const isReconnect = workerData.value.code !== IrcCloseCode.Manual;
 
-    if (isReconnect) {
+    /**
+     * If connection is lost, but user token is present, try to reconnect
+     */
+    if (isReconnect && userState.token) {
       log.message(log.Type.Irc, 'Reconnecting');
 
       connect();

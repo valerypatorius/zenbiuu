@@ -2,8 +2,13 @@
   <div class="window">
     <TitleBar />
 
-    <div class="window__main">
-      <Sidebar v-if="userState.token" />
+    <div
+      :class="[
+        'window__main',
+        isMountSidebar && 'window__main--with-sidebar',
+      ]"
+    >
+      <Sidebar v-if="isMountSidebar" />
 
       <RouterView :key="route.path" />
 
@@ -31,6 +36,13 @@ const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
 const { state: userState } = useUser();
 
+/**
+ * True, if sidebar should be mounted.
+ * There is a time gap between receiving token and name,
+ * so sidebar should be mounted only when name is present
+ */
+const isMountSidebar = computed(() => userState.name !== undefined);
+
 /** True, if app window is set always on top */
 const isAlwaysOnTop = computed(() => appState.settings.isAlwaysOnTop);
 
@@ -49,7 +61,7 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
 checkAppUpdates();
 </script>
 
-<style>
+<style lang="postcss">
   :root {
     /** Base black color */
     --rgb-black: 0, 0, 0;
@@ -288,9 +300,13 @@ checkAppUpdates();
 
   .window__main {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
     position: relative;
     overflow: hidden;
+
+    &--with-sidebar {
+      grid-template-columns: auto 1fr;
+    }
   }
 
   /** Custom scrollbar styles */
@@ -301,26 +317,26 @@ checkAppUpdates();
     overflow-x: hidden;
     overflow-y: scroll;
     position: relative;
-  }
 
-  .scrollable::-webkit-scrollbar {
-    width: var(--scrollbar-size);
-    height: var(--scrollbar-size);
-    opacity: 0;
-  }
+    &::-webkit-scrollbar {
+      width: var(--scrollbar-size);
+      height: var(--scrollbar-size);
+      opacity: 0;
+    }
 
-  .scrollable::-webkit-scrollbar-thumb {
-    background-color: var(--color-transparent);
-    background-clip: padding-box;
-    border: var(--scrollbar-offset) solid transparent;
-    border-radius: var(--scrollbar-size);
-  }
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--color-transparent);
+      background-clip: padding-box;
+      border: var(--scrollbar-offset) solid transparent;
+      border-radius: var(--scrollbar-size);
+    }
 
-  .scrollable:hover::-webkit-scrollbar-thumb {
-    background-color: var(--color-control-active);
-  }
+    &:hover::-webkit-scrollbar-thumb {
+      background-color: var(--color-control-active);
+    }
 
-  .scrollable::-webkit-scrollbar-thumb:hover {
-    --scrollbar-offset: 0.2rem;
+    &::-webkit-scrollbar-thumb:hover {
+      --scrollbar-offset: 0.2rem;
+    }
   }
 </style>

@@ -30,7 +30,7 @@ enum UserEndpoint {
 }
 
 export const useAuth = createGlobalState(() => {
-  const { state: userState } = useUser();
+  const { state: userState, clear: clearUser } = useUser();
   const route = useRoute();
   const router = useRouter();
   const { get, post } = useRequest();
@@ -104,7 +104,7 @@ export const useAuth = createGlobalState(() => {
 
       connectToIrc();
     } catch (error) {
-      userState.token = undefined;
+      clearUser();
     }
   }
 
@@ -128,6 +128,11 @@ export const useAuth = createGlobalState(() => {
     const token = await requestAccessToken(`${UserEndpoint.Authorize}?${query}`);
 
     userState.token = token;
+
+    /**
+     * Call validation to receive user name and id
+     */
+    await validate();
   }
 
   /**
@@ -141,14 +146,10 @@ export const useAuth = createGlobalState(() => {
 
     const query = Object.entries(params).map(([key, string]) => `${key}=${string}`).join('&');
 
-    await post(`${UserEndpoint.Revoke}?${query}`);
+    await post(`${UserEndpoint.Revoke}?${query}`, undefined, {});
 
     disconnectFromIrc();
-
-    userState.id = undefined;
-    userState.name = undefined;
-    userState.token = undefined;
-    userState.tokenDate = 0;
+    clearUser();
   }
 
   return {
