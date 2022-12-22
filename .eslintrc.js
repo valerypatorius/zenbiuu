@@ -42,24 +42,12 @@ module.exports = {
       },
     ],
 
-    /** Makes code unnecessary complicated */
-    '@typescript-eslint/promise-function-async': 'off',
-
     /** Use typescript rule to support enums */
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
 
     /** Such patterns are not used */
     'node/no-callback-literal': 'off',
-
-    /** Buggy behavior */
-    'padded-blocks': 'off',
-
-    /** Too much promises do not need to be handled */
-    '@typescript-eslint/no-floating-promises': 'off',
-
-    /** Causes unnecessary code complications  */
-    '@typescript-eslint/strict-boolean-expressions': 'off',
 
     /** Does not work well with imported types for some reason */
     '@typescript-eslint/restrict-template-expressions': [

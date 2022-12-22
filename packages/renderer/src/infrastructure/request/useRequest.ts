@@ -43,7 +43,7 @@ export const useRequest = createSharedComposable(() => {
       return;
     }
 
-    if (data.error) {
+    if (data.error !== undefined) {
       log.warning(log.Type.Request, `${urlObject.hostname}${urlObject.pathname}`);
 
       /**
@@ -52,7 +52,8 @@ export const useRequest = createSharedComposable(() => {
        */
       if (data.error.cause === RequestStatusCode.NotAuthorized) {
         clearUser();
-        router.replace(RouteName.Auth);
+
+        void router.replace(RouteName.Auth);
       }
 
       handlers.reject(data.error);
@@ -65,8 +66,8 @@ export const useRequest = createSharedComposable(() => {
     queue.delete(data.url);
   });
 
-  function handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {
-    return new Promise((resolve, reject) => {
+  async function handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {
+    return await new Promise((resolve, reject) => {
       if (queue.has(payload.url)) {
         reject(RequestError.Queued);
 

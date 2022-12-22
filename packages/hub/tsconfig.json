@@ -9,7 +9,11 @@
       "@/types/*": [
         "../../types/*"
       ],
-    }
+      "@/store/*": [
+        "../../store/*"
+      ],
+    },
+    "lib": ["ESNext", "dom", "dom.iterable"]
   },
   "include": [
     "src/**/*.ts",

@@ -5,7 +5,7 @@ import Color from 'color';
  * Do not allow clear white or black colors for readability
  */
 export function getColorForChatAuthor (hex: string): string {
-  if (!hex) {
+  if (hex.length === 0) {
     return '';
   }
 

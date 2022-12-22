@@ -63,13 +63,15 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response is successfull and error field is not present in it,
      * add data to message and post it
      */
-    if (response.status === RequestStatusCode.Success && !responseData.error) {
+    if (response.status === RequestStatusCode.Success && !('error' in responseData)) {
       message.data = responseData;
 
       context.postMessage(message);
     }
 
-    throw new Error(responseData.message || RequestError.Unknown);
+    const errormessage = typeof responseData.message === 'string' ? responseData.message : RequestError.Unknown;
+
+    throw new Error(errormessage);
   } catch (error) {
     message.error = error as Error & { cause?: RequestStatusCode };
 
@@ -80,10 +82,10 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
 context.onmessage = ({ data: messageData }: RequestWorkerMessage) => {
   switch (messageData.action) {
     case RequestAction.Get:
-      handle('GET', messageData.data);
+      void handle('GET', messageData.data);
       break;
     case RequestAction.Post:
-      handle('POST', messageData.data);
+      void handle('POST', messageData.data);
       break;
   }
 };

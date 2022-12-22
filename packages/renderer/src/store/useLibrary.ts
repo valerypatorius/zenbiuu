@@ -1,18 +1,16 @@
-import { computed, ref } from 'vue';
-import { createGlobalState, toReactive } from '@vueuse/core';
+import { computed } from 'vue';
+import { createSharedComposable } from '@vueuse/core';
 import { useUser } from './useUser';
-import { config } from '@/src/utils/hub';
-import { Module, ModulesSchema } from '@/types/schema';
-import { Sorting, TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
+import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
 import date from '@/src/utils/date';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
+import { useStore } from './__useStore';
+import { LibraryStoreName, defaultLibraryState } from '@/store/library';
 
 enum LibraryError {
-  EmptySearchQuery = 'Search query is empty',
   EmptySearchResult = 'Nothing found',
-  Request = 'Request failed',
 };
 
 enum LibraryEndpoint {
@@ -27,32 +25,13 @@ enum LibraryEndpoint {
  */
 const RELOAD_INTERVAL = 2 * date.Minute;
 
-export const useLibrary = createGlobalState(() => {
-  const refState = ref<ModulesSchema[Module.Library]>({
-    sorting: Sorting.ViewersDesc,
-    followed: [],
-    streams: {
-      followed: [],
-      found: [],
-    },
-    users: [],
-    lastUpdateTime: 0,
-    isReady: false,
-  });
-
-  const state = toReactive(refState);
-
+export const useLibrary = createSharedComposable(() => {
+  const { state } = useStore(LibraryStoreName, defaultLibraryState);
   const { state: userState } = useUser();
   const { get } = useRequest();
   const { start: startInterval } = useInterval();
 
   const followedIds = computed(() => state.followed.map((user) => user.to_id));
-
-  init();
-
-  async function init (): Promise<void> {
-    refState.value = await config.get(Module.Library);
-  }
 
   /**
    * Request followed channels list
@@ -92,7 +71,7 @@ export const useLibrary = createGlobalState(() => {
     const { data } = await get<TwitchResponse<TwitchChannelFromSearch>>(`${LibraryEndpoint.SearchChannels}?query=${query}&first=10`);
     const liveIds = data.filter((item) => item.is_live).map((item) => item.id);
 
-    if (!liveIds.length) {
+    if (liveIds.length === 0) {
       return await Promise.reject(LibraryError.EmptySearchResult);
     }
 
@@ -107,10 +86,10 @@ export const useLibrary = createGlobalState(() => {
   async function update (): Promise<void> {
     await getFollowedChannels();
 
-    getFollowedChannelsData();
+    void getFollowedChannelsData();
 
     startInterval(() => {
-      getStreams(followedIds.value);
+      void getStreams(followedIds.value);
     }, RELOAD_INTERVAL, {
       immediate: true,
     });

@@ -7,19 +7,19 @@ import routes from '@/src/router/routes';
  * Returns window title based on specified route
  */
 export function getWindowTitle (route: RouteLocationNormalized, isDisplayAppName = false): string {
-  const title = route.meta.title ? route.meta.title() : (route.params.name || route.name);
+  const title = typeof route.meta.title === 'function' ? route.meta.title() : route.params.name;
 
-  if (title) {
-    let result = title.toString();
-
-    if (isDisplayAppName) {
-      result = `${result} - ${getAppName()}`;
-    }
-
-    return result;
+  if (typeof title !== 'string') {
+    return getAppName();
   }
 
-  return getAppName();
+  let result = title.toString();
+
+  if (isDisplayAppName) {
+    result = `${result} - ${getAppName()}`;
+  }
+
+  return result;
 }
 
 /**

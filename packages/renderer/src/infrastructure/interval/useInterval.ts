@@ -10,7 +10,7 @@ export const useInterval = createSharedComposable(() => {
   const handlers = reactive(new Map<string, IntervalHandler>());
 
   watch(workerData, () => {
-    handlers.get(workerData.value)?.();
+    void handlers.get(workerData.value)?.();
   });
 
   function start (handler: IntervalHandler, frequency: number, options?: { immediate?: boolean }): () => void {
