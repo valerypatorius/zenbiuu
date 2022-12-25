@@ -20,28 +20,6 @@ It uses [Vite](https://vitejs.dev/) as its build tool.
 3. Set received client id in `VITE_APP_CLIENT_ID` field
 4. Set the same redirect url you specified during app registration in `VITE_APP_REDIRECT_URL` field
 
-### Run development server
-Yarn is [strongly recommended](https://github.com/electron-userland/electron-builder/issues/1147#issuecomment-276284477) by electron-builder
-
-1. Install [yarn](https://yarnpkg.com/getting-started/install#about-global-installs), if not installed
-```bash
-npm install -g yarn
-```
-2. Install dependencies
-```bash
-yarn
-```
-
-3. Start dev server
-```bash
-yarn dev
-```
-
-### Build and compile
-Run
-```bash
-yarn release
-```
 
 ## License
 [GPL-3.0](https://opensource.org/licenses/GPL-3.0)
