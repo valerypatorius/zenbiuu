@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { useUser } from './useUser';
 import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
@@ -31,6 +31,8 @@ export const useLibrary = createSharedComposable(() => {
   const { get } = useRequest();
   const { start: startInterval } = useInterval();
 
+  const isReady = ref(false);
+
   const followedIds = computed(() => state.followed.map((user) => user.to_id));
 
   /**
@@ -61,7 +63,8 @@ export const useLibrary = createSharedComposable(() => {
 
     state.streams[type] = data;
     state.lastUpdateTime = getCurrentUnixTime();
-    state.isReady = true;
+
+    isReady.value = true;
   }
 
   /**
@@ -99,7 +102,8 @@ export const useLibrary = createSharedComposable(() => {
    * Reset library state
    */
   function reset (): void {
-    state.isReady = false;
+    isReady.value = false;
+
     state.lastUpdateTime = 0;
     state.followed = [];
     state.users = [];
@@ -114,5 +118,6 @@ export const useLibrary = createSharedComposable(() => {
     update,
     reset,
     search,
+    isReady,
   };
 });

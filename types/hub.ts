@@ -1,13 +1,17 @@
 import { Schema } from '../store/schema';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 import { AppColorScheme } from './color';
+import { AppUpdateStatus } from './renderer/update';
+
+export const HubApiKey = 'hub';
 
 /**
  * Available channels for communication
  * between main and renderer processes
  */
-export enum Channel {
+export enum HubChannel {
   Initial = 'initial',
+  AppInfo = 'appInfo',
   StateChange = 'stateChange',
 
   ConfigGet = 'configGet',
@@ -30,27 +34,18 @@ export enum Channel {
   InstallAppUpdate = 'installAppUpdate',
 }
 
-/**
- * Available app update statuses
- */
-export enum AppUpdateStatus {
-  NotChecked = 'notChecked',
-  Checking = 'checking',
-  Error = 'error',
-  Available = 'available',
-  NotAvailable = 'notAvailable',
-  Downloading = 'downloading',
-  ReadyForInstall = 'readyForInstall',
+export interface HubAppInfo {
+  [key: string]: any;
+  name: string;
+  version: string;
+  locale: string;
 }
 
 /**
  * Hub data state
  */
-export interface State {
+export interface HubState {
   [key: string]: any;
-  appLocale: string;
-  appVersion: string;
-  appName: string;
   isAppWindowMaximized: boolean;
   themeSource: string;
   shouldUseDarkColors: boolean;
@@ -68,8 +63,8 @@ export interface MainProcessApi {
     get: <T extends keyof Schema>(key?: T) => Promise<Schema[T]>;
     set: <T extends keyof Schema>(key: T, value: Schema[T]) => void;
   };
-  env: Record<string, string>;
   platform: string;
+  app: HubAppInfo;
   setNativeTheme: (value: AppColorScheme) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
   requestAccessToken: (url: string) => Promise<string>;
@@ -77,8 +72,7 @@ export interface MainProcessApi {
   downloadAppUpdate: () => void;
   installAppUpdate: () => void;
   clearSessionStorage: () => void;
-  getState: () => State;
-  getStringByteLength: (str: string) => number;
+  getState: () => HubState;
 }
 
 /**
@@ -86,4 +80,4 @@ export interface MainProcessApi {
  * Dispatched when hub state is changed by main process.
  * Updates reactive state copy
  */
-export const StateChangeEvent = 'hubStateChange';
+export const HubStateChangeEvent = 'hubStateChange';

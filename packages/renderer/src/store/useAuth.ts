@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createSharedComposable, tryOnBeforeUnmount, tryOnMounted } from '@vueuse/core';
-import { requestAccessToken } from '@/src/utils/hub';
+import { requestAccessToken } from '@/src/infrastructure/hub/hub';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
 import { TwitchTokenValidationResponse } from '@/types/renderer/user';

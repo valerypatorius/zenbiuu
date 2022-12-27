@@ -21,9 +21,6 @@ export interface LibraryStoreSchema {
 
   /** Last time of library update */
   lastUpdateTime: number;
-
-  /** True, if library is ready for display */
-  isReady: boolean;
 }
 
 export const LibraryStoreName = 'library';
@@ -37,5 +34,4 @@ export const defaultLibraryState: LibraryStoreSchema = {
   },
   users: [],
   lastUpdateTime: 0,
-  isReady: false,
 };

@@ -143,14 +143,14 @@ import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { RouteName } from '@/types/renderer/router';
 import { StreamType } from '@/types/renderer/library';
-import { state } from '@/src/utils/hub';
-import { AppUpdateStatus } from '@/types/hub';
 import type { TwitchChannelFromSearch } from '@/types/renderer/library';
 import { useSidebar } from '@/src/store/useSidebar';
 import { useUser } from '@/src/store/useUser';
 import { useLibrary } from '@/src/store/useLibrary';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { usePlayer } from '@/src/store/usePlayer';
+import { useHub } from '@/src/store/useHub';
+import { AppUpdateStatus } from '@/types/renderer/update';
 
 interface SidebarChannelItem {
   userId: string;
@@ -178,8 +178,9 @@ const { t } = useI18n();
 const { isSettingsActive } = useInterface();
 const { state: sidebarState } = useSidebar();
 const { state: userState } = useUser();
-const { state: libraryState, update: updateLibrary, search: searchChannels } = useLibrary();
+const { state: libraryState, update: updateLibrary, search: searchChannels, isReady: isLibraryReady } = useLibrary();
 const { state: playerState } = usePlayer();
+const { state: hubState } = useHub();
 
 /** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;
@@ -220,16 +221,13 @@ const userAccessToken = computed(() => userState.token);
 
 /** Returns true, if app update is available */
 const isUpdateAvailable = computed(() => {
-  return state.appUpdateStatus === AppUpdateStatus.Available ||
-    state.appUpdateStatus === AppUpdateStatus.Downloading ||
-    state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
+  return hubState.appUpdateStatus === AppUpdateStatus.Available ||
+    hubState.appUpdateStatus === AppUpdateStatus.Downloading ||
+    hubState.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
 });
 
 /** Returns true, if current route is "library" */
 const isLibrary = computed(() => route.name === RouteName.Library);
-
-/** Returns true, if actual library content has been loaded */
-const isLibraryReady = computed(() => libraryState.isReady);
 
 /**
  * Returns true, if sidebar should be hidden

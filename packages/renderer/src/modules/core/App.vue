@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
-import { callWindowMethod, checkAppUpdates } from '@/src/utils/hub';
+import { callWindowMethod, checkAppUpdates } from '@/src/infrastructure/hub/hub';
 import TitleBar from '@/src/modules/core/components/Titlebar.vue';
 import Sidebar from '@/src/modules/library/components/sidebar/Sidebar.vue';
 import Settings from '@/src/modules/settings/Settings.vue';
@@ -28,7 +28,9 @@ import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { useApp } from '@/src/store/useApp';
 import { useUser } from '@/src/store/useUser';
 import { useAuth } from '@/src/store/useAuth';
+import { useHub } from '@/src/store/useHub';
 
+useHub();
 useAuth();
 
 const route = useRoute();

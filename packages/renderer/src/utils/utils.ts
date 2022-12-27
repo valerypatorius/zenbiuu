@@ -1,5 +1,4 @@
-import { state, platform } from './hub';
-import { AppLocaleName } from '@/types/renderer/locale';
+import { platform } from '@/src/infrastructure/hub/hub';
 
 /**
  * Returns url to public folder.
@@ -50,37 +49,6 @@ export function escape (string: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-/**
- * Current app version
- */
-export function getAppVersion (): string {
-  return state.appVersion;
-}
-
-/**
- * Current app name
- */
-export function getAppName (): string {
-  return state.appName;
-}
-
-/**
- * Current app locale
- */
-export function getAppLocale (): AppLocaleName {
-  const locale = state.appLocale;
-
-  if (locale.includes('en') === true) {
-    return AppLocaleName.En;
-  }
-
-  if (locale.includes('ru') === true) {
-    return AppLocaleName.Ru;
-  }
-
-  return AppLocaleName.En;
 }
 
 /**

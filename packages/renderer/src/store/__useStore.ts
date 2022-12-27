@@ -1,6 +1,6 @@
 import { ref, toRaw } from 'vue';
 import { createEventHook, EventHookOn, toReactive, watchDebounced } from '@vueuse/core';
-import { store } from '@/src/utils/hub';
+import { store } from '@/src/infrastructure/hub/hub';
 import { Schema } from '@/store/schema';
 
 export function useStore<K extends keyof Schema, T extends Schema[K]> (storeName: K, defaultState: T): {

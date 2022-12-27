@@ -1,9 +1,29 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Channel as HubChannel, State as HubState, MainProcessApi, StateChangeEvent, AppUpdateStatus } from '@/types/hub';
+import { HubChannel, HubState, MainProcessApi, HubApiKey, HubStateChangeEvent, HubAppInfo } from '@/types/hub';
+import { AppUpdateStatus } from '@/types/renderer/update';
 import { AppColorScheme } from '@/types/color';
 import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 
 const { platform } = process;
+
+const app: HubAppInfo = {
+  name: '',
+  version: '',
+  locale: 'en',
+};
+
+/**
+ * State with simple data, updated by main process
+ */
+const state: HubState = {
+  isAppWindowMaximized: false,
+  themeSource: AppColorScheme.Dark,
+  shouldUseDarkColors: true,
+  appUpdateStatus: AppUpdateStatus.NotChecked,
+  appUpdateData: null,
+  appUpdateProgress: null,
+  appUpdateError: null,
+};
 
 /**
  * Get and set data in store file
@@ -18,41 +38,13 @@ const store: MainProcessApi['store'] = {
 };
 
 /**
- * Values from .env file
- */
-const env: MainProcessApi['env'] = {
-  APP_CLIENT_ID: import.meta.env.VITE_APP_CLIENT_ID,
-  STREAM_CLIENT_ID: import.meta.env.VITE_STREAM_CLIENT_ID,
-  REDIRECT_URL: import.meta.env.VITE_APP_REDIRECT_URL,
-};
-
-/**
- * State with simple data, updated by main process
- */
-const state: HubState = {
-  appLocale: 'en',
-  appVersion: '',
-  appName: '',
-  isAppWindowMaximized: false,
-  themeSource: AppColorScheme.Dark,
-  shouldUseDarkColors: true,
-  appUpdateStatus: AppUpdateStatus.NotChecked,
-  appUpdateData: null,
-  appUpdateProgress: null,
-  appUpdateError: null,
-};
-
-/**
  * Set app theme
  */
 async function setNativeTheme (value: AppColorScheme): Promise<void> {
-  const themeState: {
-    themeSource: string;
-    shouldUseDarkColors: boolean;
-  } = await ipcRenderer.invoke(HubChannel.SetNativeTheme, value);
+  const themeState: Partial<HubState> = await ipcRenderer.invoke(HubChannel.SetNativeTheme, value);
 
   Object.entries(themeState).forEach(([key, value]) => {
-    state[key] = value;
+    state[key as keyof Partial<HubState>] = value;
   });
 }
 
@@ -75,7 +67,7 @@ async function requestAccessToken (url: string): Promise<string> {
  * when state is changed
  */
 function dispatchStateChangeEvent (): void {
-  const event = new CustomEvent(StateChangeEvent, {
+  const event = new CustomEvent(HubStateChangeEvent, {
     detail: {
       state,
     },
@@ -117,8 +109,8 @@ function clearSessionStorage (): void {
  * available in renderer process under window.hub
  */
 const api: MainProcessApi = {
+  app,
   store,
-  env,
   platform,
   setNativeTheme,
   callWindowMethod,
@@ -128,13 +120,12 @@ const api: MainProcessApi = {
   installAppUpdate,
   clearSessionStorage,
   getState: () => state,
-  getStringByteLength: (str: string) => Buffer.byteLength(str, 'utf8'),
 };
 
 /**
  * Make api available in renderer process
  */
-contextBridge.exposeInMainWorld('hub', api);
+contextBridge.exposeInMainWorld(HubApiKey, api);
 
 /**
  * Request initial data from main process
@@ -142,6 +133,17 @@ contextBridge.exposeInMainWorld('hub', api);
 void ipcRenderer.invoke(HubChannel.Initial).then((initialState: HubState) => {
   Object.entries(initialState).forEach(([key, value]) => {
     state[key] = value;
+  });
+
+  dispatchStateChangeEvent();
+});
+
+/**
+ * Request app info from main process
+ */
+void ipcRenderer.invoke(HubChannel.AppInfo).then((appInfo: HubAppInfo) => {
+  Object.entries(appInfo).forEach(([key, value]) => {
+    app[key] = value;
   });
 
   dispatchStateChangeEvent();

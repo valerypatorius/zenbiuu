@@ -12,7 +12,7 @@
         <Preview
           v-for="stream in sortedStreams"
           :key="stream.user_login"
-          :is-loading="!isLibraryReady"
+          :is-loading="!isReady"
           :data="stream"
           @click="onChannelSelect"
         />
@@ -37,11 +37,8 @@ import { RouteName } from '@/types/renderer/router';
  * Define store and router instances
  */
 const router = useRouter();
-const { state: libraryState } = useLibrary();
+const { state: libraryState, isReady } = useLibrary();
 const { state: playerState } = usePlayer();
-
-/** True, if actual library content has been loaded */
-const isLibraryReady = computed(() => libraryState.isReady);
 
 /** Current library sorting type */
 const sorting = computed(() => libraryState.sorting);
