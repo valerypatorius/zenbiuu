@@ -51,22 +51,24 @@
 import { marked } from 'marked';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { state, downloadAppUpdate, installAppUpdate } from '@/src/utils/hub';
+import { downloadAppUpdate, installAppUpdate } from '@/src/infrastructure/hub/hub';
 import { isMac } from '@/src/utils/utils';
-import { AppUpdateStatus } from '@/types/hub';
+import { useHub } from '@/src/store/useHub';
+import { AppUpdateStatus } from '@/types/renderer/update';
 
 const { t } = useI18n();
+const { state: hubState } = useHub();
 
 /** Current app update status */
-const appUpdateStatus = computed(() => state.appUpdateStatus);
+const appUpdateStatus = computed(() => hubState.appUpdateStatus);
 
 /** Download progress percentage */
 const downloadProgress = computed(() => {
-  if (!state.appUpdateProgress) {
+  if (!hubState.appUpdateProgress) {
     return 0;
   }
 
-  return Math.round(state.appUpdateProgress.percent);
+  return Math.round(hubState.appUpdateProgress.percent);
 });
 
 /** True, if update is downloading */
@@ -93,11 +95,11 @@ const buttonLabel = computed(() => {
 
 /** Release notes html. Parsed from markdown string */
 const releaseNotes = computed(() => {
-  if (!state.appUpdateData || !state.appUpdateData.releaseNotes) {
+  if (!hubState.appUpdateData || !hubState.appUpdateData.releaseNotes) {
     return '';
   }
 
-  const { releaseNotes } = state.appUpdateData;
+  const { releaseNotes } = hubState.appUpdateData;
   const markedOptions = {
     headerIds: false,
   };

@@ -8,7 +8,7 @@
 
     <div class="auth__content">
       <div class="auth__title">
-        {{ t('auth.title') }} {{ title }}
+        {{ t('auth.title') }} {{ hubState.appName }}
       </div>
 
       <div class="auth__description">
@@ -42,20 +42,18 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/modules/ui/components/Icon.vue';
-import { getAppName } from '@/src/utils/utils';
 import appIconPath from '@/assets/icon.svg';
 import { useRouter } from 'vue-router';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { useAuth } from '@/src/store/useAuth';
 import { RouteName } from '@/types/renderer/router';
+import { useHub } from '@/src/store/useHub';
 
 const router = useRouter();
 const { t } = useI18n();
-
-/** Screen title */
-const title = getAppName();
 const { isSettingsActive } = useInterface();
 const { authorize } = useAuth();
+const { state: hubState } = useHub();
 
 /**
  * True, if auth is being processed.

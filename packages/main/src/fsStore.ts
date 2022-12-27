@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import ElectronStore from 'electron-store';
 import { Schema, StoreFileName, defaultState } from '@/store/schema';
-import { Channel as HubChannel } from '@/types/hub';
+import { HubChannel } from '@/types/hub';
 
 export const store = new ElectronStore({
   name: StoreFileName,

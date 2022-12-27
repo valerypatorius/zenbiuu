@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue';
-import { createGlobalState } from '@vueuse/core';
+import { createSharedComposable } from '@vueuse/core';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 
-export const useInterface = createGlobalState(() => {
+export const useInterface = createSharedComposable(() => {
   const { isLoading: isRequestLoading } = useRequest();
 
   const isLoading = computed(() => isRequestLoading.value);

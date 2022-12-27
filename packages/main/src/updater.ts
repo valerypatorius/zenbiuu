@@ -1,6 +1,7 @@
 import { autoUpdater, UpdateInfo, ProgressInfo } from 'electron-updater';
 import { ipcMain, WebContents } from 'electron';
-import { Channel as HubChannel, AppUpdateStatus } from '@/types/hub';
+import { HubChannel } from '@/types/hub';
+import { AppUpdateStatus } from '@/types/renderer/update';
 
 /**
  * Helper class to process auto updates

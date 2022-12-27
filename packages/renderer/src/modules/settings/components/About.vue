@@ -1,7 +1,7 @@
 <template>
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ t('version') }} {{ getAppVersion() }}
+      {{ t('version') }} {{ hubState.appVersion }}
     </div>
 
     <p>
@@ -22,7 +22,8 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { getAppVersion } from '@/src/utils/utils';
+import { useHub } from '@/src/store/useHub';
 
 const { t } = useI18n();
+const { state: hubState } = useHub();
 </script>

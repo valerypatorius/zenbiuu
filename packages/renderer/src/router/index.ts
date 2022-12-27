@@ -1,5 +1,4 @@
-import { callWindowMethod } from '@/src/utils/hub';
-import { getAppName } from '@/src/utils/utils';
+import { app, callWindowMethod } from '@/src/infrastructure/hub/hub';
 import { createRouter, createWebHashHistory, RouteLocationNormalized } from 'vue-router';
 import routes from '@/src/router/routes';
 
@@ -10,13 +9,13 @@ export function getWindowTitle (route: RouteLocationNormalized, isDisplayAppName
   const title = typeof route.meta.title === 'function' ? route.meta.title() : route.params.name;
 
   if (typeof title !== 'string') {
-    return getAppName();
+    return app.name;
   }
 
   let result = title.toString();
 
   if (isDisplayAppName) {
-    result = `${result} - ${getAppName()}`;
+    result = `${result} - ${app.name}`;
   }
 
   return result;

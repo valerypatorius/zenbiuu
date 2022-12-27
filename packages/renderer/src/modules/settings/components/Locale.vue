@@ -11,7 +11,7 @@
       :value="option.name"
       :checked="option.checked"
       name="locale"
-      @change="setAppLocale(option.name)"
+      @change="setLocale(option.name)"
     >
       {{ option.label }}
     </radio>
@@ -21,9 +21,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 import Radio from '@/src/modules/ui/components/Radio.vue';
-import { updateWindowTitle } from '@/src/router/index';
 import { AppLocaleName, AppLocaleDisplayName } from '@/types/renderer/locale';
 import { useApp } from '@/src/store/useApp';
 
@@ -34,8 +32,7 @@ interface LocaleOption {
 }
 
 const { t, locale } = useI18n();
-const route = useRoute();
-const { state: appState } = useApp();
+const { setLocale } = useApp();
 
 /** Available locale options */
 const localeOptions = computed(() => {
@@ -53,14 +50,4 @@ const localeOptions = computed(() => {
 
   return result;
 });
-
-/**
- * Set app locale and update window title
- */
-function setAppLocale (value: AppLocaleName): void {
-  locale.value = value;
-  appState.locale = value;
-
-  updateWindowTitle(route);
-}
 </script>

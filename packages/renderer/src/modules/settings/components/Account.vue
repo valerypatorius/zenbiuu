@@ -29,7 +29,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { RouteName } from '@/types/renderer/router';
-import { clearSessionStorage } from '@/src/utils/hub';
+import { clearSessionStorage } from '@/src/infrastructure/hub/hub';
 import { useUser } from '@/src/store/useUser';
 import { useAuth } from '@/src/store/useAuth';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';

@@ -46,11 +46,11 @@ import SettingsLocale from '@/src/modules/settings/components/Locale.vue';
 import SettingsAccount from '@/src/modules/settings/components/Account.vue';
 import SettingsAbout from '@/src/modules/settings/components/About.vue';
 import SettingsUpdate from '@/src/modules/settings/components/Update.vue';
-import { state } from '@/src/utils/hub';
-import { AppUpdateStatus } from '@/types/hub';
+import { useHub } from '@/src/store/useHub';
 import type { Component } from 'vue';
 import { useUser } from '@/src/store/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
+import { AppUpdateStatus } from '@/types/renderer/update';
 
 enum TabName {
   Interface = 'interface',
@@ -69,15 +69,16 @@ interface TabData {
 const { t } = useI18n();
 const { state: userState } = useUser();
 const { isSettingsActive } = useInterface();
+const { state: hubState } = useHub();
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);
 
 /** Returns true, if app update is available */
 const isUpdateAvailable = computed(() => {
-  return state.appUpdateStatus === AppUpdateStatus.Available ||
-    state.appUpdateStatus === AppUpdateStatus.Downloading ||
-    state.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
+  return hubState.appUpdateStatus === AppUpdateStatus.Available ||
+    hubState.appUpdateStatus === AppUpdateStatus.Downloading ||
+    hubState.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
 });
 
 const Tab = computed<Record<TabName, TabData>>(() => {
@@ -114,7 +115,7 @@ const Tab = computed<Record<TabName, TabData>>(() => {
  * Currently active tab.
  * If update is available, force "update" tab to be active
  */
-const activeTabName = ref(state.appUpdateStatus === AppUpdateStatus.Available ? TabName.Update : TabName.Interface);
+const activeTabName = ref(hubState.appUpdateStatus === AppUpdateStatus.Available ? TabName.Update : TabName.Interface);
 
 /** Tabs list to render */
 const availableTabs = computed(() => {

@@ -2,7 +2,7 @@ import { join } from 'path';
 import { app, BrowserWindow, shell, session, nativeTheme, ipcMain } from 'electron';
 import { store, listenForConfigRequests } from './fsStore';
 import { objectKeysToLowercase, getAccessTokenFromTwitchAuthUrl } from '@/src/utils';
-import { Channel as HubChannel, State as HubState } from '@/types/hub';
+import { HubAppInfo, HubChannel, HubState } from '@/types/hub';
 import { AppColorScheme } from '@/types/color';
 import autoUpdater from '@/src/updater';
 import { WindowStoreName } from '@/store/window';
@@ -156,9 +156,6 @@ function handleRendererMessages (): void {
     const { themeSource, shouldUseDarkColors } = nativeTheme;
 
     return {
-      appLocale: app.getLocale(),
-      appVersion: app.getVersion(),
-      appName: app.getName(),
       isAppWindowMaximized: mainWindow !== null ? mainWindow.isMaximized() : false,
       themeSource,
       shouldUseDarkColors,
@@ -166,6 +163,17 @@ function handleRendererMessages (): void {
       appUpdateData: null,
       appUpdateProgress: null,
       appUpdateError: null,
+    };
+  });
+
+  /**
+   * Return app info
+   */
+  ipcMain.handle(HubChannel.AppInfo, async (): Promise<HubAppInfo> => {
+    return {
+      locale: app.getLocale(),
+      version: app.getVersion(),
+      name: app.getName(),
     };
   });
 
