@@ -113,7 +113,7 @@ export const useChat = createSharedComposable(() => {
   }
 
   async function getBttvGlobalEmotes (): Promise<void> {
-    const response = await get<BttvGlobalEmotes>(ChatEndpoint.BttvGlobal, {});
+    const response = await get<BttvGlobalEmotes>(ChatEndpoint.BttvGlobal, { headers: undefined });
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
@@ -126,7 +126,7 @@ export const useChat = createSharedComposable(() => {
   }
 
   async function getBttvChannelEmotes (channelId: string): Promise<void> {
-    const response = await get<BttvChannelEmotes>(`${ChatEndpoint.BttvChannel}/${channelId}`, {});
+    const response = await get<BttvChannelEmotes>(`${ChatEndpoint.BttvChannel}/${channelId}`, { headers: undefined });
     const { channelEmotes, sharedEmotes } = response;
     const emotes = [...channelEmotes, ...sharedEmotes];
 
@@ -141,7 +141,7 @@ export const useChat = createSharedComposable(() => {
   }
 
   async function getFfzChannelEmotes (channelName: string): Promise<void> {
-    const response = await get<FfzChannelEmotes>(`${ChatEndpoint.FfzChannel}/${channelName}`, {});
+    const response = await get<FfzChannelEmotes>(`${ChatEndpoint.FfzChannel}/${channelName}`, { headers: undefined });
 
     Object.values(response.sets).forEach((set) => {
       set.emoticons.forEach((emote) => {
@@ -157,7 +157,7 @@ export const useChat = createSharedComposable(() => {
   }
 
   async function getSevenTvGlobalEmotes (): Promise<void> {
-    const response = await get<SevenTvEmotes>(ChatEndpoint.SevenTvGlobal, {});
+    const response = await get<SevenTvEmotes>(ChatEndpoint.SevenTvGlobal, { headers: undefined });
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
@@ -170,7 +170,7 @@ export const useChat = createSharedComposable(() => {
   }
 
   async function getSevenTvChannelEmotes (channelName: string): Promise<void> {
-    const response = await get<SevenTvEmotes>(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`, {});
+    const response = await get<SevenTvEmotes>(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`, { headers: undefined });
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';

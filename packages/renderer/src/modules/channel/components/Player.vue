@@ -83,6 +83,7 @@ import type { PlayerElements } from '@/types/renderer/player';
 import { usePlayer } from '@/src/store/usePlayer';
 import { useLibrary } from '@/src/store/useLibrary';
 import { useApp } from '@/src/store/useApp';
+import { useStats } from '@/src/store/useStats';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
 
 export type HlsInstance = InstanceType<typeof Hls>;
@@ -118,7 +119,8 @@ const HLS_CONFIG: Partial<HlsConfig> = {
 
 const { state: appState } = useApp();
 const { state: libraryState } = useLibrary();
-const { state: playerState, getPlaylist, sendStats } = usePlayer();
+const { state: playerState, getPlaylist } = usePlayer();
+const { send: sendStats, prepareUrlForChannel: prepareStatsUrlForChannel } = useStats();
 const { start: startInterval } = useInterval();
 
 const player = ref<HTMLDivElement>();
@@ -213,7 +215,12 @@ onMounted(() => {
   playerElements.value.canvas = canvas.value;
 
   /**
-   * Update stream info and send player stats every 1 minute
+   * Prepare stats posting url
+   */
+  prepareStatsUrlForChannel(props.channelName);
+
+  /**
+   * Send player stats every 1 minute
    */
   stopStatsInterval.value = startInterval(() => {
     if (info.value === undefined) {
@@ -221,8 +228,9 @@ onMounted(() => {
     }
 
     sendStats({
+      channelName: props.channelName,
+      channelId: info.value.user_id,
       broadcastId: info.value.id,
-      channeld: info.value.user_id,
     });
   }, STATS_POST_FREQUENCY);
 

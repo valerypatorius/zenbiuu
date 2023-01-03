@@ -15,7 +15,8 @@ interface QueueHandlers<T = any> {
 interface RequestHandlerPayload {
   url: string;
   body?: any;
-  headers?: Record<string, string>;
+  options?: RequestInit;
+  parseResponse?: RequestPayload['parseResponse'];
 }
 
 export const useRequest = createSharedComposable(() => {
@@ -81,16 +82,17 @@ export const useRequest = createSharedComposable(() => {
 
       const data: RequestPayload = {
         url: payload.url,
+        parseResponse: payload.parseResponse ?? 'json',
+      };
+
+      data.options = {
+        headers: defaultHeaders.value,
+        referrerPolicy: 'origin',
+        ...payload.options,
       };
 
       if (action === RequestAction.Post && payload.body !== undefined) {
-        data.body = typeof payload.body === 'string' ? payload.body : JSON.stringify(payload.body);
-      }
-
-      if (payload.headers !== undefined) {
-        data.options = {
-          headers: payload.headers,
-        };
+        data.options.body = typeof payload.body === 'string' ? payload.body : JSON.stringify(payload.body);
       }
 
       postMessage({
@@ -100,18 +102,20 @@ export const useRequest = createSharedComposable(() => {
     });
   }
 
-  async function get<T> (url: string, headers = defaultHeaders.value): Promise<T> {
+  async function get<T> (url: string, options?: RequestInit, parseResponse?: RequestPayload['parseResponse']): Promise<T> {
     return await handle<T>(RequestAction.Get, {
       url,
-      headers,
+      options,
+      parseResponse,
     });
   }
 
-  async function post<T> (url: string, body?: any, headers = defaultHeaders.value): Promise<T> {
+  async function post<T> (url: string, body?: any, options?: RequestInit, parseResponse?: RequestPayload['parseResponse']): Promise<T> {
     return await handle<T>(RequestAction.Post, {
       url,
       body,
-      headers,
+      options,
+      parseResponse,
     });
   }
 

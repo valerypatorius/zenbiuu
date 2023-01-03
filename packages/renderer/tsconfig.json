@@ -15,6 +15,9 @@
       "@/assets/*": [
         "./assets/*"
       ],
+      "@/utils/*": [
+        "../../utils/*"
+      ],
     },
     "lib": ["ESNext", "dom", "dom.iterable"]
   },

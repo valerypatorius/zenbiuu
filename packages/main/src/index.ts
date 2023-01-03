@@ -15,6 +15,10 @@ const env: ImportMetaEnv = import.meta.env;
  */
 const isSingleInstance = app.requestSingleInstanceLock();
 
+const appRootUrl = env.MODE === 'development'
+  ? env.VITE_DEV_SERVER_URL
+  : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
+
 /**
  * Do not allow creating multiple app instances
  */
@@ -263,37 +267,33 @@ function createWindow (): void {
     });
   });
 
-  const pageUrl = env.MODE === 'development'
-    ? env.VITE_DEV_SERVER_URL
-    : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
-
-  void mainWindow.loadURL(pageUrl);
+  void mainWindow.loadURL(appRootUrl);
 }
 
 /**
  * Handle some CORS issues when requesting video data
  */
 function handleCors (): void {
-  const playerUrls = {
+  const filter = {
     urls: [
-      'https://*.ttvnw.net/*',
+      /** Initial playlist */
+      'https://usher.ttvnw.net/*',
+
+      /** Video fragments */
+      'https://*.hls.ttvnw.net/*',
+
+      /** GQL for playlists access tokens */
       'https://gql.twitch.tv/*',
+
+      /** Web pages */
+      'https://www.twitch.tv/*',
+
+      /** CDN with channels config files */
+      'https://static.twitchcdn.net/*',
     ],
   };
 
-  session.defaultSession.webRequest.onBeforeSendHeaders(playerUrls, (details, handler) => {
-    const requestHeaders = {
-      ...objectKeysToLowercase(details.requestHeaders),
-      origin: 'https://www.twitch.tv',
-      referer: 'https://www.twitch.tv',
-    };
-
-    handler({
-      requestHeaders,
-    });
-  });
-
-  session.defaultSession.webRequest.onHeadersReceived(playerUrls, (details, handler) => {
+  session.defaultSession.webRequest.onHeadersReceived(filter, (details, handler) => {
     const responseHeaders = {
       ...objectKeysToLowercase(details?.responseHeaders ?? {}),
       'access-control-allow-origin': '*',

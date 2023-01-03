@@ -20,7 +20,7 @@ export enum RequestStatusCode {
 export interface RequestPayload {
   url: string;
   options?: RequestInit;
-  body?: string;
+  parseResponse?: 'json' | 'text';
 }
 
 export interface RequestResponse<T = any> {

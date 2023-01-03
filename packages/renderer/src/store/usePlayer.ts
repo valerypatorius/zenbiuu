@@ -2,21 +2,17 @@ import { createSharedComposable } from '@vueuse/core';
 import { AccessTokenResponse, PlayerLayout } from '@/types/renderer/player';
 import { useUser } from './useUser';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import { uid } from '../utils/utils';
 import { useStore } from './__useStore';
 import { PlayerStoreName, defaultPlayerState } from '@/store/player';
 
 enum PlayerEndpoint {
   GraphApi = 'https://gql.twitch.tv/gql',
-  Stats = 'https://spade.twitch.tv/track',
 }
 
 interface PlaylistAccess {
   sig: string;
   token: string;
 }
-
-const DEVICE_ID = uid();
 
 function formPlaylistUrl (channel: string, { sig, token }: PlaylistAccess): string {
   const params = {
@@ -44,20 +40,22 @@ export const usePlayer = createSharedComposable(() => {
   const { state: userState } = useUser();
   const { post } = useRequest();
 
-  async function getAcessToken (channel: string): Promise<PlaylistAccess> {
+  async function getAcessToken (channelName: string): Promise<PlaylistAccess> {
     const response = await post<AccessTokenResponse>(PlayerEndpoint.GraphApi, {
       operationName: 'PlaybackAccessToken_Template',
       query: 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}',
       variables: {
         isLive: true,
-        login: channel,
+        login: channelName,
         isVod: false,
         vodID: '',
         playerType: 'site',
       },
     }, {
-      'Client-ID': import.meta.env.VITE_STREAM_CLIENT_ID,
-      'Device-ID': DEVICE_ID,
+      headers: {
+        'Client-ID': import.meta.env.VITE_STREAM_CLIENT_ID,
+        'Device-ID': userState.deviceId,
+      },
     });
 
     return {
@@ -70,25 +68,6 @@ export const usePlayer = createSharedComposable(() => {
     const access = await getAcessToken(channel);
 
     return formPlaylistUrl(channel, access);
-  }
-
-  async function sendStats ({ broadcastId, channeld }: { broadcastId: string; channeld: string }): Promise<void> {
-    const data = [
-      {
-        event: 'minute-watched',
-        properties: {
-          broadcast_id: broadcastId,
-          channel_id: channeld,
-          login: userState.name,
-          platform: 'web',
-          player: 'site',
-        },
-      },
-    ];
-
-    await post(PlayerEndpoint.Stats, {
-      data: btoa(JSON.stringify(data)),
-    }, {});
   }
 
   function toggleSidebar (): void {
@@ -121,6 +100,5 @@ export const usePlayer = createSharedComposable(() => {
     toggleLayout,
     setVolume,
     setCompressor,
-    sendStats,
   };
 });
