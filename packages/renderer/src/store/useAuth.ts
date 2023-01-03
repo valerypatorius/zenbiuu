@@ -27,6 +27,7 @@ enum UserEndpoint {
   Authorize = 'https://id.twitch.tv/oauth2/authorize',
   Validate = 'https://id.twitch.tv/oauth2/validate',
   Revoke = 'https://id.twitch.tv/oauth2/revoke',
+  Integrity = 'https://gql.twitch.tv/integrity',
 }
 
 export const useAuth = createSharedComposable(() => {
@@ -94,8 +95,10 @@ export const useAuth = createSharedComposable(() => {
 
     try {
       const response = await get<TwitchTokenValidationResponse>(UserEndpoint.Validate, {
-        Accept: 'application/vnd.twitchtv.v5+json',
-        Authorization: `OAuth ${userState.token}`,
+        headers: {
+          Accept: 'application/vnd.twitchtv.v5+json',
+          Authorization: `OAuth ${userState.token}`,
+        },
       });
 
       userState.tokenDate = now;
@@ -146,7 +149,7 @@ export const useAuth = createSharedComposable(() => {
 
     const query = Object.entries(params).map(([key, string]) => `${key}=${string}`).join('&');
 
-    await post(`${UserEndpoint.Revoke}?${query}`, undefined, {});
+    await post(`${UserEndpoint.Revoke}?${query}`, undefined, { headers: undefined });
 
     disconnectFromIrc();
     clearUser();

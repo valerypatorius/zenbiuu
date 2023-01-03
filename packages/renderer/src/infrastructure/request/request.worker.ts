@@ -15,7 +15,6 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
   try {
     const response = await fetch(payload.url, {
       method,
-      body: payload.body,
       ...payload.options,
     });
 
@@ -41,6 +40,20 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * Make response string to check if it can be empty
      */
     const responseText = await response.clone().text();
+
+    /**
+     * If response should be parsed as text, return it right away
+     */
+    if (
+      (response.status === RequestStatusCode.Success || response.status === RequestStatusCode.NoContent) &&
+      payload.parseResponse === 'text'
+    ) {
+      message.data = responseText;
+
+      context.postMessage(message);
+
+      return;
+    }
 
     /**
      * If response should be empty and it is, post message and do not proceed

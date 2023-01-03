@@ -1,6 +1,6 @@
 import { createSharedComposable } from '@vueuse/core';
 import { useStore } from './__useStore';
-import { UserStoreName, defaultUserState } from '@/store/user';
+import { UserStoreName, defaultUserState, DEFAULT_DEVICE_ID } from '@/store/user';
 
 export const useUser = createSharedComposable(() => {
   const { state } = useStore(UserStoreName, defaultUserState);
@@ -10,6 +10,7 @@ export const useUser = createSharedComposable(() => {
     state.name = undefined;
     state.token = undefined;
     state.tokenDate = 0;
+    state.deviceId = DEFAULT_DEVICE_ID;
   }
 
   return {
