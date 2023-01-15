@@ -1,12 +1,13 @@
 import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
+import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { IrcCommand } from '@/src/infrastructure/irc/types.irc.worker';
 import { useStore } from './__useStore';
 import { ChatStoreName, defaultChatState } from '@/store/chat';
-import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes } from '@/types/renderer/chat';
+import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from '@/types/renderer/chat';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
@@ -27,6 +28,10 @@ export const useChat = createSharedComposable(() => {
   const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
   const messages = ref<ChatMessage[]>([]);
   const isPaused = ref(false);
+
+  const customEmotes = useIDBKeyval<Record<string, ChatEmote>>('emotes', {}, {
+    shallow: true,
+  });
 
   function messageHandler ({ command, data }: { command: IrcCommand; data?: ChatMessage }): void {
     switch (command) {
@@ -56,31 +61,15 @@ export const useChat = createSharedComposable(() => {
       .split(' ')
       .map((word: string) => {
         if (messageData.emotes?.[word] !== undefined) {
-          const emote = messageData.emotes[word];
-          const { url, height } = emote;
+          const { url, height } = messageData.emotes[word];
 
           return `<span class="emote" title="${word}">
             <img src="${url}" alt="${word}" style="--height: ${height}px;">
           </span>`;
         }
 
-        if (state.emotes.bttv[word] !== undefined) {
-          const emote = state.emotes.bttv[word];
-          const { url, height } = emote;
-
-          return `<span class="emote" title="${word}">
-            <img src="${url}" alt="${word}" style="--height: ${height}px;">
-          </span>`;
-        } else if (state.emotes.ffz[word] !== undefined) {
-          const emote = state.emotes.ffz[word];
-          const { url, height } = emote;
-
-          return `<span class="emote" title="${word}">
-            <img src="${url}" alt="${word}" style="--height: ${height}px;">
-          </span>`;
-        } else if (state.emotes.seventv[word] !== undefined) {
-          const emote = state.emotes.seventv[word];
-          const { url, height } = emote;
+        if (customEmotes.value[word] !== undefined) {
+          const { url, height } = customEmotes.value[word];
 
           return `<span class="emote" title="${word}">
             <img src="${url}" alt="${word}" style="--height: ${height}px;">
@@ -112,84 +101,101 @@ export const useChat = createSharedComposable(() => {
     messages.value = [];
   }
 
-  async function getBttvGlobalEmotes (): Promise<void> {
+  async function getBttvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
     const response = await get<BttvGlobalEmotes>(ChatEndpoint.BttvGlobal, { headers: undefined });
+    const result: Record<string, ChatEmote> = {};
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      state.emotes.bttv[emote.code] = {
+      result[emote.code] = {
         url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
         height: 28,
       };
     });
+
+    return result;
   }
 
-  async function getBttvChannelEmotes (channelId: string): Promise<void> {
+  async function getBttvChannelEmotes (channelId: string): Promise<Record<string, ChatEmote>> {
     const response = await get<BttvChannelEmotes>(`${ChatEndpoint.BttvChannel}/${channelId}`, { headers: undefined });
     const { channelEmotes, sharedEmotes } = response;
     const emotes = [...channelEmotes, ...sharedEmotes];
+    const result: Record<string, ChatEmote> = {};
 
     emotes.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      state.emotes.bttv[emote.code] = {
+      result[emote.code] = {
         url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
         height: 28,
       };
     });
+
+    return result;
   }
 
-  async function getFfzChannelEmotes (channelName: string): Promise<void> {
+  async function getFfzEmotes (channelName: string): Promise<Record<string, ChatEmote>> {
     const response = await get<FfzChannelEmotes>(`${ChatEndpoint.FfzChannel}/${channelName}`, { headers: undefined });
+    const result: Record<string, ChatEmote> = {};
 
     Object.values(response.sets).forEach((set) => {
       set.emoticons.forEach((emote) => {
         const size = window.devicePixelRatio > 1 ? 2 : 1;
         const url = emote.urls[size] ?? emote.urls[1];
 
-        state.emotes.ffz[emote.name] = {
+        result[emote.name] = {
           url: `https:${url}`,
           height: emote.height,
         };
       });
     });
+
+    return result;
   }
 
-  async function getSevenTvGlobalEmotes (): Promise<void> {
+  async function getSevenTvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
     const response = await get<SevenTvEmotes>(ChatEndpoint.SevenTvGlobal, { headers: undefined });
+    const result: Record<string, ChatEmote> = {};
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      state.emotes.seventv[emote.name] = {
-        url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
-        height: 28,
+      result[emote.name] = {
+        url: `https://cdn.7tv.app/emote/${emote.id}/${size}.webp`,
+        height: emote.height[0],
       };
     });
+
+    return result;
   }
 
-  async function getSevenTvChannelEmotes (channelName: string): Promise<void> {
+  async function getSevenTvChannelEmotes (channelName: string): Promise<Record<string, ChatEmote>> {
     const response = await get<SevenTvEmotes>(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`, { headers: undefined });
+    const result: Record<string, ChatEmote> = {};
 
     response.forEach((emote) => {
       const size = window.devicePixelRatio > 1 ? '2x' : '1x';
 
-      state.emotes.seventv[emote.name] = {
-        url: `https://cdn.7tv.app/emote/${emote.id}/${size}`,
-        height: 28,
+      result[emote.name] = {
+        url: `https://cdn.7tv.app/emote/${emote.id}/${size}.webp`,
+        height: emote.height[0],
       };
     });
+
+    return result;
   }
 
-  function getEmotes ({ id, name }: { id: string; name: string }): void {
-    void getBttvGlobalEmotes();
+  async function getEmotes ({ id, name }: { id: string; name: string }): Promise<void> {
+    const result: Record<string, ChatEmote> = {
+      ...await getBttvGlobalEmotes(),
+      ...await getBttvChannelEmotes(id),
+      ...await getFfzEmotes(name),
+      ...await getSevenTvGlobalEmotes(),
+      ...await getSevenTvChannelEmotes(name),
+    };
 
-    void getBttvChannelEmotes(id);
-    void getFfzChannelEmotes(name);
-
-    void getSevenTvGlobalEmotes();
-    void getSevenTvChannelEmotes(name);
+    customEmotes.value = result;
   }
 
   function pause (value: boolean): void {

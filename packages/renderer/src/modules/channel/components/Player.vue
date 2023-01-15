@@ -74,7 +74,6 @@
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
 import date from '@/src/utils/date';
 import Hls, { HlsConfig } from 'hls.js';
-import { StreamType } from '@/types/renderer/library';
 import Loader from '@/src/modules/ui/components/Loader.vue';
 import PlayerOverlay from '@/src/modules/channel/components/player/Overlay.vue';
 import PlayerInfo from '@/src/modules/channel/components/player/Info.vue';
@@ -118,7 +117,7 @@ const HLS_CONFIG: Partial<HlsConfig> = {
 };
 
 const { state: appState } = useApp();
-const { state: libraryState } = useLibrary();
+const { followedStreams, foundStreams, lastUpdateTime } = useLibrary();
 const { state: playerState, getPlaylist } = usePlayer();
 const { send: sendStats, prepareUrlForChannel: prepareStatsUrlForChannel } = useStats();
 const { start: startInterval } = useInterval();
@@ -183,14 +182,12 @@ const isChatHidden = computed(() => playerState.isHideChat);
 /** Current volume value */
 const currentVolume = computed(() => playerState.volume);
 
-/** Returns true, if channel is followed */
-const isFollowed = computed(() => !!libraryState.followed.find((item) => item.to_id === props.channelId));
-
 /** Stream info */
 const info = computed(() => {
-  const streamType = isFollowed.value ? StreamType.Followed : StreamType.Found;
+  const followedStreamData = followedStreams.value.find((stream) => stream.user_login === props.channelName);
+  const foundStreamData = foundStreams.value.find((stream) => stream.user_login === props.channelName);
 
-  return libraryState.streams[streamType].find((stream) => stream.user_login === props.channelName);
+  return followedStreamData ?? foundStreamData;
 });
 
 /** Stream thumbnail url */
@@ -203,7 +200,7 @@ const thumbnail = computed(() => {
     return '';
   }
 
-  return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${libraryState.lastUpdateTime}`;
+  return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime.value}`;
 });
 
 onMounted(() => {

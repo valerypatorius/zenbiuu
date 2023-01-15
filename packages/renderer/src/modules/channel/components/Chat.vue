@@ -463,13 +463,13 @@ function resize (event: MouseEvent, axis: Axis): void {
         margin-top: -0.1rem;
 
         img {
-          height: calc(var(--height, 32px) *( var(--size-base) / 10));
+          max-height: calc(var(--height, 28px) * ( var(--size-base) / 10));
         }
 
         /** Allow some unique emotes to overlap others */
         + .emote[title="cvMask"],
         + .emote[title="cvHazmat"] {
-          margin-left: -32px;
+          margin-left: calc(var(--height, 28px) * ( var(--size-base) / 10) * -1);
         }
       }
 

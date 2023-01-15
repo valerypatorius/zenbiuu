@@ -7,7 +7,7 @@
       },
     ]"
     :style="{
-      width: customSidebarWidth + 'px',
+      width: sidebarWidth + 'px',
     }"
   >
     <template v-if="userAccessToken">
@@ -142,7 +142,6 @@ import SidebarSearch from '@/src/modules/library/components/sidebar/Search.vue';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { RouteName } from '@/types/renderer/router';
-import { StreamType } from '@/types/renderer/library';
 import type { TwitchChannelFromSearch } from '@/types/renderer/library';
 import { useSidebar } from '@/src/store/useSidebar';
 import { useUser } from '@/src/store/useUser';
@@ -178,7 +177,7 @@ const { t } = useI18n();
 const { isSettingsActive } = useInterface();
 const { state: sidebarState } = useSidebar();
 const { state: userState } = useUser();
-const { state: libraryState, update: updateLibrary, search: searchChannels, isReady: isLibraryReady } = useLibrary();
+const { update: updateLibrary, search: searchChannels, isReady: isLibraryReady, followedIds, followedChannels, followedStreams, foundStreams, lastUpdateTime } = useLibrary();
 const { state: playerState } = usePlayer();
 const { state: hubState } = useHub();
 
@@ -194,6 +193,12 @@ const offlineItemsCount = ref(MIN_OFFLINE_ITEMS_COUNT);
 
 /** Current sidebar width, set by user */
 const customSidebarWidth = ref(sidebarState.width);
+
+const isSidebarResizing = ref(false);
+
+const sidebarWidth = computed(() => {
+  return isSidebarResizing.value ? customSidebarWidth.value : sidebarState.width;
+});
 
 /** Resizer instance */
 const resizer = ref<Resizer>();
@@ -249,9 +254,9 @@ function isContainsSubstring (str: string, substr: string): boolean {
 
 /** List of live channels to display */
 const liveItems = computed(() => {
-  return libraryState.streams[StreamType.Followed]
+  return followedStreams.value
     .reduce<SidebarChannelItem[]>((result, stream) => {
-      const userData = libraryState.users.find((user) => user.id === stream.user_id);
+      const userData = followedChannels.value.find((user) => user.id === stream.user_id);
 
       if (userData) {
         result.push({
@@ -278,10 +283,10 @@ const liveItems = computed(() => {
 const offlineItems = computed(() => {
   const liveIds = liveItems.value.map((item) => item.userId);
 
-  return libraryState.followed
-    .filter((followedItem) => !liveIds.includes(followedItem.to_id))
-    .reduce<SidebarChannelItem[]>((result, followedItem) => {
-      const userData = libraryState.users.find((user) => user.id === followedItem.to_id);
+  return followedIds.value
+    .filter((followedId) => !liveIds.includes(followedId))
+    .reduce<SidebarChannelItem[]>((result, followedId) => {
+      const userData = followedChannels.value.find((user) => user.id === followedId);
 
       if (userData) {
         result.push({
@@ -320,7 +325,7 @@ const foundItems = computed(() => {
       };
 
       if (foundItem.is_live) {
-        const stream = libraryState.streams[StreamType.Found].find((item) => item.user_id === foundItem.id);
+        const stream = foundStreams.value.find((item) => item.user_id === foundItem.id);
 
         if (stream) {
           data.stream = {
@@ -363,9 +368,11 @@ onMounted(() => {
     },
     multiplier: -1,
     onResize: (value: number) => {
+      isSidebarResizing.value = true;
       customSidebarWidth.value = value;
     },
     onStop: () => {
+      isSidebarResizing.value = false;
       sidebarState.width = customSidebarWidth.value;
     },
   });
@@ -388,9 +395,8 @@ onBeforeUnmount(() => {
  * Open selected channel screen
  */
 function selectChannel (item: SidebarChannelItem): void {
-  const { lastUpdateTime } = libraryState;
   const cover = item.stream && item.stream.cover
-    ? `${item.stream.cover.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime}`
+    ? `${item.stream.cover.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime.value}`
     : '';
 
   router.replace({
