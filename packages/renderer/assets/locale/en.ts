@@ -47,14 +47,6 @@ export default {
       iconBy: 'App icon by',
       interfaceIcons: 'Interface icons by',
     },
-    update: {
-      title: 'Update',
-      available: 'Update is available',
-      download: 'Download',
-      downloading: 'Downloading',
-      ready: 'Install',
-      macWarning: 'Sorry, but Zenbiuu does not support auto updates on MacOS at the moment. Please download latest version from GitHub manually',
-    },
     logout: 'Logout',
   },
   chat: {

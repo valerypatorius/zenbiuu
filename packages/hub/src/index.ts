@@ -1,8 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { HubChannel, HubState, MainProcessApi, HubApiKey, HubStateChangeEvent, HubAppInfo } from '@/types/hub';
-import { AppUpdateStatus } from '@/types/renderer/update';
 import { AppColorScheme } from '@/types/color';
-import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 
 const { platform } = process;
 
@@ -19,10 +17,6 @@ const state: HubState = {
   isAppWindowMaximized: false,
   themeSource: AppColorScheme.Dark,
   shouldUseDarkColors: true,
-  appUpdateStatus: AppUpdateStatus.NotChecked,
-  appUpdateData: null,
-  appUpdateProgress: null,
-  appUpdateError: null,
 };
 
 /**
@@ -77,27 +71,6 @@ function dispatchStateChangeEvent (): void {
 }
 
 /**
- * Check for app updates
- */
-function checkAppUpdates (): void {
-  ipcRenderer.send(HubChannel.CheckAppUpdates);
-}
-
-/**
- * Download an update
- */
-function downloadAppUpdate (): void {
-  ipcRenderer.send(HubChannel.DownloadAppUpdate);
-}
-
-/**
- * Quit and install an update
- */
-function installAppUpdate (): void {
-  ipcRenderer.send(HubChannel.InstallAppUpdate);
-}
-
-/**
  * CLear session storage data
  */
 function clearSessionStorage (): void {
@@ -115,9 +88,6 @@ const api: MainProcessApi = {
   setNativeTheme,
   callWindowMethod,
   requestAccessToken,
-  checkAppUpdates,
-  downloadAppUpdate,
-  installAppUpdate,
   clearSessionStorage,
   getState: () => state,
 };
@@ -156,32 +126,6 @@ ipcRenderer.on(HubChannel.StateChange, (event, receivedState: HubState) => {
   Object.entries(receivedState).forEach(([key, value]) => {
     state[key] = value;
   });
-
-  dispatchStateChangeEvent();
-});
-
-/**
- * Listen for app update status changes
- */
-ipcRenderer.on(HubChannel.SetUpdateStatus, (event, status: AppUpdateStatus, updateData?: UpdateInfo, progressData?: ProgressInfo) => {
-  state.appUpdateStatus = status;
-
-  if (updateData !== undefined) {
-    state.appUpdateData = updateData;
-  }
-
-  if (progressData !== undefined) {
-    state.appUpdateProgress = progressData;
-  }
-
-  dispatchStateChangeEvent();
-});
-
-/**
- * Listen for update errors
- */
-ipcRenderer.on(HubChannel.SetUpdateError, (event, error: Error) => {
-  state.appUpdateError = error;
 
   dispatchStateChangeEvent();
 });

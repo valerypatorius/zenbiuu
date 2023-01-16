@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
-import { callWindowMethod, checkAppUpdates } from '@/src/infrastructure/hub/hub';
+import { callWindowMethod } from '@/src/infrastructure/hub/hub';
 import TitleBar from '@/src/modules/core/components/Titlebar.vue';
 import Sidebar from '@/src/modules/library/components/sidebar/Sidebar.vue';
 import Settings from '@/src/modules/settings/Settings.vue';
@@ -58,9 +58,6 @@ watchEffect(() => {
 
 /** Set initial interface size */
 document.documentElement.style.setProperty('--size-base', appState.interfaceSize.toString());
-
-/** Check for updates */
-checkAppUpdates();
 </script>
 
 <style lang="postcss">

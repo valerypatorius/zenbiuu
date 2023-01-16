@@ -45,19 +45,15 @@ import SettingsInterface from '@/src/modules/settings/components/Interface.vue';
 import SettingsLocale from '@/src/modules/settings/components/Locale.vue';
 import SettingsAccount from '@/src/modules/settings/components/Account.vue';
 import SettingsAbout from '@/src/modules/settings/components/About.vue';
-import SettingsUpdate from '@/src/modules/settings/components/Update.vue';
-import { useHub } from '@/src/store/useHub';
 import type { Component } from 'vue';
 import { useUser } from '@/src/store/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { AppUpdateStatus } from '@/types/renderer/update';
 
 enum TabName {
   Interface = 'interface',
   Locale = 'locale',
   Account = 'account',
   About = 'about',
-  Update = 'update',
 }
 
 interface TabData {
@@ -69,17 +65,9 @@ interface TabData {
 const { t } = useI18n();
 const { state: userState } = useUser();
 const { isSettingsActive } = useInterface();
-const { state: hubState } = useHub();
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);
-
-/** Returns true, if app update is available */
-const isUpdateAvailable = computed(() => {
-  return hubState.appUpdateStatus === AppUpdateStatus.Available ||
-    hubState.appUpdateStatus === AppUpdateStatus.Downloading ||
-    hubState.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
-});
 
 const Tab = computed<Record<TabName, TabData>>(() => {
   return {
@@ -103,28 +91,18 @@ const Tab = computed<Record<TabName, TabData>>(() => {
       icon: 'SettingsAbout',
       component: SettingsAbout,
     },
-    [TabName.Update]: {
-      label: t('settings.update.title'),
-      icon: 'SettingsUpdate',
-      component: SettingsUpdate,
-    },
   };
 });
 
 /**
- * Currently active tab.
- * If update is available, force "update" tab to be active
+ * Currently active tab
  */
-const activeTabName = ref(hubState.appUpdateStatus === AppUpdateStatus.Available ? TabName.Update : TabName.Interface);
+const activeTabName = ref(TabName.Interface);
 
 /** Tabs list to render */
 const availableTabs = computed(() => {
   return Object.entries(Tab.value).reduce<Record<string, TabData>>((result, [tabName, tabData]) => {
     if (tabName === TabName.Account && !userAccessToken.value) {
-      return result;
-    }
-
-    if (tabName === TabName.Update && !isUpdateAvailable.value) {
       return result;
     }
 

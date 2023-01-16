@@ -4,7 +4,6 @@ import { store, listenForConfigRequests } from './fsStore';
 import { objectKeysToLowercase, getAccessTokenFromTwitchAuthUrl } from '@/src/utils';
 import { HubAppInfo, HubChannel, HubState } from '@/types/hub';
 import { AppColorScheme } from '@/types/color';
-import autoUpdater from '@/src/updater';
 import { WindowStoreName } from '@/store/window';
 import { ThemeStoreName } from '@/store/theme';
 
@@ -163,10 +162,6 @@ function handleRendererMessages (): void {
       isAppWindowMaximized: mainWindow !== null ? mainWindow.isMaximized() : false,
       themeSource,
       shouldUseDarkColors,
-      appUpdateStatus: autoUpdater.status,
-      appUpdateData: null,
-      appUpdateProgress: null,
-      appUpdateError: null,
     };
   });
 
@@ -204,11 +199,6 @@ function createWindow (): void {
       preload: join(__dirname, '../../hub/dist/index.cjs'),
     },
   });
-
-  /**
-   * Set context for auto updater to send messages to
-   */
-  autoUpdater.setContext(mainWindow.webContents);
 
   /**
    * When window is ready, show it

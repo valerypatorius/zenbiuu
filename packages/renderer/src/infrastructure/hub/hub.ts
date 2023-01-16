@@ -7,8 +7,5 @@ export const {
   setNativeTheme,
   callWindowMethod,
   requestAccessToken,
-  checkAppUpdates,
-  downloadAppUpdate,
-  installAppUpdate,
   clearSessionStorage,
 } = window[HubApiKey];

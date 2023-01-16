@@ -1,7 +1,5 @@
 import { Schema } from '../store/schema';
-import type { UpdateInfo, ProgressInfo } from 'electron-updater';
 import { AppColorScheme } from './color';
-import { AppUpdateStatus } from './renderer/update';
 
 export const HubApiKey = 'hub';
 
@@ -26,12 +24,6 @@ export enum HubChannel {
 
   RequestAccessToken = 'requestAccessToken',
   ClearSessionStorage = 'clearSessionStorage',
-
-  SetUpdateStatus = 'setUpdateStatus',
-  SetUpdateError = 'setUpdateError',
-  CheckAppUpdates = 'checkAppUpdates',
-  DownloadAppUpdate = 'downloadAppUpdate',
-  InstallAppUpdate = 'installAppUpdate',
 }
 
 export interface HubAppInfo {
@@ -49,10 +41,6 @@ export interface HubState {
   isAppWindowMaximized: boolean;
   themeSource: string;
   shouldUseDarkColors: boolean;
-  appUpdateStatus: AppUpdateStatus;
-  appUpdateData: UpdateInfo | null;
-  appUpdateProgress: ProgressInfo | null;
-  appUpdateError: Error | null;
 }
 
 /**
@@ -68,9 +56,6 @@ export interface MainProcessApi {
   setNativeTheme: (value: AppColorScheme) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
   requestAccessToken: (url: string) => Promise<string>;
-  checkAppUpdates: () => void;
-  downloadAppUpdate: () => void;
-  installAppUpdate: () => void;
   clearSessionStorage: () => void;
   getState: () => HubState;
 }

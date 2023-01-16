@@ -47,14 +47,6 @@ export default {
       iconBy: 'Иконка приложения от',
       interfaceIcons: 'Иконки интерфейса от',
     },
-    update: {
-      title: 'Обновление',
-      available: 'Доступно обновление',
-      download: 'Загрузить',
-      downloading: 'Загружается',
-      ready: 'Установить',
-      macWarning: 'Извините, но в данный момент Zenbiuu не поддерживает автообновления на MacOS. Пожалуйста, загрузите последнюю версию с GitHub вручную',
-    },
     logout: 'Выйти',
   },
   chat: {
