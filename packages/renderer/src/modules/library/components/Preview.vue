@@ -106,7 +106,7 @@ const emit = defineEmits<{
   (e: 'click', name: string, id: string, latestCover: string): void;
 }>();
 
-const { state: libraryState } = useLibrary();
+const { followedChannels, lastUpdateTime } = useLibrary();
 const { state: appState } = useApp();
 
 /** Previous cover url */
@@ -126,12 +126,12 @@ const viewersCount = computed(() => props.data.viewer_count.toLocaleString());
 
 /** Latest cover url, not ready for display */
 const latestCover = computed(() => {
-  return `${props.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${libraryState.lastUpdateTime}`;
+  return `${props.data.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime.value}`;
 });
 
 /** Channel logo image */
 const channelLogo = computed(() => {
-  const data = libraryState.users.find((user) => user.id === props.data.user_id);
+  const data = followedChannels.value.find((channel) => channel.id === props.data.user_id);
 
   return data ? data.profile_image_url : '';
 });

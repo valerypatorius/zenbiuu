@@ -1,7 +1,8 @@
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
+import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
 import { useUser } from './useUser';
-import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch, StreamType } from '@/types/renderer/library';
+import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch } from '@/types/renderer/library';
 import date from '@/src/utils/date';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
@@ -33,7 +34,12 @@ export const useLibrary = createSharedComposable(() => {
 
   const isReady = ref(false);
 
-  const followedIds = computed(() => state.followed.map((user) => user.to_id));
+  const lastUpdateTime = useIDBKeyval<number>('library:lastUpdateTime', 0);
+
+  const followedIds = useIDBKeyval<string[]>('library:followedIds', []);
+  const followedChannels = useIDBKeyval<TwitchUser[]>('library:followedChannels', []);
+  const followedStreams = useIDBKeyval<TwitchStream[]>('library:followedStreams', []);
+  const foundStreams = useIDBKeyval<TwitchStream[]>('library:foundStreams', []);
 
   /**
    * Request followed channels list
@@ -41,7 +47,7 @@ export const useLibrary = createSharedComposable(() => {
   async function getFollowedChannels (): Promise<void> {
     const { data } = await get<TwitchResponse<TwitchUserFollow>>(`${LibraryEndpoint.Follows}?from_id=${userState.id}&first=100`);
 
-    state.followed = data;
+    followedIds.value = data.map((user) => user.to_id);
   }
 
   /**
@@ -51,20 +57,30 @@ export const useLibrary = createSharedComposable(() => {
     const query = followedIds.value.join('&id=');
     const { data } = await get<TwitchResponse<TwitchUser>>(`${LibraryEndpoint.Users}?id=${query}`);
 
-    state.users = data;
+    followedChannels.value = data;
   }
 
   /**
-   * Request streams from followed ids
+   * Request streams data of followed channels ids
    */
-  async function getStreams (ids: string[], type = StreamType.Followed): Promise<void> {
+  async function getFollowedStreams (): Promise<void> {
+    const query = followedIds.value.join('&user_id=');
+    const { data } = await get<TwitchResponse<TwitchStream>>(`${LibraryEndpoint.Streams}?user_id=${query}&first=100`);
+
+    followedStreams.value = data;
+    lastUpdateTime.value = getCurrentUnixTime();
+
+    isReady.value = true;
+  }
+
+  /**
+   * Request streams data of found channels ids
+   */
+  async function getFoundStreams (ids: string[]): Promise<void> {
     const query = ids.join('&user_id=');
     const { data } = await get<TwitchResponse<TwitchStream>>(`${LibraryEndpoint.Streams}?user_id=${query}&first=100`);
 
-    state.streams[type] = data;
-    state.lastUpdateTime = getCurrentUnixTime();
-
-    isReady.value = true;
+    foundStreams.value = data;
   }
 
   /**
@@ -78,7 +94,7 @@ export const useLibrary = createSharedComposable(() => {
       return await Promise.reject(LibraryError.EmptySearchResult);
     }
 
-    await getStreams(liveIds, StreamType.Found);
+    await getFoundStreams(liveIds);
 
     return await Promise.resolve(data);
   }
@@ -92,7 +108,7 @@ export const useLibrary = createSharedComposable(() => {
     void getFollowedChannelsData();
 
     startInterval(() => {
-      void getStreams(followedIds.value);
+      void getFollowedStreams();
     }, RELOAD_INTERVAL, {
       immediate: true,
     });
@@ -104,13 +120,11 @@ export const useLibrary = createSharedComposable(() => {
   function reset (): void {
     isReady.value = false;
 
-    state.lastUpdateTime = 0;
-    state.followed = [];
-    state.users = [];
-    state.streams = {
-      followed: [],
-      found: [],
-    };
+    lastUpdateTime.value = 0;
+    followedIds.value = [];
+    followedChannels.value = [];
+    followedStreams.value = [];
+    foundStreams.value = [];
   }
 
   return {
@@ -119,5 +133,10 @@ export const useLibrary = createSharedComposable(() => {
     reset,
     search,
     isReady,
+    followedIds,
+    followedChannels,
+    followedStreams,
+    foundStreams,
+    lastUpdateTime,
   };
 });

@@ -27,7 +27,7 @@ import { useRouter } from 'vue-router';
 import Filters from '@/src/modules/library/components/Filters.vue';
 import Preview from '@/src/modules/library/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
-import { StreamType, TwitchStream, Sorting } from '@/types/renderer/library';
+import { TwitchStream, Sorting } from '@/types/renderer/library';
 import { unixtime } from '@/src/utils/date';
 import { useLibrary } from '@/src/store/useLibrary';
 import { usePlayer } from '@/src/store/usePlayer';
@@ -37,7 +37,7 @@ import { RouteName } from '@/types/renderer/router';
  * Define store and router instances
  */
 const router = useRouter();
-const { state: libraryState, isReady } = useLibrary();
+const { state: libraryState, isReady, followedStreams } = useLibrary();
 const { state: playerState } = usePlayer();
 
 /** Current library sorting type */
@@ -66,11 +66,8 @@ const sortingRule = computed(() => {
   }
 });
 
-/** Streams list */
-const streams = computed(() => libraryState.streams[StreamType.Followed]);
-
 /** Streams list, sorted by active rule */
-const sortedStreams = computed(() => [...streams.value].sort(sortingRule.value));
+const sortedStreams = computed(() => [...followedStreams.value].sort(sortingRule.value));
 
 /** Set sorting type */
 const setSorting = (value: Sorting) => {

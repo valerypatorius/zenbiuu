@@ -1,12 +1,4 @@
 /**
- * Stream types
- */
-export enum StreamType {
-  Followed = 'followed',
-  Found = 'found',
-}
-
-/**
  * Sorting types (ascension or descension)
  */
 export enum SortingType {
