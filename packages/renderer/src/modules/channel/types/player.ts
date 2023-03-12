@@ -1,3 +1,23 @@
+export interface PlayerStoreSchema {
+  /** Volume level from 0 to 1 */
+  volume: number;
+
+  /** True, if compressor should be enabled */
+  compressor: boolean;
+
+  /** True, if sidebar should be hidden */
+  isHideSidebar: boolean;
+
+  /** True, if chat should be hidden */
+  isHideChat: boolean;
+
+  /** Player layout */
+  layout: PlayerLayout;
+
+  /** Player cover, used while video is loading */
+  cover?: string;
+}
+
 /**
  * Available player layouts
  */

@@ -9,6 +9,9 @@
       "@/assets/*": [
         "./assets/*"
       ],
+      "@/hub/types": [
+        "../hub/src/types"
+      ]
     },
     "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },

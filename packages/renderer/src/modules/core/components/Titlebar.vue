@@ -46,14 +46,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import WindowControls from './WindowControls.vue';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { isWindows } from '@/src/utils/utils';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import Loader from '@/src/modules/ui/components/Loader.vue';
-import WindowControls from '@/src/modules/ui/components/WindowControls.vue';
-import { getWindowTitle } from '@/src/router/index';
-import { RouteName } from '@/src/router/types';
-import { usePlayer } from '@/src/store/usePlayer';
+import { getWindowTitle } from '@/src/infrastructure/router';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { usePlayer } from '@/src/modules/channel/usePlayer';
 
 /**
  * Define store and router instances

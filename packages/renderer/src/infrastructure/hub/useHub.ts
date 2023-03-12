@@ -1,9 +1,11 @@
 import { reactive } from 'vue';
 import { createSharedComposable, useEventListener } from '@vueuse/core';
-import { HubStateChangeEvent, HubState } from '../../../hub/src/types';
+import { HubApiKey, HubStateChangeEvent, type HubState } from '@/hub/types';
+
+const hubApi = window[HubApiKey];
 
 export const useHub = createSharedComposable(() => {
-  const state: HubState = reactive(window.hub.getState());
+  const state: HubState = reactive(hubApi.getState());
 
   useEventListener(window, HubStateChangeEvent, (event: CustomEvent<{ state: HubState }>) => {
     const receivedState = event.detail.state;
@@ -14,6 +16,7 @@ export const useHub = createSharedComposable(() => {
   });
 
   return {
+    ...hubApi,
     state,
   };
 });

@@ -1,9 +1,8 @@
 import { createSharedComposable } from '@vueuse/core';
-import { AccessTokenResponse, PlayerLayout } from '@/src/modules/channel/types/player';
-import { useUser } from './useUser';
+import { type AccessTokenResponse, PlayerLayout, type PlayerStoreSchema } from './types/player';
+import { useUser } from '@/src/modules/auth/useUser';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import { useStore } from './__useStore';
-import { PlayerStoreName, defaultPlayerState } from '@/src/store/types/player';
+import { useStore } from '@/src/infrastructure/store/useStore';
 
 enum PlayerEndpoint {
   GraphApi = 'https://gql.twitch.tv/gql',
@@ -34,8 +33,17 @@ function formPlaylistUrl (channel: string, { sig, token }: PlaylistAccess): stri
   return `https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8?${query}`;
 }
 
+const defaultPlayerState: PlayerStoreSchema = {
+  volume: 0.25,
+  compressor: false,
+  isHideSidebar: false,
+  isHideChat: false,
+  layout: PlayerLayout.Horizontal,
+  cover: undefined,
+};
+
 export const usePlayer = createSharedComposable(() => {
-  const { state } = useStore(PlayerStoreName, defaultPlayerState);
+  const { state } = useStore('player', defaultPlayerState);
 
   const { state: userState } = useUser();
   const { post } = useRequest();

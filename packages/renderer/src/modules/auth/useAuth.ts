@@ -1,15 +1,15 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createSharedComposable, tryOnBeforeUnmount, tryOnMounted } from '@vueuse/core';
-import type { TwitchTokenValidationResponse } from '@/src/store/types/user';
-import { waitForRedirect } from '@/src/infrastructure/hub/hub';
+import { useUser } from './useUser';
+import { type TwitchTokenValidationResponse } from './types';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
-import { RouteName } from '@/src/router/types';
+import { RouteName } from '@/src/infrastructure/router/types';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import { useUser } from '@/src/store/useUser';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 /**
  * Max lifetime of auth token before validation is required
@@ -49,6 +49,7 @@ export const useAuth = createSharedComposable(() => {
   const { get, post } = useRequest();
   const { connect: connectToIrc, disconnect: disconnectFromIrc } = useIrc();
   const { start: startInterval } = useInterval();
+  const { waitForRedirect } = useHub();
 
   /** Stop function for token validation interval */
   const stopTokenInterval = ref<() => void>();

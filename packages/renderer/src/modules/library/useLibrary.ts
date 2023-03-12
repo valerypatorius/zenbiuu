@@ -1,14 +1,13 @@
 import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
-import { useUser } from './useUser';
-import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch } from '@/src/modules/library/types';
+import { type LibraryStoreSchema, type TwitchResponse, type TwitchStream, type TwitchUserFollow, type TwitchUser, type TwitchChannelFromSearch, Sorting } from './types';
+import { useUser } from '@/src/modules/auth/useUser';
 import date from '@/src/utils/date';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
-import { useStore } from './__useStore';
-import { LibraryStoreName, defaultLibraryState } from '@/src/store/types/library';
+import { useStore } from '@/src/infrastructure/store/useStore';
 
 enum LibraryError {
   EmptySearchResult = 'Nothing found',
@@ -26,8 +25,12 @@ enum LibraryEndpoint {
  */
 const RELOAD_INTERVAL = 2 * date.Minute;
 
+export const defaultLibraryState: LibraryStoreSchema = {
+  sorting: Sorting.ViewersDesc,
+};
+
 export const useLibrary = createSharedComposable(() => {
-  const { state } = useStore(LibraryStoreName, defaultLibraryState);
+  const { state } = useStore('library', defaultLibraryState);
   const { state: userState } = useUser();
   const { get } = useRequest();
   const { start: startInterval } = useInterval();

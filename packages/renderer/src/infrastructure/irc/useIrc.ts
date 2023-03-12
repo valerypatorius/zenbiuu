@@ -1,11 +1,11 @@
 import { watch, ref } from 'vue';
 import { createEventHook, createSharedComposable, useWebWorker } from '@vueuse/core';
+import IrcWorker from './irc.worker.ts?worker';
+import { IrcAction, IrcCloseCode, IrcCommand, type IrcData, type IrcPayload } from './types';
+import type { ChatMessage } from '@/src/modules/channel/types/chat';
 import { parseMessage, parseText, parseEmotes, parseBadges } from '@/src/utils/irc';
 import log from '@/src/utils/log';
-import { useUser } from '@/src/store/useUser';
-import IrcWorker from './irc.worker.ts?worker';
-import { IrcAction, IrcCloseCode, IrcCommand, IrcData, IrcPayload } from './types.irc.worker';
-import type { ChatMessage } from '@/src/modules/channel/types/chat';
+import { useUser } from '@/src/modules/auth/useUser';
 
 const IrcEndpoint = 'wss://irc-ws.chat.twitch.tv:443';
 

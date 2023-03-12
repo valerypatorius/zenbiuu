@@ -85,12 +85,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useLibrary } from '../useLibrary';
+import type { TwitchStream } from '@/src/modules/library/types';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import Light from '@/src/modules/ui/components/Light.vue';
 import Duration from '@/src/modules/ui/components/Duration.vue';
-import { useLibrary } from '@/src/store/useLibrary';
-import { useApp } from '@/src/store/useApp';
-import type { TwitchStream } from '@/src/modules/library/types';
+import { useApp } from '@/src/modules/core/useApp';
 
 const props = withDefaults(defineProps<{
   /** Stream data object */

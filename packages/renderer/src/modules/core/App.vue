@@ -20,15 +20,14 @@
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
-import { callWindowMethod } from '@/src/infrastructure/hub/hub';
+import { useApp } from './useApp';
 import TitleBar from '@/src/modules/core/components/Titlebar.vue';
 import Sidebar from '@/src/modules/library/components/sidebar/Sidebar.vue';
 import Settings from '@/src/modules/settings/Settings.vue';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { useApp } from '@/src/store/useApp';
-import { useUser } from '@/src/store/useUser';
-import { useAuth } from '@/src/store/useAuth';
-import { useHub } from '@/src/store/useHub';
+import { useUser } from '@/src/modules/auth/useUser';
+import { useAuth } from '@/src/modules/auth/useAuth';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 useHub();
 useAuth();
@@ -37,6 +36,7 @@ const route = useRoute();
 const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
 const { state: userState } = useUser();
+const { callWindowMethod } = useHub();
 
 /**
  * True, if sidebar should be mounted.

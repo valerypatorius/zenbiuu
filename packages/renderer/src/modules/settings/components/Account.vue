@@ -28,12 +28,12 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { RouteName } from '@/src/router/types';
-import { clearSessionStorage } from '@/src/infrastructure/hub/hub';
-import { useUser } from '@/src/store/useUser';
-import { useAuth } from '@/src/store/useAuth';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { useUser } from '@/src/modules/auth/useUser';
+import { useAuth } from '@/src/modules/auth/useAuth';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { useLibrary } from '@/src/store/useLibrary';
+import { useLibrary } from '@/src/modules/library/useLibrary';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -41,6 +41,7 @@ const { state: userState } = useUser();
 const { deauthorize } = useAuth();
 const { isSettingsActive } = useInterface();
 const { reset: resetLibrary } = useLibrary();
+const { clearSessionStorage } = useHub();
 
 /** True, if logout request is being processed */
 const isLoading = ref(false);

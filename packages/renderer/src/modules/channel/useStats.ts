@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import { useUser } from './useUser';
+import { useUser } from '@/src/modules/auth/useUser';
 
 enum StatsError {
   MissingChannelSettings = 'Missing channel settings file',

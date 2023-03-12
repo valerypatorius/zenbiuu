@@ -72,17 +72,17 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
-import date from '@/src/utils/date';
 import Hls, { HlsConfig } from 'hls.js';
+import { usePlayer } from '../usePlayer';
+import { useStats } from '../useStats';
+import type { Level } from 'hls.js';
+import type { PlayerElements } from '@/src/modules/channel/types/player';
+import date from '@/src/utils/date';
 import Loader from '@/src/modules/ui/components/Loader.vue';
 import PlayerOverlay from '@/src/modules/channel/components/player/Overlay.vue';
 import PlayerInfo from '@/src/modules/channel/components/player/Info.vue';
-import type { Level } from 'hls.js';
-import type { PlayerElements } from '@/src/modules/channel/types/player';
-import { usePlayer } from '@/src/store/usePlayer';
-import { useLibrary } from '@/src/store/useLibrary';
-import { useApp } from '@/src/store/useApp';
-import { useStats } from '@/src/store/useStats';
+import { useLibrary } from '@/src/modules/library/useLibrary';
+import { useApp } from '@/src/modules/core/useApp';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
 
 export type HlsInstance = InstanceType<typeof Hls>;

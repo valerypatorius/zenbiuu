@@ -73,11 +73,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NativeTheme } from 'electron';
+import { useTheme } from '../useTheme';
 import Radio from '@/src/modules/ui/components/Radio.vue';
 import Checkbox from '@/src/modules/ui/components/Checkbox.vue';
-import { useApp } from '@/src/store/useApp';
-import { useTheme } from '@/src/store/useTheme';
-import { NativeTheme } from 'electron';
+import { useApp } from '@/src/modules/core/useApp';
 
 /**
  * Interface size limits

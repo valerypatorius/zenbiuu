@@ -1,13 +1,12 @@
 import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
+import type { ChatStoreSchema, ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from './types/chat';
+import { useStore } from '@/src/infrastructure/store/useStore';
 import { getColorForChatAuthor } from '@/src/utils/color';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
-import { IrcCommand } from '@/src/infrastructure/irc/types.irc.worker';
-import { useStore } from './__useStore';
-import { ChatStoreName, defaultChatState } from '@/src/store/types/chat';
-import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from '@/src/modules/channel/types/chat';
+import { IrcCommand } from '@/src/infrastructure/irc/types';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
@@ -22,8 +21,13 @@ enum ChatEndpoint {
  */
 const LIMIT = 200;
 
+const defaultChatState: ChatStoreSchema = {
+  width: 300,
+  height: 500,
+};
+
 export const useChat = createSharedComposable(() => {
-  const { state } = useStore(ChatStoreName, defaultChatState);
+  const { state } = useStore('chat', defaultChatState);
   const { get } = useRequest();
   const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
   const messages = ref<ChatMessage[]>([]);

@@ -1,3 +1,11 @@
+export interface ChatStoreSchema {
+  /** Chat width in horizontal layout */
+  width: number;
+
+  /** Chat height in vertical layout */
+  height: number;
+}
+
 /**
  * Chat emote
  */
@@ -80,12 +88,10 @@ export interface FfzEmoteDataSimple {
  */
 export interface FfzChannelEmotes {
   room: Record<string, any>;
-  sets: {
-    [key: string]: {
-      [key: string]: any;
-      emoticons: FfzEmoteDataSimple[];
-    };
-  };
+  sets: Record<string, {
+    [key: string]: any;
+    emoticons: FfzEmoteDataSimple[];
+  }>;
 }
 
 /**

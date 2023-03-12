@@ -39,14 +39,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { Component } from 'vue';
 import Icon from '@/src/modules/ui/components/Icon.vue';
-import Popup from '@/src/modules/ui/components/Popup.vue';
+import Popup from '@/src/modules/core/components/Popup.vue';
 import SettingsInterface from '@/src/modules/settings/components/Interface.vue';
 import SettingsLocale from '@/src/modules/settings/components/Locale.vue';
 import SettingsAccount from '@/src/modules/settings/components/Account.vue';
 import SettingsAbout from '@/src/modules/settings/components/About.vue';
-import type { Component } from 'vue';
-import { useUser } from '@/src/store/useUser';
+import { useUser } from '@/src/modules/auth/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 
 enum TabName {

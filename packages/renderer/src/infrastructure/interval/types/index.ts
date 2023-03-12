@@ -11,4 +11,4 @@ export enum IntervalAction {
   Stop = 'stop',
 }
 
-export type IntervalWorkerMessage = MessageEvent<WorkerMessageData<IntervalAction, IntervalData>>;
+export type IntervalWorkerMessage = MessageEvent<{ action: IntervalAction; data: IntervalData }>;

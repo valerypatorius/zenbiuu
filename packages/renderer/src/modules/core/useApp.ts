@@ -1,13 +1,22 @@
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { createSharedComposable } from '@vueuse/core';
-import { useStore } from './__useStore';
-import { AppStoreName, defaultAppState } from '@/src/store/types/app';
-import { AppLocaleName } from '@/src/infrastructure/i18n/types';
-import { updateWindowTitle } from '@/src/router/index';
+import { type AppStoreSchema } from './types';
+import { useStore } from '@/src/infrastructure/store/useStore';
+import { type AppLocaleName } from '@/src/infrastructure/i18n/types';
+import { updateWindowTitle } from '@/src/infrastructure/router';
+
+const defaultAppState: AppStoreSchema = {
+  locale: undefined,
+  interfaceSize: 10,
+  settings: {
+    isAlwaysOnTop: false,
+    isBlurEnabled: true,
+  },
+};
 
 export const useApp = createSharedComposable(() => {
-  const { state } = useStore(AppStoreName, defaultAppState);
+  const { state } = useStore('app', defaultAppState);
   const route = useRoute();
   const { locale } = useI18n();
 

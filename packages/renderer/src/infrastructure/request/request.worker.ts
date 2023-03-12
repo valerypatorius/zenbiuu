@@ -1,4 +1,4 @@
-import { RequestAction, RequestError, RequestStatusCode, RequestWorkerMessage, RequestResponse, RequestPayload } from './types.request.worker';
+import { RequestAction, RequestError, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from './types';
 
 const context = self as unknown as Worker;
 

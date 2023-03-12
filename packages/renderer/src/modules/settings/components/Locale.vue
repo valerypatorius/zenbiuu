@@ -23,7 +23,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Radio from '@/src/modules/ui/components/Radio.vue';
 import { AppLocaleName, AppLocaleDisplayName } from '@/src/infrastructure/i18n/types';
-import { useApp } from '@/src/store/useApp';
+import { useApp } from '@/src/modules/core/useApp';
 
 interface LocaleOption {
   name: AppLocaleName;

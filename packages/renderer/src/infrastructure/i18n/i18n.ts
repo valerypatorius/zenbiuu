@@ -1,27 +1,29 @@
 import { createI18n } from 'vue-i18n';
 import en from '@/assets/locale/en';
 import ru from '@/assets/locale/ru';
-import { app } from '@/src/infrastructure/hub/hub';
 import { AppLocaleName } from '@/src/infrastructure/i18n/types';
+import { HubApiKey } from '@/hub/types';
 
-const defaultLocale = getAppLocale();
+function guessAppLocale (): AppLocaleName {
+  const appLocale = window[HubApiKey].app.locale;
 
-function getAppLocale (): AppLocaleName {
-  if (app.locale.includes('en') === true) {
+  if (appLocale.includes('en') === true) {
     return AppLocaleName.En;
   }
 
-  if (app.locale.includes('ru') === true) {
+  if (appLocale.includes('ru') === true) {
     return AppLocaleName.Ru;
   }
 
   return AppLocaleName.En;
 }
 
+const defaultLocale = guessAppLocale();
+
 export default createI18n({
   legacy: false,
   locale: defaultLocale,
-  fallbackLocale: defaultLocale,
+  fallbackLocale: AppLocaleName.En,
   messages: {
     en,
     ru,

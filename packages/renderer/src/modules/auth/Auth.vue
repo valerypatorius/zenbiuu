@@ -42,12 +42,12 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useAuth } from './useAuth';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import appIconPath from '@/assets/icon.svg';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { useAuth } from '@/src/store/useAuth';
-import { RouteName } from '@/src/router/types';
-import { useHub } from '@/src/store/useHub';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 const router = useRouter();
 const { t } = useI18n();

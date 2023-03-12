@@ -1,4 +1,4 @@
-import { platform } from '@/src/infrastructure/hub/hub';
+import { HubApiKey } from '@/hub/types';
 
 /**
  * Returns unique id
@@ -29,14 +29,14 @@ export function getCurrentUnixTime (): number {
  * Returns true, if current platform is Windows
  */
 export function isWindows (): boolean {
-  return platform === 'win32';
+  return window[HubApiKey].platform === 'win32';
 }
 
 /**
  * Returns true, if current platform is MacOS
  */
 export function isMac (): boolean {
-  return platform === 'darwin';
+  return window[HubApiKey].platform === 'darwin';
 }
 
 /**

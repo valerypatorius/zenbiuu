@@ -29,4 +29,4 @@ export interface RequestResponse<T = any> {
   error?: Error & { cause?: RequestStatusCode };
 }
 
-export type RequestWorkerMessage = MessageEvent<WorkerMessageData<RequestAction, RequestPayload>>;
+export type RequestWorkerMessage = MessageEvent<{ action: RequestAction; data: RequestPayload }>;

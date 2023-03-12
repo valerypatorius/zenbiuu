@@ -20,9 +20,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { usePlayer } from './usePlayer';
 import Chat from '@/src/modules/channel/components/Chat.vue';
 import Player from '@/src/modules/channel/components/Player.vue';
-import { usePlayer } from '@/src/store/usePlayer';
 
 /**
  * Define store and router instances

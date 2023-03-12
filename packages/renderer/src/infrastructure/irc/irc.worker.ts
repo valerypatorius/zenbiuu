@@ -1,6 +1,4 @@
-import { IrcAction, IrcWorkerMessage, IrcPayload } from './types.irc.worker';
-
-const context = self as any as Worker;
+import { IrcAction, type IrcWorkerMessage, type IrcPayload } from './types';
 
 /**
  * Messages queue
@@ -57,7 +55,7 @@ function handleMessage (event: MessageEvent<string>): void {
     return;
   }
 
-  context.postMessage(event.data);
+  self.postMessage(event.data);
 }
 
 /**
@@ -65,7 +63,7 @@ function handleMessage (event: MessageEvent<string>): void {
  * @param event - close event
  */
 function handleClose (event: CloseEvent): void {
-  context.postMessage({
+  self.postMessage({
     close: true,
     code: event.code,
   });
@@ -176,7 +174,7 @@ function resolveQueue (): void {
   queue.forEach(handleQueuedMessage);
 }
 
-context.onmessage = ({ data: messageData }: IrcWorkerMessage) => {
+self.onmessage = ({ data: messageData }: IrcWorkerMessage) => {
   const payload = messageData.data;
 
   switch (messageData.action) {

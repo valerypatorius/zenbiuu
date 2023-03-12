@@ -135,17 +135,17 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { useSidebar } from '../../useSidebar';
+import { useLibrary } from '../../useLibrary';
+import type { TwitchChannelFromSearch } from '@/src/modules/library/types';
 import SidebarItem from '@/src/modules/library/components/sidebar/Item.vue';
 import SidebarSearch from '@/src/modules/library/components/sidebar/Search.vue';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
-import { RouteName } from '@/src/router/types';
-import type { TwitchChannelFromSearch } from '@/src/modules/library/types';
-import { useSidebar } from '@/src/store/useSidebar';
-import { useUser } from '@/src/store/useUser';
-import { useLibrary } from '@/src/store/useLibrary';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { useUser } from '@/src/modules/auth/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { usePlayer } from '@/src/store/usePlayer';
+import { usePlayer } from '@/src/modules/channel/usePlayer';
 
 interface SidebarChannelItem {
   userId: string;

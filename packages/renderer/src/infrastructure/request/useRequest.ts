@@ -1,11 +1,11 @@
 import { reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
-import { useUser } from '@/src/store/useUser';
-import log from '@/src/utils/log';
 import RequestWorker from './request.worker.ts?worker';
-import { RequestAction, RequestError, RequestResponse, RequestPayload, RequestStatusCode } from './types.request.worker';
-import { RouteName } from '@/src/router/types';
+import { RequestAction, RequestError, type RequestResponse, type RequestPayload, RequestStatusCode } from './types';
+import { useUser } from '@/src/modules/auth/useUser';
+import log from '@/src/utils/log';
+import { RouteName } from '@/src/infrastructure/router/types';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;

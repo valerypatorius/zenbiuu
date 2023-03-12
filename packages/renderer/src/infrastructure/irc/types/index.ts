@@ -33,4 +33,4 @@ export enum IrcAction {
   RunQueue = 'runQueue',
 }
 
-export type IrcWorkerMessage = MessageEvent<WorkerMessageData<IrcAction, IrcPayload>>;
+export type IrcWorkerMessage = MessageEvent<{ action: IrcAction; data: IrcPayload }>;

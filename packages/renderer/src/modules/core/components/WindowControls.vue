@@ -28,9 +28,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { callWindowMethod } from '@/src/infrastructure/hub/hub';
 import Icon from '@/src/modules/ui/components/Icon.vue';
-import { useHub } from '@/src/store/useHub';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 /**
  * Available window methods
@@ -42,7 +41,7 @@ import { useHub } from '@/src/store/useHub';
   Close = 'close',
 }
 
-const { state: hubState } = useHub();
+const { state: hubState, callWindowMethod } = useHub();
 
 /** Returns current maximized state of app window */
 const isMaximized = computed(() => hubState.isAppWindowMaximized);

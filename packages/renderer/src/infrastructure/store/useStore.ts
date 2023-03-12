@@ -1,14 +1,13 @@
-import { createEventHook, EventHookOn, toReactive, useStorage, watchDebounced } from '@vueuse/core';
-import { Schema } from '@/src/store/types/schema';
+import { createEventHook, toReactive, useStorage, watchDebounced, type EventHookOn } from '@vueuse/core';
 
-export function useStore<K extends keyof Schema, T extends Schema[K]> (storeName: K, defaultState: T): {
+export function useStore<T extends object> (storeName: string, defaultState: T): {
   state: T;
   onUpdate: EventHookOn<T>;
 } {
   /**
    * Initial store object
    */
-  const refState = useStorage(`store:${storeName as string}`, defaultState);
+  const refState = useStorage(`store:${storeName}`, defaultState);
 
   /**
    * Reactive state reference for ease of use

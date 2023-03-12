@@ -1,3 +1,13 @@
+export interface LibraryStoreSchema {
+  /** Active library sorting */
+  sorting: Sorting;
+}
+
+export interface SidebarStoreSchema {
+  /** Sidebar width */
+  width: number;
+}
+
 /**
  * Sorting types (ascension or descension)
  */

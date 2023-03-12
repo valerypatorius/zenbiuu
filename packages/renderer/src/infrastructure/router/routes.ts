@@ -1,9 +1,9 @@
-import { RouteRecordRaw } from 'vue-router';
+import { type RouteRecordRaw } from 'vue-router';
+import { RouteName } from './types';
 import Auth from '@/src/modules/auth/Auth.vue';
 import Library from '@/src/modules/library/Library.vue';
 import Channel from '@/src/modules/channel/Channel.vue';
 import i18n from '@/src/infrastructure/i18n/i18n';
-import { RouteName } from '@/src/router/types';
 
 const routes: RouteRecordRaw[] = [
   {

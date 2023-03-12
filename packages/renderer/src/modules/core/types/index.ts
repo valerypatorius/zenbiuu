@@ -16,14 +16,3 @@ export interface AppStoreSchema {
   /** Interface size value in rem */
   interfaceSize: number;
 }
-
-export const AppStoreName = 'app';
-
-export const defaultAppState: AppStoreSchema = {
-  locale: undefined,
-  interfaceSize: 10,
-  settings: {
-    isAlwaysOnTop: false,
-    isBlurEnabled: true,
-  },
-};

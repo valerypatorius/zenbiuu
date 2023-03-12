@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useApp } from '@/src/store/useApp';
+import { useApp } from '../useApp';
 
 const emit = defineEmits<{
   (name: 'close'): void;
