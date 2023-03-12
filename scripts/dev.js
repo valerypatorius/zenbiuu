@@ -1,9 +1,9 @@
 #!/usr/bin/node
 
-const { createServer, build, createLogger, loadEnv } = require('vite');
 const { spawn } = require('child_process');
-const electronPath = require('electron');
 const { createInterface } = require('readline');
+const { createServer, build, createLogger, loadEnv } = require('vite');
+const electronPath = require('electron');
 
 const LogLevel = {
   Info: 'info',

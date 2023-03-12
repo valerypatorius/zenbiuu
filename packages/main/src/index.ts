@@ -4,9 +4,9 @@ import { HubChannel } from '../../hub/src/types';
 import { config } from './config';
 import { theme } from './theme';
 import { Window, openWindow } from './window';
-import { env } from './env';
 import { handleCors } from './cors';
 import { handleRendererRequests } from './handlers';
+import { env } from './env';
 
 const appRootUrl = env.MODE === 'development'
   ? env.VITE_DEV_SERVER_URL
@@ -34,7 +34,6 @@ function createAppWindow (): void {
     show: false,
     width,
     height,
-    backgroundColor: theme.windowColor,
     frame: false,
     titleBarStyle: 'hiddenInset',
     webPreferences: {

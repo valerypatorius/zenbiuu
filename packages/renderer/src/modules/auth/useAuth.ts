@@ -49,7 +49,7 @@ export const useAuth = createSharedComposable(() => {
   const { get, post } = useRequest();
   const { connect: connectToIrc, disconnect: disconnectFromIrc } = useIrc();
   const { start: startInterval } = useInterval();
-  const { waitForRedirect } = useHub();
+  const { state: hubState, waitForRedirect } = useHub();
 
   /** Stop function for token validation interval */
   const stopTokenInterval = ref<() => void>();
@@ -134,8 +134,8 @@ export const useAuth = createSharedComposable(() => {
     ];
 
     const params = {
-      client_id: import.meta.env.VITE_APP_CLIENT_ID,
-      redirect_uri: encodeURIComponent(import.meta.env.VITE_APP_REDIRECT_URL),
+      client_id: hubState.clientId,
+      redirect_uri: encodeURIComponent(hubState.redirectUrl),
       response_type: 'token',
       state: getCurrentUnixTime(),
       scope: scopes.join('+'),
@@ -163,7 +163,7 @@ export const useAuth = createSharedComposable(() => {
    */
   async function deauthorize (): Promise<void> {
     const params = {
-      client_id: import.meta.env.VITE_APP_CLIENT_ID,
+      client_id: hubState.clientId,
       token: userState.token,
     };
 

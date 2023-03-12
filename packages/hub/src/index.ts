@@ -1,32 +1,24 @@
 import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
-import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi, type HubAppInfo } from './types';
-
-const { platform } = process;
-
-const app: HubAppInfo = {
-  name: '',
-  version: '',
-  locale: 'en',
-};
+import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi } from './types';
 
 /**
  * State with simple data, updated by main process
  */
 const state: HubState = {
+  app: {
+    name: '',
+    version: '',
+    locale: 'en',
+  },
+  platform: process.platform,
   isAppWindowMaximized: false,
-  themeSource: 'system',
-  shouldUseDarkColors: true,
 };
 
 /**
  * Set app theme
  */
 async function setThemeSource (value: NativeTheme['themeSource']): Promise<void> {
-  const themeState: Partial<HubState> = await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
-
-  Object.entries(themeState).forEach(([key, value]) => {
-    state[key as keyof Partial<HubState>] = value;
-  });
+  return await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
 }
 
 /**
@@ -69,8 +61,6 @@ function clearSessionStorage (): void {
  * available in renderer process under window.hub
  */
 const api: MainProcessApi = {
-  app,
-  platform,
   setThemeSource,
   callWindowMethod,
   waitForRedirect,
@@ -83,35 +73,22 @@ const api: MainProcessApi = {
  */
 contextBridge.exposeInMainWorld(HubApiKey, api);
 
+function updateState (updatedState: HubState): void {
+  Object.entries(updatedState).forEach(([key, value]) => {
+    state[key as keyof HubState] = value;
+  });
+
+  dispatchStateChangeEvent();
+}
+
 /**
  * Request initial data from main process
  */
-void ipcRenderer.invoke(HubChannel.Initial).then((initialState: HubState) => {
-  Object.entries(initialState).forEach(([key, value]) => {
-    state[key] = value;
-  });
-
-  dispatchStateChangeEvent();
-});
-
-/**
- * Request app info from main process
- */
-void ipcRenderer.invoke(HubChannel.AppInfo).then((appInfo: HubAppInfo) => {
-  Object.entries(appInfo).forEach(([key, value]) => {
-    app[key] = value;
-  });
-
-  dispatchStateChangeEvent();
-});
+void ipcRenderer.invoke(HubChannel.Initial).then(updateState);
 
 /**
  * Listen for future state changes from main process
  */
 ipcRenderer.on(HubChannel.WindowStateChange, (event, receivedState: HubState) => {
-  Object.entries(receivedState).forEach(([key, value]) => {
-    state[key] = value;
-  });
-
-  dispatchStateChangeEvent();
+  updateState(receivedState);
 });

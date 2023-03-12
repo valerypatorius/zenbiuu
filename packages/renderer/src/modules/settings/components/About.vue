@@ -1,7 +1,7 @@
 <template>
   <div class="settings-section">
     <div class="settings-section__title">
-      {{ t('version') }} {{ hubState.appVersion }}
+      {{ hubState.app.name }} {{ t('version') }} {{ hubState.app.version }}
     </div>
 
     <p>

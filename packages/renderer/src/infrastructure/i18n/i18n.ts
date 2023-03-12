@@ -5,7 +5,7 @@ import { AppLocaleName } from '@/src/infrastructure/i18n/types';
 import { HubApiKey } from '@/hub/types';
 
 function guessAppLocale (): AppLocaleName {
-  const appLocale = window[HubApiKey].app.locale;
+  const appLocale = window[HubApiKey].getState().app.locale;
 
   if (appLocale.includes('en') === true) {
     return AppLocaleName.En;

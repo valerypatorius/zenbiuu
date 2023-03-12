@@ -3,6 +3,7 @@ import { type AccessTokenResponse, PlayerLayout, type PlayerStoreSchema } from '
 import { useUser } from '@/src/modules/auth/useUser';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useStore } from '@/src/infrastructure/store/useStore';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 enum PlayerEndpoint {
   GraphApi = 'https://gql.twitch.tv/gql',
@@ -47,6 +48,7 @@ export const usePlayer = createSharedComposable(() => {
 
   const { state: userState } = useUser();
   const { post } = useRequest();
+  const { state: hubState } = useHub();
 
   async function getAcessToken (channelName: string): Promise<PlaylistAccess> {
     const response = await post<AccessTokenResponse>(PlayerEndpoint.GraphApi, {
@@ -61,7 +63,7 @@ export const usePlayer = createSharedComposable(() => {
       },
     }, {
       headers: {
-        'Client-ID': import.meta.env.VITE_STREAM_CLIENT_ID,
+        'Client-ID': hubState.streamClientId,
         'Device-ID': userState.deviceId,
       },
     });

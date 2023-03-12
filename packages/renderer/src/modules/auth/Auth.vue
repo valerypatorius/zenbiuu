@@ -8,7 +8,7 @@
 
     <div class="auth__content">
       <div class="auth__title">
-        {{ t('auth.title') }} {{ hubState.appName }}
+        {{ t('auth.title') }} {{ hubState.app.name }}
       </div>
 
       <div class="auth__description">

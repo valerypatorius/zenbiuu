@@ -1,7 +1,8 @@
 import { app, session, ipcMain, type BrowserWindow, type NativeTheme } from 'electron';
-import { HubChannel, type HubState, type HubAppInfo } from '../../hub/src/types';
+import { HubChannel, type HubState } from '../../hub/src/types';
 import { theme } from './theme';
 import { Window, waitForRedirect } from './window';
+import { env } from './env';
 
 export function handleRendererRequests (): void {
   /**
@@ -40,20 +41,16 @@ export function handleRendererRequests (): void {
    */
   ipcMain.handle(HubChannel.Initial, async (): Promise<HubState> => {
     return {
+      app: {
+        locale: app.getLocale(),
+        version: app.getVersion(),
+        name: app.getName(),
+      },
+      clientId: env.VITE_APP_CLIENT_ID,
+      streamClientId: env.VITE_STREAM_CLIENT_ID,
+      redirectUrl: env.VITE_APP_REDIRECT_URL,
+      platform: process.platform,
       isAppWindowMaximized: Window.Main?.isMaximized() ?? false,
-      themeSource: theme.get().themeSource,
-      shouldUseDarkColors: theme.get().shouldUseDarkColors,
-    };
-  });
-
-  /**
-   * Return app info
-   */
-  ipcMain.handle(HubChannel.AppInfo, async (): Promise<HubAppInfo> => {
-    return {
-      locale: app.getLocale(),
-      version: app.getVersion(),
-      name: app.getName(),
     };
   });
 

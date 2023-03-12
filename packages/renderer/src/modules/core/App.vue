@@ -29,7 +29,6 @@ import { useUser } from '@/src/modules/auth/useUser';
 import { useAuth } from '@/src/modules/auth/useAuth';
 import { useHub } from '@/src/infrastructure/hub/useHub';
 
-useHub();
 useAuth();
 
 const route = useRoute();

@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
-const { build } = require('vite');
 const { dirname } = require('path');
+const { build, loadEnv } = require('vite');
 
 const packagesConfigs = [
   'packages/hub/vite.config.js',
@@ -13,6 +13,11 @@ const buildByConfig = (configFile) => build({
   configFile,
   mode: 'production',
 });
+
+/**
+ * Manually load variables defined in .env file
+ */
+Object.assign(process.env, loadEnv('production', process.cwd()));
 
 (async () => {
   try {

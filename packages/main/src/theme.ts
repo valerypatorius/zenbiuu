@@ -1,4 +1,4 @@
-import { nativeTheme, NativeTheme } from 'electron';
+import { nativeTheme, type NativeTheme } from 'electron';
 import { Window } from './window';
 
 class NativeThemeManager {

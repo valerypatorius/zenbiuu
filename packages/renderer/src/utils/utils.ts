@@ -27,16 +27,18 @@ export function getCurrentUnixTime (): number {
 
 /**
  * Returns true, if current platform is Windows
+ * @todo move to useHub composable
  */
 export function isWindows (): boolean {
-  return window[HubApiKey].platform === 'win32';
+  return window[HubApiKey].getState().platform === 'win32';
 }
 
 /**
  * Returns true, if current platform is MacOS
+ * @todo move to useHub composable
  */
 export function isMac (): boolean {
-  return window[HubApiKey].platform === 'darwin';
+  return window[HubApiKey].getState().platform === 'darwin';
 }
 
 /**

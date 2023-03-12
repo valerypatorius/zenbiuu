@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { BrowserWindow } from 'electron';
 import { theme } from './theme';
 import { env } from './env';
@@ -15,7 +16,11 @@ export const Window: Record<string, BrowserWindow | null> = {
  * Open new window and load specified url
  */
 export function openWindow (url: string, options?: Electron.BrowserWindowConstructorOptions): BrowserWindow {
-  const w = new BrowserWindow(options);
+  const w = new BrowserWindow({
+    backgroundColor: theme.windowColor,
+    icon: join(__dirname, '../../../build/512x512.png'),
+    ...options,
+  });
 
   void w.loadURL(url);
 
@@ -31,7 +36,6 @@ export async function waitForRedirect (url: string): Promise<string> {
       width: 800,
       height: 600,
       show: false,
-      backgroundColor: theme.windowColor,
       parent: Window.Main ?? undefined,
     });
 

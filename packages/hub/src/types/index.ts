@@ -8,7 +8,6 @@ export const HubApiKey = 'hub';
  */
 export enum HubChannel {
   Initial = 'initial',
-  AppInfo = 'appInfo',
   WindowStateChange = 'windowStateChange',
   SetThemeSource = 'setThemeSource',
   CallWindowMethod = 'callWindowMethod',
@@ -16,29 +15,26 @@ export enum HubChannel {
   ClearSessionStorage = 'clearSessionStorage',
 }
 
-export interface HubAppInfo {
-  [key: string]: any;
-  name: string;
-  version: string;
-  locale: string;
-}
-
 /**
  * Hub data state
  */
 export interface HubState {
-  [key: string]: any;
+  app: {
+    name: string;
+    version: string;
+    locale: string;
+  };
+  clientId: string;
+  streamClientId: string;
+  redirectUrl: string;
+  platform: NodeJS.Platform;
   isAppWindowMaximized: boolean;
-  themeSource: NativeTheme['themeSource'];
-  shouldUseDarkColors: boolean;
 }
 
 /**
  * Hub data and methods, available in renderer process via window.hub
  */
 export interface MainProcessApi {
-  platform: NodeJS.Platform;
-  app: HubAppInfo;
   setThemeSource: (value: NativeTheme['themeSource']) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
   waitForRedirect: (url: string) => Promise<string>;

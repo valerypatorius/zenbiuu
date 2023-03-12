@@ -4,9 +4,10 @@ import { HubApiKey } from '@/hub/types';
 
 /**
  * Returns window title based on specified route
+ * @todo move to useHub composable
  */
 export function getWindowTitle (route: RouteLocationNormalized, isDisplayAppName = false): string {
-  const appName = window[HubApiKey].app.name;
+  const appName = window[HubApiKey].getState().app.name;
   const title = typeof route.meta.title === 'function' ? route.meta.title() : route.params.name;
 
   if (typeof title !== 'string') {
