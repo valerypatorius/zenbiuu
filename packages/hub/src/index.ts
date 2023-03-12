@@ -10,6 +10,9 @@ const state: HubState = {
     version: '',
     locale: 'en',
   },
+  clientId: '',
+  streamClientId: '',
+  redirectUrl: '',
   platform: process.platform,
   isAppWindowMaximized: false,
 };
@@ -75,7 +78,7 @@ contextBridge.exposeInMainWorld(HubApiKey, api);
 
 function updateState (updatedState: HubState): void {
   Object.entries(updatedState).forEach(([key, value]) => {
-    state[key as keyof HubState] = value;
+    state[key] = value;
   });
 
   dispatchStateChangeEvent();

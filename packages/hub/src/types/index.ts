@@ -19,6 +19,7 @@ export enum HubChannel {
  * Hub data state
  */
 export interface HubState {
+  [key: string]: any;
   app: {
     name: string;
     version: string;

@@ -1,4 +1,4 @@
-import { AppLocaleName } from '@/src/infrastructure/i18n/types';
+import { type AppLocaleName } from '@/src/infrastructure/i18n/types';
 
 export interface AppStoreSchema {
   /** App locale */
