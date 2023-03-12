@@ -1,9 +1,9 @@
 import { join } from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, shell } from 'electron';
+import { HubChannel } from '../../hub/src/types';
 import { config } from './config';
 import { theme } from './theme';
-import { HubChannel } from '../../hub/src/types';
-import { Window } from './window';
+import { Window, openWindow } from './window';
 import { env } from './env';
 import { handleCors } from './cors';
 import { handleRendererRequests } from './handlers';
@@ -27,10 +27,10 @@ if (!isSingleInstance) {
 /**
  * Create main app window
  */
-function createWindow (): void {
+function createAppWindow (): void {
   const { width, height } = config.get('windowBounds');
 
-  Window.Main = new BrowserWindow({
+  Window.Main = openWindow(appRootUrl, {
     show: false,
     width,
     height,
@@ -98,8 +98,6 @@ function createWindow (): void {
       isAppWindowMaximized: Window.Main.isMaximized(),
     });
   });
-
-  void Window.Main.loadURL(appRootUrl);
 }
 
 /**
@@ -136,7 +134,7 @@ app.on('window-all-closed', () => {
  */
 app.on('activate', () => {
   if (Window.Main === null) {
-    createWindow();
+    createAppWindow();
   }
 });
 
@@ -151,7 +149,7 @@ app.whenReady()
 
     handleCors();
     handleRendererRequests();
-    createWindow();
+    createAppWindow();
   }).catch((error) => {
     console.error('Failed to start the app', error);
   });

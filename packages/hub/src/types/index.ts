@@ -10,11 +10,9 @@ export enum HubChannel {
   Initial = 'initial',
   AppInfo = 'appInfo',
   WindowStateChange = 'windowStateChange',
-
   SetThemeSource = 'setThemeSource',
   CallWindowMethod = 'callWindowMethod',
-
-  RequestAccessToken = 'requestAccessToken',
+  WaitForRedirect = 'waitForRedirect',
   ClearSessionStorage = 'clearSessionStorage',
 }
 
@@ -43,7 +41,7 @@ export interface MainProcessApi {
   app: HubAppInfo;
   setThemeSource: (value: NativeTheme['themeSource']) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
-  requestAccessToken: (url: string) => Promise<string>;
+  waitForRedirect: (url: string) => Promise<string>;
   clearSessionStorage: () => void;
   getState: () => HubState;
 }

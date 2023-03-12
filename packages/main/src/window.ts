@@ -1,6 +1,5 @@
 import { BrowserWindow } from 'electron';
 import { theme } from './theme';
-import { getAccessTokenFromTwitchAuthUrl } from './utils';
 import { env } from './env';
 
 /**
@@ -9,22 +8,34 @@ import { env } from './env';
  */
 export const Window: Record<string, BrowserWindow | null> = {
   Main: null,
-  Auth: null,
+  Service: null,
 };
 
 /**
- * Open auth window to receive access token
+ * Open new window and load specified url
  */
-export async function getAuthToken (url: string): Promise<string> {
+export function openWindow (url: string, options?: Electron.BrowserWindowConstructorOptions): BrowserWindow {
+  const w = new BrowserWindow(options);
+
+  void w.loadURL(url);
+
+  return w;
+}
+
+/**
+ * Open service window, wait for redirect and return redirected url
+ */
+export async function waitForRedirect (url: string): Promise<string> {
   return await new Promise((resolve, reject) => {
-    Window.Auth = new BrowserWindow({
+    Window.Service = openWindow(url, {
       width: 800,
       height: 600,
       show: false,
       backgroundColor: theme.windowColor,
+      parent: Window.Main ?? undefined,
     });
 
-    Window.Auth.webContents.on('will-navigate', (redirectEvent, redirectUrl) => {
+    Window.Service.webContents.on('will-navigate', (redirectEvent, redirectUrl) => {
       /**
        * Do not throw an error here, because multiple redirects happen
        */
@@ -32,33 +43,25 @@ export async function getAuthToken (url: string): Promise<string> {
         return;
       }
 
-      const token = getAccessTokenFromTwitchAuthUrl(redirectUrl);
+      resolve(redirectUrl);
 
-      if (token !== null) {
-        resolve(token);
-      } else {
-        reject(new Error('Token is missing'));
-      }
-
-      Window.Auth?.destroy();
+      Window.Service?.destroy();
     });
 
-    Window.Auth.once('ready-to-show', () => {
-      Window.Auth?.show();
+    Window.Service.once('ready-to-show', () => {
+      Window.Service?.show();
     });
 
-    Window.Auth.webContents.on('did-fail-load', () => {
+    Window.Service.webContents.on('did-fail-load', () => {
       reject(new Error('Window failed to load'));
     });
 
-    Window.Auth.on('close', () => {
+    Window.Service.on('close', () => {
       reject(new Error('Window closed by user'));
     });
 
-    Window.Auth.on('closed', () => {
-      Window.Auth = null;
+    Window.Service.on('closed', () => {
+      Window.Service = null;
     });
-
-    void Window.Auth.loadURL(url);
   });
 }

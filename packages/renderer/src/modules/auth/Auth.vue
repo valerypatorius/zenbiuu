@@ -41,9 +41,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import appIconPath from '@/assets/icon.svg';
-import { useRouter } from 'vue-router';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { useAuth } from '@/src/store/useAuth';
 import { RouteName } from '@/src/router/types';

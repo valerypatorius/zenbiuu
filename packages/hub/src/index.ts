@@ -1,5 +1,5 @@
-import { contextBridge, ipcRenderer, NativeTheme } from 'electron';
-import { HubChannel, HubState, MainProcessApi, HubApiKey, HubStateChangeEvent, HubAppInfo } from './types';
+import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
+import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi, type HubAppInfo } from './types';
 
 const { platform } = process;
 
@@ -37,10 +37,10 @@ async function callWindowMethod (methodName: string, ...args: any[]): Promise<bo
 }
 
 /**
- * Request access token by opening window with specified url
+ * Load url in separate window, wait for redirect and return redirected url
  */
-async function requestAccessToken (url: string): Promise<string> {
-  return await ipcRenderer.invoke(HubChannel.RequestAccessToken, url);
+async function waitForRedirect (url: string): Promise<string> {
+  return await ipcRenderer.invoke(HubChannel.WaitForRedirect, url);
 }
 
 /**
@@ -73,7 +73,7 @@ const api: MainProcessApi = {
   platform,
   setThemeSource,
   callWindowMethod,
-  requestAccessToken,
+  waitForRedirect,
   clearSessionStorage,
   getState: () => state,
 };

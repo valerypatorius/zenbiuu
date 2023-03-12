@@ -5,6 +5,6 @@ export const {
   platform,
   setThemeSource,
   callWindowMethod,
-  requestAccessToken,
+  waitForRedirect,
   clearSessionStorage,
 } = window[HubApiKey];

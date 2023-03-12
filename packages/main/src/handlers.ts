@@ -1,30 +1,30 @@
-import { HubAppInfo, HubChannel, HubState } from '../../hub/src/types';
-import { app, session, ipcMain, BrowserWindow, NativeTheme } from 'electron';
+import { app, session, ipcMain, type BrowserWindow, type NativeTheme } from 'electron';
+import { HubChannel, type HubState, type HubAppInfo } from '../../hub/src/types';
 import { theme } from './theme';
-import { Window, getAuthToken } from './window';
+import { Window, waitForRedirect } from './window';
 
 export function handleRendererRequests (): void {
   /**
- * Set app theme and return its current state
- */
+   * Set app theme and return its current state
+   */
   ipcMain.handle(HubChannel.SetThemeSource, async (event, value: NativeTheme['themeSource']) => {
     theme.setSource(value);
   });
 
   /**
- * Try to get auth token, when renderer process requests it
- */
-  ipcMain.handle(HubChannel.RequestAccessToken, async (event, url: string) => {
+   * Load url in separate window, wait for redirect and extract url params using provided function
+   */
+  ipcMain.handle(HubChannel.WaitForRedirect, async (event, url: string) => {
     try {
-      return await getAuthToken(url);
+      return await waitForRedirect(url);
     } catch (error) {
       return await Promise.reject(error);
     }
   });
 
   /**
- * Call window method, when renderer process requests it
- */
+   * Call window method, when renderer process requests it
+   */
   ipcMain.handle(HubChannel.CallWindowMethod, async (event, methodName: keyof BrowserWindow, ...args: any[]): Promise<boolean> => {
     if (Window.Main !== null && typeof Window.Main[methodName] === 'function') {
       (Window.Main[methodName] as CallableFunction)(...args);
@@ -36,8 +36,8 @@ export function handleRendererRequests (): void {
   });
 
   /**
- * Return initial app data
- */
+   * Return initial app data
+   */
   ipcMain.handle(HubChannel.Initial, async (): Promise<HubState> => {
     return {
       isAppWindowMaximized: Window.Main?.isMaximized() ?? false,
@@ -47,8 +47,8 @@ export function handleRendererRequests (): void {
   });
 
   /**
- * Return app info
- */
+   * Return app info
+   */
   ipcMain.handle(HubChannel.AppInfo, async (): Promise<HubAppInfo> => {
     return {
       locale: app.getLocale(),
@@ -58,8 +58,8 @@ export function handleRendererRequests (): void {
   });
 
   /**
- * Clear session storage data
- */
+   * Clear session storage data
+   */
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
     void session.defaultSession.clearStorageData();
   });

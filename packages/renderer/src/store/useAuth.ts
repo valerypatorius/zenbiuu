@@ -1,10 +1,10 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createSharedComposable, tryOnBeforeUnmount, tryOnMounted } from '@vueuse/core';
-import { requestAccessToken } from '@/src/infrastructure/hub/hub';
+import type { TwitchTokenValidationResponse } from '@/src/store/types/user';
+import { waitForRedirect } from '@/src/infrastructure/hub/hub';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
-import { TwitchTokenValidationResponse } from '@/src/store/types/user';
 import { RouteName } from '@/src/router/types';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useUser } from '@/src/store/useUser';
@@ -20,6 +20,7 @@ const TOKEN_LIFETIME = date.Hour;
 const TOKEN_UPDATE_INTERVAL = date.Hour;
 
 export enum UserError {
+  FailedAuth = 'Authorization failed',
   MissingAuthToken = 'Missing authorized user token',
 };
 
@@ -28,6 +29,17 @@ enum UserEndpoint {
   Validate = 'https://id.twitch.tv/oauth2/validate',
   Revoke = 'https://id.twitch.tv/oauth2/revoke',
   Integrity = 'https://gql.twitch.tv/integrity',
+}
+
+/**
+ * Get access token from specified url
+ */
+function getAccessTokenUrl (url: string): string | null {
+  const modifiedUrl = url.replace('#', '?');
+  const urlObject = new URL(modifiedUrl);
+  const result = urlObject.searchParams.get('access_token');
+
+  return result;
 }
 
 export const useAuth = createSharedComposable(() => {
@@ -69,7 +81,8 @@ export const useAuth = createSharedComposable(() => {
         void router.replace(RouteName.Auth);
       }
 
-      return await Promise.reject(UserError.MissingAuthToken);
+      await Promise.reject(UserError.MissingAuthToken);
+      return;
     }
 
     const now = getCurrentUnixTime();
@@ -128,7 +141,13 @@ export const useAuth = createSharedComposable(() => {
     };
 
     const query = Object.entries(params).map(([key, string]) => `${key}=${string}`).join('&');
-    const token = await requestAccessToken(`${UserEndpoint.Authorize}?${query}`);
+    const redirectedAuthUrl = await waitForRedirect(`${UserEndpoint.Authorize}?${query}`);
+    const token = getAccessTokenUrl(redirectedAuthUrl);
+
+    if (token === null) {
+      await Promise.reject(UserError.FailedAuth);
+      return;
+    }
 
     userState.token = token;
 
