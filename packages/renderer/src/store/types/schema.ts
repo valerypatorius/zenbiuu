@@ -1,4 +1,3 @@
-import { WindowStoreName, WindowStoreSchema, defaultWindowState } from './window';
 import { UserStoreName, UserStoreSchema, defaultUserState } from './user';
 import { ThemeStoreName, ThemeStoreSchema, defaultThemeState } from './theme';
 import { SidebarStoreName, SidebarStoreSchema, defaultSidebarState } from './sidebar';
@@ -8,7 +7,6 @@ import { ChatStoreName, ChatStoreSchema, defaultChatState } from './chat';
 import { AppStoreName, AppStoreSchema, defaultAppState } from './app';
 
 export interface Schema {
-  [WindowStoreName]: WindowStoreSchema;
   [UserStoreName]: UserStoreSchema;
   [ThemeStoreName]: ThemeStoreSchema;
   [SidebarStoreName]: SidebarStoreSchema;
@@ -18,10 +16,7 @@ export interface Schema {
   [AppStoreName]: AppStoreSchema;
 };
 
-export const StoreFileName = 'store';
-
 export const defaultState = {
-  [WindowStoreName]: defaultWindowState,
   [UserStoreName]: defaultUserState,
   [ThemeStoreName]: defaultThemeState,
   [SidebarStoreName]: defaultSidebarState,

@@ -1,4 +1,4 @@
-import { Sorting } from '../types/renderer/library';
+import { Sorting } from '@/src/modules/library/types';
 
 export interface LibraryStoreSchema {
   /** Active library sorting */

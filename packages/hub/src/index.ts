@@ -1,6 +1,5 @@
-import { contextBridge, ipcRenderer } from 'electron';
-import { HubChannel, HubState, MainProcessApi, HubApiKey, HubStateChangeEvent, HubAppInfo } from '@/types/hub';
-import { AppColorScheme } from '@/types/color';
+import { contextBridge, ipcRenderer, NativeTheme } from 'electron';
+import { HubChannel, HubState, MainProcessApi, HubApiKey, HubStateChangeEvent, HubAppInfo } from './types';
 
 const { platform } = process;
 
@@ -15,27 +14,15 @@ const app: HubAppInfo = {
  */
 const state: HubState = {
   isAppWindowMaximized: false,
-  themeSource: AppColorScheme.Dark,
+  themeSource: 'system',
   shouldUseDarkColors: true,
-};
-
-/**
- * Get and set data in store file
- */
-const store: MainProcessApi['store'] = {
-  get: async (key) => {
-    return await ipcRenderer.invoke(HubChannel.ConfigGet, key);
-  },
-  set: (key, value) => {
-    ipcRenderer.send(HubChannel.ConfigSet, key, value);
-  },
 };
 
 /**
  * Set app theme
  */
-async function setNativeTheme (value: AppColorScheme): Promise<void> {
-  const themeState: Partial<HubState> = await ipcRenderer.invoke(HubChannel.SetNativeTheme, value);
+async function setThemeSource (value: NativeTheme['themeSource']): Promise<void> {
+  const themeState: Partial<HubState> = await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
 
   Object.entries(themeState).forEach(([key, value]) => {
     state[key as keyof Partial<HubState>] = value;
@@ -83,9 +70,8 @@ function clearSessionStorage (): void {
  */
 const api: MainProcessApi = {
   app,
-  store,
   platform,
-  setNativeTheme,
+  setThemeSource,
   callWindowMethod,
   requestAccessToken,
   clearSessionStorage,
@@ -122,7 +108,7 @@ void ipcRenderer.invoke(HubChannel.AppInfo).then((appInfo: HubAppInfo) => {
 /**
  * Listen for future state changes from main process
  */
-ipcRenderer.on(HubChannel.StateChange, (event, receivedState: HubState) => {
+ipcRenderer.on(HubChannel.WindowStateChange, (event, receivedState: HubState) => {
   Object.entries(receivedState).forEach(([key, value]) => {
     state[key] = value;
   });

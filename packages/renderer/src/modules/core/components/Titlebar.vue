@@ -52,7 +52,7 @@ import Icon from '@/src/modules/ui/components/Icon.vue';
 import Loader from '@/src/modules/ui/components/Loader.vue';
 import WindowControls from '@/src/modules/ui/components/WindowControls.vue';
 import { getWindowTitle } from '@/src/router/index';
-import { RouteName } from '@/types/renderer/router';
+import { RouteName } from '@/src/router/types';
 import { usePlayer } from '@/src/store/usePlayer';
 
 /**

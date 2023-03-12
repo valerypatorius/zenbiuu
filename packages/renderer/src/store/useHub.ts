@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 import { createSharedComposable, useEventListener } from '@vueuse/core';
-import { HubStateChangeEvent, HubState } from '@/types/hub';
+import { HubStateChangeEvent, HubState } from '../../../hub/src/types';
 
 export const useHub = createSharedComposable(() => {
   const state: HubState = reactive(window.hub.getState());

@@ -90,7 +90,7 @@ import Light from '@/src/modules/ui/components/Light.vue';
 import Duration from '@/src/modules/ui/components/Duration.vue';
 import { useLibrary } from '@/src/store/useLibrary';
 import { useApp } from '@/src/store/useApp';
-import type { TwitchStream } from '@/types/renderer/library';
+import type { TwitchStream } from '@/src/modules/library/types';
 
 const props = withDefaults(defineProps<{
   /** Stream data object */

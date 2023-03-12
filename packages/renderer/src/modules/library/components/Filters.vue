@@ -30,7 +30,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Icon from '@/src/modules/ui/components/Icon.vue';
-import { Sorting, SortingType } from '@/types/renderer/library';
+import { Sorting, SortingType } from '@/src/modules/library/types';
 import { useLibrary } from '@/src/store/useLibrary';
 
 const emit = defineEmits<{

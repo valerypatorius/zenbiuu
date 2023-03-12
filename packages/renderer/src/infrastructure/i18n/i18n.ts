@@ -2,7 +2,7 @@ import { createI18n } from 'vue-i18n';
 import en from '@/assets/locale/en';
 import ru from '@/assets/locale/ru';
 import { app } from '@/src/infrastructure/hub/hub';
-import { AppLocaleName } from '@/types/renderer/locale';
+import { AppLocaleName } from '@/src/infrastructure/i18n/types';
 
 const defaultLocale = getAppLocale();
 

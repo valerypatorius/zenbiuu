@@ -1,5 +1,5 @@
 import linkifyHtml from 'linkify-html';
-import type { ChatEmote } from '@/types/renderer/chat';
+import type { ChatEmote } from '@/src/modules/channel/types/chat';
 import { escape } from '@/src/utils/utils';
 
 /**

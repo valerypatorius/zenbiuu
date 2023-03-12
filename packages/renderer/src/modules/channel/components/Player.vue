@@ -78,7 +78,7 @@ import Loader from '@/src/modules/ui/components/Loader.vue';
 import PlayerOverlay from '@/src/modules/channel/components/player/Overlay.vue';
 import PlayerInfo from '@/src/modules/channel/components/player/Info.vue';
 import type { Level } from 'hls.js';
-import type { PlayerElements } from '@/types/renderer/player';
+import type { PlayerElements } from '@/src/modules/channel/types/player';
 import { usePlayer } from '@/src/store/usePlayer';
 import { useLibrary } from '@/src/store/useLibrary';
 import { useApp } from '@/src/store/useApp';

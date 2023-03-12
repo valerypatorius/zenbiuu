@@ -1,9 +1,9 @@
 import { createSharedComposable } from '@vueuse/core';
-import { AccessTokenResponse, PlayerLayout } from '@/types/renderer/player';
+import { AccessTokenResponse, PlayerLayout } from '@/src/modules/channel/types/player';
 import { useUser } from './useUser';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useStore } from './__useStore';
-import { PlayerStoreName, defaultPlayerState } from '@/store/player';
+import { PlayerStoreName, defaultPlayerState } from '@/src/store/types/player';
 
 enum PlayerEndpoint {
   GraphApi = 'https://gql.twitch.tv/gql',

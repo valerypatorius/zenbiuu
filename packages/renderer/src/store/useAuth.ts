@@ -4,8 +4,8 @@ import { createSharedComposable, tryOnBeforeUnmount, tryOnMounted } from '@vueus
 import { requestAccessToken } from '@/src/infrastructure/hub/hub';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import date from '@/src/utils/date';
-import { TwitchTokenValidationResponse } from '@/types/renderer/user';
-import { RouteName } from '@/types/renderer/router';
+import { TwitchTokenValidationResponse } from '@/src/store/types/user';
+import { RouteName } from '@/src/router/types';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useUser } from '@/src/store/useUser';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';

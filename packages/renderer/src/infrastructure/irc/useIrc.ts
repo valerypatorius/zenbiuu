@@ -5,7 +5,7 @@ import log from '@/src/utils/log';
 import { useUser } from '@/src/store/useUser';
 import IrcWorker from './irc.worker.ts?worker';
 import { IrcAction, IrcCloseCode, IrcCommand, IrcData, IrcPayload } from './types.irc.worker';
-import type { ChatMessage } from '@/types/renderer/chat';
+import type { ChatMessage } from '@/src/modules/channel/types/chat';
 
 const IrcEndpoint = 'wss://irc-ws.chat.twitch.tv:443';
 

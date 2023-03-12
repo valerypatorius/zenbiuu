@@ -104,8 +104,8 @@ import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
-import { PlayerLayout } from '@/types/renderer/player';
-import type { ChatMessage } from '@/types/renderer/chat';
+import { PlayerLayout } from '@/src/modules/channel/types/player';
+import type { ChatMessage } from '@/src/modules/channel/types/chat';
 import { useChat } from '@/src/store/useChat';
 import { useUser } from '@/src/store/useUser';
 import { usePlayer } from '@/src/store/usePlayer';

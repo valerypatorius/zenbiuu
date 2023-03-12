@@ -2,18 +2,16 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { createSharedComposable } from '@vueuse/core';
 import { useStore } from './__useStore';
-import { AppStoreName, defaultAppState } from '@/store/app';
-import { AppLocaleName } from '@/types/renderer/locale';
+import { AppStoreName, defaultAppState } from '@/src/store/types/app';
+import { AppLocaleName } from '@/src/infrastructure/i18n/types';
 import { updateWindowTitle } from '@/src/router/index';
 
 export const useApp = createSharedComposable(() => {
-  const { state, onReady } = useStore(AppStoreName, defaultAppState);
+  const { state } = useStore(AppStoreName, defaultAppState);
   const route = useRoute();
   const { locale } = useI18n();
 
-  onReady(() => {
-    setLocale(state.locale);
-  });
+  setLocale(state.locale);
 
   function setLocale (value?: AppLocaleName): void {
     if (value === undefined) {

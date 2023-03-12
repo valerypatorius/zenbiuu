@@ -6,17 +6,8 @@
       "@/src/*": [
         "./src/*"
       ],
-      "@/types/*": [
-        "../../types/*"
-      ],
-      "@/store/*": [
-        "../../store/*"
-      ],
       "@/assets/*": [
         "./assets/*"
-      ],
-      "@/utils/*": [
-        "../../utils/*"
       ],
     },
     "lib": ["ESNext", "dom", "dom.iterable"]
@@ -24,6 +15,5 @@
   "include": [
     "src/**/*.vue",
     "src/**/*.ts",
-    "../../types/**/*.ts"
   ]
 }

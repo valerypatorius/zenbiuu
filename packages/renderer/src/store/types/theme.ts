@@ -1,12 +1,12 @@
-import { AppColorScheme } from '../types/color';
+import type { NativeTheme } from 'electron';
 
 export interface ThemeStoreSchema {
   /** Current color scheme */
-  name: AppColorScheme;
+  name: NativeTheme['themeSource'];
 }
 
 export const ThemeStoreName = 'theme';
 
 export const defaultThemeState: ThemeStoreSchema = {
-  name: AppColorScheme.System,
+  name: 'system',
 };

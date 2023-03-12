@@ -27,11 +27,11 @@ import { useRouter } from 'vue-router';
 import Filters from '@/src/modules/library/components/Filters.vue';
 import Preview from '@/src/modules/library/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
-import { TwitchStream, Sorting } from '@/types/renderer/library';
+import { TwitchStream, Sorting } from '@/src/modules/library/types';
 import { unixtime } from '@/src/utils/date';
 import { useLibrary } from '@/src/store/useLibrary';
 import { usePlayer } from '@/src/store/usePlayer';
-import { RouteName } from '@/types/renderer/router';
+import { RouteName } from '@/src/router/types';
 
 /**
  * Define store and router instances

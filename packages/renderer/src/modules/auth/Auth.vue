@@ -46,7 +46,7 @@ import appIconPath from '@/assets/icon.svg';
 import { useRouter } from 'vue-router';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { useAuth } from '@/src/store/useAuth';
-import { RouteName } from '@/types/renderer/router';
+import { RouteName } from '@/src/router/types';
 import { useHub } from '@/src/store/useHub';
 
 const router = useRouter();

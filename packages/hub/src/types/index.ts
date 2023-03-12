@@ -1,5 +1,4 @@
-import { Schema } from '../store/schema';
-import { AppColorScheme } from './color';
+import type { NativeTheme } from 'electron';
 
 export const HubApiKey = 'hub';
 
@@ -10,16 +9,9 @@ export const HubApiKey = 'hub';
 export enum HubChannel {
   Initial = 'initial',
   AppInfo = 'appInfo',
-  StateChange = 'stateChange',
+  WindowStateChange = 'windowStateChange',
 
-  ConfigGet = 'configGet',
-  ConfigSet = 'configSet',
-
-  LibraryGet = 'libraryGet',
-  LibrarySet = 'librarySet',
-  LibraryClear = 'libraryClear',
-
-  SetNativeTheme = 'setNativeTheme',
+  SetThemeSource = 'setThemeSource',
   CallWindowMethod = 'callWindowMethod',
 
   RequestAccessToken = 'requestAccessToken',
@@ -39,7 +31,7 @@ export interface HubAppInfo {
 export interface HubState {
   [key: string]: any;
   isAppWindowMaximized: boolean;
-  themeSource: string;
+  themeSource: NativeTheme['themeSource'];
   shouldUseDarkColors: boolean;
 }
 
@@ -47,13 +39,9 @@ export interface HubState {
  * Hub data and methods, available in renderer process via window.hub
  */
 export interface MainProcessApi {
-  store: {
-    get: <T extends keyof Schema>(key?: T) => Promise<Schema[T]>;
-    set: <T extends keyof Schema>(key: T, value: Schema[T]) => void;
-  };
-  platform: string;
+  platform: NodeJS.Platform;
   app: HubAppInfo;
-  setNativeTheme: (value: AppColorScheme) => Promise<void>;
+  setThemeSource: (value: NativeTheme['themeSource']) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
   requestAccessToken: (url: string) => Promise<string>;
   clearSessionStorage: () => void;
@@ -66,3 +54,9 @@ export interface MainProcessApi {
  * Updates reactive state copy
  */
 export const HubStateChangeEvent = 'hubStateChange';
+
+declare global {
+  interface Window {
+    hub: MainProcessApi;
+  }
+}

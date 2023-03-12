@@ -6,8 +6,8 @@ import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { IrcCommand } from '@/src/infrastructure/irc/types.irc.worker';
 import { useStore } from './__useStore';
-import { ChatStoreName, defaultChatState } from '@/store/chat';
-import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from '@/types/renderer/chat';
+import { ChatStoreName, defaultChatState } from '@/src/store/types/chat';
+import type { ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from '@/src/modules/channel/types/chat';
 
 enum ChatEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',

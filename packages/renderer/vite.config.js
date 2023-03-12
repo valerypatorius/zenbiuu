@@ -11,9 +11,7 @@ export default defineConfig({
     alias: {
       '@/src': join(root, 'src'),
       '@/types': join(root, '../../', 'types'),
-      '@/store': join(root, '../../', 'store'),
       '@/assets': join(root, 'assets'),
-      '@/utils': join(root, '../../', 'utils'),
     },
   },
   plugins: [

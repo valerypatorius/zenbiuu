@@ -117,9 +117,8 @@ import Control from '@/src/modules/channel/components/player/Control.vue';
 import Picker, { PickerItem } from '@/src/modules/channel/components/player/Picker.vue';
 import Volume from '@/src/modules/channel/components/player/Volume.vue';
 import Duration from '@/src/modules/ui/components/Duration.vue';
-import { PlayerLayout } from '@/types/renderer/player';
-import type { TwitchStream } from '@/types/renderer/library';
-import type { PlayerElements } from '@/types/renderer/player';
+import { PlayerLayout, PlayerElements } from '@/src/modules/channel/types/player';
+import type { TwitchStream } from '@/src/modules/library/types';
 import type { Level } from 'hls.js';
 import { usePlayer } from '@/src/store/usePlayer';
 

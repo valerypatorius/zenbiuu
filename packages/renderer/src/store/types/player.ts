@@ -1,4 +1,4 @@
-import { PlayerLayout } from '../types/renderer/player';
+import { PlayerLayout } from '@/src/modules/channel/types/player';
 
 export interface PlayerStoreSchema {
   /** Volume level from 0 to 1 */

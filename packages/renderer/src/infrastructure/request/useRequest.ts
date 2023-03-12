@@ -5,7 +5,7 @@ import { useUser } from '@/src/store/useUser';
 import log from '@/src/utils/log';
 import RequestWorker from './request.worker.ts?worker';
 import { RequestAction, RequestError, RequestResponse, RequestPayload, RequestStatusCode } from './types.request.worker';
-import { RouteName } from '@/types/renderer/router';
+import { RouteName } from '@/src/router/types';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;

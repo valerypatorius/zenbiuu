@@ -2,13 +2,13 @@ import { ref } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
 import { useUser } from './useUser';
-import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch } from '@/types/renderer/library';
+import { TwitchResponse, TwitchStream, TwitchUserFollow, TwitchUser, TwitchChannelFromSearch } from '@/src/modules/library/types';
 import date from '@/src/utils/date';
 import { getCurrentUnixTime } from '@/src/utils/utils';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
 import { useStore } from './__useStore';
-import { LibraryStoreName, defaultLibraryState } from '@/store/library';
+import { LibraryStoreName, defaultLibraryState } from '@/src/store/types/library';
 
 enum LibraryError {
   EmptySearchResult = 'Nothing found',

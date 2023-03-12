@@ -1,6 +1,6 @@
 import { reactive, watch } from 'vue';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
-import { uid } from '@/utils/utils';
+import { uid } from '@/src/utils/utils';
 import IntervalWorker from './interval.worker.ts?worker';
 import { IntervalData, IntervalHandler, IntervalAction } from './types.interval.worker';
 

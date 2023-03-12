@@ -28,7 +28,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { RouteName } from '@/types/renderer/router';
+import { RouteName } from '@/src/router/types';
 import { clearSessionStorage } from '@/src/infrastructure/hub/hub';
 import { useUser } from '@/src/store/useUser';
 import { useAuth } from '@/src/store/useAuth';

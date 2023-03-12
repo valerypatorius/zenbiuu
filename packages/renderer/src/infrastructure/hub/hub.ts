@@ -1,10 +1,9 @@
-import { HubApiKey } from '@/types/hub';
+import { HubApiKey } from '../../../../hub/src/types';
 
 export const {
   app,
-  store,
   platform,
-  setNativeTheme,
+  setThemeSource,
   callWindowMethod,
   requestAccessToken,
   clearSessionStorage,
