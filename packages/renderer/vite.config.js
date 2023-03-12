@@ -12,6 +12,9 @@ export default defineConfig({
       '@/src': join(root, 'src'),
       '@/types': join(root, '../../', 'types'),
       '@/assets': join(root, 'assets'),
+
+      /** @see https://github.com/video-dev/hls.js/issues/5146 */
+      'hls.js': 'hls.js/dist/hls.min.js',
     },
   },
   plugins: [
