@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { builtinModules } from 'module';
 import { defineConfig } from 'vite';
 
@@ -7,13 +6,6 @@ const isDev = process.env.MODE === 'development';
 
 export default defineConfig({
   root,
-  resolve: {
-    alias: {
-      '@/src/': join(root, 'src') + '/',
-      '@/types/': join(root, '../../', 'types') + '/',
-      '@/store/': join(root, '../../', 'store') + '/',
-    },
-  },
   build: {
     sourcemap: isDev ? 'inline' : false,
     target: 'node19',

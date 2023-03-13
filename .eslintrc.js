@@ -57,7 +57,8 @@ module.exports = {
     ],
 
     /** Require trailing comma for better git diffs */
-    'comma-dangle': ['error', 'always-multiline'],
+    'comma-dangle': 'off',
+    '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
 
     /** Disable because of not doing well with TS call Signatures */
     'func-call-spacing': 'off',
@@ -70,5 +71,10 @@ module.exports = {
 
     /** Allow single-word component names */
     'vue/multi-word-component-names': 'off',
+
+    /** Define modules' imports order */
+    'import/order': ['error', {
+      groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+    }],
   },
 };

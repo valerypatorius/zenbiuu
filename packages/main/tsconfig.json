@@ -2,20 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/src/*": [
-        "./src/*"
-      ],
-      "@/types/*": [
-        "../../types/*"
-      ],
-      "@/store/*": [
-        "../../store/*"
-      ],
-    }
+    "lib": ["ESNext"]
   },
   "include": [
-    "src/**/*.ts",
-    "../../types/**/*.ts"
+    "src/**/*.ts", "../../env.d.ts", "../../env.d.ts",
   ]
 }

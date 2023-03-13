@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import Control from '@/src/modules/channel/components/player/Control.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import Control from '@/src/modules/channel/components/player/Control.vue';
 
 const props = withDefaults(defineProps<{
   /** Current volume value */

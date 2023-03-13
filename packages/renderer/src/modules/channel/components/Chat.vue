@@ -102,13 +102,13 @@
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useChat } from '../useChat';
+import { usePlayer } from '../usePlayer';
+import type { ChatMessage } from '@/src/modules/channel/types/chat';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
-import { PlayerLayout } from '@/types/renderer/player';
-import type { ChatMessage } from '@/types/renderer/chat';
-import { useChat } from '@/src/store/useChat';
-import { useUser } from '@/src/store/useUser';
-import { usePlayer } from '@/src/store/usePlayer';
+import { PlayerLayout } from '@/src/modules/channel/types/player';
+import { useUser } from '@/src/modules/auth/useUser';
 
 /**
  * Chat width limits

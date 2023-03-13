@@ -8,7 +8,7 @@
 
     <div class="auth__content">
       <div class="auth__title">
-        {{ t('auth.title') }} {{ hubState.appName }}
+        {{ t('auth.title') }} {{ hubState.app.name }}
       </div>
 
       <div class="auth__description">
@@ -41,13 +41,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useAuth } from './useAuth';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import appIconPath from '@/assets/icon.svg';
-import { useRouter } from 'vue-router';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { useAuth } from '@/src/store/useAuth';
-import { RouteName } from '@/types/renderer/router';
-import { useHub } from '@/src/store/useHub';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { useHub } from '@/src/infrastructure/hub/useHub';
 
 const router = useRouter();
 const { t } = useI18n();

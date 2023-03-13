@@ -1,16 +1,14 @@
-import { IntervalAction, IntervalWorkerMessage } from './types.interval.worker';
-
-const context = self as unknown as Worker;
+import { IntervalAction, type IntervalWorkerMessage } from './types';
 
 const intervalsIds = new Map<string, ReturnType<typeof setInterval>>();
 
 function start (id: string, frequency: number, isImmediate = false): void {
   const intervalId = setInterval(() => {
-    context.postMessage(id);
+    self.postMessage(id);
   }, frequency);
 
   if (isImmediate) {
-    context.postMessage(id);
+    self.postMessage(id);
   }
 
   intervalsIds.set(id, intervalId);
@@ -28,7 +26,7 @@ function stop (id: string): void {
   intervalsIds.delete(id);
 }
 
-context.onmessage = ({ data: messageData }: IntervalWorkerMessage) => {
+self.onmessage = ({ data: messageData }: IntervalWorkerMessage) => {
   const { id, frequency, isImmediate } = messageData.data;
 
   switch (messageData.action) {

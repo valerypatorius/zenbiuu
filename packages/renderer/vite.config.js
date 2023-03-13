@@ -11,9 +11,11 @@ export default defineConfig({
     alias: {
       '@/src': join(root, 'src'),
       '@/types': join(root, '../../', 'types'),
-      '@/store': join(root, '../../', 'store'),
       '@/assets': join(root, 'assets'),
-      '@/utils': join(root, '../../', 'utils'),
+      '@/hub/types': join(root, '../', 'hub/src/types'),
+
+      /** @see https://github.com/video-dev/hls.js/issues/5146 */
+      'hls.js': 'hls.js/dist/hls.min.js',
     },
   },
   plugins: [

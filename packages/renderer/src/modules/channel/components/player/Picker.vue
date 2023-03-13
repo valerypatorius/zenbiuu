@@ -46,7 +46,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Control from '@/src/modules/channel/components/player/Control.vue';
-import { useApp } from '@/src/store/useApp';
+import { useApp } from '@/src/modules/core/useApp';
 
 export interface PickerItem {
   index: number;

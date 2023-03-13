@@ -1,11 +1,12 @@
 import { reactive, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
-import { useUser } from '@/src/store/useUser';
-import log from '@/src/utils/log';
+import { useHub } from '../hub/useHub';
 import RequestWorker from './request.worker.ts?worker';
-import { RequestAction, RequestError, RequestResponse, RequestPayload, RequestStatusCode } from './types.request.worker';
-import { RouteName } from '@/types/renderer/router';
+import { RequestAction, RequestError, type RequestResponse, type RequestPayload, RequestStatusCode } from './types';
+import { useUser } from '@/src/modules/auth/useUser';
+import log from '@/src/utils/log';
+import { RouteName } from '@/src/infrastructure/router/types';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -24,6 +25,7 @@ export const useRequest = createSharedComposable(() => {
 
   const { data: workerData, post: postMessage } = useWebWorker<RequestResponse>(worker);
   const { state: userState, clear: clearUser } = useUser();
+  const { state: hubState } = useHub();
   const router = useRouter();
 
   const queue = reactive(new Map<string, QueueHandlers>());
@@ -31,7 +33,7 @@ export const useRequest = createSharedComposable(() => {
   const defaultHeaders = computed<Record<string, string>>(() => ({
     Accept: 'application/vnd.twitchtv.v5+json',
     Authorization: `Bearer ${userState.token}`,
-    'Client-ID': import.meta.env.VITE_APP_CLIENT_ID,
+    'Client-ID': hubState.clientId,
   }));
 
   const isLoading = computed(() => queue.size > 0);

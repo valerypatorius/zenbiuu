@@ -1,4 +1,14 @@
-import { platform } from '@/src/infrastructure/hub/hub';
+import { HubApiKey } from '@/hub/types';
+
+/**
+ * Returns unique id
+ */
+export function uid (): string {
+  const rand = Math.random();
+  const now = new Date().getTime();
+
+  return rand.toString(36).substring(2, 15) + now.toString(36).substring(2, 15);
+}
 
 /**
  * Returns url to public folder.
@@ -17,16 +27,18 @@ export function getCurrentUnixTime (): number {
 
 /**
  * Returns true, if current platform is Windows
+ * @todo move to useHub composable
  */
 export function isWindows (): boolean {
-  return platform === 'win32';
+  return window[HubApiKey].getState().platform === 'win32';
 }
 
 /**
  * Returns true, if current platform is MacOS
+ * @todo move to useHub composable
  */
 export function isMac (): boolean {
-  return platform === 'darwin';
+  return window[HubApiKey].getState().platform === 'darwin';
 }
 
 /**

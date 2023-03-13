@@ -29,9 +29,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useLibrary } from '../useLibrary';
 import Icon from '@/src/modules/ui/components/Icon.vue';
-import { Sorting, SortingType } from '@/types/renderer/library';
-import { useLibrary } from '@/src/store/useLibrary';
+import { Sorting, SortingType } from '@/src/modules/library/types';
 
 const emit = defineEmits<{
   (e: 'change', sorting: Sorting): void;

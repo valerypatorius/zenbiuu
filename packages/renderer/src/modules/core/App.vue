@@ -20,23 +20,24 @@
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
-import { callWindowMethod, checkAppUpdates } from '@/src/infrastructure/hub/hub';
+import { useApp } from './useApp';
 import TitleBar from '@/src/modules/core/components/Titlebar.vue';
 import Sidebar from '@/src/modules/library/components/sidebar/Sidebar.vue';
 import Settings from '@/src/modules/settings/Settings.vue';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { useApp } from '@/src/store/useApp';
-import { useUser } from '@/src/store/useUser';
-import { useAuth } from '@/src/store/useAuth';
-import { useHub } from '@/src/store/useHub';
+import { useUser } from '@/src/modules/auth/useUser';
+import { useAuth } from '@/src/modules/auth/useAuth';
+import { useHub } from '@/src/infrastructure/hub/useHub';
+import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
 
-useHub();
 useAuth();
 
 const route = useRoute();
 const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
 const { state: userState } = useUser();
+const { callWindowMethod } = useHub();
+const { check: checkUpdates } = useUpdater();
 
 /**
  * True, if sidebar should be mounted.
@@ -59,8 +60,8 @@ watchEffect(() => {
 /** Set initial interface size */
 document.documentElement.style.setProperty('--size-base', appState.interfaceSize.toString());
 
-/** Check for updates */
-checkAppUpdates();
+/** Check for app updates */
+checkUpdates();
 </script>
 
 <style lang="postcss">
@@ -91,6 +92,9 @@ checkAppUpdates();
 
     /** Border radius for most elements */
     --border-radius: 0.85rem;
+
+    /** Border radius for buttons */
+    --button-border-radius: 2rem;
 
     /** Standart 16:9 ratio for videos */
     --ratio-video: 56.25%;
@@ -217,14 +221,20 @@ checkAppUpdates();
   }
 
   h1, h2, h3 {
+    font-size: 1em;
     font-weight: 500;
     margin-top: 0;
     margin-bottom: 1.2em;
   }
 
+  h1:not(:first-child),
   h2:not(:first-child),
   h3:not(:first-child) {
     margin-top: 2.4em;
+  }
+
+  ul {
+    padding-left: 0;
   }
 
   li {
@@ -243,6 +253,7 @@ checkAppUpdates();
     background-color: var(--color-text-tertiary);
     position: absolute;
     left: 0;
+    top: 0.8rem;
   }
 
   li:not(:last-child) {
@@ -265,7 +276,7 @@ checkAppUpdates();
     align-items: center;
     height: 3.6rem;
     cursor: pointer;
-    border-radius: var(--border-radius);
+    border-radius: var(--button-border-radius);
     white-space: nowrap;
   }
 
@@ -285,7 +296,8 @@ checkAppUpdates();
     pointer-events: none;
   }
 
-  button .icon {
+  button .icon,
+  button .loader {
     width: 2rem;
     margin-right: 1rem;
     margin-left: -0.25rem;

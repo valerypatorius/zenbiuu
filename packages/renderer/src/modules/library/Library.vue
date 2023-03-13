@@ -24,14 +24,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+import { useLibrary } from './useLibrary';
 import Filters from '@/src/modules/library/components/Filters.vue';
 import Preview from '@/src/modules/library/components/Preview.vue';
 import Scroller from '@/src/utils/scroller';
-import { TwitchStream, Sorting } from '@/types/renderer/library';
+import { TwitchStream, Sorting } from '@/src/modules/library/types';
 import { unixtime } from '@/src/utils/date';
-import { useLibrary } from '@/src/store/useLibrary';
-import { usePlayer } from '@/src/store/usePlayer';
-import { RouteName } from '@/types/renderer/router';
+import { usePlayer } from '@/src/modules/channel/usePlayer';
+import { RouteName } from '@/src/infrastructure/router/types';
 
 /**
  * Define store and router instances

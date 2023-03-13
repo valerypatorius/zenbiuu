@@ -1,8 +1,8 @@
 import { reactive, watch } from 'vue';
 import { createSharedComposable, useWebWorker } from '@vueuse/core';
-import { uid } from '@/utils/utils';
 import IntervalWorker from './interval.worker.ts?worker';
-import { IntervalData, IntervalHandler, IntervalAction } from './types.interval.worker';
+import { IntervalAction, type IntervalData, type IntervalHandler } from './types';
+import { uid } from '@/src/utils/utils';
 
 export const useInterval = createSharedComposable(() => {
   const worker = new IntervalWorker();

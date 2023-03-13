@@ -57,7 +57,7 @@
     </div>
 
     <radio
-      v-for="SchemeName in AppColorScheme"
+      v-for="SchemeName in (['system', 'dark', 'light'] as Array<NativeTheme['themeSource']>)"
       :id="SchemeName"
       :key="SchemeName"
       :value="SchemeName"
@@ -73,11 +73,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { NativeTheme } from 'electron';
+import { useTheme } from '../useTheme';
 import Radio from '@/src/modules/ui/components/Radio.vue';
 import Checkbox from '@/src/modules/ui/components/Checkbox.vue';
-import { AppColorScheme } from '@/types/color';
-import { useApp } from '@/src/store/useApp';
-import { useTheme } from '@/src/store/useTheme';
+import { useApp } from '@/src/modules/core/useApp';
 
 /**
  * Interface size limits
@@ -120,7 +120,7 @@ function toggleSetting (name: (keyof typeof appState.settings)): void {
 /**
  * Set app color scheme
  */
-function setAppColorScheme (value: AppColorScheme): void {
+function setAppColorScheme (value: NativeTheme['themeSource']): void {
   themeState.name = value;
 }
 

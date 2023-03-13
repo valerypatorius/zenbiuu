@@ -124,8 +124,7 @@
     <section class="sidebar__section sidebar__section--bottom">
       <sidebar-item
         icon="Settings"
-        :is-badge="isUpdateAvailable"
-        :title="isUpdateAvailable ? t('settings.update.available') : undefined"
+        :is-badge="update !== undefined"
         :is-secondary="true"
         @click="toggleSettings"
       />
@@ -137,19 +136,18 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import { useSidebar } from '../../useSidebar';
+import { useLibrary } from '../../useLibrary';
+import type { TwitchChannelFromSearch } from '@/src/modules/library/types';
 import SidebarItem from '@/src/modules/library/components/sidebar/Item.vue';
 import SidebarSearch from '@/src/modules/library/components/sidebar/Search.vue';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
-import { RouteName } from '@/types/renderer/router';
-import type { TwitchChannelFromSearch } from '@/types/renderer/library';
-import { useSidebar } from '@/src/store/useSidebar';
-import { useUser } from '@/src/store/useUser';
-import { useLibrary } from '@/src/store/useLibrary';
+import { RouteName } from '@/src/infrastructure/router/types';
+import { useUser } from '@/src/modules/auth/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
-import { usePlayer } from '@/src/store/usePlayer';
-import { useHub } from '@/src/store/useHub';
-import { AppUpdateStatus } from '@/types/renderer/update';
+import { usePlayer } from '@/src/modules/channel/usePlayer';
+import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
 
 interface SidebarChannelItem {
   userId: string;
@@ -179,7 +177,7 @@ const { state: sidebarState } = useSidebar();
 const { state: userState } = useUser();
 const { update: updateLibrary, search: searchChannels, isReady: isLibraryReady, followedIds, followedChannels, followedStreams, foundStreams, lastUpdateTime } = useLibrary();
 const { state: playerState } = usePlayer();
-const { state: hubState } = useHub();
+const { update } = useUpdater();
 
 /** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;
@@ -223,13 +221,6 @@ const isSearchError = ref(false);
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);
-
-/** Returns true, if app update is available */
-const isUpdateAvailable = computed(() => {
-  return hubState.appUpdateStatus === AppUpdateStatus.Available ||
-    hubState.appUpdateStatus === AppUpdateStatus.Downloading ||
-    hubState.appUpdateStatus === AppUpdateStatus.ReadyForInstall;
-});
 
 /** Returns true, if current route is "library" */
 const isLibrary = computed(() => route.name === RouteName.Library);

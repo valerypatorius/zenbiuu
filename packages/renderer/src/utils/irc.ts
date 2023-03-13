@@ -1,5 +1,5 @@
 import linkifyHtml from 'linkify-html';
-import type { ChatEmote } from '@/types/renderer/chat';
+import type { ChatEmote } from '@/src/modules/channel/types/chat';
 import { escape } from '@/src/utils/utils';
 
 /**
@@ -15,7 +15,7 @@ const BADGES = [
 /**
  * List of regular expressions
  */
-const REGEXP: {[key: string]: RegExp} = {
+const REGEXP: Record<string, RegExp> = {
   tags: /(?<tags>[^\s]+)/,
   command: /(.+tmi\.twitch\.tv\s)(?<command>[^\s]+)/,
   text: /(\s:)(?<text>.*)$/,
@@ -25,7 +25,7 @@ const REGEXP: {[key: string]: RegExp} = {
 /**
  * Parse message tags string
  */
-export function parseTags (raw: string): {[key: string]: string} {
+export function parseTags (raw: string): Record<string, string> {
   const arr = raw
     .split(';')
     .map((pair) => pair.split('='));
@@ -36,11 +36,11 @@ export function parseTags (raw: string): {[key: string]: string} {
 /**
  * Parse IRC message
  */
-export function parseMessage (raw: string): {command: string; text: string; channel: string; tags: {[key: string]: string} | null} {
+export function parseMessage (raw: string): { command: string; text: string; channel: string; tags: Record<string, string> | null } {
   let message = raw.trim();
   let tags = null;
 
-  const matches: {[key: string]: RegExpMatchArray | null} = {};
+  const matches: Record<string, RegExpMatchArray | null> = {};
 
   /**
    * Get message tags and remove them from message
@@ -78,7 +78,7 @@ export function parseEmotes (raw: string, messageText: string): Record<string, C
     return undefined;
   }
 
-  const result: {[key: string]: ChatEmote} = {};
+  const result: Record<string, ChatEmote> = {};
 
   const data = Object.fromEntries(raw
     .split('/')
@@ -125,7 +125,7 @@ export function parseBadges (raw: string): string[] {
  * - find links;
  * - check for colored text;
  */
-export function parseText (text: string): {value: string; isColored: boolean} {
+export function parseText (text: string): { value: string; isColored: boolean } {
   const coloredStringStart = 'ACTION';
   const coloredStringEnd = '';
 

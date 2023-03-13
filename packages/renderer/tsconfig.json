@@ -6,24 +6,17 @@
       "@/src/*": [
         "./src/*"
       ],
-      "@/types/*": [
-        "../../types/*"
-      ],
-      "@/store/*": [
-        "../../store/*"
-      ],
       "@/assets/*": [
         "./assets/*"
       ],
-      "@/utils/*": [
-        "../../utils/*"
-      ],
+      "@/hub/types": [
+        "../hub/src/types"
+      ]
     },
-    "lib": ["ESNext", "dom", "dom.iterable"]
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },
   "include": [
     "src/**/*.vue",
     "src/**/*.ts",
-    "../../types/**/*.ts"
   ]
 }
