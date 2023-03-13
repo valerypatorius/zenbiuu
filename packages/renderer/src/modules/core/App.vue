@@ -221,14 +221,20 @@ checkUpdates();
   }
 
   h1, h2, h3 {
+    font-size: 1em;
     font-weight: 500;
     margin-top: 0;
     margin-bottom: 1.2em;
   }
 
+  h1:not(:first-child),
   h2:not(:first-child),
   h3:not(:first-child) {
     margin-top: 2.4em;
+  }
+
+  ul {
+    padding-left: 0;
   }
 
   li {
@@ -247,6 +253,7 @@ checkUpdates();
     background-color: var(--color-text-tertiary);
     position: absolute;
     left: 0;
+    top: 0.8rem;
   }
 
   li:not(:last-child) {

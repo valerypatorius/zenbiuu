@@ -52,6 +52,8 @@ export default {
       updateDownload: 'Download',
       updateDownloading: 'Downloading',
       updateInstall: 'Install',
+      updateProblems: 'Having problems?',
+      updateManualDownload: 'Download manually',
     },
     logout: 'Logout',
   },

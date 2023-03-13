@@ -1,12 +1,21 @@
+import { marked } from 'marked';
 import { createSharedComposable } from '@vueuse/core';
 import { type UpdateInfo } from 'electron-updater';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useHub } from '../hub/useHub';
 
 export const useUpdater = createSharedComposable(() => {
   const { updater } = useHub();
 
   const update = ref<UpdateInfo>();
+
+  const releaseNotesHtml = computed(() => {
+    if (typeof update.value?.releaseNotes !== 'string') {
+      return '';
+    }
+
+    return marked.parse(update.value.releaseNotes);
+  });
 
   const isChecking = ref(false);
   const isDownloading = ref(false);
@@ -29,12 +38,15 @@ export const useUpdater = createSharedComposable(() => {
       return;
     }
 
-    isDownloading.value = true;
+    try {
+      isDownloading.value = true;
 
-    await updater.download();
+      await updater.download();
 
-    isDownloading.value = false;
-    isReadyToInstall.value = true;
+      isReadyToInstall.value = true;
+    } finally {
+      isDownloading.value = false;
+    }
   }
 
   function install (): void {
@@ -54,5 +66,6 @@ export const useUpdater = createSharedComposable(() => {
     isDownloading,
     isReadyToInstall,
     isLatestVersion,
+    releaseNotesHtml,
   };
 });

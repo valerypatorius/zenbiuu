@@ -9,13 +9,15 @@
       <a href="https://github.com/valerypatorius/zenbiuu/issues">GitHub</a>
     </p>
 
+    <p class="settings__secondary">
+      {{ t('legal.disclaimer', { name: hubState.app.name }) }}
+    </p>
+  </div>
+
+  <div class="settings-section">
     <p>
       {{ t('settings.about.iconBy') }} <a href="https://www.iconfinder.com/icons/5296664/monkey_japan_japanese_onsen_hot_icon">Maxicons</a><br>
       {{ t('settings.about.interfaceIcons') }} <a href="https://boxicons.com/">Boxicons</a><br>
-    </p>
-
-    <p class="settings__secondary">
-      {{ t('legal.disclaimer', { name: hubState.app.name }) }}
     </p>
   </div>
 
@@ -34,6 +36,18 @@
         {{ updateButtonText }}
       </button>
     </p>
+
+    <p>
+      {{ t('settings.about.updateProblems') }}
+      <a href="https://github.com/valerypatorius/zenbiuu/releases/latest">
+        {{ t('settings.about.updateManualDownload') }}
+      </a>
+    </p>
+
+    <p
+      v-if="releaseNotesHtml"
+      v-html="releaseNotesHtml"
+    />
   </div>
 </template>
 
@@ -46,7 +60,7 @@ import Loader from '@/src/modules/ui/components/Loader.vue';
 
 const { t } = useI18n();
 const { state: hubState } = useHub();
-const { update, check, download, install, isChecking: isCheckingUpdate, isDownloading, isReadyToInstall } = useUpdater();
+const { update, check, download, install, isChecking: isCheckingUpdate, isDownloading, isReadyToInstall, releaseNotesHtml } = useUpdater();
 
 const updateMessage = computed(() => {
   if (isCheckingUpdate.value) {

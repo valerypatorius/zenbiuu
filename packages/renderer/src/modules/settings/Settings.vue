@@ -50,6 +50,7 @@ import SettingsAccount from '@/src/modules/settings/components/Account.vue';
 import SettingsAbout from '@/src/modules/settings/components/About.vue';
 import { useUser } from '@/src/modules/auth/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
+import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
 
 enum TabName {
   Interface = 'interface',
@@ -67,6 +68,7 @@ interface TabData {
 const { t } = useI18n();
 const { state: userState } = useUser();
 const { isSettingsActive } = useInterface();
+const { update } = useUpdater();
 
 /** Logined user access token */
 const userAccessToken = computed(() => userState.token);
@@ -99,7 +101,7 @@ const Tab = computed<Record<TabName, TabData>>(() => {
 /**
  * Currently active tab
  */
-const activeTabName = ref(TabName.About);
+const activeTabName = ref(update.value !== undefined ? TabName.About : TabName.Interface);
 
 /** Tabs list to render */
 const availableTabs = computed(() => {

@@ -52,6 +52,8 @@ export default {
       updateDownload: 'Скачать',
       updateDownloading: 'Загружаем',
       updateInstall: 'Установить',
+      updateProblems: 'Возникли проблемы?',
+      updateManualDownload: 'Скачать вручную',
     },
     logout: 'Выйти',
   },
