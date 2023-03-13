@@ -124,6 +124,7 @@
     <section class="sidebar__section sidebar__section--bottom">
       <sidebar-item
         icon="Settings"
+        :is-badge="update !== undefined"
         :is-secondary="true"
         @click="toggleSettings"
       />
@@ -146,6 +147,7 @@ import { RouteName } from '@/src/infrastructure/router/types';
 import { useUser } from '@/src/modules/auth/useUser';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { usePlayer } from '@/src/modules/channel/usePlayer';
+import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
 
 interface SidebarChannelItem {
   userId: string;
@@ -175,6 +177,7 @@ const { state: sidebarState } = useSidebar();
 const { state: userState } = useUser();
 const { update: updateLibrary, search: searchChannels, isReady: isLibraryReady, followedIds, followedChannels, followedStreams, foundStreams, lastUpdateTime } = useLibrary();
 const { state: playerState } = usePlayer();
+const { update } = useUpdater();
 
 /** Minimum visible offline items count */
 const MIN_OFFLINE_ITEMS_COUNT = 0;

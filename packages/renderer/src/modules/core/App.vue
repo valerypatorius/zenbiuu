@@ -28,6 +28,7 @@ import { useInterface } from '@/src/infrastructure/interface/useInterface';
 import { useUser } from '@/src/modules/auth/useUser';
 import { useAuth } from '@/src/modules/auth/useAuth';
 import { useHub } from '@/src/infrastructure/hub/useHub';
+import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
 
 useAuth();
 
@@ -36,6 +37,7 @@ const { isSettingsActive } = useInterface();
 const { state: appState } = useApp();
 const { state: userState } = useUser();
 const { callWindowMethod } = useHub();
+const { check: checkUpdates } = useUpdater();
 
 /**
  * True, if sidebar should be mounted.
@@ -57,6 +59,9 @@ watchEffect(() => {
 
 /** Set initial interface size */
 document.documentElement.style.setProperty('--size-base', appState.interfaceSize.toString());
+
+/** Check for app updates */
+checkUpdates();
 </script>
 
 <style lang="postcss">
@@ -87,6 +92,9 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
 
     /** Border radius for most elements */
     --border-radius: 0.85rem;
+
+    /** Border radius for buttons */
+    --button-border-radius: 2rem;
 
     /** Standart 16:9 ratio for videos */
     --ratio-video: 56.25%;
@@ -261,7 +269,7 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
     align-items: center;
     height: 3.6rem;
     cursor: pointer;
-    border-radius: var(--border-radius);
+    border-radius: var(--button-border-radius);
     white-space: nowrap;
   }
 
@@ -281,7 +289,8 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
     pointer-events: none;
   }
 
-  button .icon {
+  button .icon,
+  button .loader {
     width: 2rem;
     margin-right: 1rem;
     margin-left: -0.25rem;

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
-import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi } from './types';
+import { type UpdateInfo } from 'electron-updater';
+import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi, type UpdaterApi } from './types';
 
 /**
  * State with simple data, updated by main process
@@ -60,6 +61,21 @@ function clearSessionStorage (): void {
 }
 
 /**
+ * Methods for communication with app updater
+ */
+const updater: UpdaterApi = {
+  check: async (): Promise<UpdateInfo | undefined> => {
+    return await ipcRenderer.invoke(HubChannel.CheckForUpdates);
+  },
+  download: async (): Promise<string[]> => {
+    return await ipcRenderer.invoke(HubChannel.DownloadUpdate);
+  },
+  install: () => {
+    void ipcRenderer.invoke(HubChannel.InstallUpdate);
+  },
+};
+
+/**
  * Object with all available data and methods,
  * available in renderer process under window.hub
  */
@@ -69,6 +85,7 @@ const api: MainProcessApi = {
   waitForRedirect,
   clearSessionStorage,
   getState: () => state,
+  updater,
 };
 
 /**

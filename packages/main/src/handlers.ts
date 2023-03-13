@@ -1,8 +1,10 @@
 import { app, session, ipcMain, type BrowserWindow, type NativeTheme } from 'electron';
+import { type UpdateInfo } from 'electron-updater';
 import { HubChannel, type HubState } from '../../hub/src/types';
 import { theme } from './theme';
 import { Window, waitForRedirect } from './window';
 import { env } from './env';
+import { updater } from './updater';
 
 export function handleRendererRequests (): void {
   /**
@@ -59,5 +61,26 @@ export function handleRendererRequests (): void {
    */
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
     void session.defaultSession.clearStorageData();
+  });
+
+  /**
+   * Check for app updates
+   */
+  ipcMain.handle(HubChannel.CheckForUpdates, async (): Promise<UpdateInfo | undefined> => {
+    return await updater.check();
+  });
+
+  /**
+   * Download app update
+   */
+  ipcMain.handle(HubChannel.DownloadUpdate, async (): Promise<string[]> => {
+    return await updater.download();
+  });
+
+  /**
+   * Install app update
+   */
+  ipcMain.handle(HubChannel.InstallUpdate, (): void => {
+    updater.install();
   });
 }

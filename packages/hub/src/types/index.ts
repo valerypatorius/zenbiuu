@@ -1,4 +1,5 @@
 import type { NativeTheme } from 'electron';
+import type { UpdateInfo } from 'electron-updater';
 
 export const HubApiKey = 'hub';
 
@@ -13,7 +14,10 @@ export enum HubChannel {
   CallWindowMethod = 'callWindowMethod',
   WaitForRedirect = 'waitForRedirect',
   ClearSessionStorage = 'clearSessionStorage',
-}
+  CheckForUpdates = 'checkForUpdates',
+  DownloadUpdate = 'downloadUpdate',
+  InstallUpdate = 'installUpdate',
+};
 
 /**
  * Hub data state
@@ -32,6 +36,12 @@ export interface HubState {
   isAppWindowMaximized: boolean;
 }
 
+export interface UpdaterApi {
+  check: () => Promise<UpdateInfo | undefined>;
+  download: () => Promise<string[]>;
+  install: () => void;
+}
+
 /**
  * Hub data and methods, available in renderer process via window.hub
  */
@@ -41,6 +51,7 @@ export interface MainProcessApi {
   waitForRedirect: (url: string) => Promise<string>;
   clearSessionStorage: () => void;
   getState: () => HubState;
+  updater: UpdaterApi;
 }
 
 /**

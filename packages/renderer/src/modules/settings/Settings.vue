@@ -30,7 +30,9 @@
       </div>
 
       <div class="settings__content scrollable">
-        <component :is="Tab[activeTabName].component" />
+        <KeepAlive>
+          <component :is="Tab[activeTabName].component" />
+        </KeepAlive>
       </div>
     </div>
   </popup>
@@ -97,7 +99,7 @@ const Tab = computed<Record<TabName, TabData>>(() => {
 /**
  * Currently active tab
  */
-const activeTabName = ref(TabName.Interface);
+const activeTabName = ref(TabName.About);
 
 /** Tabs list to render */
 const availableTabs = computed(() => {
@@ -224,6 +226,7 @@ function closeSettings (): void {
       margin-bottom: 1.6rem;
       display: flex;
       align-items: center;
+      gap: 1.2rem;
     }
 
     img {
