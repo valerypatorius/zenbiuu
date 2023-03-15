@@ -149,7 +149,7 @@ export const useChat = createSharedComposable(() => {
         const url = emote.urls[size] ?? emote.urls[1];
 
         result[emote.name] = {
-          url: `https:${url}`,
+          url,
           height: emote.height,
         };
       });

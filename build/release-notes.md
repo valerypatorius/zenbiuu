@@ -1,3 +1,9 @@
+# v1.1.1
+## 2023-03-15
+
+- Fix broken FFZ emotes' urls
+- Reconnection to chat after closed connection now works properly (e.g. when waking up from sleep mode)
+
 # v1.1.0
 ## 2023-03-13
 
