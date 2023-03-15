@@ -1,5 +1,5 @@
 import { watch, ref } from 'vue';
-import { createEventHook, createSharedComposable, useWebWorker } from '@vueuse/core';
+import { createEventHook, createSharedComposable, useWebWorker, useDebounceFn, useCounter } from '@vueuse/core';
 import IrcWorker from './irc.worker.ts?worker';
 import { IrcAction, IrcCloseCode, IrcCommand, type IrcData, type IrcPayload } from './types';
 import type { ChatMessage } from '@/src/modules/channel/types/chat';
@@ -14,6 +14,7 @@ export const useIrc = createSharedComposable(() => {
 
   const { data: workerData, post: postMessage } = useWebWorker<IrcData>(worker);
   const { state: userState } = useUser();
+  const { count: connectionDelay, set: setConnectionDelay, reset: resetConnectionDelay } = useCounter(100);
 
   const isConnected = ref(false);
   const messageHook = createEventHook<{ command: IrcCommand; data?: ChatMessage }>();
@@ -48,9 +49,50 @@ export const useIrc = createSharedComposable(() => {
     if (isReconnect && userState.token !== undefined) {
       log.message(log.Type.Irc, 'Reconnecting');
 
-      connect();
+      void connect();
     }
   });
+
+  /**
+   * Debounced connect call for manual use.
+   * Helps to avoid frequent calls when trying to reconnect
+   */
+  const connect = useDebounceFn(() => {
+    if (isConnected.value) {
+      return;
+    }
+
+    const data: IrcPayload = {
+      url: IrcEndpoint,
+      token: userState.token,
+      name: userState.name,
+    };
+
+    postMessage({
+      action: IrcAction.Connect,
+      data,
+    });
+
+    setConnectionDelay(connectionDelay.value * 2);
+  }, connectionDelay);
+
+  /**
+   * Disconnect call for manual use
+   */
+  function disconnect (): void {
+    if (!isConnected.value) {
+      return;
+    }
+
+    const data: IrcPayload = {
+      code: IrcCloseCode.Manual,
+    };
+
+    postMessage({
+      action: IrcAction.Disconnect,
+      data,
+    });
+  }
 
   function handleMessage (raw: string): void {
     const messages = raw.trim().split(/\n/);
@@ -70,6 +112,8 @@ export const useIrc = createSharedComposable(() => {
        * run messages queue, stored in worker
        */
       if (parsed.command === IrcCommand.Connect) {
+        resetConnectionDelay();
+
         isConnected.value = true;
 
         postMessage({
@@ -126,38 +170,6 @@ export const useIrc = createSharedComposable(() => {
         command: parsed.command as IrcCommand,
         data,
       });
-    });
-  }
-
-  function connect (): void {
-    if (isConnected.value) {
-      return;
-    }
-
-    const data: IrcPayload = {
-      url: IrcEndpoint,
-      token: userState.token,
-      name: userState.name,
-    };
-
-    postMessage({
-      action: IrcAction.Connect,
-      data,
-    });
-  }
-
-  function disconnect (): void {
-    if (!isConnected.value) {
-      return;
-    }
-
-    const data: IrcPayload = {
-      code: IrcCloseCode.Manual,
-    };
-
-    postMessage({
-      action: IrcAction.Disconnect,
-      data,
     });
   }
 

@@ -63,10 +63,20 @@ function handleMessage (event: MessageEvent<string>): void {
  * @param event - close event
  */
 function handleClose (event: CloseEvent): void {
+  if (socket === undefined) {
+    return;
+  }
+
   self.postMessage({
     close: true,
     code: event.code,
   });
+
+  socket.removeEventListener('open', handleAuth);
+  socket.removeEventListener('message', handleMessage);
+  socket.removeEventListener('close', handleClose);
+
+  socket = undefined;
 }
 
 /**
@@ -110,17 +120,7 @@ function connect ({ url, token, name }: IrcPayload): void {
  * Close socket connection
  */
 function disconnect (code?: number): void {
-  if (socket === undefined) {
-    return;
-  }
-
-  socket.close(code);
-
-  socket.removeEventListener('open', handleAuth);
-  socket.removeEventListener('message', handleMessage);
-  socket.removeEventListener('close', handleClose);
-
-  socket = undefined;
+  socket?.close(code);
 }
 
 /**
