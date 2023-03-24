@@ -252,6 +252,7 @@ function onClick () {
     font-size: 1.6rem;
     line-height: 1.5em;
     font-weight: 500;
+    word-break: break-word;
   }
 
   .preview .preview-channel {
