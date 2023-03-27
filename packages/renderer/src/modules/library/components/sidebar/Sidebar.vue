@@ -70,6 +70,7 @@
             :image="item.image"
             :label="item.name"
             :is-disabled="true"
+            :is-active="item.isActive"
             :is-loading="!isLibraryReady"
             @click="selectChannel(item)"
           />
@@ -285,6 +286,7 @@ const offlineItems = computed(() => {
           image: userData.profile_image_url,
           name: userData.display_name,
           isLive: false,
+          isActive: userData.display_name === route.params.name,
         });
       }
 

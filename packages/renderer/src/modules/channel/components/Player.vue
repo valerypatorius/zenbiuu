@@ -71,12 +71,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import Hls, { HlsConfig } from 'hls.js';
 import { usePlayer } from '../usePlayer';
 import { useStats } from '../useStats';
 import type { Level } from 'hls.js';
-import type { PlayerElements } from '@/src/modules/channel/types/player';
 import date from '@/src/utils/date';
 import Loader from '@/src/modules/ui/components/Loader.vue';
 import PlayerOverlay from '@/src/modules/channel/components/player/Overlay.vue';
@@ -155,9 +154,6 @@ const inactivityInterval = ref<ReturnType<typeof setTimeout>>();
 /** If true, interface and cursor will be hidden */
 const isInactive = ref(false);
 
-/** True, when both playlist and stream info are not available */
-const isOffline = ref(false);
-
 /**
  * True, if overlay control is hovered.
  * Disables inactivity watcher
@@ -168,7 +164,13 @@ const isControlHovered = ref(false);
  * DOM-elements, which properties are modified
  * by player and its child components
  */
-const playerElements = ref<Partial<PlayerElements>>({});
+const playerElements = computed(() => {
+  return {
+    player: player.value,
+    video: video.value,
+    canvas: canvas.value,
+  };
+});
 
 /** Returns true, if interface blur is enabled in settings */
 const isBlurEnabled = computed(() => appState.settings.isBlurEnabled);
@@ -190,6 +192,9 @@ const info = computed(() => {
   return followedStreamData ?? foundStreamData;
 });
 
+/** True, if stream is offline */
+const isOffline = computed(() => info.value === undefined);
+
 /** Stream thumbnail url */
 const thumbnail = computed(() => {
   if (playerState.cover) {
@@ -203,18 +208,13 @@ const thumbnail = computed(() => {
   return `${info.value.thumbnail_url.replace(/\{width\}/, '640').replace(/\{height\}/, '360')}?v=${lastUpdateTime.value}`;
 });
 
-onMounted(() => {
+function init (): void {
   /**
-   * Save rendered elements
+   * Start playback
    */
-  playerElements.value.player = player.value;
-  playerElements.value.video = video.value;
-  playerElements.value.canvas = canvas.value;
+  initPlayer();
 
-  /**
-   * Prepare stats posting url
-   */
-  prepareStatsUrlForChannel(props.channelName);
+  loadPlaylist(props.channelName);
 
   /**
    * Send player stats every 1 minute
@@ -230,19 +230,15 @@ onMounted(() => {
       broadcastId: info.value.id,
     });
   }, STATS_POST_FREQUENCY);
+}
 
-  /**
-   * Start playback
-   */
-  initPlayer();
-  loadPlaylist(props.channelName);
-});
+function destroy (): void {
+  destroyPlayer();
 
-onBeforeUnmount(() => {
   /**
    * Stop watching for cursor
    */
-  if (inactivityInterval.value) {
+  if (inactivityInterval.value !== undefined) {
     clearTimeout(inactivityInterval.value);
     inactivityInterval.value = undefined;
   }
@@ -250,7 +246,7 @@ onBeforeUnmount(() => {
   /**
    * Stop sending stats
    */
-  if (stopStatsInterval.value) {
+  if (stopStatsInterval.value !== undefined) {
     stopStatsInterval.value();
     stopStatsInterval.value = undefined;
   }
@@ -258,19 +254,33 @@ onBeforeUnmount(() => {
   /**
    * Stop updating video background
    */
-  if (videoBackgroundInterval.value) {
+  if (videoBackgroundInterval.value !== undefined) {
     cancelAnimationFrame(videoBackgroundInterval.value);
     videoBackgroundInterval.value = undefined;
   }
+}
 
+watch(isOffline, async () => {
   /**
-   * Destroy player
+   * Wait for player elements to render
    */
-  hls.value?.off(Hls.Events.MEDIA_ATTACHED);
-  hls.value?.off(Hls.Events.MANIFEST_PARSED);
-  hls.value?.off(Hls.Events.INIT_PTS_FOUND);
-  hls.value?.destroy();
-  hls.value = undefined;
+  await nextTick();
+
+  if (isOffline.value) {
+    destroy();
+  } else {
+    init();
+  }
+}, {
+  immediate: true,
+});
+
+onMounted(() => {
+  prepareStatsUrlForChannel(props.channelName);
+});
+
+onBeforeUnmount(() => {
+  destroy();
 });
 
 /**
@@ -316,6 +326,17 @@ function initPlayer (): void {
       initVideoBackground();
     });
   });
+}
+
+/**
+ * Remove player listeners and destroy it
+ */
+function destroyPlayer (): void {
+  hls.value?.off(Hls.Events.MEDIA_ATTACHED);
+  hls.value?.off(Hls.Events.MANIFEST_PARSED);
+  hls.value?.off(Hls.Events.INIT_PTS_FOUND);
+  hls.value?.destroy();
+  hls.value = undefined;
 }
 
 /**

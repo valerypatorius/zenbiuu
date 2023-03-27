@@ -9,10 +9,6 @@ import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useInterval } from '@/src/infrastructure/interval/useInterval';
 import { useStore } from '@/src/infrastructure/store/useStore';
 
-enum LibraryError {
-  EmptySearchResult = 'Nothing found',
-};
-
 enum LibraryEndpoint {
   Follows = 'https://api.twitch.tv/helix/users/follows',
   Streams = 'https://api.twitch.tv/helix/streams',
@@ -91,13 +87,9 @@ export const useLibrary = createSharedComposable(() => {
    */
   async function search (query: string): Promise<TwitchChannelFromSearch[]> {
     const { data } = await get<TwitchResponse<TwitchChannelFromSearch>>(`${LibraryEndpoint.SearchChannels}?query=${query}&first=10`);
-    const liveIds = data.filter((item) => item.is_live).map((item) => item.id);
+    const ids = data.map((item) => item.id);
 
-    if (liveIds.length === 0) {
-      return await Promise.reject(LibraryError.EmptySearchResult);
-    }
-
-    await getFoundStreams(liveIds);
+    await getFoundStreams(ids);
 
     return await Promise.resolve(data);
   }
