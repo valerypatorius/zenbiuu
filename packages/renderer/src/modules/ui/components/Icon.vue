@@ -10,15 +10,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import icons, { IconString } from '@/assets/icons';
+import type { IconName } from './types';
+import icons from '@/assets/icons';
 
 const props = defineProps<{
   /** Icon name */
-  name: string;
+  name: IconName;
 }>();
 
 /** Svg html string */
-const svg = computed<IconString>(() => icons[props.name]);
+const svg = computed(() => icons[props.name]);
 </script>
 
 <style lang="postcss">

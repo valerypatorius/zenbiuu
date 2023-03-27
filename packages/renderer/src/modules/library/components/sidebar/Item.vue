@@ -54,6 +54,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { IconName } from '@/src/modules/ui/components/types';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
 const props = defineProps<{
@@ -64,7 +65,7 @@ const props = defineProps<{
   details?: string;
 
   /** Icon name */
-  icon?: string;
+  icon?: IconName;
 
   /** Image url */
   image?: string;
@@ -142,7 +143,6 @@ const isOnlyIcon = computed(() => !props.label?.length && !props.details?.length
 
     &--disabled  {
       color: var(--color-text-secondary);
-      pointer-events: none;
 
       .sidebar-item__image {
         filter: grayscale(1);

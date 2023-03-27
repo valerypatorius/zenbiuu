@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import type { IconName } from '@/src/modules/ui/components/types';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
 const {
@@ -30,7 +31,7 @@ const {
   size?: 'default' | 'large';
 
   /** Icon name */
-  icon?: string;
+  icon?: IconName;
 
   /** Title text for tooltip on hover */
   title?: string;
