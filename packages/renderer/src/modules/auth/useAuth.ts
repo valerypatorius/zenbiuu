@@ -129,6 +129,7 @@ export const useAuth = createSharedComposable(() => {
     const scopes = [
       'channel:read:subscriptions',
       'chat:read',
+      'chat:edit',
       'user:read:follows',
       'channel:moderate',
     ];

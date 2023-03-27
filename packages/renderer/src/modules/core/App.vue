@@ -10,6 +10,7 @@
     >
       <Sidebar v-if="isMountSidebar" />
 
+      <!-- @todo Do not use key, properly update components instead -->
       <RouterView :key="route.path" />
 
       <Settings v-if="isSettingsActive" />
@@ -29,6 +30,7 @@ import { useUser } from '@/src/modules/auth/useUser';
 import { useAuth } from '@/src/modules/auth/useAuth';
 import { useHub } from '@/src/infrastructure/hub/useHub';
 import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
+import { useEmotes } from '@/src/modules/channel/useEmotes';
 
 useAuth();
 
@@ -38,6 +40,7 @@ const { state: appState } = useApp();
 const { state: userState } = useUser();
 const { callWindowMethod } = useHub();
 const { check: checkUpdates } = useUpdater();
+const { getGlobalEmotes } = useEmotes();
 
 /**
  * True, if sidebar should be mounted.
@@ -62,6 +65,9 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
 
 /** Check for app updates */
 checkUpdates();
+
+/** Request and save global emotes */
+getGlobalEmotes();
 </script>
 
 <style lang="postcss">
@@ -113,6 +119,7 @@ checkUpdates();
     --color-button: rgba(var(--rgb-accent), 1);
     --color-button-text: rgba(var(--rgb-white), 1);
     --color-link: rgba(var(--rgb-link), 1);
+    --color-error: rgba(var(--rgb-red), 0.75);
   }
 
   @media (prefers-color-scheme: dark) {

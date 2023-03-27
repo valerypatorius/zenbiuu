@@ -58,8 +58,10 @@ export default {
     logout: 'Выйти',
   },
   chat: {
-    joinedAs: 'Вы вошли в чат как',
+    connectingTo: 'Подключение к чату {channel}...',
+    joinedAs: 'Вы вошли в чат {channel} как {name}',
     scrollToBottom: 'Прокрутить вниз',
+    message: 'Сообщение',
   },
   player: {
     mute: 'Отключить звук',

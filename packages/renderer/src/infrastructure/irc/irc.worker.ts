@@ -35,9 +35,9 @@ function handleAuth (): void {
     return;
   }
 
+  socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
   socket.send(`PASS oauth:${connectionOptions.token as string}`);
   socket.send(`NICK ${connectionOptions.name as string}`);
-  socket.send('CAP REQ :twitch.tv/tags');
 }
 
 /**
@@ -48,6 +48,10 @@ function handleMessage (event: MessageEvent<string>): void {
   if (socket === undefined) {
     return;
   }
+
+  /**
+   * @todo Handle RECONNECT command
+   */
 
   if (event.data.trim() === 'PING :tmi.twitch.tv') {
     socket.send('PONG :tmi.twitch.tv');
@@ -164,6 +168,17 @@ function leaveChannelChat (channel?: string): void {
 }
 
 /**
+ * If socket is open, send message to a specified channel
+ */
+function sendMessage (message?: string, channel?: string, nonce?: string): void {
+  if (socket === undefined || message === undefined || channel === undefined || nonce === undefined) {
+    return;
+  }
+
+  socket.send(`@client-nonce=${nonce} PRIVMSG #${channel} :${message}`);
+}
+
+/**
  * If socket is open, send messages and remove them from queue
  */
 function resolveQueue (): void {
@@ -189,6 +204,9 @@ self.onmessage = ({ data: messageData }: IrcWorkerMessage) => {
       break;
     case IrcAction.Leave:
       leaveChannelChat(payload.channel);
+      break;
+    case IrcAction.Send:
+      sendMessage(payload.message, payload.channel, payload.nonce);
       break;
     case IrcAction.RunQueue:
       resolveQueue();

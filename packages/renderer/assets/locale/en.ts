@@ -58,8 +58,10 @@ export default {
     logout: 'Logout',
   },
   chat: {
-    joinedAs: 'Joined chat room as',
+    connectingTo: 'Connecting to {channel} chat room...',
+    joinedAs: 'Joined {channel} chat room as {name}',
     scrollToBottom: 'Scroll to bottom',
+    message: 'Message',
   },
   player: {
     mute: 'Mute',

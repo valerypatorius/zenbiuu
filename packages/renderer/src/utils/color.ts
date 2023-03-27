@@ -4,8 +4,8 @@ import Color from 'color';
  * Returns destaurated rgb value for chat message author.
  * Do not allow clear white or black colors for readability
  */
-export function getColorForChatAuthor (hex: string): string {
-  if (hex.length === 0) {
+export function getColorForChatAuthor (hex?: string): string {
+  if (hex === undefined || hex.length === 0) {
     return '';
   }
 

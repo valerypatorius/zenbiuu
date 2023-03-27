@@ -1,25 +1,25 @@
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
-import { useIDBKeyval } from '@vueuse/integrations/useIDBKeyval';
-import type { ChatStoreSchema, ChatMessage, BttvChannelEmotes, BttvGlobalEmotes, FfzChannelEmotes, SevenTvEmotes, ChatEmote } from './types/chat';
+import linkifyHtml from 'linkify-html';
+import { useEmotes } from './useEmotes';
+import type { ChatStoreSchema, ChatMessage, ChatUserState, ChatServiceMessage } from './types/chat';
+import { escape, uid } from '@/src/utils/utils';
 import { useStore } from '@/src/infrastructure/store/useStore';
-import { getColorForChatAuthor } from '@/src/utils/color';
-import { useRequest } from '@/src/infrastructure/request/useRequest';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { IrcCommand } from '@/src/infrastructure/irc/types';
-
-enum ChatEndpoint {
-  BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
-  BttvChannel = 'https://api.betterttv.net/3/cached/users/twitch',
-  FfzChannel = 'https://api.frankerfacez.com/v1/room',
-  SevenTvGlobal = 'https://api.7tv.app/v2/emotes/global',
-  SevenTvChannel = 'https://api.7tv.app/v2/users',
-}
+import { getColorForChatAuthor } from '@/src/utils/color';
 
 /**
  * Max number of messages in chat
  */
 const LIMIT = 200;
+
+/**
+ * @todo When processing pending message, deal with /me part of a text instead
+ */
+const COLORED_MESSAGE_START_MARKER = '\u{1}ACTION';
+
+const COLORED_MESSAGE_END_MARKER = '\u{1}';
 
 const defaultChatState: ChatStoreSchema = {
   width: 300,
@@ -28,180 +28,213 @@ const defaultChatState: ChatStoreSchema = {
 
 export const useChat = createSharedComposable(() => {
   const { state } = useStore('chat', defaultChatState);
-  const { get } = useRequest();
-  const { join: joinChannel, leave: leaveChannel, onMessage, offMessage } = useIrc();
+  const { emotes, getChannelEmotes } = useEmotes();
+  const {
+    join: joinChannel,
+    leave: leaveChannel,
+    send: sendMessage,
+    onServiceMessageReceived,
+    offServiceMessageReceived,
+    onUserStateUpdated,
+    offUserStateUpdated,
+    onMessageReceived,
+    offMessageReceived,
+  } = useIrc();
+
+  const joinedChannel = ref<string>();
+  const userState = ref<ChatUserState>();
+
   const messages = ref<ChatMessage[]>([]);
+  const pendingUserMessages = reactive(new Map<string, string>());
+
   const isPaused = ref(false);
+  const isJoined = ref(false);
 
-  const customEmotes = useIDBKeyval<Record<string, ChatEmote>>('emotes', {}, {
-    shallow: true,
-  });
-
-  function messageHandler ({ command, data }: { command: IrcCommand; data?: ChatMessage }): void {
-    switch (command) {
-      case IrcCommand.Join:
-        clear();
-        break;
-      case IrcCommand.Message:
-        addMessage(data as ChatMessage);
-        break;
+  /**
+   * Perform actions, when service message is received
+   */
+  function serviceMessagesHandler ({ command }: ChatServiceMessage): void {
+    if (command === IrcCommand.Join) {
+      isJoined.value = true;
+      clear();
+    } else if (command === IrcCommand.Leave) {
+      isJoined.value = false;
     }
   }
 
-  async function join (channelName: string): Promise<void> {
+  /**
+   * User's state is updated, when
+   * - connecting to IRC. We receive state in global context;
+   * - joining a room. We receive state in room context;
+   * - sending a message. We receive state of sent message;
+   */
+  function userStateUpdatesHandler (state: ChatUserState): void {
+    /**
+     * Update local state
+     */
+    userState.value = state;
+
+    /**
+     * If client nonce is received, it means that
+     * user's state update is a response to some user's action.
+     * Assume it is a response to a sent message and try to process pending one with same nonce value
+     */
+    if (state.nonce !== undefined) {
+      processPendingMessage(state.nonce);
+    }
+  }
+
+  /**
+   * Perform actions, when chat message is received
+   */
+  function messagesHandler (message: ChatMessage): void {
+    addMessage(message);
+  }
+
+  async function join ({ channelId, channelName }: { channelId: string; channelName: string }): Promise<void> {
     joinChannel(channelName);
-    onMessage(messageHandler);
+
+    void getChannelEmotes(channelName, channelId);
+
+    onServiceMessageReceived(serviceMessagesHandler);
+    onUserStateUpdated(userStateUpdatesHandler);
+    onMessageReceived(messagesHandler);
+
+    joinedChannel.value = channelName;
   }
 
   function leave (channel: string): void {
     clear();
 
     leaveChannel(channel);
-    offMessage(messageHandler);
+    offServiceMessageReceived(serviceMessagesHandler);
+    offUserStateUpdated(userStateUpdatesHandler);
+    offMessageReceived(messagesHandler);
+
+    joinedChannel.value = undefined;
   }
 
-  function addMessage (messageData: ChatMessage): void {
-    const emotedText = messageData.text.value
+  function send (text: string, channelName: string): void {
+    const nonce = uid();
+
+    pendingUserMessages.set(nonce, text);
+
+    sendMessage(text, channelName, nonce);
+  }
+
+  /**
+   * Try to find and process pending message with specified nonce value
+   */
+  function processPendingMessage (nonce: string): void {
+    const pendingMessageText = pendingUserMessages.get(nonce);
+
+    /**
+     * Do not proceed, if local user's state is missing
+     * or pending message is not found
+     */
+    if (userState.value === undefined || pendingMessageText === undefined) {
+      return;
+    }
+
+    const { messageId, name, color, badges } = userState.value;
+
+    /**
+     * Do not proceed, if user's state is missing data,
+     * required for displaying a message
+     */
+    if (messageId === undefined || name === undefined || color === undefined || badges === undefined) {
+      return;
+    }
+
+    /**
+     * Add message to chat
+     */
+    addMessage({
+      id: messageId,
+      author: name,
+      text: pendingMessageText,
+      color,
+      badges,
+    });
+
+    /**
+     * Remove message from pending list
+     */
+    pendingUserMessages.delete(nonce);
+  }
+
+  /**
+   * Returns HTML of an emote, ready for display
+   */
+  function getEmoteHtml (name: string, urls: Record<`${string}x` | `${number}x`, string>): string {
+    const srcset = Object.entries(urls).reduce<string[]>((result, [size, url]) => {
+      result.push(`${url} ${size}`);
+      return result;
+    }, []).join(',');
+
+    return `<span class="emote" title="${name}">
+      <img alt="${name}" srcset="${srcset}">
+    </span>`;
+  }
+
+  /**
+   * Returns HTML of a message, ready for display.
+   * Escape unsafe symbols, highlight links and replace text parts with supported emotes
+   */
+  function getMessageHtml (text: string, isColoredText = false): string {
+    if (isColoredText) {
+      text = text
+        .replace(COLORED_MESSAGE_START_MARKER, '')
+        .replace(COLORED_MESSAGE_END_MARKER, '');
+    }
+
+    text = linkifyHtml(escape(text), {
+      className: 'link',
+      defaultProtocol: 'https',
+      target: '_self',
+    });
+
+    const emotifiedText = text
       .split(' ')
       .map((word: string) => {
-        if (messageData.emotes?.[word] !== undefined) {
-          const { url, height } = messageData.emotes[word];
-
-          return `<span class="emote" title="${word}">
-            <img src="${url}" alt="${word}" style="--height: ${height}px;">
-          </span>`;
-        }
-
-        if (customEmotes.value[word] !== undefined) {
-          const { url, height } = customEmotes.value[word];
-
-          return `<span class="emote" title="${word}">
-            <img src="${url}" alt="${word}" style="--height: ${height}px;">
-          </span>`;
+        if (emotes.value[word] !== undefined) {
+          return getEmoteHtml(word, emotes.value[word].urls);
         }
 
         return word;
       }).join(' ');
 
-    const message: ChatMessage = {
-      id: messageData.id,
-      author: messageData.author,
-      badges: messageData.badges,
-      color: getColorForChatAuthor(messageData.color),
-      text: {
-        value: emotedText,
-        isColored: messageData.text.isColored,
-      },
-    };
+    return emotifiedText;
+  }
 
-    messages.value.push(message);
+  /**
+   * Add message to displayed list
+   */
+  function addMessage (message: ChatMessage): void {
+    const isColoredText = message.text.startsWith(COLORED_MESSAGE_START_MARKER) && message.text.endsWith(COLORED_MESSAGE_END_MARKER);
+
+    messages.value.push({
+      ...message,
+      isColoredText,
+      color: getColorForChatAuthor(message.color),
+      text: getMessageHtml(message.text, isColoredText),
+    });
 
     if (messages.value.length > LIMIT && !isPaused.value) {
       messages.value.splice(0, messages.value.length - LIMIT);
     }
   }
 
+  /**
+   * Clear displayed list
+   */
   function clear (): void {
     messages.value = [];
   }
 
-  async function getBttvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
-    const response = await get<BttvGlobalEmotes>(ChatEndpoint.BttvGlobal, { headers: undefined });
-    const result: Record<string, ChatEmote> = {};
-
-    response.forEach((emote) => {
-      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-      result[emote.code] = {
-        url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
-        height: 28,
-      };
-    });
-
-    return result;
-  }
-
-  async function getBttvChannelEmotes (channelId: string): Promise<Record<string, ChatEmote>> {
-    const response = await get<BttvChannelEmotes>(`${ChatEndpoint.BttvChannel}/${channelId}`, { headers: undefined });
-    const { channelEmotes, sharedEmotes } = response;
-    const emotes = [...channelEmotes, ...sharedEmotes];
-    const result: Record<string, ChatEmote> = {};
-
-    emotes.forEach((emote) => {
-      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-      result[emote.code] = {
-        url: `https://cdn.betterttv.net/emote/${emote.id}/${size}`,
-        height: 28,
-      };
-    });
-
-    return result;
-  }
-
-  async function getFfzEmotes (channelName: string): Promise<Record<string, ChatEmote>> {
-    const response = await get<FfzChannelEmotes>(`${ChatEndpoint.FfzChannel}/${channelName}`, { headers: undefined });
-    const result: Record<string, ChatEmote> = {};
-
-    Object.values(response.sets).forEach((set) => {
-      set.emoticons.forEach((emote) => {
-        const size = window.devicePixelRatio > 1 ? 2 : 1;
-        const url = emote.urls[size] ?? emote.urls[1];
-
-        result[emote.name] = {
-          url,
-          height: emote.height,
-        };
-      });
-    });
-
-    return result;
-  }
-
-  async function getSevenTvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
-    const response = await get<SevenTvEmotes>(ChatEndpoint.SevenTvGlobal, { headers: undefined });
-    const result: Record<string, ChatEmote> = {};
-
-    response.forEach((emote) => {
-      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-      result[emote.name] = {
-        url: `https://cdn.7tv.app/emote/${emote.id}/${size}.webp`,
-        height: emote.height[0],
-      };
-    });
-
-    return result;
-  }
-
-  async function getSevenTvChannelEmotes (channelName: string): Promise<Record<string, ChatEmote>> {
-    const response = await get<SevenTvEmotes>(`${ChatEndpoint.SevenTvChannel}/${channelName}/emotes`, { headers: undefined });
-    const result: Record<string, ChatEmote> = {};
-
-    response.forEach((emote) => {
-      const size = window.devicePixelRatio > 1 ? '2x' : '1x';
-
-      result[emote.name] = {
-        url: `https://cdn.7tv.app/emote/${emote.id}/${size}.webp`,
-        height: emote.height[0],
-      };
-    });
-
-    return result;
-  }
-
-  async function getEmotes ({ id, name }: { id: string; name: string }): Promise<void> {
-    const result: Record<string, ChatEmote> = {
-      ...await getBttvGlobalEmotes(),
-      ...await getBttvChannelEmotes(id),
-      ...await getFfzEmotes(name),
-      ...await getSevenTvGlobalEmotes(),
-      ...await getSevenTvChannelEmotes(name),
-    };
-
-    customEmotes.value = result;
-  }
-
+  /**
+   * Pause or unpause chat autoscroll
+   */
   function pause (value: boolean): void {
     isPaused.value = value;
   }
@@ -212,8 +245,10 @@ export const useChat = createSharedComposable(() => {
     join,
     leave,
     clear,
-    getEmotes,
+    send,
     pause,
     isPaused,
+    isJoined,
+    joinedChannel,
   };
 });
