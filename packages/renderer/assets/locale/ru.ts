@@ -62,6 +62,12 @@ export default {
     joinedAs: 'Вы вошли в чат {channel} как {name}',
     scrollToBottom: 'Прокрутить вниз',
     message: 'Сообщение',
+    emotes: {
+      hot: 'Актуальные',
+      recent: 'Недавние',
+      all: 'Все',
+      search: 'Поиск',
+    },
   },
   player: {
     mute: 'Отключить звук',

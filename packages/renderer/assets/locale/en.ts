@@ -62,6 +62,12 @@ export default {
     joinedAs: 'Joined {channel} chat room as {name}',
     scrollToBottom: 'Scroll to bottom',
     message: 'Message',
+    emotes: {
+      hot: 'Hot',
+      recent: 'Recent',
+      all: 'All',
+      search: 'Search',
+    },
   },
   player: {
     mute: 'Mute',
