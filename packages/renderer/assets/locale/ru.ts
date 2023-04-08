@@ -10,7 +10,6 @@ export default {
     loginWithTwitch: 'Войти через Twitch',
   },
   sidebar: {
-    search: 'Поиск',
     settings: 'Настройки',
     hide: 'Скрыть',
     foundItems: 'Результаты поиска',
@@ -66,7 +65,6 @@ export default {
       hot: 'Актуальные',
       recent: 'Недавние',
       all: 'Все',
-      search: 'Поиск',
     },
   },
   player: {
@@ -101,4 +99,5 @@ export default {
   enable: 'Включить',
   disable: 'Отключить',
   openInBrowser: 'Открыть в браузере',
+  search: 'Поиск',
 };

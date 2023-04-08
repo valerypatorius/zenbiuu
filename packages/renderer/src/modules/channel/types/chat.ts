@@ -13,6 +13,8 @@ export interface ChatStoreSchema {
  */
 export interface ChatEmote {
   urls: Record<`${string | number}x`, string>;
+  provider: EmoteProvider;
+  name: string;
 }
 
 export interface ChatServiceMessage {
@@ -29,6 +31,7 @@ export interface ChatMessage {
   color: string;
   text: string;
   badges: string[];
+  emotes?: string[];
   isColoredText?: boolean;
 }
 
@@ -147,4 +150,11 @@ export interface TwitchEmoteData {
 export interface TwitchEmotesResponse {
   data: TwitchEmoteData[];
   template: string;
+}
+
+export enum EmoteProvider {
+  Twitch = 'Twitch',
+  BTTV = 'BTTV',
+  FFZ = 'FFZ',
+  SevenTV = '7TV',
 }

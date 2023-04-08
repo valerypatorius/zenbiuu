@@ -2,6 +2,7 @@ import { ref, reactive } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import linkifyHtml from 'linkify-html';
 import { useEmotes } from './useEmotes';
+import { getEmoteHtml } from './utils/emotes';
 import type { ChatStoreSchema, ChatMessage, ChatUserState, ChatServiceMessage } from './types/chat';
 import { escape, uid } from '@/src/utils/utils';
 import { useStore } from '@/src/infrastructure/store/useStore';
@@ -164,60 +165,62 @@ export const useChat = createSharedComposable(() => {
   }
 
   /**
-   * Returns HTML of an emote, ready for display
-   */
-  function getEmoteHtml (name: string, urls: Record<`${string}x` | `${number}x`, string>): string {
-    const srcset = Object.entries(urls).reduce<string[]>((result, [size, url]) => {
-      result.push(`${url} ${size}`);
-      return result;
-    }, []).join(',');
-
-    return `<span class="emote" title="${name}">
-      <img alt="${name}" srcset="${srcset}">
-    </span>`;
-  }
-
-  /**
    * Returns HTML of a message, ready for display.
    * Escape unsafe symbols, highlight links and replace text parts with supported emotes
    */
-  function getMessageHtml (text: string, isColoredText = false): string {
+  function parseMessageText (source: string, isColoredText = false): { html: string; emotes: string[] } {
     if (isColoredText) {
-      text = text
+      source = source
         .replace(COLORED_MESSAGE_START_MARKER, '')
         .replace(COLORED_MESSAGE_END_MARKER, '');
     }
 
-    text = linkifyHtml(escape(text), {
+    source = linkifyHtml(escape(source), {
       className: 'link',
       defaultProtocol: 'https',
       target: '_self',
     });
 
-    const emotifiedText = text
+    const emotesNames: string[] = [];
+
+    const html = source
       .split(' ')
       .map((word: string) => {
         if (emotes.value[word] !== undefined) {
+          /**
+           * Do not push emote name, if it has been already added.
+           * Means that multiple emote's spam in one message will not affect emote's hotness
+           */
+          if (!emotesNames.includes(word)) {
+            emotesNames.push(word);
+          }
+
           return getEmoteHtml(word, emotes.value[word].urls);
         }
 
         return word;
       }).join(' ');
 
-    return emotifiedText;
+    return {
+      html,
+      emotes: emotesNames,
+    };
   }
 
   /**
    * Add message to displayed list
+   * @todo Make message object reactive
    */
   function addMessage (message: ChatMessage): void {
     const isColoredText = message.text.startsWith(COLORED_MESSAGE_START_MARKER) && message.text.endsWith(COLORED_MESSAGE_END_MARKER);
+    const parsedText = parseMessageText(message.text, isColoredText);
 
     messages.value.push({
       ...message,
       isColoredText,
       color: getColorForChatAuthor(message.color),
-      text: getMessageHtml(message.text, isColoredText),
+      text: parsedText.html,
+      emotes: parsedText.emotes,
     });
 
     if (messages.value.length > LIMIT && !isPaused.value) {
@@ -239,6 +242,19 @@ export const useChat = createSharedComposable(() => {
     isPaused.value = value;
   }
 
+  /**
+   * Returns emotes names from the last N chat messages
+   */
+  function getMessagesEmotesNames (offset = 100): string[] {
+    return messages.value.slice(offset * -1).reduce<string[]>((result, message) => {
+      if (message.emotes !== undefined) {
+        result.push(...message.emotes);
+      }
+
+      return result;
+    }, []);
+  }
+
   return {
     state,
     messages,
@@ -250,5 +266,6 @@ export const useChat = createSharedComposable(() => {
     isPaused,
     isJoined,
     joinedChannel,
+    getMessagesEmotesNames,
   };
 });

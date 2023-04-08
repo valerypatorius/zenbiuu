@@ -10,12 +10,12 @@
       width: chatWidth,
       height: chatHeight,
     }"
-    @mouseenter="pauseChat(true)"
-    @mouseleave="pauseChat(false)"
   >
     <div
       ref="scrollable"
       class="chat__content scrollable"
+      @mouseenter="pauseChat(true)"
+      @mouseleave="pauseChat(false)"
     >
       <div class="chat__messages">
         <!-- Empty chat message -->
@@ -23,7 +23,18 @@
           v-if="!messages.length && userName"
           class="chat__dummy"
         >
-          {{ t('chat.joinedAs') }} {{ userName }}
+          <template v-if="isJoined">
+            {{ t('chat.joinedAs', {
+              name: userName,
+              channel: joinedChannel,
+            }) }}
+          </template>
+
+          <template v-else>
+            {{ t('chat.connectingTo', {
+              channel: joinedChannel,
+            }) }}
+          </template>
         </div>
 
         <!-- Messages list -->
@@ -32,9 +43,6 @@
           :key="message.id"
           :class="[
             'chat-message',
-            {
-              'chat-message--removed': message.isRemoved,
-            },
           ]"
           :style="getChatMessageStyles(message)"
           :data-id="message.id"
@@ -56,13 +64,13 @@
 
           <!-- Message author -->
           <span class="chat-message__author">
-            {{ message.author }}{{ message.text.isColored ? ' ' : ': ' }}
+            {{ message.author }}{{ message.isColoredText ? ' ' : ': ' }}
           </span>
 
           <!-- Message text -->
           <span
             class="chat-message__content"
-            v-html="message.text.value"
+            v-html="message.text"
           />
         </div>
 
@@ -72,16 +80,20 @@
           class="chat__horizon"
         />
       </div>
+
+      <!-- "Scroll to bottom" button -->
+      <button
+        v-show="!isAtBottom && isJoined"
+        class="chat__scrollToBottom"
+        @click="scrollToBottom"
+      >
+        {{ t('chat.scrollToBottom') }}
+      </button>
     </div>
 
-    <!-- "Scroll to bottom" button -->
-    <button
-      v-show="!isAtBottom && isReady"
-      class="chat__scrollToBottom"
-      @click="scrollToBottom"
-    >
-      {{ t('chat.scrollToBottom') }}
-    </button>
+    <div class="chat__form">
+      <Form />
+    </div>
 
     <!-- Chat width resizer -->
     <div
@@ -104,6 +116,7 @@ import { ref, computed, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n';
 import { useChat } from '../useChat';
 import { usePlayer } from '../usePlayer';
+import Form from './chat/Form.vue';
 import type { ChatMessage } from '@/src/modules/channel/types/chat';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
@@ -146,9 +159,10 @@ const {
   join: joinChat,
   leave: leaveChat,
   clear: clearChat,
-  getEmotes,
   pause: pauseChat,
   isPaused,
+  isJoined,
+  joinedChannel,
 } = useChat();
 
 /**
@@ -191,17 +205,15 @@ const scrollable = ref<HTMLElement>();
 /** Container horizon element */
 const horizon = ref<HTMLElement>();
 
-/**
- * True, if chat is ready to display messages for current channel.
- * Used to prevent displaying messages from previous channel
- */
-const isReady = ref(false);
-
 /** Logined user name */
 const userName = computed(() => userState.name);
 
+/**
+ * @todo Move some computed properties to composables
+ */
+
 /** Chat messages */
-const messages = computed(() => isReady.value ? chatMessages.value : []);
+const messages = computed(() => isJoined.value ? chatMessages.value : []);
 
 /** Last message */
 const lastMessage = computed(() => chatMessages.value.slice(-1)[0]);
@@ -226,18 +238,16 @@ watch(lastMessage, () => {
 });
 
 onMounted(() => {
-  /** Join IRC */
-  joinChat(props.channelName).then(() => {
-    isReady.value = true;
-  });
-
-  /** Request chat emotes */
-  getEmotes({
-    id: props.channelId,
-    name: props.channelName,
+  /** Join chat room */
+  joinChat({
+    channelId: props.channelId,
+    channelName: props.channelName,
   });
 
   /** Start watching for horizon interesections */
+  /**
+   * @todo Use composable
+   */
   horizonObserver.value = new IntersectionObserver(onHorizonIntersection, {
     root: scrollable.value,
     threshold: 1,
@@ -249,6 +259,9 @@ onMounted(() => {
   }
 
   /** Enable resizers */
+  /**
+   * @todo Make composable for resizers
+   */
   resizer[Axis.X] = new Resizer({
     axis: Axis.X,
     value: customChatWidth.value,
@@ -280,15 +293,16 @@ onMounted(() => {
   });
 
   /** Listen for scroll */
+  /**
+   * @todo Move scroller to composable
+   */
   if (scrollable.value) {
     scroller.value = new Scroller(scrollable.value);
   }
 });
 
 onBeforeUnmount(() => {
-  isReady.value = false;
-
-  /** Leave IRC */
+  /** Leave chat room */
   leaveChat(props.channelName);
 
   /** CLear chat messages */
@@ -318,11 +332,11 @@ onBeforeUnmount(() => {
  * Returns styles for chat message
  */
 function getChatMessageStyles (message: ChatMessage): Record<string, string> {
-  const { color, text } = message;
+  const { color, isColoredText } = message;
 
   return {
     '--color': color,
-    '--text-color': text.isColored ? color : '',
+    '--text-color': isColoredText ? color : '',
   };
 }
 
@@ -359,13 +373,11 @@ function resize (event: MouseEvent, axis: Axis): void {
     min-height: 0;
     position: relative;
     overflow: hidden;
+    display: grid;
+    grid-template-rows: 1fr auto;
 
     &--hidden {
       max-width: 0;
-    }
-
-    &__content {
-      height: 100%;
     }
 
     &__horizon {
@@ -403,7 +415,7 @@ function resize (event: MouseEvent, axis: Axis): void {
     }
 
     &__scrollToBottom {
-      position: absolute;
+      position: sticky;
       bottom: 2.5rem;
       left: 50%;
       transform: translateX(-50%);
@@ -425,8 +437,11 @@ function resize (event: MouseEvent, axis: Axis): void {
     }
 
     &__messages {
-      padding-left: 1rem;
-      padding-bottom: 1rem;
+      padding-left: var(--width-scrollbar);
+    }
+
+    &__form {
+      padding: var(--width-scrollbar);
     }
   }
 
@@ -464,12 +479,6 @@ function resize (event: MouseEvent, axis: Axis): void {
 
         img {
           max-height: calc(var(--height, 28px) * ( var(--size-base) / 10));
-        }
-
-        /** Allow some unique emotes to overlap others */
-        + .emote[title="cvMask"],
-        + .emote[title="cvHazmat"] {
-          margin-left: calc(var(--height, 28px) * ( var(--size-base) / 10) * -1);
         }
       }
 

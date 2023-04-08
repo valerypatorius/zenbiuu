@@ -10,7 +10,6 @@ export default {
     loginWithTwitch: 'Log in with Twitch account',
   },
   sidebar: {
-    search: 'Search',
     settings: 'Settings',
     hide: 'Hide',
     foundItems: 'Search results',
@@ -66,7 +65,6 @@ export default {
       hot: 'Hot',
       recent: 'Recent',
       all: 'All',
-      search: 'Search',
     },
   },
   player: {
@@ -101,4 +99,5 @@ export default {
   enable: 'Enable',
   disable: 'Disable',
   openInBrowser: 'Open in browser',
+  search: 'Search',
 };
