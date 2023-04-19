@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
 import { type UpdateInfo } from 'electron-updater';
-import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi, type UpdaterApi } from './types';
+import { HubChannel, HubApiKey, HubStateChangeEvent, type HubState, type MainProcessApi, type UpdaterApi, HubInterceptedLinkEvent } from './types';
 
 /**
  * State with simple data, updated by main process
@@ -33,13 +33,6 @@ async function callWindowMethod (methodName: string, ...args: any[]): Promise<bo
 }
 
 /**
- * Load url in separate window, wait for redirect and return redirected url
- */
-async function waitForRedirect (url: string): Promise<string> {
-  return await ipcRenderer.invoke(HubChannel.WaitForRedirect, url);
-}
-
-/**
  * Dispatch custom event on window,
  * when state is changed
  */
@@ -54,10 +47,31 @@ function dispatchStateChangeEvent (): void {
 }
 
 /**
+ * Dispatch custom event on window,
+ * when app link is intercepted
+ */
+function dispatchInterceptedLink (link: string): void {
+  const event = new CustomEvent(HubInterceptedLinkEvent, {
+    detail: {
+      link,
+    },
+  });
+
+  window.dispatchEvent(event);
+}
+
+/**
  * CLear session storage data
  */
 function clearSessionStorage (): void {
   ipcRenderer.send(HubChannel.ClearSessionStorage);
+}
+
+/**
+ * Open URL in default browser
+ */
+function openUrlInBrowser (url: string): void {
+  ipcRenderer.send(HubChannel.OpenUrlInBrowser, url);
 }
 
 /**
@@ -82,8 +96,8 @@ const updater: UpdaterApi = {
 const api: MainProcessApi = {
   setThemeSource,
   callWindowMethod,
-  waitForRedirect,
   clearSessionStorage,
+  openUrlInBrowser,
   getState: () => state,
   updater,
 };
@@ -111,4 +125,11 @@ void ipcRenderer.invoke(HubChannel.Initial).then(updateState);
  */
 ipcRenderer.on(HubChannel.WindowStateChange, (event, receivedState: HubState) => {
   updateState(receivedState);
+});
+
+/**
+ * Listen for intercepted app links
+ */
+ipcRenderer.on(HubChannel.InterceptedLink, (event, link: string) => {
+  dispatchInterceptedLink(link);
 });

@@ -1,8 +1,8 @@
-import { app, session, ipcMain, type BrowserWindow, type NativeTheme } from 'electron';
+import { app, session, ipcMain, type BrowserWindow, type NativeTheme, shell } from 'electron';
 import { type UpdateInfo } from 'electron-updater';
 import { HubChannel, type HubState } from '../../hub/src/types';
 import { theme } from './theme';
-import { Window, waitForRedirect } from './window';
+import { Window } from './window';
 import { env } from './env';
 import { updater } from './updater';
 
@@ -12,17 +12,6 @@ export function handleRendererRequests (): void {
    */
   ipcMain.handle(HubChannel.SetThemeSource, async (event, value: NativeTheme['themeSource']) => {
     theme.setSource(value);
-  });
-
-  /**
-   * Load url in separate window, wait for redirect and extract url params using provided function
-   */
-  ipcMain.handle(HubChannel.WaitForRedirect, async (event, url: string) => {
-    try {
-      return await waitForRedirect(url);
-    } catch (error) {
-      return await Promise.reject(error);
-    }
   });
 
   /**
@@ -61,6 +50,13 @@ export function handleRendererRequests (): void {
    */
   ipcMain.on(HubChannel.ClearSessionStorage, () => {
     void session.defaultSession.clearStorageData();
+  });
+
+  /**
+   * Open url in default browser
+   */
+  ipcMain.on(HubChannel.OpenUrlInBrowser, (event, url: string) => {
+    void shell.openExternal(url);
   });
 
   /**

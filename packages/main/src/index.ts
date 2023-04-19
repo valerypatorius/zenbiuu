@@ -7,6 +7,7 @@ import { Window, openWindow } from './window';
 import { handleCors } from './cors';
 import { handleRendererRequests } from './handlers';
 import { env } from './env';
+import './protocol';
 
 const appRootUrl = env.MODE === 'development'
   ? env.VITE_DEV_SERVER_URL
