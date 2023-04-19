@@ -67,7 +67,7 @@ function toggleSettings () {
  * which provides auth token from browser
  */
 const { off: offInterceptedEvent } = onInterceptedEvent(({ method, payload }) => {
-  if (method !== 'open') {
+  if (method !== 'auth') {
     return;
   }
 
