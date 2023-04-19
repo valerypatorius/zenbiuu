@@ -1,3 +1,10 @@
+# v1.2.0
+## 2023-04-19
+
+Authorization flow was updated due to Twitch browsers restrictions and is now being handled through default browser
+
+- The app is now capable of intercepting links with zenbiuu:// protocol
+
 # v1.1.1
 ## 2023-03-15
 
