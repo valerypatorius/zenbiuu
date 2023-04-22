@@ -39,10 +39,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useAuth } from './useAuth';
+import { useAuth, UserError } from './useAuth';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import appIconPath from '@/assets/icon.svg';
 import { useInterface } from '@/src/infrastructure/interface/useInterface';
@@ -52,13 +52,9 @@ import { useHub } from '@/src/infrastructure/hub/useHub';
 const router = useRouter();
 const { t } = useI18n();
 const { isSettingsActive } = useInterface();
-const { authorize } = useAuth();
-const { state: hubState } = useHub();
+const { requestAuth, setToken, validate } = useAuth();
+const { state: hubState, onInterceptedEvent } = useHub();
 
-/**
- * True, if auth is being processed.
- * Prevents multiple buttons clicks
- */
 const isLoading = ref(false);
 
 /** Toggle settings panel */
@@ -66,22 +62,43 @@ function toggleSettings () {
   isSettingsActive.value = !isSettingsActive.value;
 }
 
-/** Request auth and go to library screen */
-async function requestAuth (): Promise<void> {
-  if (isLoading.value) {
+/**
+ * While auth screen is active, listen for intercepted links to catch the one,
+ * which provides auth token from browser
+ */
+const { off: offInterceptedEvent } = onInterceptedEvent(({ method, payload }) => {
+  if (method !== 'auth') {
+    return;
+  }
+
+  /**
+   * @todo Improve typings
+   */
+  const token = payload.token;
+
+  if (typeof token !== 'string') {
+    console.error(UserError.FailedAuth);
     return;
   }
 
   isLoading.value = true;
 
-  try {
-    await authorize();
+  /**
+   * Save received token
+   */
+  setToken(token);
 
+  /**
+   * Validate it and show library screen
+   */
+  validate().then(() => {
     router.replace({ name: RouteName.Library });
-  } finally {
-    isLoading.value = false;
-  }
-}
+  });
+});
+
+onBeforeUnmount(() => {
+  offInterceptedEvent();
+});
 </script>
 
 <style>

@@ -12,11 +12,12 @@ export enum HubChannel {
   WindowStateChange = 'windowStateChange',
   SetThemeSource = 'setThemeSource',
   CallWindowMethod = 'callWindowMethod',
-  WaitForRedirect = 'waitForRedirect',
   ClearSessionStorage = 'clearSessionStorage',
   CheckForUpdates = 'checkForUpdates',
   DownloadUpdate = 'downloadUpdate',
   InstallUpdate = 'installUpdate',
+  InterceptedLink = 'interceptedLink',
+  OpenUrlInBrowser = 'openUrlInBrowser',
 };
 
 /**
@@ -48,9 +49,9 @@ export interface UpdaterApi {
 export interface MainProcessApi {
   setThemeSource: (value: NativeTheme['themeSource']) => Promise<void>;
   callWindowMethod: (methodName: string, ...args: any[]) => Promise<boolean>;
-  waitForRedirect: (url: string) => Promise<string>;
   clearSessionStorage: () => void;
   getState: () => HubState;
+  openUrlInBrowser: (url: string) => void;
   updater: UpdaterApi;
 }
 
@@ -60,6 +61,12 @@ export interface MainProcessApi {
  * Updates reactive state copy
  */
 export const HubStateChangeEvent = 'hubStateChange';
+
+/**
+ * Dispatched when app intercepts links with app protocol from the outside.
+ * E.g. when "zenbiuu://open" is opened in browser
+ */
+export const HubInterceptedLinkEvent = 'hubInterceptedLink';
 
 declare global {
   interface Window {

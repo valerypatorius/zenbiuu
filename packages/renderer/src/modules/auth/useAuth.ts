@@ -31,17 +31,6 @@ enum UserEndpoint {
   Integrity = 'https://gql.twitch.tv/integrity',
 }
 
-/**
- * Get access token from specified url
- */
-function getAccessTokenUrl (url: string): string | null {
-  const modifiedUrl = url.replace('#', '?');
-  const urlObject = new URL(modifiedUrl);
-  const result = urlObject.searchParams.get('access_token');
-
-  return result;
-}
-
 export const useAuth = createSharedComposable(() => {
   const { state: userState, clear: clearUser } = useUser();
   const route = useRoute();
@@ -49,7 +38,7 @@ export const useAuth = createSharedComposable(() => {
   const { get, post } = useRequest();
   const { connect: connectToIrc, disconnect: disconnectFromIrc } = useIrc();
   const { start: startInterval } = useInterval();
-  const { state: hubState, waitForRedirect } = useHub();
+  const { state: hubState, openUrlInBrowser } = useHub();
 
   /** Stop function for token validation interval */
   const stopTokenInterval = ref<() => void>();
@@ -125,7 +114,7 @@ export const useAuth = createSharedComposable(() => {
     }
   }
 
-  async function authorize (): Promise<void> {
+  function requestAuth (): void {
     const scopes = [
       'channel:read:subscriptions',
       'chat:read',
@@ -143,20 +132,8 @@ export const useAuth = createSharedComposable(() => {
     };
 
     const query = Object.entries(params).map(([key, string]) => `${key}=${string}`).join('&');
-    const redirectedAuthUrl = await waitForRedirect(`${UserEndpoint.Authorize}?${query}`);
-    const token = getAccessTokenUrl(redirectedAuthUrl);
 
-    if (token === null) {
-      await Promise.reject(UserError.FailedAuth);
-      return;
-    }
-
-    userState.token = token;
-
-    /**
-     * Call validation to receive user name and id
-     */
-    await validate();
+    openUrlInBrowser(`${UserEndpoint.Authorize}?${query}`);
   }
 
   /**
@@ -176,9 +153,17 @@ export const useAuth = createSharedComposable(() => {
     clearUser();
   }
 
+  /**
+   * Set token value
+   */
+  function setToken (value: string): void {
+    userState.token = value;
+  }
+
   return {
     validate,
-    authorize,
+    requestAuth,
     deauthorize,
+    setToken,
   };
 });
