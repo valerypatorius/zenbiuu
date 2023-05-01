@@ -459,7 +459,7 @@ function resize (event: MouseEvent, axis: Axis): void {
     color: var(--text-color);
     border-radius: var(--border-radius);
 
-    &:nth-child(2n) {
+    &:nth-child(2n):not(.chat-message--mention) {
       background-color: var(--color-control-semiactive);
     }
 
@@ -514,6 +514,14 @@ function resize (event: MouseEvent, axis: Axis): void {
       margin-right: 0.6rem;
       margin-top: -1px;
     }
+  }
+
+  .mention {
+    font-weight: 500;
+    background-color: var(--color-control-active);
+    color: var(--color-link);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--border-radius);
   }
 
   /** Author badges */

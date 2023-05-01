@@ -9,6 +9,7 @@ import { useStore } from '@/src/infrastructure/store/useStore';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
 import { IrcCommand } from '@/src/infrastructure/irc/types';
 import { getColorForChatAuthor } from '@/src/utils/color';
+import { useUser } from '@/src/modules/auth/useUser';
 
 /**
  * Max number of messages in chat
@@ -29,6 +30,7 @@ const defaultChatState: ChatStoreSchema = {
 
 export const useChat = createSharedComposable(() => {
   const { state } = useStore('chat', defaultChatState);
+  const { state: userState } = useUser();
   const { emotes, getChannelEmotes } = useEmotes();
   const {
     join: joinChannel,
@@ -43,7 +45,7 @@ export const useChat = createSharedComposable(() => {
   } = useIrc();
 
   const joinedChannel = ref<string>();
-  const userState = ref<ChatUserState>();
+  const chatUserState = ref<ChatUserState>();
 
   const messages = ref<ChatMessage[]>([]);
   const pendingUserMessages = reactive(new Map<string, string>());
@@ -73,7 +75,7 @@ export const useChat = createSharedComposable(() => {
     /**
      * Update local state
      */
-    userState.value = state;
+    chatUserState.value = state;
 
     /**
      * If client nonce is received, it means that
@@ -133,11 +135,11 @@ export const useChat = createSharedComposable(() => {
      * Do not proceed, if local user's state is missing
      * or pending message is not found
      */
-    if (userState.value === undefined || pendingMessageText === undefined) {
+    if (chatUserState.value === undefined || pendingMessageText === undefined) {
       return;
     }
 
-    const { messageId, name, color, badges } = userState.value;
+    const { messageId, name, color, badges } = chatUserState.value;
 
     /**
      * Do not proceed, if user's state is missing data,
@@ -210,6 +212,8 @@ export const useChat = createSharedComposable(() => {
     const html = source
       .split(' ')
       .map((word: string) => {
+        const isMatchesUserName = userState.name !== undefined && word.toLowerCase() === `@${userState.name.toLowerCase()}`;
+
         if (emotes.value[word] !== undefined) {
           /**
            * Do not push emote name, if it has been already added.
@@ -225,6 +229,11 @@ export const useChat = createSharedComposable(() => {
            * Local emotes should not affect hotness
            */
           return getEmoteHtml(word, localEmotes[word].urls);
+        } else if (isMatchesUserName) {
+          /**
+           * Format mention for display
+           */
+          return `<span class="mention">${word}</span>`;
         }
 
         return word;
