@@ -168,6 +168,7 @@ export const useIrc = createSharedComposable(() => {
       color: message.tags?.color,
       badges: message.tags?.badges,
       text: message.text,
+      localEmotesMap: message.tags?.emotes,
     };
 
     hooks.messageReceived.trigger(chatMessage);

@@ -4,11 +4,12 @@ import { ref, computed } from 'vue';
 import { parseTwitchEmotes, parseBTTVEmotes, parseFFZEmotes, parse7TVEmotes } from './utils/emotes';
 import { type BttvChannelEmotes, type BttvGlobalEmotes, type FfzChannelEmotes, type SevenTvEmotes, type ChatEmote, type TwitchEmotesResponse } from './types/chat';
 import { useRequest } from '@/src/infrastructure/request/useRequest';
-import { sortArrayByFrequency } from '@/src/utils/utils';
+import { sortArrayByFrequency, splitArrayIntoChunks } from '@/src/utils/utils';
 
 enum EmotesEndpoint {
   TwitchGlobal = 'https://api.twitch.tv/helix/chat/emotes/global',
   TwitchChannel = 'https://api.twitch.tv/helix/chat/emotes',
+  TwitchSets = 'https://api.twitch.tv/helix/chat/emotes/set',
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
   BttvChannel = 'https://api.betterttv.net/3/cached/users/twitch',
   FfzChannel = 'https://api.frankerfacez.com/v1/room',
@@ -68,16 +69,35 @@ export const useEmotes = createSharedComposable(() => {
     }, {});
   });
 
-  async function getTwitchGlobalEmotes (): Promise<Record<string, ChatEmote>> {
-    const response = await get<TwitchEmotesResponse>(EmotesEndpoint.TwitchGlobal);
-
-    return parseTwitchEmotes(response);
-  }
+  const isCommonEmotesRequested = ref(false);
 
   async function getTwitchChannelEmotes (channelId: string): Promise<Record<string, ChatEmote>> {
     const response = await get<TwitchEmotesResponse>(`${EmotesEndpoint.TwitchChannel}/?broadcaster_id=${channelId}`);
 
     return parseTwitchEmotes(response);
+  }
+
+  async function getTwitchEmoteSets (setsIds: string[]): Promise<Record<string, ChatEmote>> {
+    const SETS_LIMIT = 25;
+    const chunks = splitArrayIntoChunks(setsIds, SETS_LIMIT);
+    const promises: Array<Promise<TwitchEmotesResponse>> = [];
+
+    chunks.forEach((chunk) => {
+      const query = chunk.map((id) => `emote_set_id=${id}`);
+
+      promises.push(get<TwitchEmotesResponse>(`${EmotesEndpoint.TwitchSets}/?${query.join('&')}`));
+    });
+
+    const responses = await Promise.all(promises);
+
+    return responses.reduce<Record<string, ChatEmote>>((result, response) => {
+      result = {
+        ...result,
+        ...parseTwitchEmotes(response),
+      };
+
+      return result;
+    }, {});
   }
 
   async function getBttvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
@@ -140,12 +160,22 @@ export const useEmotes = createSharedComposable(() => {
   }
 
   /**
-   * Request global emotes
+   * Request common emotes: sets of current user and third-party global emotes.
+   * Note: emotes are requested once
    */
-  async function getGlobalEmotes (): Promise<void> {
-    void getTwitchGlobalEmotes().then(addGlobalEmotes);
+  async function getCommonEmotes (emoteSets?: string[]): Promise<void> {
+    if (isCommonEmotesRequested.value) {
+      return;
+    }
+
+    isCommonEmotesRequested.value = true;
+
     void getBttvGlobalEmotes().then(addGlobalEmotes);
     void getSevenTvGlobalEmotes().then(addGlobalEmotes);
+
+    if (emoteSets !== undefined && emoteSets.length > 0) {
+      void getTwitchEmoteSets(emoteSets).then(addGlobalEmotes);
+    }
   }
 
   /**
@@ -237,7 +267,7 @@ export const useEmotes = createSharedComposable(() => {
     emotesByChar,
     hotEmotes,
     recentEmotes,
-    getGlobalEmotes,
+    getCommonEmotes,
     getChannelEmotes,
     setHotEmotes,
     addRecentEmote,

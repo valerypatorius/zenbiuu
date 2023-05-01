@@ -2,8 +2,8 @@ import { ref, reactive } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import linkifyHtml from 'linkify-html';
 import { useEmotes } from './useEmotes';
-import { getEmoteHtml } from './utils/emotes';
-import type { ChatStoreSchema, ChatMessage, ChatUserState, ChatServiceMessage } from './types/chat';
+import { getEmoteHtml, getTwitchEmoteById } from './utils/emotes';
+import type { ChatStoreSchema, ChatMessage, ChatUserState, ChatServiceMessage, ChatEmote } from './types/chat';
 import { escape, uid } from '@/src/utils/utils';
 import { useStore } from '@/src/infrastructure/store/useStore';
 import { useIrc } from '@/src/infrastructure/irc/useIrc';
@@ -168,13 +168,37 @@ export const useChat = createSharedComposable(() => {
    * Returns HTML of a message, ready for display.
    * Escape unsafe symbols, highlight links and replace text parts with supported emotes
    */
-  function parseMessageText (source: string, isColoredText = false): { html: string; emotes: string[] } {
+  function parseMessageText (message: ChatMessage): { html: string; emotes: string[]; isColoredText: boolean } {
+    let source = message.text;
+    const isColoredText = source.startsWith(COLORED_MESSAGE_START_MARKER) && source.endsWith(COLORED_MESSAGE_END_MARKER);
+
     if (isColoredText) {
       source = source
         .replace(COLORED_MESSAGE_START_MARKER, '')
         .replace(COLORED_MESSAGE_END_MARKER, '');
     }
 
+    /**
+     * Message author can use other channels' subscribers emotes,
+     * which are not available for usage by current user.
+     * So we have to find them in text and compose data for them
+     */
+    const localEmotes: Record<string, ChatEmote> = {};
+
+    if (message.localEmotesMap !== undefined) {
+      Object.entries(message.localEmotesMap).forEach(([emoteId, coords]) => {
+        /**
+         * Only first occurence is enough, no need to go through all matches
+         */
+        const emoteName = source.substring(coords[0].start, coords[0].end + 1);
+
+        localEmotes[emoteName] = getTwitchEmoteById(emoteName, emoteId);
+      });
+    }
+
+    /**
+     * @todo Deal with escaping, as some emotes contain these symbols (e.g. <3)
+     */
     source = linkifyHtml(escape(source), {
       className: 'link',
       defaultProtocol: 'https',
@@ -195,7 +219,12 @@ export const useChat = createSharedComposable(() => {
             emotesNames.push(word);
           }
 
-          return getEmoteHtml(word, emotes.value[word].urls);
+          return getEmoteHtml(word, emotes.value[word].urls, emotes.value[word].isZeroWidth);
+        } else if (localEmotes[word] !== undefined) {
+          /**
+           * Local emotes should not affect hotness
+           */
+          return getEmoteHtml(word, localEmotes[word].urls);
         }
 
         return word;
@@ -204,6 +233,7 @@ export const useChat = createSharedComposable(() => {
     return {
       html,
       emotes: emotesNames,
+      isColoredText,
     };
   }
 
@@ -212,15 +242,14 @@ export const useChat = createSharedComposable(() => {
    * @todo Make message object reactive
    */
   function addMessage (message: ChatMessage): void {
-    const isColoredText = message.text.startsWith(COLORED_MESSAGE_START_MARKER) && message.text.endsWith(COLORED_MESSAGE_END_MARKER);
-    const parsedText = parseMessageText(message.text, isColoredText);
+    const parsedText = parseMessageText(message);
 
     messages.value.push({
       ...message,
-      isColoredText,
       color: getColorForChatAuthor(message.color),
       text: parsedText.html,
       emotes: parsedText.emotes,
+      isColoredText: parsedText.isColoredText,
     });
 
     if (messages.value.length > LIMIT && !isPaused.value) {
@@ -267,5 +296,6 @@ export const useChat = createSharedComposable(() => {
     isJoined,
     joinedChannel,
     getMessagesEmotesNames,
+    parseMessageText,
   };
 });

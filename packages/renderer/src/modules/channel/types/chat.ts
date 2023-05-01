@@ -15,6 +15,7 @@ export interface ChatEmote {
   urls: Record<`${string | number}x`, string>;
   provider: EmoteProvider;
   name: string;
+  isZeroWidth?: boolean;
 }
 
 export interface ChatServiceMessage {
@@ -33,6 +34,7 @@ export interface ChatMessage {
   badges: string[];
   emotes?: string[];
   isColoredText?: boolean;
+  localEmotesMap?: Record<string, Array<{ start: number; end: number }>>;
 }
 
 /**
@@ -125,6 +127,7 @@ export interface SevenTvEmoteData {
   width: number[];
   height: number[];
   urls: Array<[`${number}`, string]>;
+  visibility_simple: Array<string | 'ZERO_WIDTH'>;
 }
 
 /**

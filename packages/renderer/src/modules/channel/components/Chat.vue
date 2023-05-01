@@ -441,6 +441,9 @@ function resize (event: MouseEvent, axis: Axis): void {
     }
 
     &__form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
       padding: var(--width-scrollbar);
     }
   }
@@ -476,6 +479,18 @@ function resize (event: MouseEvent, axis: Axis): void {
         display: inline-block;
         vertical-align: middle;
         margin-top: -0.1rem;
+
+        &--zero-width {
+          display: inline-flex;
+          justify-content: flex-end;
+          position: relative;
+          z-index: 1;
+          width: 0;
+
+          &:first-child {
+            justify-content: flex-start;
+          }
+        }
 
         img {
           max-height: calc(var(--height, 28px) * ( var(--size-base) / 10));
