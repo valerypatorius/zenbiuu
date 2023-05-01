@@ -48,7 +48,7 @@
             v-for="emote in hotEmotes"
             :key="emote.name"
             v-bind="emote"
-            @click="emit('select', $event)"
+            @select="emit('select', $event, true)"
           />
         </div>
 
@@ -61,7 +61,7 @@
             v-for="emote in recentEmotes"
             :key="emote.name"
             v-bind="emote"
-            @click="emit('select', $event)"
+            @select="emit('select', $event, false)"
           />
         </div>
 
@@ -80,7 +80,7 @@
                 v-for="emote in charEmotes"
                 :key="emote.name"
                 v-bind="emote"
-                @click="emit('select', $event)"
+                @select="emit('select', $event, true)"
               />
             </div>
           </template>
@@ -91,16 +91,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onActivated, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEmotes } from '../../useEmotes';
+import { ChatEmote } from '../../types/chat';
 import Emote from './Emote';
 import { useApp } from '@/src/modules/core/useApp';
 import Loader from '@/src/modules/ui/components/Loader.vue';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
 const emit = defineEmits<{
-  (event: 'select', emoteName: string): void;
+  (event: 'select', emote: ChatEmote, isRememberRecent: boolean): void;
   (event: 'leave'): void;
 }>();
 
@@ -155,10 +156,6 @@ function setDefaultActiveTab () {
 }
 
 onMounted(() => {
-  setDefaultActiveTab();
-});
-
-onActivated(() => {
   setDefaultActiveTab();
 });
 </script>
@@ -220,7 +217,7 @@ onActivated(() => {
     &__list {
       padding-left: 1rem;
       padding-bottom: 1rem;
-      height: 26rem;
+      max-height: 26rem;
     }
 
     &__title {
@@ -232,8 +229,11 @@ onActivated(() => {
     }
 
     &__section {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(4.8rem, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      /* display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(4.8rem, 1fr)); */
 
       &::after {
         content: '';
@@ -251,8 +251,8 @@ onActivated(() => {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border-radius: var(--border-radius);
-    padding: 0.8rem 0.4rem;
+    /* border-radius: var(--border-radius);
+    padding: 0.8rem 0.4rem; */
 
     img {
       max-width: 100%;

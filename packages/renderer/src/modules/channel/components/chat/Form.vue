@@ -1,71 +1,75 @@
 <template>
+  <Emotes
+    v-if="isEmotesActive"
+    @select="onEmoteSelect"
+  />
+
   <div
     :class="[
-      'chat-form-container',
-      isEmpty && 'chat-form-container--empty',
+      'chat-form',
+      isEmpty && 'chat-form--empty',
     ]"
   >
-    <keep-alive>
-      <Emotes
-        v-if="isEmotesActive"
-        @select="onEmoteSelect"
-      />
-    </keep-alive>
+    <div
+      ref="fieldElement"
+      :class="[
+        'scrollable',
+        'chat-form__field',
+        isEmpty && 'chat-form__field--empty',
+      ]"
+      v-bind="fieldProps"
+      tabindex="0"
+      :data-placeholder="t('chat.message')"
+      @input="onInput()"
+      @paste="onPaste"
+      @drop.prevent
+      @keydown.ctrl.enter="submit"
+    />
 
-    <div class="chat-form">
-      <div
-        ref="fieldElement"
-        :class="[
-          'scrollable',
-          'chat-form__field',
-          isEmpty && 'chat-form__field--empty',
-        ]"
-        tabindex="0"
-        contenteditable="true"
-        :data-placeholder="t('chat.message')"
-        @input="onInput"
-        @paste="onPaste"
-        @drop.prevent
-        @keydown.ctrl.enter="submit"
-      />
+    <div
+      v-show="messageLength > ACKNOWLEDGED_MESSAGE_LENGTH"
+      :class="[
+        'chat-form__counter',
+        isLimitExceeded && 'chat-form__counter--exceeded'
+      ]"
+    >
+      {{ MAX_MESSAGE_LENGTH - messageLength }}
+    </div>
 
-      <div
+    <div class="chat-form__actions">
+      <!-- <div
         :class="[
-          'chat-form__emote-button',
-          isEmotesActive && 'chat-form__emote-button--active',
+          'chat-form__button',
+          isEmotesActive && 'chat-form__button--active',
         ]"
         @click="toggleEmotesSelection"
       >
         <Icon name="Emote" />
-      </div>
+      </div> -->
 
       <div
-        v-show="messageLength > ACKNOWLEDGED_MESSAGE_LENGTH"
         :class="[
-          'chat-form__counter',
-          isLimitExceeded && 'chat-form__counter--exceeded'
+          'chat-form__button',
+          isEmpty && 'chat-form__button--disabled',
         ]"
+        @click="submit"
       >
-        {{ MAX_MESSAGE_LENGTH - messageLength }}
+        <Icon :name="'ArrowUp'" />
       </div>
-    </div>
-
-    <div
-      v-show="!isEmpty"
-      class="chat-submit"
-      @click="submit"
-    >
-      <Icon :name="'ArrowUp'" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, HTMLAttributes } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useChat } from '../../useChat';
 import { useEmotes } from '../../useEmotes';
+import { getEmoteImage } from '../../utils/emotes';
+import { ChatEmote } from '../../types/chat';
+import { getPlainTextFromHtml } from '../../utils/form';
 import Emotes from './Emotes.vue';
+import { useCursor } from '@/src/modules/ui/useCursor';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
 const { t } = useI18n();
@@ -88,13 +92,26 @@ const isLimitExceeded = computed(() => MAX_MESSAGE_LENGTH - messageLength.value 
 
 const isEmpty = computed(() => message.value.length === 0);
 
-function onInput (): void {
-  message.value = fieldElement.value?.innerText.trim() ?? '';
+const fieldProps: HTMLAttributes = {
+  // @ts-ignore
+  contenteditable: 'plaintext-only',
+};
+
+function onInput (isClearEmpty = true): void {
+  if (fieldElement.value === undefined) {
+    return;
+  }
+
+  /**
+   * @todo Replace matching emotes on the fly, using range
+   */
+
+  message.value = getPlainTextFromHtml(fieldElement.value);
 
   /**
    * Clear all html garbage, if message is in fact empty
    */
-  if (isEmpty.value && fieldElement.value !== undefined) {
+  if (isEmpty.value && isClearEmpty) {
     clear();
   }
 }
@@ -141,34 +158,33 @@ function toggleEmotesSelection (): void {
   }
 }
 
-function onEmoteSelect (name: string): void {
-  addRecentEmote(name);
+const { appendNodeAtCursor } = useCursor(fieldElement);
+
+function onEmoteSelect (emote: ChatEmote, isRememberRecent: boolean): void {
+  if (isRememberRecent && joinedChannel.value !== undefined) {
+    addRecentEmote(emote.name);
+  }
+
+  const node = getEmoteImage(emote.name, emote.urls);
+
+  appendNodeAtCursor(node);
+
+  onInput(false);
 }
 </script>
 
 <style lang="postcss">
-.chat-form-container {
+.chat-form {
   --icon-size: 2rem;
   --min-field-size: 4rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 1rem;
-  position: relative;
-
-  &--empty {
-    grid-template-columns: 1fr;
-  }
-}
-
-.chat-form {
   min-width: 0;
   position: relative;
+  display: grid;
 
   &__field {
     min-height: var(--min-field-size);
     padding: var(--width-scrollbar);
-    padding-right: var(--min-field-size);
+    padding-right: calc(var(--min-field-size) * 2);
     max-height: 20rem;
     overflow-x: hidden;
     overflow-y: auto;
@@ -187,14 +203,26 @@ function onEmoteSelect (name: string): void {
         font-weight: 500;
       }
     }
+
+    img {
+      display: inline-block;
+      vertical-align: middle;
+      margin-top: -0.1rem;
+    }
   }
 
-  &__emote-button {
+  &__actions {
+    display: flex;
+    align-items: end;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+
+  &__button {
+    flex-shrink: 0;
     width: var(--min-field-size);
     height: var(--min-field-size);
-    position: absolute;
-    bottom: 0;
-    right: 0;
     cursor: pointer;
     color: var(--color-text-secondary);
     display: flex;
@@ -204,6 +232,11 @@ function onEmoteSelect (name: string): void {
     &:hover,
     &--active {
       color: var(--color-text-main);
+    }
+
+    &--disabled {
+      pointer-events: none;
+      opacity: 0.5;
     }
 
     .icon {
@@ -223,25 +256,6 @@ function onEmoteSelect (name: string): void {
     &--exceeded {
       color: var(--color-error);
     }
-  }
-}
-
-.chat-submit {
-  width: var(--min-field-size);
-  height: var(--min-field-size);
-  color: var(--color-text-secondary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--color-control-semiactive);
-  }
-
-  .icon {
-    width: var(--icon-size);
   }
 }
 </style>

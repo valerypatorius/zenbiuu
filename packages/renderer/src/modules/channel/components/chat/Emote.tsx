@@ -1,21 +1,21 @@
 import { type FunctionalComponent } from 'vue';
-import { type EmoteProvider } from '../../types/chat';
+import { type ChatEmote } from '../../types/chat';
 import { getEmoteSrcSet } from '../../utils/emotes';
 
-interface EmoteProps {
-  urls: Record<`${string | number}x`, string>;
-  provider: EmoteProvider;
-  name: string;
+declare module '@vue/runtime-dom' {
+  interface ImgHTMLAttributes extends HTMLAttributes {
+    loading?: 'lazy' | 'eager' | 'auto';
+  }
 }
 
-const Emote: FunctionalComponent<EmoteProps, {
-  click: (emoteName: string) => void;
+const Emote: FunctionalComponent<ChatEmote & { key: string }, {
+  select: (props: ChatEmote) => void;
 }> = (props, { emit }) => {
   return <div
     class="emote-preview"
     title={props.name}
     onClick={() => {
-      emit('click', props.name);
+      emit('select', props);
     }}
   >
     <img
