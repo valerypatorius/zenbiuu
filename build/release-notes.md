@@ -1,3 +1,8 @@
+# v1.2.1
+## 2023-06-01
+
+- Fix broken streams playback, caused by Twitch restrictions
+
 # v1.2.0
 ## 2023-04-19
 
