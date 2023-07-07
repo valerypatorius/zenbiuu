@@ -1,3 +1,9 @@
+# v1.3.0
+## 2023-07-07
+
+Write messages in chat 💬\
+Emotes selection will arrive later, but no one can stop you from spamming copypastas now
+
 # v1.2.1
 ## 2023-06-01
 
