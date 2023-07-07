@@ -1,11 +1,9 @@
-import linkifyHtml from 'linkify-html';
-import type { ChatEmote } from '@/src/modules/channel/types/chat';
-import { escape } from '@/src/utils/utils';
+import { IrcCommand, type ParsedIrcMessage } from '@/src/infrastructure/irc/types';
 
 /**
  * Supported message author badges
  */
-const BADGES = [
+const SUPPORTED_BADGES = [
   'moderator',
   'subscriber',
   'partner',
@@ -13,133 +11,220 @@ const BADGES = [
 ];
 
 /**
- * List of regular expressions
+ * Returns true, if array of enums includes specified string.
+ * Helps to deal with types
  */
-const REGEXP: Record<string, RegExp> = {
-  tags: /(?<tags>[^\s]+)/,
-  command: /(.+tmi\.twitch\.tv\s)(?<command>[^\s]+)/,
-  text: /(\s:)(?<text>.*)$/,
-  channel: /#(?<channel>.+)$/,
-};
-
-/**
- * Parse message tags string
- */
-export function parseTags (raw: string): Record<string, string> {
-  const arr = raw
-    .split(';')
-    .map((pair) => pair.split('='));
-
-  return Object.fromEntries(arr);
+function isEnumArrayIncludesString<T extends string> (str: string, arr: T[]): str is T {
+  return arr.includes(str as T);
 }
 
 /**
- * Parse IRC message
+ * Parse IRC message command
  */
-export function parseMessage (raw: string): { command: string; text: string; channel: string; tags: Record<string, string> | null } {
-  let message = raw.trim();
-  let tags = null;
+function parseCommand (source: string): { name: IrcCommand; channel?: string } | undefined {
+  const globalCommands = [
+    IrcCommand.Connect,
+    IrcCommand.Disconnect,
+    IrcCommand.GlobalUserState,
+  ];
 
-  const matches: Record<string, RegExpMatchArray | null> = {};
+  const roomCommands = [
+    IrcCommand.Join,
+    IrcCommand.Leave,
+    IrcCommand.Notice,
+    IrcCommand.Clear,
+    IrcCommand.HostTarget,
+    IrcCommand.Message,
+    IrcCommand.UserState,
+    IrcCommand.RoomState,
+  ];
+
+  const [name, channel] = source.trim().split(' ');
 
   /**
-   * Get message tags and remove them from message
+   * Global commands do not contain channel information,
+   * so only command name is returned
    */
-  if (message.startsWith('@')) {
-    message = message.replace('@', '');
-
-    matches.tags = message.match(REGEXP.tags);
-
-    tags = parseTags(matches.tags?.groups != null ? matches.tags.groups.tags : '');
-    message = message.replace(REGEXP.tags, '').trim();
+  if (isEnumArrayIncludesString(name, globalCommands)) {
+    return {
+      name,
+    };
   }
 
-  matches.command = message.match(REGEXP.command);
-  matches.text = message.match(REGEXP.text);
-  matches.channel = message.match(REGEXP.channel);
-
-  const command = matches.command?.groups != null ? matches.command.groups.command : '';
-  const text = matches.text?.groups != null ? matches.text.groups.text : '';
-  const channel = matches.channel?.groups != null ? matches.channel.groups.channel : '';
-
-  return {
-    command,
-    text,
-    tags,
-    channel,
-  };
+  /**
+   * Room commands, on the other hand, should return it
+   */
+  if (isEnumArrayIncludesString(name, roomCommands)) {
+    return {
+      name,
+      channel,
+    };
+  }
 }
 
 /**
- * Parse message text for Twitch emotes
+ * Parse IRC message's badges string and return list of badges names
  */
-export function parseEmotes (raw: string, messageText: string): Record<string, ChatEmote> | undefined {
-  if (raw.length === 0 || messageText.length === 0) {
-    return undefined;
-  }
+function parseBadges (source: string): string[] {
+  const result: string[] = [];
+  const badges = source.split(',');
 
-  const result: Record<string, ChatEmote> = {};
+  badges.forEach((badge) => {
+    const [name] = badge.split('/');
 
-  const data = Object.fromEntries(raw
-    .split('/')
-    .map((item) => item.split(':')).map(([id, pos]) => (
-      [
-        id,
-        pos
-          .split(',')
-          .map((p) => p.split('-').map((n) => parseInt(n, 10))),
-      ]
-    )));
-
-  Object.entries(data).forEach(([id, positions]) => {
-    const [start, end] = positions[0];
-    const emoteNameFromText = messageText.slice(start, end + 1);
-    const size = window.devicePixelRatio > 1 ? '2.0' : '1.0';
-
-    result[emoteNameFromText] = {
-      url: `https://static-cdn.jtvnw.net/emoticons/v1/${id}/${size}`,
-      height: 28,
-    };
+    if (SUPPORTED_BADGES.includes(name)) {
+      result.push(name);
+    }
   });
 
   return result;
 }
 
 /**
- * Parse author badges tag
+ * Parse emotes positions in message text.
+ * Not really necessary, because in the end all emotes names are simply replaced with String.replace() call
  */
-export function parseBadges (raw: string): string[] {
-  if (typeof raw !== 'string') {
-    return [];
-  }
+function parseEmotes (source: string): Record<string, Array<{ start: number; end: number }>> {
+  const result: Record<string, Array<{ start: number; end: number }>> = {};
+  const emotes = source.split('/');
 
-  return raw
-    .split(',')
-    .map((badge) => badge.split('/')[0])
-    .filter((badge) => BADGES.includes(badge));
+  emotes.forEach((emote) => {
+    const [emoteId, occurrences] = emote.split(':');
+
+    /**
+     * The list of position objects that identify
+     * the location of the emote in the chat message
+     */
+    const positions = occurrences.split(',');
+
+    result[emoteId] = positions.reduce<Array<{ start: number; end: number }>>((res, position) => {
+      const [start, end] = position.split('-');
+
+      res.push({
+        start: parseInt(start),
+        end: parseInt(end),
+      });
+
+      return res;
+    }, []);
+  });
+
+  return result;
 }
 
 /**
- * Parse message text:
- * - purify it from unsafe symbols;
- * - find links;
- * - check for colored text;
+ * Entry point for message tags parsing
+ * @todo Make an attempt to fully type all possible tags
  */
-export function parseText (text: string): { value: string; isColored: boolean } {
-  const coloredStringStart = 'ACTION';
-  const coloredStringEnd = '';
+function parseTags (source: string): Record<string, any> {
+  const result: Record<string, any> = {};
+  const chunks = source.split(';');
 
-  const cleanText = text
-    .replace(coloredStringStart, '')
-    .replace(coloredStringEnd, '')
-    .trim();
+  chunks.forEach((chunk) => {
+    const [key, value = ''] = chunk.split('=');
+
+    if (value.length === 0) {
+      return result;
+    }
+
+    switch (key) {
+      /** E.g. badges=staff/1,broadcaster/1,turbo/1 */
+      case 'badges':
+      case 'badge-info':
+        result[key] = parseBadges(value);
+        break;
+      /** E.g. emotes=25:0-4,12-16/1902:6-10 */
+      case 'emotes':
+        result[key] = parseEmotes(value);
+        break;
+      /** E.g. emote-sets=0,33,50,237 */
+      case 'emote-sets':
+        result[key] = value.split(',');
+        break;
+      default:
+        result[key] = value;
+    }
+  });
+
+  return result;
+}
+
+/**
+ * Does not really parse text, because text displaying is chat's responsibility.
+ * But we can mark it as undefined to distinguish chat messages from service messages
+ */
+function parseText (source: string): string | undefined {
+  const result = source.trim();
+
+  return result.length > 0 ? result : undefined;
+}
+
+/**
+ * Parse incoming IRC message
+ * @see https://dev.twitch.tv/docs/irc/example-parser/
+ */
+export function parseMessage (message: string): ParsedIrcMessage | undefined {
+  const DIVIDER = ' ';
+
+  /**
+   * Cursor position increments as we parse a message
+   */
+  let cursor = 0;
+
+  let text: ParsedIrcMessage['text'];
+  let tags: ParsedIrcMessage['tags'];
+
+  /**
+   * Start selection from start and check for tags section
+   */
+  if (message[cursor] === '@') {
+    const cursorEnd = message.indexOf(DIVIDER);
+
+    tags = parseTags(message.slice(1, cursorEnd));
+
+    cursor = cursorEnd + 1;
+  }
+
+  /**
+   * Skip source section and move to the next section
+   */
+  if (message[cursor] === ':') {
+    cursor = message.indexOf(DIVIDER, cursor) + 1;
+  }
+
+  /**
+   * Select text between source and text
+   */
+  let cursorEnd = message.indexOf(':', cursor);
+
+  /**
+   * If text does not exist, assume that the rest of a message is command
+   */
+  if (cursorEnd === -1) {
+    cursorEnd = message.length;
+  }
+
+  const command = parseCommand(message.slice(cursor, cursorEnd));
+
+  /**
+   * Do not proceed, if commant is not supported
+   */
+  if (command === undefined) {
+    return;
+  }
+
+  /**
+   * Finally move to text section
+   */
+  if (cursorEnd < message.length) {
+    cursor = cursorEnd + 1;
+    text = parseText(message.slice(cursor));
+  }
 
   return {
-    value: linkifyHtml(escape(cleanText), {
-      className: 'link',
-      defaultProtocol: 'https',
-      target: '_self',
-    }),
-    isColored: text.startsWith(coloredStringStart) && text.endsWith(coloredStringEnd),
+    command: command.name,
+    channel: command.channel,
+    text,
+    tags,
   };
 }

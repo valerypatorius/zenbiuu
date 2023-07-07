@@ -1,9 +1,9 @@
 import { watch, ref } from 'vue';
 import { createEventHook, createSharedComposable, useWebWorker, useDebounceFn, useCounter } from '@vueuse/core';
 import IrcWorker from './irc.worker.ts?worker';
-import { IrcAction, IrcCloseCode, IrcCommand, type IrcData, type IrcPayload } from './types';
-import type { ChatMessage } from '@/src/modules/channel/types/chat';
-import { parseMessage, parseText, parseEmotes, parseBadges } from '@/src/utils/irc';
+import { IrcAction, IrcCloseCode, IrcCommand, type ParsedIrcMessage, type IrcData, type IrcPayload } from './types';
+import type { ChatMessage, ChatServiceMessage, ChatUserState } from '@/src/modules/channel/types/chat';
+import { parseMessage } from '@/src/utils/irc';
 import log from '@/src/utils/log';
 import { useUser } from '@/src/modules/auth/useUser';
 
@@ -17,7 +17,12 @@ export const useIrc = createSharedComposable(() => {
   const { count: connectionDelay, set: setConnectionDelay, reset: resetConnectionDelay } = useCounter(100);
 
   const isConnected = ref(false);
-  const messageHook = createEventHook<{ command: IrcCommand; data?: ChatMessage }>();
+
+  const hooks = {
+    messageReceived: createEventHook<ChatMessage>(),
+    userStateUpdate: createEventHook<ChatUserState>(),
+    serviceMessageReceived: createEventHook<ChatServiceMessage>(),
+  };
 
   watch(workerData, () => {
     /**
@@ -25,7 +30,7 @@ export const useIrc = createSharedComposable(() => {
      * so parse it
      */
     if (typeof workerData.value === 'string') {
-      handleMessage(workerData.value);
+      handleWorkerMessage(workerData.value);
 
       return;
     }
@@ -94,85 +99,6 @@ export const useIrc = createSharedComposable(() => {
     });
   }
 
-  function handleMessage (raw: string): void {
-    const messages = raw.trim().split(/\n/);
-
-    messages.forEach((message: string) => {
-      const parsed = parseMessage(message);
-
-      /**
-       * Do not proceed if message contains unknown command
-       */
-      if (!Object.values(IrcCommand).includes(parsed.command as IrcCommand)) {
-        return;
-      }
-
-      /**
-       * If we received message about successfull connection to IRC,
-       * run messages queue, stored in worker
-       */
-      if (parsed.command === IrcCommand.Connect) {
-        resetConnectionDelay();
-
-        isConnected.value = true;
-
-        postMessage({
-          action: IrcAction.RunQueue,
-        });
-      }
-
-      /**
-       * If we received some service message,
-       * log it and trigger message hook, but do not provide any additional data
-       */
-      if (parsed.command !== IrcCommand.Message) {
-        const logData = [];
-
-        logData.push(parsed.command);
-        logData.push(parsed.text);
-        logData.push(parsed.channel);
-
-        log.message(log.Type.Irc, logData.join(' '));
-
-        messageHook.trigger({
-          command: parsed.command as IrcCommand,
-        });
-
-        return;
-      }
-
-      /**
-       * If message tags were not parsed for some reason,
-       * simply log it and do not proceed
-       */
-      if (parsed.tags === null) {
-        log.warning(log.Type.Irc, 'Could not parse message', raw);
-
-        return;
-      }
-
-      const text = parseText(parsed.text);
-
-      const data: ChatMessage = {
-        text,
-        id: parsed.tags.id,
-        author: parsed.tags['display-name'],
-        emotes: parseEmotes(parsed.tags.emotes, text.value),
-        badges: parseBadges(parsed.tags.badges),
-        color: parsed.tags.color,
-      };
-
-      /**
-       * At this point we should have fully parsed chat message,
-       * ready to be used for display. Trigger message hook and relax
-       */
-      messageHook.trigger({
-        command: parsed.command as IrcCommand,
-        data,
-      });
-    });
-  }
-
   function join (channel: string): void {
     const data: IrcPayload = {
       channel,
@@ -195,12 +121,153 @@ export const useIrc = createSharedComposable(() => {
     });
   }
 
+  function send (message: string, channel: string, nonce: string): void {
+    const data: IrcPayload = {
+      message,
+      channel,
+      nonce,
+    };
+
+    postMessage({
+      action: IrcAction.Send,
+      data,
+    });
+  }
+
+  function handleConnection (): void {
+    resetConnectionDelay();
+
+    isConnected.value = true;
+
+    postMessage({
+      action: IrcAction.RunQueue,
+    });
+  }
+
+  function handleUserStateUpdate (tags: Record<string, any>): void {
+    hooks.userStateUpdate.trigger({
+      name: tags?.['display-name'],
+      color: tags?.color,
+      emoteSets: tags?.['emote-sets'],
+
+      messageId: tags?.id,
+      nonce: tags?.['client-nonce'],
+      badges: tags?.badges,
+    });
+  }
+
+  function handleChatMessage (message: ParsedIrcMessage): void {
+    if (message.text === undefined) {
+      log.warning(log.Type.Irc, 'Tried to handle chat message, but its text was empty', message);
+      return;
+    }
+
+    const chatMessage: ChatMessage = {
+      id: message.tags?.id,
+      author: message.tags?.['display-name'],
+      color: message.tags?.color,
+      badges: message.tags?.badges,
+      text: message.text,
+      localEmotesMap: message.tags?.emotes,
+    };
+
+    hooks.messageReceived.trigger(chatMessage);
+  }
+
+  function logMessage (message: ParsedIrcMessage): void {
+    const logData = [];
+
+    logData.push(message.command);
+
+    if (message.channel !== undefined) {
+      logData.push(message.channel);
+    }
+
+    if (message.text !== undefined) {
+      logData.push(message.text);
+    }
+
+    log.message(log.Type.Irc, logData.join(' '));
+  }
+
+  function handleServiceMessage (message: ParsedIrcMessage): void {
+    logMessage(message);
+
+    hooks.serviceMessageReceived.trigger({
+      command: message.command,
+      text: message.text,
+    });
+  }
+
+  function handleWorkerMessage (source: string): void {
+    const rawMessages = source.trim().split(/\n/);
+
+    rawMessages.forEach((rawMessage: string) => {
+      const message = parseMessage(rawMessage);
+
+      if (message === undefined) {
+        return;
+      }
+
+      /**
+       * If we received message about successfull connection to IRC,
+       * run messages queue, stored in worker
+       */
+      if (message.command === IrcCommand.Connect) {
+        handleConnection();
+        logMessage(message);
+
+        return;
+      }
+
+      /**
+       * If we received message about user's state,
+       * trigger according hook to save it
+       */
+      if (message.command === IrcCommand.GlobalUserState || message.command === IrcCommand.UserState) {
+        if (message.tags !== undefined) {
+          handleUserStateUpdate(message.tags);
+        }
+
+        return;
+      }
+
+      /**
+       * If we received chat message,
+       * trigger according hook to process and display it
+       */
+      if (message.command === IrcCommand.Message) {
+        handleChatMessage(message);
+
+        return;
+      }
+
+      /**
+       * At this point we need to handle all other messages
+       */
+      handleServiceMessage(message);
+
+      /**
+       * @todo Handle ROOMSTATE command
+       * @todo handle NOTICE command
+       */
+    });
+  }
+
   return {
     connect,
     disconnect,
     join,
     leave,
-    onMessage: messageHook.on,
-    offMessage: messageHook.off,
+    send,
+
+    onMessageReceived: hooks.messageReceived.on,
+    offMessageReceived: hooks.messageReceived.off,
+
+    onUserStateUpdated: hooks.userStateUpdate.on,
+    offUserStateUpdated: hooks.userStateUpdate.off,
+
+    onServiceMessageReceived: hooks.serviceMessageReceived.on,
+    offServiceMessageReceived: hooks.serviceMessageReceived.off,
   };
 });

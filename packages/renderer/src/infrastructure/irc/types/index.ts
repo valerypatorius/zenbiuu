@@ -4,6 +4,8 @@ export interface IrcPayload {
   token?: string;
   name?: string;
   code?: IrcCloseCode;
+  message?: string;
+  nonce?: string;
 }
 
 export type IrcData = {
@@ -20,9 +22,18 @@ export enum IrcCloseCode {
 export enum IrcCommand {
   Connect = '001',
   Disconnect = '-1',
+  Clear = 'CLEARCHAT',
+  Notice = 'NOTICE',
+  HostTarget = 'HOSTTARGET',
+
   Join = 'JOIN',
   Leave = 'PART',
+
   Message = 'PRIVMSG',
+
+  GlobalUserState = 'GLOBALUSERSTATE',
+  UserState = 'USERSTATE',
+  RoomState = 'ROOMSTATE',
 }
 
 export enum IrcAction {
@@ -31,6 +42,14 @@ export enum IrcAction {
   Join = 'join',
   Leave = 'leave',
   RunQueue = 'runQueue',
+  Send = 'send',
+}
+
+export interface ParsedIrcMessage {
+  command: IrcCommand;
+  channel?: string;
+  text?: string;
+  tags?: Record<string, any>;
 }
 
 export type IrcWorkerMessage = MessageEvent<{ action: IrcAction; data: IrcPayload }>;

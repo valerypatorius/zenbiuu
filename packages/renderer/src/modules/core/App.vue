@@ -10,6 +10,7 @@
     >
       <Sidebar v-if="isMountSidebar" />
 
+      <!-- @todo Do not use key, properly update components instead -->
       <RouterView :key="route.path" />
 
       <Settings v-if="isSettingsActive" />
@@ -21,6 +22,7 @@
 import { computed, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useApp } from './useApp';
+import { useEmotes } from '@/src/modules/channel/useEmotes';
 import TitleBar from '@/src/modules/core/components/Titlebar.vue';
 import Sidebar from '@/src/modules/library/components/sidebar/Sidebar.vue';
 import Settings from '@/src/modules/settings/Settings.vue';
@@ -29,6 +31,7 @@ import { useUser } from '@/src/modules/auth/useUser';
 import { useAuth } from '@/src/modules/auth/useAuth';
 import { useHub } from '@/src/infrastructure/hub/useHub';
 import { useUpdater } from '@/src/infrastructure/updater/useUpdater';
+import { useIrc } from '@/src/infrastructure/irc/useIrc';
 
 useAuth();
 
@@ -38,6 +41,8 @@ const { state: appState } = useApp();
 const { state: userState } = useUser();
 const { callWindowMethod } = useHub();
 const { check: checkUpdates } = useUpdater();
+const { onUserStateUpdated: onIrcUserStateUpdated } = useIrc();
+const { getCommonEmotes } = useEmotes();
 
 /**
  * True, if sidebar should be mounted.
@@ -62,6 +67,11 @@ document.documentElement.style.setProperty('--size-base', appState.interfaceSize
 
 /** Check for app updates */
 checkUpdates();
+
+/** When IRC user state is updated, request common emotes */
+onIrcUserStateUpdated((state) => {
+  getCommonEmotes(state.emoteSets);
+});
 </script>
 
 <style lang="postcss">
@@ -113,6 +123,7 @@ checkUpdates();
     --color-button: rgba(var(--rgb-accent), 1);
     --color-button-text: rgba(var(--rgb-white), 1);
     --color-link: rgba(var(--rgb-link), 1);
+    --color-error: rgba(var(--rgb-red), 0.75);
   }
 
   @media (prefers-color-scheme: dark) {

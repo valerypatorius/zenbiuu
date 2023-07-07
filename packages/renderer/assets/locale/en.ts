@@ -10,7 +10,6 @@ export default {
     loginWithTwitch: 'Log in with Twitch account',
   },
   sidebar: {
-    search: 'Search',
     settings: 'Settings',
     hide: 'Hide',
     foundItems: 'Search results',
@@ -58,8 +57,15 @@ export default {
     logout: 'Logout',
   },
   chat: {
-    joinedAs: 'Joined chat room as',
+    connectingTo: 'Connecting to {channel} chat room...',
+    joinedAs: 'Joined {channel} chat room as {name}',
     scrollToBottom: 'Scroll to bottom',
+    message: 'Message',
+    emotes: {
+      hot: 'Hot',
+      recent: 'Recent',
+      all: 'All',
+    },
   },
   player: {
     mute: 'Mute',
@@ -93,4 +99,5 @@ export default {
   enable: 'Enable',
   disable: 'Disable',
   openInBrowser: 'Open in browser',
+  search: 'Search',
 };

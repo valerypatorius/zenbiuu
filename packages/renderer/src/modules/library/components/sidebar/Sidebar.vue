@@ -19,7 +19,7 @@
 
       <!-- Search -->
       <section class="sidebar__section">
-        <sidebar-search
+        <Search
           v-model:query="searchQuery"
           @input="onSearchInput"
           @clear="onSearchClear"
@@ -70,6 +70,7 @@
             :image="item.image"
             :label="item.name"
             :is-disabled="true"
+            :is-active="item.isActive"
             :is-loading="!isLibraryReady"
             @click="selectChannel(item)"
           />
@@ -139,8 +140,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useSidebar } from '../../useSidebar';
 import { useLibrary } from '../../useLibrary';
 import type { TwitchChannelFromSearch } from '@/src/modules/library/types';
+import Search from '@/src/modules/ui/components/Search.vue';
 import SidebarItem from '@/src/modules/library/components/sidebar/Item.vue';
-import SidebarSearch from '@/src/modules/library/components/sidebar/Search.vue';
 import Resizer, { Axis } from '@/src/utils/resizer';
 import Scroller from '@/src/utils/scroller';
 import { RouteName } from '@/src/infrastructure/router/types';
@@ -285,6 +286,7 @@ const offlineItems = computed(() => {
           image: userData.profile_image_url,
           name: userData.display_name,
           isLive: false,
+          isActive: userData.display_name === route.params.name,
         });
       }
 
@@ -465,7 +467,6 @@ function onSearchClear (): void {
     clearTimeout(searchTimeout.value);
   }
 
-  searchQuery.value = '';
   searchResults.value = [];
   isSearchError.value = false;
 }

@@ -10,7 +10,6 @@ export default {
     loginWithTwitch: 'Войти через Twitch',
   },
   sidebar: {
-    search: 'Поиск',
     settings: 'Настройки',
     hide: 'Скрыть',
     foundItems: 'Результаты поиска',
@@ -58,8 +57,15 @@ export default {
     logout: 'Выйти',
   },
   chat: {
-    joinedAs: 'Вы вошли в чат как',
+    connectingTo: 'Подключение к чату {channel}...',
+    joinedAs: 'Вы вошли в чат {channel} как {name}',
     scrollToBottom: 'Прокрутить вниз',
+    message: 'Сообщение',
+    emotes: {
+      hot: 'Актуальные',
+      recent: 'Недавние',
+      all: 'Все',
+    },
   },
   player: {
     mute: 'Отключить звук',
@@ -93,4 +99,5 @@ export default {
   enable: 'Включить',
   disable: 'Отключить',
   openInBrowser: 'Открыть в браузере',
+  search: 'Поиск',
 };

@@ -1,3 +1,5 @@
+import { type IrcCommand } from '@/src/infrastructure/irc/types';
+
 export interface ChatStoreSchema {
   /** Chat width in horizontal layout */
   width: number;
@@ -10,8 +12,15 @@ export interface ChatStoreSchema {
  * Chat emote
  */
 export interface ChatEmote {
-  url: string;
-  height: number;
+  urls: Record<`${string | number}x`, string>;
+  provider: EmoteProvider;
+  name: string;
+  isZeroWidth?: boolean;
+}
+
+export interface ChatServiceMessage {
+  command: IrcCommand;
+  text?: string;
 }
 
 /**
@@ -21,13 +30,25 @@ export interface ChatMessage {
   id: string;
   author: string;
   color: string;
-  text: {
-    value: string;
-    isColored: boolean;
-  };
+  text: string;
   badges: string[];
-  emotes?: Record<string, ChatEmote>;
-  isRemoved?: boolean;
+  emotes?: string[];
+  isColoredText?: boolean;
+  localEmotesMap?: Record<string, Array<{ start: number; end: number }>>;
+}
+
+/**
+ * State of logined user in a chat room
+ */
+export interface ChatUserState {
+  name?: string;
+  color?: string;
+  emoteSets?: string[];
+
+  /** Usually exist when message is posted */
+  badges?: string[];
+  nonce?: string;
+  messageId?: string;
 }
 
 /**
@@ -37,6 +58,7 @@ interface BttvEmoteDataBase {
   id: string;
   code: string;
   imageType: string;
+  animated: boolean;
 }
 
 /**
@@ -44,6 +66,8 @@ interface BttvEmoteDataBase {
  */
 export interface BttvEmoteDataDefault extends BttvEmoteDataBase {
   userId: string;
+  width: number;
+  height: number;
 }
 
 /**
@@ -75,37 +99,65 @@ export interface BttvChannelEmotes {
 /**
  * FFZ emote data. Unused fields are not included
  */
-export interface FfzEmoteDataSimple {
+export interface FfzEmoteData {
   id: number;
   name: string;
   height: number;
   width: number;
-  urls: Record<string, string>;
+  urls: Record<`${number}`, string>;
 }
 
 /**
  * FFZ response for emotes request
  */
 export interface FfzChannelEmotes {
-  room: Record<string, any>;
-  sets: Record<string, {
-    [key: string]: any;
-    emoticons: FfzEmoteDataSimple[];
+  room: unknown;
+  sets: Record<`${number}`, {
+    emoticons: FfzEmoteData[];
   }>;
 }
 
 /**
  * 7tv emote data. Unused fields are not included
  */
-export interface SevenTvEmoteDataSimple {
+export interface SevenTvEmoteData {
   id: string;
+  mime: string;
   name: string;
   width: number[];
   height: number[];
-  urls: Array<[string, string]>;
+  urls: Array<[`${number}`, string]>;
+  visibility_simple: Array<string | 'ZERO_WIDTH'>;
 }
 
 /**
  * 7tv response for emotes request
  */
-export type SevenTvEmotes = SevenTvEmoteDataSimple[];
+export type SevenTvEmotes = SevenTvEmoteData[];
+
+/**
+ * Native Twitch emote data
+ */
+export interface TwitchEmoteData {
+  id: string;
+  name: string;
+  images: Record<`url_${number}x`, string>;
+  format: Array<'static' | 'animated'>;
+  scale: Array<'1.0' | '2.0' | '3.0'>;
+  theme_mode: Array<'light' | 'dark'>;
+}
+
+/**
+ * Twitch emotes response
+ */
+export interface TwitchEmotesResponse {
+  data: TwitchEmoteData[];
+  template: string;
+}
+
+export enum EmoteProvider {
+  Twitch = 'Twitch',
+  BTTV = 'BTTV',
+  FFZ = 'FFZ',
+  SevenTV = '7TV',
+}

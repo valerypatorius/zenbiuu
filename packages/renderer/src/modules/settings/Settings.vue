@@ -42,6 +42,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Component } from 'vue';
+import type { IconName } from '@/src/modules/ui/components/types';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 import Popup from '@/src/modules/core/components/Popup.vue';
 import SettingsInterface from '@/src/modules/settings/components/Interface.vue';
@@ -61,7 +62,7 @@ enum TabName {
 
 interface TabData {
   label: string;
-  icon: string;
+  icon: IconName;
   component: Component;
 }
 

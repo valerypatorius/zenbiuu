@@ -1,10 +1,10 @@
 <template>
-  <div class="sidebar-search">
+  <div class="search">
     <input
       :value="query"
       type="text"
       tabindex="-1"
-      :placeholder="$t('sidebar.search')"
+      :placeholder="t('search')"
       @input="onInput"
     >
 
@@ -12,9 +12,8 @@
 
     <div
       v-if="query"
-      ref="searchInput"
-      class="sidebar-search__remove"
-      @click="emit('clear')"
+      class="search__clear"
+      @click="onClear"
     >
       <icon name="Close" />
     </div>
@@ -22,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import Icon from '@/src/modules/ui/components/Icon.vue';
 
 defineProps<{
@@ -34,6 +34,8 @@ const emit = defineEmits<{
   (e: 'clear'): void;
 }>();
 
+const { t } = useI18n();
+
 /**
  * Emit event to update query model value
  */
@@ -42,14 +44,23 @@ function onInput (event: Event): void {
 
   emit('update:query', value);
 }
+
+/**
+ * Clear model value and emit "clear" event
+ */
+function onClear () {
+  emit('update:query', '');
+  emit('clear');
+}
 </script>
 
 <style lang="postcss">
-  .sidebar-search {
+  .search {
     display: flex;
     align-items: center;
     position: relative;
-    height: var(--item-height, 4rem);
+    width: 100%;
+    height: var(--item-height);
 
     input {
       width: 100%;
@@ -58,7 +69,7 @@ function onInput (event: Event): void {
       padding-right: calc(var(--offset-x) + var(--size-icon) + var(--offset-icon));
       background-color: transparent;
       color: var(--color-text);
-      font-weight: 500;
+      font-weight: var(--font-weight, 500);
       position: absolute;
       left: 0;
       background-color: var(--color-overlay);
@@ -90,8 +101,7 @@ function onInput (event: Event): void {
       pointer-events: none;
     }
 
-    /** Remove button */
-    &__remove {
+    &__clear {
       height: 100%;
       display: flex;
       align-items: center;

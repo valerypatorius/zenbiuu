@@ -1,8 +1,6 @@
-export type IconString = string;
+const svg = (path: string, size = 24): string => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${path}</svg>`;
 
-const svg = (path: string, size = 24): IconString => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${path}</svg>`;
-
-const icons: Record<string, IconString> = {
+const icons = {
   Menu: svg('<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>'),
   User: svg('<path d="M7.5 6.5C7.5 8.981 9.519 11 12 11s4.5-2.019 4.5-4.5S14.481 2 12 2 7.5 4.019 7.5 6.5zM20 21h1v-1c0-3.859-3.141-7-7-7h-4c-3.86 0-7 3.141-7 7v1h1 1 14H20z"/>'),
   Time: svg('<path d="M12,2C6.486,2,2,6.486,2,12s4.486,10,10,10s10-4.486,10-10S17.514,2,12,2z M15.293,16.707L11,12.414V6h2v5.586l3.707,3.707 L15.293,16.707z"/>'),
@@ -37,10 +35,12 @@ const icons: Record<string, IconString> = {
   FullscreenExit: svg('<path d="M10 4H8v4H4v2h6zM8 20h2v-6H4v2h4zm12-6h-6v6h2v-4h4zm0-6h-4V4h-2v6h6z"/>'),
   Close: svg('<path d="M16.192 6.344l-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"/>'),
   Picker: svg('<path d="M19 10H5c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2zM5 20v-8h14l.002 8H5zM5 6h14v2H5zm2-4h10v2H7z"/>'),
+  Emote: svg('<path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><circle cx="8.5" cy="10.5" r="1.5"/><circle cx="15.493" cy="10.493" r="1.493"/>'),
+  Hot: svg('<path d="M16.5 8c0 1.5-.5 3.5-2.9 4.3.7-1.7.8-3.4.3-5-.7-2.1-3-3.7-4.6-4.6-.4-.3-1.1.1-1 .7 0 1.1-.3 2.7-2 4.4C4.1 10 3 12.3 3 14.5 3 17.4 5 21 9 21c-4-4-1-7.5-1-7.5.8 5.9 5 7.5 7 7.5 1.7 0 5-1.2 5-6.4 0-3.1-1.3-5.5-2.4-6.9-.3-.5-1-.2-1.1.3"/>'),
   WindowMinimize: svg('<path d="M11 4.399V5.5H0V4.399h11z"/>', 11),
   WindowMaximize: svg('<path d="M11 0v11H0V0h11zM9.899 1.101H1.1V9.9h8.8V1.1z"/>', 11),
   WindowUnmaximize: svg('<path d="M11 8.798H8.798V11H0V2.202h2.202V0H11v8.798zm-3.298-5.5h-6.6v6.6h6.6v-6.6zM9.9 1.1H3.298v1.101h5.5v5.5h1.1v-6.6z"/>', 11),
   WindowClose: svg('<path d="M6.279 5.5L11 10.221l-.779.779L5.5 6.279.779 11 0 10.221 4.721 5.5 0 .779.779 0 5.5 4.721 10.221 0 11 .779 6.279 5.5z"/>', 11),
-};
+} as const;
 
 export default icons;

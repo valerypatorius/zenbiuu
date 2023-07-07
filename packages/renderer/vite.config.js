@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
 
 const root = __dirname;
 const isDev = process.env.MODE === 'development';
@@ -22,6 +23,7 @@ export default defineConfig({
     vue({
       reactivityTransform: true,
     }),
+    vueJsx(),
   ],
   base: '',
   server: {
