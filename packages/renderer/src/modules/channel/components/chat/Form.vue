@@ -50,7 +50,7 @@
       <div
         :class="[
           'chat-form__button',
-          isEmpty && 'chat-form__button--disabled',
+          (isEmpty || isLimitExceeded) && 'chat-form__button--disabled',
         ]"
         @click="submit"
       >
@@ -133,7 +133,7 @@ function clear (): void {
 }
 
 function submit (): void {
-  if (isEmpty.value || !isJoined.value || joinedChannel.value === undefined) {
+  if (isEmpty.value || !isJoined.value || isLimitExceeded.value || joinedChannel.value === undefined) {
     return;
   }
 
