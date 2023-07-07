@@ -11,14 +11,15 @@ Zenbiuu (ゼンビウー, pronounced `/zenbjuː/`, like `zen view`) is a desktop
 </p>
 
 ### Current features
-- [x] Watch streams from your subscriptions and read chat
+- [x] Watch streams from your subscriptions
+- [x] Communicate in chat
 - [x] Earn channel points for watching streams
 - [x] Search for non-followed channels
 - [x] Third-party chat emotes support (BTTV, FFZ, 7tv)
 - [x] No ads or tracking
 
 ### Upcoming features
-- [ ] Write messages in chat
+- [ ] Chat emotes selection and suggestion
 
 ### Planned features
 - Watch VODs
