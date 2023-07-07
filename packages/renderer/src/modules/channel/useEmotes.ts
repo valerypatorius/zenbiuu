@@ -135,8 +135,8 @@ export const useEmotes = createSharedComposable(() => {
     return parse7TVEmotes(response);
   }
 
-  async function getSevenTvChannelEmotes (channelName: string): Promise<Record<string, ChatEmote>> {
-    const response = await get<SevenTvEmotes>(`${EmotesEndpoint.SevenTvChannel}/${channelName}/emotes`, { headers: undefined });
+  async function getSevenTvChannelEmotes (channelId: string): Promise<Record<string, ChatEmote>> {
+    const response = await get<SevenTvEmotes>(`${EmotesEndpoint.SevenTvChannel}/${channelId}/emotes`, { headers: undefined });
 
     return parse7TVEmotes(response);
   }
@@ -187,7 +187,7 @@ export const useEmotes = createSharedComposable(() => {
     void getTwitchChannelEmotes(channelId).then(addChannelEmotes);
     void getBttvChannelEmotes(channelId).then(addChannelEmotes);
     void getFfzChannelEmotes(channelName).then(addChannelEmotes);
-    void getSevenTvChannelEmotes(channelName).then(addChannelEmotes);
+    void getSevenTvChannelEmotes(channelId).then(addChannelEmotes);
   }
 
   /**
