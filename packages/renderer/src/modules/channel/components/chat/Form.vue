@@ -141,6 +141,7 @@ function submit (): void {
   clear();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function toggleEmotesSelection (): void {
   isEmotesActive.value = !isEmotesActive.value;
 
