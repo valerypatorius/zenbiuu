@@ -99,13 +99,11 @@ export interface TwitchUser {
 
 /**
  * Relationship between two Twitch users
- * @link https://dev.twitch.tv/docs/api/reference#get-users-follows
+ * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
  */
 export interface TwitchUserFollow {
-  from_id: string;
-  from_login: string;
-  from_name: string;
-  to_id: string;
-  to_name: string;
+  broadcaster_id: string;
+  broadcaster_login: string;
+  broadcaster_name: string;
   followed_at: string;
 }

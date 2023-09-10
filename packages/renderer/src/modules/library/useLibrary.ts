@@ -10,7 +10,7 @@ import { useInterval } from '@/src/infrastructure/interval/useInterval';
 import { useStore } from '@/src/infrastructure/store/useStore';
 
 enum LibraryEndpoint {
-  Follows = 'https://api.twitch.tv/helix/users/follows',
+  Follows = 'https://api.twitch.tv/helix/channels/followed',
   Streams = 'https://api.twitch.tv/helix/streams',
   Users = 'https://api.twitch.tv/helix/users',
   SearchChannels = 'https://api.twitch.tv/helix/search/channels',
@@ -44,9 +44,9 @@ export const useLibrary = createSharedComposable(() => {
    * Request followed channels list
    */
   async function getFollowedChannels (): Promise<void> {
-    const { data } = await get<TwitchResponse<TwitchUserFollow>>(`${LibraryEndpoint.Follows}?from_id=${userState.id}&first=100`);
+    const { data } = await get<TwitchResponse<TwitchUserFollow>>(`${LibraryEndpoint.Follows}?user_id=${userState.id}&first=100`);
 
-    followedIds.value = data.map((user) => user.to_id);
+    followedIds.value = data.map((user) => user.broadcaster_id);
   }
 
   /**
