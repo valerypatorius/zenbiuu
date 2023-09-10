@@ -1,3 +1,8 @@
+# v1.3.1
+## 2023-09-10
+
+- Fix call to deprecated API, which led to broken library
+
 # v1.3.0
 ## 2023-07-07
 
