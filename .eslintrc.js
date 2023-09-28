@@ -25,7 +25,7 @@ module.exports = {
   ],
   rules: {
     /** Prefer semicolons */
-    semi: ['error', 'always'],
+    semi: 'off',
     '@typescript-eslint/semi': ['error', 'always'],
     '@typescript-eslint/member-delimiter-style': [
       'error',

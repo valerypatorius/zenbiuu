@@ -1,4 +1,10 @@
 export default {
+  errors: {
+    AUTH_PROVIDER_MISSING: 'Authorization provider is missing',
+    AUTH_FAILED_ERROR: 'Authorization has failed',
+    PARSE_INTERCEPTED_LINK_ERROR: 'Failed to intercept link',
+  },
+
   router: {
     auth: 'Log in',
     library: 'Library',

@@ -4,7 +4,7 @@ const { dirname } = require('path');
 const { build, loadEnv } = require('vite');
 
 const packagesConfigs = [
-  'packages/hub/vite.config.js',
+  'packages/preload/vite.config.js',
   'packages/main/vite.config.js',
   'packages/renderer/vite.config.js',
 ];

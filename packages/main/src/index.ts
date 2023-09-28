@@ -1,155 +1,49 @@
-import { join } from 'path';
-import { app, shell } from 'electron';
-import { HubChannel } from '../../hub/src/types';
-import { config } from './config';
-import { theme } from './theme';
-import { Window, openWindow } from './window';
-import { handleCors } from './cors';
-import { handleRendererRequests } from './handlers';
-import { env } from './env';
-import './protocol';
+import ElectronStore from 'electron-store';
+import App from './modules/app';
+import Window from './modules/window';
+import Theme from './modules/theme';
+// import { handleCors } from './modules/window/cors';
+// import { handleRendererRequests } from './modules/window/handlers';
+import { type StoreSchema } from './types/store';
+import Hub from './modules/hub';
+// import Updater from './modules/updater';
 
-const appRootUrl = env.MODE === 'development'
-  ? env.VITE_DEV_SERVER_URL
-  : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
-
-/**
- * If false, assume that another instance of the app is already running
- */
-const isSingleInstance = app.requestSingleInstanceLock();
+const app = new App();
 
 /**
  * Do not allow creating multiple app instances
  */
-if (!isSingleInstance) {
+if (!app.isAllowAppStart) {
   app.quit();
 }
 
-/**
- * Create main app window
- */
-function createAppWindow (): void {
-  const { width, height } = config.get('windowBounds');
-
-  Window.Main = openWindow(appRootUrl, {
-    show: false,
-    width,
-    height,
-    frame: false,
-    titleBarStyle: 'hiddenInset',
-    webPreferences: {
-      preload: join(__dirname, '../../hub/dist/index.cjs'),
+const store = new ElectronStore<StoreSchema>({
+  name: 'v2.store',
+  defaults: {
+    windowBounds: {
+      width: 1280,
+      height: 720,
     },
-  });
-
-  /**
-   * When window is ready, show it
-   */
-  Window.Main.on('ready-to-show', () => {
-    Window.Main?.show();
-
-    if (env.MODE === 'development') {
-      Window.Main?.webContents.openDevTools();
-    }
-  });
-
-  /**
-   * Update window size in config file
-   */
-  Window.Main.on('resized', () => {
-    if (Window.Main === null) {
-      return;
-    }
-
-    const { width, height } = Window.Main.getBounds();
-
-    config.set('windowBounds', {
-      width,
-      height,
-    });
-  });
-
-  /**
-   * Clear references to main window, when it is closed
-   */
-  Window.Main.on('closed', () => {
-    Window.Main = null;
-  });
-
-  /**
-   * Open all links in default browser
-   */
-  Window.Main.webContents.on('will-navigate', (event, url) => {
-    event.preventDefault();
-    void shell.openExternal(url);
-  });
-
-  /**
-   * When window maximized state is changed, update state in renderer process
-   */
-  Window.Main.on('maximize', () => {
-    Window.Main?.webContents.send(HubChannel.WindowStateChange, {
-      isAppWindowMaximized: Window.Main.isMaximized(),
-    });
-  });
-
-  Window.Main.on('unmaximize', () => {
-    Window.Main?.webContents.send(HubChannel.WindowStateChange, {
-      isAppWindowMaximized: Window.Main.isMaximized(),
-    });
-  });
-}
-
-/**
- * Disable system media keys handling
- */
-app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
-
-/**
- * Allow only one running instance of the app
- */
-app.on('second-instance', () => {
-  if (Window.Main === null) {
-    return;
-  }
-
-  if (Window.Main.isMinimized()) {
-    Window.Main.restore();
-  }
-
-  Window.Main.focus();
+    theme: 'system',
+  },
 });
 
-/**
- * Quit when all windows are closed, but leave the app active on Mac
- */
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
+const window = new Window(store);
+
+const theme = new Theme(store, window);
+
+// const updater = new Updater();
+
+const hub = new Hub(window, theme);
+
+void (async () => {
+  try {
+    await app.start();
+
+    window.open({
+      // backgroundColor: theme.windowColor,
+    });
+  } catch (error) {
+    hub.destroy();
   }
-});
-
-/**
- * Activate window on Mac, if no other windows are opened
- */
-app.on('activate', () => {
-  if (Window.Main === null) {
-    createAppWindow();
-  }
-});
-
-/**
- * Start the app
- */
-app.whenReady()
-  .then(() => {
-    const themeSource = config.get('theme');
-
-    theme.setSource(themeSource);
-
-    handleCors();
-    handleRendererRequests();
-    createAppWindow();
-  }).catch((error) => {
-    console.error('Failed to start the app', error);
-  });
+})();

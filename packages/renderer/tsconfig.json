@@ -3,15 +3,30 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/src/*": [
-        "./src/*"
+      "@/types/*": [
+        "../../types/*"
       ],
       "@/assets/*": [
         "./assets/*"
       ],
-      "@/hub/types": [
-        "../hub/src/types"
-      ]
+      "@/oauth/*": [
+        "./src/infrastructure/oauth/*"
+      ],
+      "@/transport/*": [
+        "./src/infrastructure/transport/*"
+      ],
+      "@/providers/*": [
+        "./src/infrastructure/providers/*"
+      ],
+      "@/modules/*": [
+        "./src/infrastructure/modules/*"
+      ],
+      "@/utils/*": [
+        "./src/infrastructure/utils/*"
+      ],
+      "@/presentation/*": [
+        "./src/presentation/*"
+      ],
     },
     "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },
@@ -19,5 +34,6 @@
     "src/**/*.vue",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "../../types/**/*.ts"
   ]
 }

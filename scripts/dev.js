@@ -135,7 +135,7 @@ const setupMainPackageWatcher = (viteDevServer) => {
 const setupHubPackageWatcher = (viteDevServer) => {
   return getWatcher({
     name: 'reload-page-on-hub-package-change',
-    configFile: 'packages/hub/vite.config.js',
+    configFile: 'packages/preload/vite.config.js',
     writeBundle () {
       viteDevServer.ws.send({
         type: 'full-reload',
