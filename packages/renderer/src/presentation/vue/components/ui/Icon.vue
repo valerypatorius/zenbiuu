@@ -14,6 +14,7 @@ import icons from '@/assets/icons';
 
 const props = defineProps<{
   name: keyof typeof icons;
+  size?: number;
 }>();
 
 const svg = computed(() => icons[props.name]);
@@ -21,6 +22,9 @@ const svg = computed(() => icons[props.name]);
 
 <style lang="postcss">
 .icon {
+  --size: v-bind('size + "px"');
+  width: var(--size);
+  height: var(--size);
   flex-shrink: 0;
   display: block;
 

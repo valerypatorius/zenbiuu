@@ -1,15 +1,15 @@
 import { join } from 'path';
 import { BrowserWindow, shell } from 'electron';
-import { type StoreSchema } from '../../types/store';
-import type ElectronStore from 'electron-store';
+import type WindowInterface from '@/interfaces/Window.interface';
+import type StoreInterface from '@/interfaces/Store.interface';
 
-export default class Window {
+export default class Window implements WindowInterface {
   #instance?: BrowserWindow;
 
   readonly #url = import.meta.env.MODE === 'development' ? import.meta.env.VITE_DEV_SERVER_URL : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
 
   constructor (
-    private readonly store: ElectronStore<StoreSchema>,
+    private readonly store: StoreInterface,
   ) {
   }
 
@@ -62,7 +62,7 @@ export default class Window {
     }
   }
 
-  public isMinimized (): boolean {
+  public get isMinimized (): boolean {
     return this.#instance?.isMinimized() ?? false;
   }
 

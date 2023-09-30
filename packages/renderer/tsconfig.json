@@ -3,11 +3,20 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/types/*": [
-        "../../types/*"
+      "$/*": [
+        "../../*"
+      ],
+      "@/entities/*": [
+        "./src/entities/*"
+      ],
+      "@/interfaces/*": [
+        "./src/interfaces/*"
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@/hub/*": [
+        "./src/infrastructure/hub/*"
       ],
       "@/oauth/*": [
         "./src/infrastructure/oauth/*"
@@ -22,7 +31,7 @@
         "./src/infrastructure/modules/*"
       ],
       "@/utils/*": [
-        "./src/infrastructure/utils/*"
+        "./src/utils/*"
       ],
       "@/presentation/*": [
         "./src/presentation/*"
@@ -34,6 +43,6 @@
     "src/**/*.vue",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "../../types/**/*.ts"
+    "index.d.ts"
   ]
 }

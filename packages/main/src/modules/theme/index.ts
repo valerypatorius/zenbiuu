@@ -1,12 +1,12 @@
 import { nativeTheme, type NativeTheme } from 'electron';
-import { type StoreSchema } from 'src/types/store';
-import type ElectronStore from 'electron-store';
-import type Window from '../window';
+import type ThemeInterface from '@/interfaces/Theme.interface';
+import type StoreInterface from '@/interfaces/Store.interface';
+import type WindowInterface from '@/interfaces/Window.interface';
 
-export default class Theme {
+export default class Theme implements ThemeInterface {
   constructor (
-    private readonly store: ElectronStore<StoreSchema>,
-    private readonly window: Window,
+    private readonly store: StoreInterface,
+    private readonly window: WindowInterface,
   ) {
     this.setSource(this.store.get('theme'));
   }

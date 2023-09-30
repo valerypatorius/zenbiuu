@@ -2,9 +2,26 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["ESNext"]
+    "lib": ["ESNext"],
+    "paths": {
+      "$/*": [
+        "../../*"
+      ],
+      "@/interfaces/*": [
+        "src/interfaces/*"
+      ],
+      "@/entities/*": [
+        "src/entities/*"
+      ],
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts",
-  ]
+  ],
 }

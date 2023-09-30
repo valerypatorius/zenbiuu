@@ -1,12 +1,10 @@
-import { computedAsync, createSharedComposable } from '@vueuse/core';
-import hub from '@/modules/hub';
+import { createSharedComposable } from '@vueuse/core';
+import { inject } from 'vue';
+import { appPropertiesKey, hubKey } from '../injections';
 
 export const useHub = createSharedComposable(() => {
-  const app = computedAsync(async () => hub.service.getAppProperties(), {
-    name: '',
-    version: '',
-    locale: '',
-  });
+  const hub = inject(hubKey);
+  const app = inject(appPropertiesKey);
 
   return {
     app,

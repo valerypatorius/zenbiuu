@@ -1,4 +1,4 @@
-import type { OAuthInterface } from 'src/infrastructure/oauth/types';
+import type OAuthInterface from '@/interfaces/OAuth.interface';
 import { convertObjectToLocationQuery, uid } from '@/utils/string';
 
 export default abstract class OAuth implements OAuthInterface {

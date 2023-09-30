@@ -10,13 +10,16 @@ export default defineConfig({
   root,
   resolve: {
     alias: {
-      '@/types': join(root, '../../', 'types'),
+      $: join(root, '../../'),
+      '@/entities': join(root, 'src/entities'),
+      '@/interfaces': join(root, 'src/interfaces'),
       '@/assets': join(root, 'assets'),
+      '@/hub': join(root, 'src/infrastructure/hub'),
       '@/oauth': join(root, 'src/infrastructure/oauth'),
       '@/transport': join(root, 'src/infrastructure/transport'),
       '@/providers': join(root, 'src/infrastructure/providers'),
       '@/modules': join(root, 'src/infrastructure/modules'),
-      '@/utils': join(root, 'src/infrastructure/utils'),
+      '@/utils': join(root, 'src/utils'),
       '@/presentation': join(root, 'src/presentation'),
     },
   },

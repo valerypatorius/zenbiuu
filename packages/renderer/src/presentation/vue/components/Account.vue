@@ -1,12 +1,6 @@
 <template>
   <div class="account">
-    <div class="account__avatar">
-      <img
-        v-if="avatar"
-        :src="avatar"
-        loading="lazy"
-      >
-    </div>
+    <Avatar :src="avatar" />
 
     <div class="account__main">
       <div
@@ -20,10 +14,38 @@
         {{ provider }}
       </div>
     </div>
+
+    <div class="account__actions">
+      <div
+        :class="[
+          'account__action',
+          isPrimary && 'account__action--active',
+        ]"
+        @click="emit('select')"
+      >
+        <Icon
+          class="account__primary"
+          name="crown"
+          :size="20"
+        />
+      </div>
+
+      <div
+        class="account__action"
+        @click="emit('remove')"
+      >
+        <Icon
+          name="trash"
+          :size="20"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Avatar from './ui/Avatar.vue';
+import Icon from './ui/Icon.vue';
 import { type Provider } from '@/providers/types';
 
 defineProps<{
@@ -31,6 +53,12 @@ defineProps<{
   name?: string;
   avatar?: string;
   provider: Provider;
+  isPrimary: boolean;
+}>();
+
+const emit = defineEmits<{
+  select: [];
+  remove: [];
 }>();
 </script>
 
@@ -39,28 +67,48 @@ defineProps<{
 
 .account {
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 
-  &__avatar {
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 5px 15px -5px var(--theme-color-text-secondary);
-
-    img {
-      display: block;
-      width: 100%;
-    }
+  &__main {
+    min-width: 0;
   }
 
   &__name {
     font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__details {
     @extend %text-small;
     color: var(--theme-color-text-secondary);
+  }
+
+  &__actions {
+    align-self: stretch;
+    display: flex;
+    color: var(--theme-color-text-secondary);
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    cursor: pointer;
+
+    &--active {
+      color: var(--theme-color-button-background);
+      pointer-events: none;
+    }
+
+    &:hover {
+      background-color: var(--theme-color-button-background);
+      color: var(--theme-color-button-text);
+    }
   }
 }
 </style>

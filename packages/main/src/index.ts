@@ -1,11 +1,10 @@
-import ElectronStore from 'electron-store';
-import App from './modules/app';
-import Window from './modules/window';
-import Theme from './modules/theme';
-// import { handleCors } from './modules/window/cors';
-// import { handleRendererRequests } from './modules/window/handlers';
-import { type StoreSchema } from './types/store';
-import Hub from './modules/hub';
+import { session } from 'electron';
+import Store from './modules/store';
+import App from '@/modules/app';
+import Window from '@/modules/window';
+import Theme from '@/modules/theme';
+import Hub from '@/modules/hub';
+import { objectKeysToLowercase } from '@/utils/index';
 // import Updater from './modules/updater';
 
 const app = new App();
@@ -13,11 +12,11 @@ const app = new App();
 /**
  * Do not allow creating multiple app instances
  */
-if (!app.isAllowAppStart) {
+if (app.isAllowAppStart === false) {
   app.quit();
 }
 
-const store = new ElectronStore<StoreSchema>({
+const store = new Store({
   name: 'v2.store',
   defaults: {
     windowBounds: {
@@ -36,9 +35,45 @@ const theme = new Theme(store, window);
 
 const hub = new Hub(window, theme);
 
+/**
+ * @todo Make pretty
+ */
+const filter = {
+  urls: [
+    /** Initial playlist */
+    'https://usher.ttvnw.net/*',
+
+    /** Video fragments */
+    'https://*.hls.ttvnw.net/*',
+
+    /** GQL for playlists access tokens */
+    'https://gql.twitch.tv/*',
+
+    /** Web pages */
+    'https://www.twitch.tv/*',
+
+    /** CDN with channels config files */
+    'https://static.twitchcdn.net/*',
+  ],
+};
+
 void (async () => {
   try {
     await app.start();
+
+    /**
+     * Deal with CORS
+     */
+    session.defaultSession.webRequest.onHeadersReceived(filter, (details, handler) => {
+      const responseHeaders = {
+        ...objectKeysToLowercase(details?.responseHeaders ?? {}),
+        'access-control-allow-origin': '*',
+      };
+
+      handler({
+        responseHeaders,
+      });
+    });
 
     window.open({
       // backgroundColor: theme.windowColor,

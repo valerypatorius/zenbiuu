@@ -1,12 +1,28 @@
 import AccountStore from './store';
-import AccountService from './service';
-import providers from '@/providers/index';
+import type ProvidersInterface from '@/interfaces/Providers.interface';
+import type AccountEntity from '@/entities/AccountEntity';
+import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
 
-class Account {
+export default class Account {
   public readonly store = new AccountStore();
-  public readonly service = new AccountService(this.store, providers);
+
+  constructor (
+    private readonly providers: ProvidersInterface,
+  ) {
+  }
+
+  public async getDataByEntity (entity: AuthorizedEntity): Promise<AccountEntity> {
+    const storedAccount = this.store.getAccount(entity);
+
+    if (storedAccount !== undefined) {
+      return storedAccount;
+    }
+
+    const providerApi = await this.providers.getApi(entity.provider);
+    const data = await providerApi.getAccount(entity.token);
+
+    this.store.setAccount(data);
+
+    return data;
+  }
 }
-
-const account = new Account();
-
-export default account;

@@ -3,23 +3,22 @@
 
   <main>
     <Settings />
-    <!-- <div v-if="isAuthorized">
-      Library
-    </div> -->
 
-    <Auth />
+    <div v-if="primaryEntity !== undefined">
+      Library
+    </div>
+
+    <Auth v-else />
   </main>
 </template>
 
 <script setup lang="ts">
+import { useAuth } from '../services/useAuth';
 import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
 import Settings from './Settings.vue';
-// import { useAuth } from '@/src/modules/auth/useAuth';
 
-// const { isAuthorized } = useAuth();
-
-// useAuth();
+const { primaryEntity } = useAuth();
 
 // const route = useRoute();
 // const { isSettingsActive } = useInterface();

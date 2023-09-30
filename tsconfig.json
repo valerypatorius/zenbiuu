@@ -13,11 +13,6 @@
     ],
     "lib": ["ESNext"],
     "esModuleInterop": true,
-    "jsx": "preserve",
-    "paths": {
-      "@/types/*": [
-        "../../types/*"
-      ]
-    }
+    "jsx": "preserve"
   }
 }

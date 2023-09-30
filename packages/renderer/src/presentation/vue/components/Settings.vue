@@ -8,7 +8,11 @@
         {{ t('settings.title') }}
       </div>
 
-      <div class="settings__section">
+      <!-- Accounts management -->
+      <div
+        v-if="accounts.length > 0"
+        class="settings__section"
+      >
         <div class="settings__section-title">
           {{ t('settings.account.title') }}
         </div>
@@ -19,7 +23,18 @@
           :avatar="avatar"
           :name="name"
           :provider="provider"
+          :is-primary="isPrimaryEntity({ token, provider })"
+          @select="setPrimaryEntity({ token, provider })"
+          @remove="removeAccount({ token, provider })"
         />
+
+        <Button
+          v-for="provider in availableProviders"
+          :key="provider"
+          @click="authorize(provider)"
+        >
+          Добавить {{ provider }}
+        </Button>
       </div>
 
       <div class="settings__section">
@@ -48,19 +63,24 @@ import { useI18n } from 'vue-i18n';
 import { useHub } from '../services/useHub';
 import { useSettings } from '../services/useSettings';
 import { useAccount } from '../services/useAccount';
+import { useAuth } from '../services/useAuth';
+import { useProviders } from '../services/useProviders';
 import Account from './Account.vue';
+import Button from '@/presentation/vue/components/ui/Button.vue';
 
 const { t } = useI18n();
 const { app } = useHub();
 const { state: isSettingsOpened } = useSettings();
-const { accounts } = useAccount();
+const { accounts, remove: removeAccount } = useAccount();
+const { isPrimaryEntity, setPrimaryEntity, authorize } = useAuth();
+const { available: availableProviders } = useProviders();
 </script>
 
 <style lang="postcss">
 @import '@/presentation/styles/typography.pcss';
 
 .settings {
-  width: 400px;
+  width: 320px;
   /* border-radius: 0 12px 12px 0; */
   position: fixed;
   top: var(--layout-titlebar-height);
@@ -89,7 +109,7 @@ const { accounts } = useAccount();
 
   &__section {
     display: grid;
-    gap: 8px;
+    gap: 12px;
     padding: 20px;
   }
 

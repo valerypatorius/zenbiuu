@@ -1,7 +1,8 @@
 import path from 'path';
 import { app } from 'electron';
+import type AppInterface from '@/interfaces/App.interface';
 
-export default class App {
+export default class App implements AppInterface {
   #protocol = app.getName();
 
   public isAllowAppStart = app.requestSingleInstanceLock();

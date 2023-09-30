@@ -13,12 +13,12 @@
       {{ t('auth.description') }}
 
       <div class="auth__buttons">
-        <Button @click="authorize(Provider.Twitch)">
-          Twitch
-        </Button>
-
-        <Button @click="authorize(Provider.Goodgame)">
-          GoodGame
+        <Button
+          v-for="provider in availableProviders"
+          :key="provider"
+          @click="authorize(provider)"
+        >
+          {{ provider }}
         </Button>
       </div>
 
@@ -31,13 +31,14 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useProviders } from '../services/useProviders';
 import { useAuth } from '@/presentation/vue/services/useAuth';
 import Button from '@/presentation/vue/components/ui/Button.vue';
 import appIconPath from '@/assets/icon.svg';
-import { Provider } from '@/providers/types';
 
 const { t } = useI18n();
 const { authorize } = useAuth();
+const { available: availableProviders } = useProviders();
 </script>
 
 <style lang="postcss">

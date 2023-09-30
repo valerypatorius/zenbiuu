@@ -1,4 +1,7 @@
-import { RequestAction, RequestError, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from '../../../_infrastructure/transport/types';
+import TransportNotAuthorizedError from '../errors/TransportNotAuthorizedError';
+import TransportNotFoundError from '../errors/TransportNotFoundError';
+import TransportUnknownError from '../errors/TransportUnknownError';
+import { RequestAction, RequestError, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from '../types';
 
 const context = self as unknown as Worker;
 
@@ -18,32 +21,24 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
       ...payload.options,
     });
 
-    console.log('response', response);
-
     /**
      * If response is not found, do not proceed
      */
     if (response.status === RequestStatusCode.NotFound) {
-      throw new Error(RequestError.NotFound, {
-        cause: RequestStatusCode.NotFound,
-      });
+      throw new TransportNotFoundError();
     }
 
     /**
      * If authorization is required, do not proceed
      */
     if (response.status === RequestStatusCode.NotAuthorized) {
-      throw new Error(RequestError.NotAuthorized, {
-        cause: RequestStatusCode.NotAuthorized,
-      });
+      throw new TransportNotAuthorizedError();
     }
 
     /**
      * Make response string to check if it can be empty
      */
     const responseText = await response.clone().text();
-
-    console.log('responseText', responseText);
 
     /**
      * If response should be parsed as text, return it right away
@@ -76,10 +71,8 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      */
     const responseData = await response.clone().json();
 
-    console.log('responseData', responseData);
-
     if (responseData === null || responseData === undefined) {
-      throw new Error(RequestError.Unknown);
+      throw new TransportUnknownError();
     }
 
     /**

@@ -1,6 +1,7 @@
 import { autoUpdater, type UpdateInfo } from 'electron-updater';
+import type UpdaterInterface from '$/interfaces/Updater.interface';
 
-export default class Updater {
+export default class Updater implements UpdaterInterface {
   constructor () {
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;

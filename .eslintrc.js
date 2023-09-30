@@ -1,6 +1,3 @@
-/**
- * @type {import('@typescript-eslint/types').ParserOptions}
- */
 const parserOptions = {
   parser: '@typescript-eslint/parser',
   tsconfigRootDir: __dirname,
@@ -76,5 +73,7 @@ module.exports = {
     'import/order': ['error', {
       groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
     }],
+
+    // '@typescript-eslint/method-signature-style': ['error', 'method'],
   },
 };

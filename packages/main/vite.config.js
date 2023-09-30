@@ -9,7 +9,10 @@ export default defineConfig({
   root,
   resolve: {
     alias: {
-      '@/types': join(root, '../../', 'types'),
+      $: join(root, '../../'),
+      '@/main/types': join(root, 'src/types'),
+      '@/modules': join(root, 'src/modules'),
+      '@/utils': join(root, 'src/utils'),
     },
   },
   build: {

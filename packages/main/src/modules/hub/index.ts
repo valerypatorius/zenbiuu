@@ -1,16 +1,18 @@
 import { app, ipcMain, shell } from 'electron';
 // import { type UpdateInfo } from 'electron-updater';
-import type Window from '../window';
-import type Theme from '../theme';
 // import type Updater from '../updater';
-import { type HubAppProperties, HubChannel } from '@/types/hub';
+import type HubInterface from '@/interfaces/Hub.interface';
+import type WindowInterface from '@/interfaces/Window.interface';
+import type ThemeInterface from '@/interfaces/Theme.interface';
+import type AppProperties from '$/entities/AppProperties';
+import HubChannel from '$/entities/HubChannel';
 
-export default class Hub {
+export default class Hub implements HubInterface {
   constructor (
-    private readonly window: Window,
-    private readonly theme: Theme,
+    private readonly window: WindowInterface,
+    private readonly theme: ThemeInterface,
   ) {
-    ipcMain.handle(HubChannel.GetAppProperties, async (): Promise<HubAppProperties> => {
+    ipcMain.handle(HubChannel.GetAppProperties, async (): Promise<AppProperties> => {
       return {
         name: app.getName(),
         version: app.getVersion(),

@@ -1,22 +1,31 @@
-import { type Account } from './types';
-import ObservableStore from '@/modules/shared/ObservableStore';
+import type AccountEntity from '@/entities/AccountEntity';
+import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
+import ObservableStore from '@/modules/shared/store/ObservableStore';
 
 interface AccountStoreSchema {
-  accounts: Account[];
+  accounts: AccountEntity[];
 }
 
 export default class AccountStore extends ObservableStore<AccountStoreSchema> {
   constructor () {
-    const state = {
+    super('store:account', {
       accounts: [],
-    };
-
-    const key = 'v2:store:account';
-
-    super(state, key);
+    });
   }
 
-  public setAccount (value: Account): void {
-    this.observableState.accounts.push(value);
+  public setAccount (value: AccountEntity): void {
+    this.stateProxy.accounts.push(value);
+  }
+
+  public getAccount ({ provider, token }: AuthorizedEntity): AccountEntity | undefined {
+    return this.stateProxy.accounts.find((account) => account.provider === provider && account.token === token);
+  }
+
+  public removeAccount ({ provider, token }: AuthorizedEntity): void {
+    const accountIndex = this.stateProxy.accounts.findIndex((account) => account.provider === provider && account.token === token);
+
+    if (accountIndex >= 0) {
+      this.stateProxy.accounts.splice(accountIndex, 1);
+    }
   }
 }
