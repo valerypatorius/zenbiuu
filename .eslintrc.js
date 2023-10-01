@@ -73,7 +73,5 @@ module.exports = {
     'import/order': ['error', {
       groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
     }],
-
-    // '@typescript-eslint/method-signature-style': ['error', 'method'],
   },
 };

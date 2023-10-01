@@ -5,16 +5,12 @@ import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type HubInterface from '@/interfaces/Hub.interface';
 import type AppProperties from '$/entities/AppProperties';
 
-export const appPropertiesKey = Symbol('app properties') as InjectionKey<AppProperties>;
-
-export const hubKey = Symbol('hub') as InjectionKey<HubInterface>;
-
-export const providersKey = Symbol('providers') as InjectionKey<ProvidersInterface>;
-
-/**
- * @todo Deal with importing from modules folder...
- */
-
-export const authModuleKey = Symbol('auth module') as InjectionKey<Auth>;
-
-export const accountModuleKey = Symbol('account module') as InjectionKey<Account>;
+export const Injection = {
+  AppProperties: Symbol('app properties') as InjectionKey<AppProperties>,
+  Providers: Symbol('providers') as InjectionKey<ProvidersInterface>,
+  Module: {
+    Hub: Symbol('hub') as InjectionKey<HubInterface>,
+    Auth: Symbol('auth module') as InjectionKey<Auth>,
+    Account: Symbol('account module') as InjectionKey<Account>,
+  },
+} as const;

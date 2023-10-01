@@ -1,13 +1,18 @@
 import { createEventHook, createSharedComposable } from '@vueuse/core';
 import { computed, inject } from 'vue';
-import { authModuleKey } from '../injections';
+import { Injection } from '../injections';
+import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useObservableState } from './useObservableState';
 import { useErrors } from './useErrors';
 import type Provider from '@/entities/Provider';
 import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
 
 export const useAuth = createSharedComposable(() => {
-  const auth = inject(authModuleKey);
+  const auth = inject(Injection.Module.Auth);
+
+  if (auth === undefined) {
+    throw new MissingModuleInjection(Injection.Module.Auth);
+  }
 
   const { state } = useObservableState(auth.store);
   const { catchable } = useErrors();
@@ -21,7 +26,11 @@ export const useAuth = createSharedComposable(() => {
 
   async function authorize (provider: Provider): Promise<void> {
     await catchable(async () => {
-      const token = await auth.authorize(provider);
+      const token = await auth?.authorize(provider);
+
+      if (token === undefined) {
+        return;
+      }
 
       await authorizedHook.trigger({
         provider,
@@ -32,14 +41,14 @@ export const useAuth = createSharedComposable(() => {
 
   async function deauthorize (entity: AuthorizedEntity): Promise<void> {
     await catchable(async () => {
-      await auth.deauthorize(entity);
+      await auth?.deauthorize(entity);
 
       await deauthorizedHook.trigger(entity);
     });
   }
 
   function setPrimaryEntity (value: AuthorizedEntity): void {
-    auth.store.setPrimaryEntity(value);
+    auth?.setPrimaryEntity(value);
   }
 
   function isPrimaryEntity ({ token, provider }: AuthorizedEntity): boolean {

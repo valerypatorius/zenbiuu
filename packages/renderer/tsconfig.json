@@ -40,9 +40,10 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   },
   "include": [
+    "../../entities/**/*.ts",
+    "../../interfaces/**/*.ts",
     "src/**/*.vue",
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "index.d.ts"
+    "src/**/*.tsx"
   ]
 }

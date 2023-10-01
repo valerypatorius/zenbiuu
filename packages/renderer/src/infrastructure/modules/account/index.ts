@@ -4,15 +4,19 @@ import type AccountEntity from '@/entities/AccountEntity';
 import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
 
 export default class Account {
-  public readonly store = new AccountStore();
+  readonly #store = new AccountStore();
 
   constructor (
     private readonly providers: ProvidersInterface,
   ) {
   }
 
+  public get store (): AccountStore {
+    return this.#store;
+  }
+
   public async getDataByEntity (entity: AuthorizedEntity): Promise<AccountEntity> {
-    const storedAccount = this.store.getAccount(entity);
+    const storedAccount = this.#store.getAccount(entity);
 
     if (storedAccount !== undefined) {
       return storedAccount;
@@ -21,8 +25,12 @@ export default class Account {
     const providerApi = await this.providers.getApi(entity.provider);
     const data = await providerApi.getAccount(entity.token);
 
-    this.store.setAccount(data);
+    this.#store.setAccount(data);
 
     return data;
+  }
+
+  public removeAccountForEntity (entity: AuthorizedEntity): void {
+    this.#store.removeAccount(entity);
   }
 }

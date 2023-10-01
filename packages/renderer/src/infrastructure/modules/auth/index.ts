@@ -6,7 +6,7 @@ import type HubInterface from '@/interfaces/Hub.interface';
 import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
 
 export default class Auth {
-  public readonly store = new AuthStore();
+  readonly #store = new AuthStore();
 
   constructor (
     private readonly providers: ProvidersInterface,
@@ -15,6 +15,10 @@ export default class Auth {
     /**
      * @todo Authorize transport on startup
      */
+  }
+
+  public get store (): AuthStore {
+    return this.#store;
   }
 
   public async authorize (provider: Provider): Promise<string> {
@@ -53,7 +57,7 @@ export default class Auth {
         /**
          * Save authorized entity in store
          */
-        this.store.saveEntity({
+        this.#store.saveEntity({
           provider,
           token,
         });
@@ -61,8 +65,8 @@ export default class Auth {
         /**
          * If saved entity is the only one, set it as primary
          */
-        if (this.store.state.entities.length === 1) {
-          this.store.setPrimaryEntity({
+        if (this.#store.state.entities.length === 1) {
+          this.#store.setPrimaryEntity({
             provider,
             token,
           });
@@ -83,6 +87,10 @@ export default class Auth {
 
     await providerApi.deauthorizeToken(entity.token);
 
-    this.store.removeEntity(entity);
+    this.#store.removeEntity(entity);
+  }
+
+  public setPrimaryEntity (value: AuthorizedEntity): void {
+    this.#store.setPrimaryEntity(value);
   }
 }

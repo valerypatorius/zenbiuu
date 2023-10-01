@@ -7,10 +7,10 @@
   "author": "valerypatorius",
   "main": "packages/main/dist/index.cjs",
   "scripts": {
-    "typecheck:hub": "tsc -p packages/hub --noEmit",
+    "typecheck:preload": "tsc -p packages/preload --noEmit",
     "typecheck:main": "tsc -p packages/main --noEmit",
     "typecheck:renderer": "vue-tsc -p packages/renderer --noEmit",
-    "typecheck": "npm run typecheck:main && npm run typecheck:hub && npm run typecheck:renderer",
+    "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer",
     "icons": "electron-icon-builder --input=icon.png --output=build --flatten",
     "compile:debug": "electron-builder build --config electron-builder.config.js --dir --config.asar=false",
     "compile:release:preview": "electron-builder build --config electron-builder.config.js --win --publish=never",
@@ -28,10 +28,8 @@
   "dependencies": {
     "@qiwi/deep-proxy": "^2.0.3",
     "@vueuse/core": "^10.4.1",
-    "@vueuse/integrations": "^10.4.1",
     "color": "^4.2.3",
     "hls.js": "^1.4.12",
-    "idb-keyval": "^6.2.1",
     "linkify-html": "^4.1.1",
     "linkifyjs": "^4.1.1",
     "localforage": "^1.10.0",

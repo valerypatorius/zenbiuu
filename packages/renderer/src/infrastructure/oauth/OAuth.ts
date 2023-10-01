@@ -8,7 +8,7 @@ export default abstract class OAuth implements OAuthInterface {
 
   protected readonly scopes: string[] = [];
 
-  protected readonly redirectUrl: string = import.meta.env.VITE_APP_REDIRECT_URL;
+  protected readonly redirectUrl = import.meta.env.VITE_APP_REDIRECT_URL;
 
   public get query (): string {
     return convertObjectToLocationQuery({

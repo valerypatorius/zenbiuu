@@ -1,34 +1,8 @@
-import { HubApiKey } from '@/hub/types';
-
-/**
- * Returns url to public folder.
- * Location is used to support both development and production environments
- */
-export function publicPath (filename: string): string {
-  return `${window.location.origin}/${filename}`;
-}
-
 /**
  * Get current unixtime in seconds
  */
 export function getCurrentUnixTime (): number {
   return Math.floor(new Date().getTime() / 1000.0);
-}
-
-/**
- * Returns true, if current platform is Windows
- * @todo move to useHub composable
- */
-export function isWindows (): boolean {
-  return window[HubApiKey].getState().platform === 'win32';
-}
-
-/**
- * Returns true, if current platform is MacOS
- * @todo move to useHub composable
- */
-export function isMac (): boolean {
-  return window[HubApiKey].getState().platform === 'darwin';
 }
 
 /**

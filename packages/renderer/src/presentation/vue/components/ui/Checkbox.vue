@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import Icon from '@/src/modules/ui/components/Icon.vue';
+import Icon from './Icon.vue';
 
 withDefaults(defineProps<{
   /** Checkbox value */
@@ -26,14 +26,14 @@ withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-  (name: 'change', payload: Event): void;
+  change: [payload: Event];
 }>();
 
 /**
  * Emit "change" event when checkbox value is changed
  * @param payload - event payload
  */
-function onChange (payload: Event) {
+function onChange (payload: Event): void {
   emit('change', payload);
 }
 </script>

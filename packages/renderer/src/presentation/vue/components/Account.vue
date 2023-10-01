@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon.vue';
-import { type Provider } from '@/providers/types';
+import type Provider from '@/entities/Provider';
 
 defineProps<{
   id?: string;

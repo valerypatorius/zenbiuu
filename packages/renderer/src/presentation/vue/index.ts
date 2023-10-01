@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { accountModuleKey, appPropertiesKey, authModuleKey, hubKey, providersKey } from './injections';
+import { Injection } from './injections';
 import App from './components/App.vue';
 import router from './router';
 import { getI18n } from './i18n';
@@ -21,13 +21,10 @@ const app = createApp(App);
 app.use(getI18n(appProperties.locale));
 app.use(router);
 
-app.provide(appPropertiesKey, appProperties);
-app.provide(hubKey, hub);
-app.provide(providersKey, providers);
-app.provide(authModuleKey, auth);
-app.provide(accountModuleKey, account);
+app.provide(Injection.AppProperties, appProperties);
+app.provide(Injection.Module.Hub, hub);
+app.provide(Injection.Providers, providers);
+app.provide(Injection.Module.Auth, auth);
+app.provide(Injection.Module.Account, account);
 
-/**
- * Mount the app
- */
 app.mount('body');

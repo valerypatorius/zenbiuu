@@ -13,12 +13,12 @@ export default class Hub implements HubInterface {
   /**
    * API, provided by main process
    */
-  private readonly api = window[HubApiKey];
+  readonly #api = window[HubApiKey];
 
   /**
    * Hooks to call when app link is intercepted
    */
-  private readonly interceptedEventsHooks = new Set<InterceptedLinkHook>();
+  readonly #interceptedEventsHooks = new Set<InterceptedLinkHook>();
 
   constructor () {
     window.addEventListener(HubEvent.InterceptedLink, this.handleInterceptedLinkEvent.bind(this) as EventListener);
@@ -28,7 +28,7 @@ export default class Hub implements HubInterface {
    * Returns app properties
    */
   public async getAppProperties (): Promise<AppProperties> {
-    return this.api.getAppProperties();
+    return this.#api.getAppProperties();
   }
 
   /**
@@ -39,7 +39,7 @@ export default class Hub implements HubInterface {
     try {
       const data = Hub.parseInterceptedLink(detail.link);
 
-      this.interceptedEventsHooks.forEach((hook) => {
+      this.#interceptedEventsHooks.forEach((hook) => {
         hook(data);
       });
     } catch (error) {
@@ -71,7 +71,7 @@ export default class Hub implements HubInterface {
    * @param url - url to load
    */
   public openUrlInBrowser (url: string): void {
-    return this.api.openUrlInBrowser(url);
+    return this.#api.openUrlInBrowser(url);
   }
 
   /**
@@ -79,7 +79,7 @@ export default class Hub implements HubInterface {
    * @param fn - function to call
    */
   public onInterceptedLink (fn: InterceptedLinkHook): InterceptedLinkHookReturnValue {
-    this.interceptedEventsHooks.add(fn);
+    this.#interceptedEventsHooks.add(fn);
 
     return {
       off: () => {
@@ -93,6 +93,6 @@ export default class Hub implements HubInterface {
    * @param fn - function, which was called
    */
   public offInterceptedLink (fn: InterceptedLinkHook): void {
-    this.interceptedEventsHooks.delete(fn);
+    this.#interceptedEventsHooks.delete(fn);
   }
 }

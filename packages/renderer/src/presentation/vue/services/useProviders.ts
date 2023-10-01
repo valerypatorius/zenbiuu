@@ -1,9 +1,14 @@
 import { createSharedComposable } from '@vueuse/core';
 import { inject } from 'vue';
-import { providersKey } from '../injections';
+import { Injection } from '../injections';
+import MissingModuleInjection from '../errors/MissingModuleInjection';
 
 export const useProviders = createSharedComposable(() => {
-  const providers = inject(providersKey);
+  const providers = inject(Injection.Providers);
+
+  if (providers === undefined) {
+    throw new MissingModuleInjection(Injection.Providers);
+  }
 
   const available = providers.available;
 
