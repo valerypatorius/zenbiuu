@@ -1,98 +1,60 @@
 import * as localforage from 'localforage';
 import StoreSaveError from './errors/StoreSaveError';
 import StoreGetError from './errors/StoreGetError';
+import StoreBuildError from './errors/StoreBuildError';
 import { observable } from '@/utils/object';
 
-type Observer<T> = (state: T) => void;
+type Observer<S extends Record<string, any>> = (state: S) => void;
+
+const store = localforage.createInstance({
+  driver: localforage.INDEXEDDB,
+  name: 'store',
+  storeName: 'v2',
+});
 
 /**
  * Store with observable and immutable state
  */
-export default abstract class ObservableStore<T extends object, O extends Observer<T> = Observer<T>> {
+export default class ObservableStore<S extends Record<string, any>, O extends Observer<S> = Observer<S>> {
   /**
    * Store name
    */
   readonly #name: string;
 
   /**
-   * Store instance
-   */
-  readonly #store: LocalForage;
-
-  /**
    * Raw non-proxied state object
    */
-  readonly #state: T;
+  readonly #state: S;
 
   /**
    * Proxied state object, available for public use.
    * Triggers observers when changed
    */
-  protected readonly stateProxy: T;
+  protected readonly stateProxy: S;
 
   /**
    * Set of observers functions, which are called on every state change
    */
   readonly #observers = new Set<O>();
 
-  /**
-   * @param name - store name
-   * @param data - initial data for state
-   */
-  constructor (name: string, data: T) {
-    /**
-     * Save store name
-     */
+  protected constructor (name: string, data: S) {
     this.#name = name;
 
-    /**
-     * Create store instance
-     */
-    this.#store = localforage.createInstance({
-      driver: localforage.INDEXEDDB,
-      name: 'store',
-      storeName: 'v2',
-    });
+    this.#state = data;
 
-    /**
-     * Copy and save initial data as state
-     */
-    this.#state = Object.assign({}, data);
-
-    /**
-     * Make proxied version of state object
-     */
     this.stateProxy = observable(this.#state, () => {
-      /**
-       * Call observers
-       */
       this.#observers.forEach((fn) => {
         fn(this.state);
       });
 
-      /**
-       * Save state in store
-       */
-      void this.saveStateToStore();
+      void ObservableStore.saveStateToStore(this.#name, this.#state);
     });
-
-    /**
-     * If data exists in store, update state with it.
-     * Otherwise, save state in store
-     */
-    this.getStateFromStore()
-      .then((storedState) => {
-        Object.assign(this.stateProxy, storedState);
-      })
-      .catch(() => {
-        void this.saveStateToStore();
-      });
   }
 
   /**
    * Returns immutable state copy for external usage
    */
-  public get state (): T {
+  public get state (): S {
     return Object.freeze(Object.assign({}, this.stateProxy));
   }
 
@@ -117,14 +79,33 @@ export default abstract class ObservableStore<T extends object, O extends Observ
     this.#observers.delete(fn);
   }
 
-  /**
-   * Save current state in store
-   */
-  private async saveStateToStore (): Promise<void> {
+  static async prepare <S extends Record<string, any>>(name: string, defaultData: S): Promise<{ name: string; data: S }> {
     try {
-      await this.#store.setItem(this.#name, this.#state);
+      const storedData = await ObservableStore.getStateFromStore<S>(name);
+      const data = storedData ?? defaultData;
+
+      if (storedData === null) {
+        await ObservableStore.saveStateToStore(name, defaultData);
+      }
+
+      return {
+        name,
+        data,
+      };
     } catch (error) {
-      console.error(error);
+      throw new StoreBuildError();
+    }
+  }
+
+  /**
+   * Save state in store
+   */
+  static async saveStateToStore <T>(name: string, state: T): Promise<void> {
+    try {
+      await store.setItem(name, state);
+    } catch (error) {
+      console.log(error);
+
       throw new StoreSaveError();
     }
   }
@@ -132,13 +113,9 @@ export default abstract class ObservableStore<T extends object, O extends Observ
   /**
    * Returns state, previously saved in store
    */
-  private async getStateFromStore (): Promise<T> {
+  static async getStateFromStore <T>(name: string): Promise<T | null> {
     try {
-      const state = await this.#store.getItem<T>(this.#name);
-
-      if (state === null) {
-        throw new StoreGetError();
-      }
+      const state = await store.getItem<T>(name);
 
       return state;
     } catch (error) {

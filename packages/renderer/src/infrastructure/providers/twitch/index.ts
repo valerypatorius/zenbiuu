@@ -1,32 +1,51 @@
+import AbstractProvider from '../AbstractProvider';
 import { type TwitchUser } from './types';
-import OAuth from './oauth';
-import Transport from './transport';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
+import OAuth from '@/oauth/OAuth';
 import Provider from '@/entities/Provider';
+import Transport from '@/transport/Transport';
 
-export default class Twitch implements ProviderApiInterface {
-  #oauth = new OAuth();
-  #transport = new Transport();
+export default class Twitch extends AbstractProvider implements ProviderApiInterface {
+  #clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
 
-  public get authUrl (): string {
-    return this.#oauth.url;
-  }
+  protected readonly oauth = new OAuth('https://id.twitch.tv/oauth2/authorize', this.#clientId, [
+    'chat:read',
+    'chat:edit',
+    'channel:moderate',
+    'user:read:follows',
+    'channel:read:subscriptions',
+  ]);
 
-  public authorizeTransport (token: string): void {
-    this.#transport.setHeaders({
-      Authorization: `Bearer ${token}`,
-      'Client-Id': this.#oauth.clientId,
+  protected readonly transport = new Transport(this.transportHeaders);
+
+  public authorize (token?: string): void {
+    this.accessToken = token;
+
+    if (this.accessToken === undefined) {
+      delete this.transportHeaders.Authorization;
+      delete this.transportHeaders['Client-Id'];
+    } else {
+      this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
+      this.transportHeaders['Client-Id'] = this.#clientId;
+    }
+
+    console.log('authorize twitch', token);
+
+    this.transport.get('https://api.twitch.tv/helix/streams/followed?user_id=76197514').then((response) => {
+      console.log('Request followed streams', response);
     });
-
-    console.log(`Provider [${Provider.Twitch}] transport authorized`);
   }
 
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-users
    */
-  public async getAccount (token: string): Promise<AccountEntity> {
-    const { data } = await this.#transport.get<{ data: TwitchUser[] }>('https://api.twitch.tv/helix/users');
+  public async login (): Promise<AccountEntity> {
+    const token = await super.requestAccessToken();
+
+    this.authorize(token);
+
+    const { data } = await this.transport.get<{ data: TwitchUser[] }>('https://api.twitch.tv/helix/users');
     const user = data[0];
 
     return {
@@ -41,13 +60,9 @@ export default class Twitch implements ProviderApiInterface {
   /**
    * @link https://dev.twitch.tv/docs/authentication/revoke-tokens/
    */
-  public async deauthorizeToken (token: string): Promise<void> {
-    console.log('deauthorize twitch', token);
-    console.log(this.#transport);
-    throw new Error('aboba');
-    // await this.transport.post('https://id.twitch.tv/oauth2/revoke', {
-    //   client_id: this.oauth.clientId,
-    //   token,
-    // });
+  public async logout (token: string): Promise<void> {
+    this.authorize(undefined);
+
+    await this.transport.post(`https://id.twitch.tv/oauth2/revoke?client_id=${this.#clientId}&token=${token}`);
   }
 }

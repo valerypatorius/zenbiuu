@@ -1,31 +1,68 @@
 import type AccountEntity from '@/entities/AccountEntity';
-import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
 import ObservableStore from '@/modules/shared/store/ObservableStore';
 
-interface AccountStoreSchema {
+interface Schema {
   accounts: AccountEntity[];
+  /**
+   * @todo Store only provider & token as primary account properties?
+   */
+  primary?: AccountEntity;
 }
 
-export default class AccountStore extends ObservableStore<AccountStoreSchema> {
-  constructor () {
-    super('store:account', {
+export default class AccountStore extends ObservableStore<Schema> {
+  static async build (): Promise<AccountStore> {
+    const { name, data } = await AccountStore.prepare<Schema>('store:account', {
       accounts: [],
     });
+
+    return new AccountStore(name, data);
   }
 
-  public setAccount (value: AccountEntity): void {
-    this.stateProxy.accounts.push(value);
+  public addAccount (account: AccountEntity): void {
+    this.stateProxy.accounts.push(account);
   }
 
-  public getAccount ({ provider, token }: AuthorizedEntity): AccountEntity | undefined {
-    return this.stateProxy.accounts.find((account) => account.provider === provider && account.token === token);
-  }
-
-  public removeAccount ({ provider, token }: AuthorizedEntity): void {
-    const accountIndex = this.stateProxy.accounts.findIndex((account) => account.provider === provider && account.token === token);
+  public removeAccount ({ provider, token }: AccountEntity): void {
+    const accountIndex = this.stateProxy.accounts.findIndex((storedAccount) => storedAccount.provider === provider && storedAccount.token === token);
 
     if (accountIndex >= 0) {
       this.stateProxy.accounts.splice(accountIndex, 1);
     }
+  }
+
+  public getAccountByProperties (account: Partial<AccountEntity>): AccountEntity | undefined {
+    return this.stateProxy.accounts.find((storedAccount) => storedAccount.provider === account.provider && storedAccount.token === account.token);
+  }
+
+  public getPrimaryAccount (): AccountEntity | undefined {
+    return this.stateProxy.primary;
+  }
+
+  public setPrimaryAccount (account: AccountEntity): void {
+    const storedAccount = this.getAccountByProperties(account);
+
+    if (storedAccount === undefined) {
+      throw new Error('Failed to set primary account', { cause: account });
+    }
+
+    this.stateProxy.primary = storedAccount;
+  }
+
+  public resetPrimaryAccount (): void {
+    const fallbackPrimaryAccount = this.stateProxy.accounts[0];
+
+    if (fallbackPrimaryAccount !== undefined) {
+      this.stateProxy.primary = fallbackPrimaryAccount;
+    } else {
+      delete this.stateProxy.primary;
+    }
+  }
+
+  public isPrimaryAccount (account: AccountEntity): boolean {
+    if (this.stateProxy.primary === undefined) {
+      return false;
+    }
+
+    return account.provider === this.stateProxy.primary.provider && account.token === this.stateProxy.primary.token;
   }
 }

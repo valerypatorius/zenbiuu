@@ -1,14 +1,15 @@
 import type OAuthInterface from '@/interfaces/OAuth.interface';
 import { convertObjectToLocationQuery, uid } from '@/utils/string';
 
-export default abstract class OAuth implements OAuthInterface {
-  public readonly abstract clientId: string;
-
-  protected readonly abstract path: string;
-
-  protected readonly scopes: string[] = [];
-
+export default class OAuth implements OAuthInterface {
   protected readonly redirectUrl = import.meta.env.VITE_APP_REDIRECT_URL;
+
+  constructor (
+    private readonly path: string,
+    private readonly clientId: string,
+    private readonly scopes: string[] = [],
+  ) {
+  }
 
   public get query (): string {
     return convertObjectToLocationQuery({

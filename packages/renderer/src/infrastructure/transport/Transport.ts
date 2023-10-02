@@ -13,22 +13,15 @@ interface RequestHandlerPayload {
   parseResponse?: RequestPayload['parseResponse'];
 }
 
-export default abstract class Transport implements TransportInterface {
+export default class Transport implements TransportInterface {
   private readonly queue = new Map<string, QueueHandlers>();
-
-  private headers: Record<string, string> = {};
 
   private readonly worker = new TransportWorker();
 
-  constructor () {
+  constructor (
+    private readonly headers: Record<string, string>,
+  ) {
     this.worker.addEventListener('message', this.handleWorkerMessage.bind(this));
-  }
-
-  public setHeaders (value: Record<string, string>): void {
-    this.headers = {
-      ...this.headers,
-      ...value,
-    };
   }
 
   private handleWorkerMessage (event: MessageEvent<RequestResponse>): void {
@@ -44,15 +37,17 @@ export default abstract class Transport implements TransportInterface {
     } else {
       handlers.resolve(data.data);
     }
+
+    this.queue.delete(data.url);
   }
 
   private async handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {
     return await new Promise((resolve, reject) => {
       /**
-       * @todo Handle with abort controller
+       * @todo Handle with abort controller?
        */
       if (this.queue.has(payload.url)) {
-        reject(new Error('already queued'));
+        reject(new Error('Endpoint has been processing', { cause: payload.url }));
 
         return;
       }

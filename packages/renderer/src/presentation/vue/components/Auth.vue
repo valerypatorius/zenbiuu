@@ -16,7 +16,7 @@
         <Button
           v-for="provider in availableProviders"
           :key="provider"
-          @click="authorize(provider)"
+          @click="login(provider)"
         >
           {{ provider }}
         </Button>
@@ -32,12 +32,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useProviders } from '../services/useProviders';
-import { useAuth } from '@/presentation/vue/services/useAuth';
 import Button from '@/presentation/vue/components/ui/Button.vue';
 import appIconPath from '@/assets/icon.svg';
+import { useAccount } from '@/presentation/vue/services/useAccount';
 
 const { t } = useI18n();
-const { authorize } = useAuth();
+const { login } = useAccount();
 const { available: availableProviders } = useProviders();
 </script>
 

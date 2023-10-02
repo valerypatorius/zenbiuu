@@ -18,20 +18,18 @@
         </div>
 
         <Account
-          v-for="{ token, avatar, name, provider } in accounts"
-          :key="token"
-          :avatar="avatar"
-          :name="name"
-          :provider="provider"
-          :is-primary="isPrimaryEntity({ token, provider })"
-          @select="setPrimaryEntity({ token, provider })"
-          @remove="removeAccount({ token, provider })"
+          v-for="account in accounts"
+          :key="`${account.provider}:${account.token}`"
+          v-bind="account"
+          :is-primary="isPrimaryAccount(account)"
+          @remove="logout(account)"
+          @select="setPrimaryAccount(account)"
         />
 
         <Button
           v-for="provider in availableProviders"
           :key="provider"
-          @click="authorize(provider)"
+          @click="login(provider)"
         >
           Добавить {{ provider }}
         </Button>
@@ -63,7 +61,6 @@ import { useI18n } from 'vue-i18n';
 import { useHub } from '../services/useHub';
 import { useSettings } from '../services/useSettings';
 import { useAccount } from '../services/useAccount';
-import { useAuth } from '../services/useAuth';
 import { useProviders } from '../services/useProviders';
 import Account from './Account.vue';
 import Button from '@/presentation/vue/components/ui/Button.vue';
@@ -71,8 +68,7 @@ import Button from '@/presentation/vue/components/ui/Button.vue';
 const { t } = useI18n();
 const { app } = useHub();
 const { state: isSettingsOpened } = useSettings();
-const { accounts, remove: removeAccount } = useAccount();
-const { isPrimaryEntity, setPrimaryEntity, authorize } = useAuth();
+const { accounts, login, logout, isPrimaryAccount, setPrimaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
 </script>
 

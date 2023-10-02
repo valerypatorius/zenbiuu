@@ -3,10 +3,7 @@
     <Avatar :src="avatar" />
 
     <div class="account__main">
-      <div
-        v-if="name"
-        class="account__name"
-      >
+      <div class="account__name">
         {{ name }}
       </div>
 
@@ -46,15 +43,13 @@
 <script setup lang="ts">
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon.vue';
-import type Provider from '@/entities/Provider';
+import type AccountEntity from '@/entities/AccountEntity';
 
-defineProps<{
-  id?: string;
-  name?: string;
-  avatar?: string;
-  provider: Provider;
-  isPrimary: boolean;
-}>();
+type Props = AccountEntity & {
+  isPrimary?: boolean;
+};
+
+defineProps<Props>();
 
 const emit = defineEmits<{
   select: [];

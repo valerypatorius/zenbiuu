@@ -3,8 +3,8 @@ import { computed, inject } from 'vue';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useObservableState } from './useObservableState';
-import { useAuth } from './useAuth';
-import { type AuthorizedEntity } from '@/entities/AuthorizedEntity';
+import type Provider from '@/entities/Provider';
+import type AccountEntity from '@/entities/AccountEntity';
 
 export const useAccount = createSharedComposable(() => {
   const account = inject(Injection.Module.Account);
@@ -14,27 +14,36 @@ export const useAccount = createSharedComposable(() => {
   }
 
   const { state } = useObservableState(account.store);
-  const { onAuthorized, onDeauthorized, deauthorize } = useAuth();
 
   const accounts = computed(() => state.value.accounts);
 
-  onAuthorized((entity) => {
-    /**
-     * @todo Handle case, when account has been authorized before
-     */
-    account.getDataByEntity(entity);
-  });
+  const hasPrimaryAccount = computed(() => state.value.primary !== undefined);
 
-  onDeauthorized((entity) => {
-    account.removeAccountForEntity(entity);
-  });
+  async function login (provider: Provider): Promise<void> {
+    await account?.login(provider);
+  }
 
-  async function remove (entity: AuthorizedEntity): Promise<void> {
-    await deauthorize(entity);
+  async function logout (entity: AccountEntity): Promise<void> {
+    await account?.logout(entity);
+  }
+
+  /**
+   * @todo Maybe do not allow calling store methods from composables?
+   */
+  function isPrimaryAccount (entity: AccountEntity): boolean {
+    return account?.store.isPrimaryAccount(entity) ?? false;
+  }
+
+  async function setPrimaryAccount (entity: AccountEntity): Promise<void> {
+    await account?.setPrimaryAccount(entity);
   }
 
   return {
     accounts,
-    remove,
+    login,
+    logout,
+    isPrimaryAccount,
+    hasPrimaryAccount,
+    setPrimaryAccount,
   };
 });

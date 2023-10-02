@@ -1,5 +1,4 @@
 export interface TransportInterface {
-  setHeaders: (value: Record<string, string>) => void;
   get: <T>(url: string) => Promise<T>;
   post: <T>(url: string, body?: any) => Promise<T>;
 }

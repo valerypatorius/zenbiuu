@@ -7,19 +7,6 @@
       >
         <Icon name="settings" />
       </div>
-
-      <!-- <div
-        class="titlebar__button"
-        @click="getUserData(Provider.Twitch)"
-      >
-        <template v-if="isAuthorized">
-          <Icon name="userAuthorized" />
-        </template>
-
-        <template v-else>
-          <Icon name="userUnknown" />
-        </template>
-      </div> -->
     </div>
 
     {{ app.name }}
@@ -27,17 +14,12 @@
 </template>
 
 <script setup lang="ts">
-// import { Provider } from '../../auth/types';
-// import { useAuth } from '../../auth/useAuth';
-// import { useUser } from '../../auth/useUser';
 import { useSettings } from '../services/useSettings';
 import Icon from '@/presentation/vue/components/ui/Icon.vue';
 import { useHub } from '@/presentation/vue/services/useHub';
 
 const { app } = useHub();
 const { toggleState: toggleSettingsState } = useSettings();
-// const { isAuthorized } = useAuth();
-// const { getUserData } = useUser();
 </script>
 
 <style lang="postcss">
