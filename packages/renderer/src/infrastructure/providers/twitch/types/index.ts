@@ -1,4 +1,15 @@
 /**
+ * @link https://dev.twitch.tv/docs/authentication/validate-tokens/
+ */
+export interface TwitchValidTokenProperties {
+  client_id: string;
+  login: string;
+  scopes: string[];
+  user_id: string;
+  expires_in: number;
+}
+
+/**
  * @link https://dev.twitch.tv/docs/api/reference#get-users
  */
 export interface TwitchUser {

@@ -1,49 +1,60 @@
 import AbstractProvider from '../AbstractProvider';
-import { type TwitchUser } from './types';
+import { type TwitchValidTokenProperties, type TwitchUser } from './types';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import OAuth from '@/oauth/OAuth';
 import Provider from '@/entities/Provider';
 import Transport from '@/transport/Transport';
+import { getExpirationDateFromNow } from '@/utils/date';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   #clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
 
-  protected readonly oauth = new OAuth('https://id.twitch.tv/oauth2/authorize', this.#clientId, [
-    'chat:read',
-    'chat:edit',
-    'channel:moderate',
-    'user:read:follows',
-    'channel:read:subscriptions',
-  ]);
+  protected readonly oauth = new OAuth({
+    name: Provider.Twitch,
+    path: 'https://id.twitch.tv/oauth2/authorize',
+    clientId: this.#clientId,
+    scopes: [
+      'chat:read',
+      'chat:edit',
+      'channel:moderate',
+      'user:read:follows',
+      'channel:read:subscriptions',
+    ],
+  });
 
   protected readonly transport = new Transport(this.transportHeaders);
 
-  public authorize (token?: string): void {
+  public async connect (token: string): Promise<string> {
     this.accessToken = token;
 
-    if (this.accessToken === undefined) {
-      delete this.transportHeaders.Authorization;
-      delete this.transportHeaders['Client-Id'];
-    } else {
-      this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
-      this.transportHeaders['Client-Id'] = this.#clientId;
-    }
+    this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
 
-    console.log('authorize twitch', token);
+    /**
+     * @todo Improve by specifying empty headers for request itself
+     */
+    delete this.transportHeaders['Client-Id'];
 
-    this.transport.get('https://api.twitch.tv/helix/streams/followed?user_id=76197514').then((response) => {
-      console.log('Request followed streams', response);
-    });
+    const { expires_in: expiresIn } = await this.transport.get<TwitchValidTokenProperties>('https://id.twitch.tv/oauth2/validate');
+
+    this.transportHeaders['Client-Id'] = this.#clientId;
+
+    return getExpirationDateFromNow(expiresIn);
+  }
+
+  public disconnect (): void {
+    this.accessToken = undefined;
+
+    delete this.transportHeaders.Authorization;
+    delete this.transportHeaders['Client-Id'];
   }
 
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-users
    */
   public async login (): Promise<AccountEntity> {
-    const token = await super.requestAccessToken();
-
-    this.authorize(token);
+    const { token } = await super.requestAuthorization();
+    const tokenExpirationDate = await this.connect(token);
 
     const { data } = await this.transport.get<{ data: TwitchUser[] }>('https://api.twitch.tv/helix/users');
     const user = data[0];
@@ -54,6 +65,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       avatar: user.profile_image_url,
       token,
       provider: Provider.Twitch,
+      tokenExpirationDate,
     };
   }
 
@@ -61,7 +73,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
    * @link https://dev.twitch.tv/docs/authentication/revoke-tokens/
    */
   public async logout (token: string): Promise<void> {
-    this.authorize(undefined);
+    this.disconnect();
 
     await this.transport.post(`https://id.twitch.tv/oauth2/revoke?client_id=${this.#clientId}&token=${token}`);
   }

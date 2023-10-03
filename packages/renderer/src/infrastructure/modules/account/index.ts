@@ -18,17 +18,20 @@ export default class Account {
 
     const primaryAccount = store.getPrimaryAccount();
 
+    /**
+     * @todo Do we really need to wait for connection?
+     */
     if (primaryAccount !== undefined) {
-      await Account.authorizeProviderByAccount(primaryAccount, providers);
+      await Account.connectProviderToAccount(primaryAccount, providers);
     }
 
     return new Account(store, providers);
   }
 
-  static async authorizeProviderByAccount (account: AccountEntity, providers: ProvidersInterface): Promise<void> {
+  static async connectProviderToAccount (account: AccountEntity, providers: ProvidersInterface): Promise<void> {
     const providerApi = await providers.getApi(account.provider);
 
-    providerApi.authorize(account.token);
+    await providerApi.connect(account.token);
   }
 
   public get store (): AccountStore {
@@ -58,6 +61,6 @@ export default class Account {
   public async setPrimaryAccount (account: AccountEntity): Promise<void> {
     this.#store.setPrimaryAccount(account);
 
-    await Account.authorizeProviderByAccount(account, this.providers);
+    await Account.connectProviderToAccount(account, this.providers);
   }
 }

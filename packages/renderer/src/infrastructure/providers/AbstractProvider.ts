@@ -15,7 +15,11 @@ export default abstract class AbstractProvider {
     protected readonly hub: HubInterface,
   ) {}
 
-  public async requestAccessToken (): Promise<string> {
+  public async requestAuthorization (): Promise<{
+    token: string;
+    state: string;
+    expiresIn?: number | null;
+  }> {
     this.hub.openUrlInBrowser(this.oauth.url);
 
     return await new Promise((resolve, reject) => {
@@ -27,10 +31,7 @@ export default abstract class AbstractProvider {
           return;
         }
 
-        /**
-         * @todo Include provider name in intercepted link
-         */
-        const token = payload.token;
+        const { token, state, expiresIn } = payload;
 
         /**
          * Once auth event has been intercepted, stop listening for it regardless of result
@@ -38,15 +39,19 @@ export default abstract class AbstractProvider {
         off();
 
         /**
-         * If token is not recognized, throw error and do not proceed
+         * If payload is not recognized, throw error and do not proceed
          */
-        if (typeof token !== 'string') {
-          reject(new Error('Failed to process access token after successfull authorization'));
+        if (typeof token !== 'string' || typeof state !== 'string' || typeof expiresIn === 'boolean' || typeof expiresIn === 'string') {
+          reject(new Error('Failed to process authorization response'));
 
           return;
         }
 
-        resolve(token);
+        resolve({
+          token,
+          state,
+          expiresIn,
+        });
       });
     });
   }

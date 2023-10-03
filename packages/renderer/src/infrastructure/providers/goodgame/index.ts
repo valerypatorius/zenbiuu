@@ -5,33 +5,37 @@ import type AccountEntity from '@/entities/AccountEntity';
 import OAuth from '@/oauth/OAuth';
 import Provider from '@/entities/Provider';
 import Transport from '@/transport/Transport';
+import { getExpirationDateFromNow } from '@/utils/date';
 
 export default class Goodgame extends AbstractProvider implements ProviderApiInterface {
   #clientId = import.meta.env.VITE_GOODGAME_APP_CLIENT_ID;
 
-  protected readonly oauth = new OAuth('https://goodgame.ru/oauth2/authorize', this.#clientId);
+  protected readonly oauth = new OAuth({
+    name: Provider.Goodgame,
+    path: 'https://goodgame.ru/oauth2/authorize',
+    clientId: this.#clientId,
+    scopes: [],
+  });
 
   protected readonly transport = new Transport(this.transportHeaders);
 
-  public authorize (token?: string): void {
+  public async connect (token: string): Promise<undefined> {
     this.accessToken = token;
 
-    if (this.accessToken === undefined) {
-      delete this.transportHeaders.Authorization;
-    } else {
-      this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
-    }
+    this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
+  }
 
-    console.log('authorize goodgame', token);
+  public disconnect (): void {
+    delete this.transportHeaders.Authorization;
   }
 
   /**
    * @link https://goodgame.ru/html/api4docs/index.html#/public/7b528dd5d7cf871825f17bf075632433
    */
   public async login (): Promise<AccountEntity> {
-    const token = await super.requestAccessToken();
+    const { token, expiresIn } = await super.requestAuthorization();
 
-    this.authorize(token);
+    await this.connect(token);
 
     const user = await this.transport.get<GoodgameUser>(`https://goodgame.ru/api/4/users/@me2/?access_token=${token}`);
 
@@ -41,10 +45,11 @@ export default class Goodgame extends AbstractProvider implements ProviderApiInt
       avatar: `https://goodgame.ru${user.avatar}`,
       token,
       provider: Provider.Goodgame,
+      tokenExpirationDate: typeof expiresIn === 'number' ? getExpirationDateFromNow(expiresIn) : undefined,
     };
   }
 
   public async logout (token: string): Promise<void> {
-    this.authorize(undefined);
+    this.disconnect();
   }
 }

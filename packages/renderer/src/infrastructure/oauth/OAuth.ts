@@ -1,23 +1,40 @@
 import type OAuthInterface from '@/interfaces/OAuth.interface';
 import { convertObjectToLocationQuery, uid } from '@/utils/string';
 
+interface OAuthConstructorParams {
+  name: string;
+  path: string;
+  clientId: string;
+  scopes?: string[];
+}
+
 export default class OAuth implements OAuthInterface {
   protected readonly redirectUrl = import.meta.env.VITE_APP_REDIRECT_URL;
 
-  constructor (
-    private readonly path: string,
-    private readonly clientId: string,
-    private readonly scopes: string[] = [],
-  ) {
+  #name: string;
+  #path: string;
+  #clientId: string;
+  #scopes: string[];
+
+  constructor ({
+    name,
+    path,
+    clientId,
+    scopes,
+  }: OAuthConstructorParams) {
+    this.#name = name;
+    this.#path = path;
+    this.#clientId = clientId;
+    this.#scopes = scopes ?? [];
   }
 
-  public get query (): string {
+  private get query (): string {
     return convertObjectToLocationQuery({
       response_type: 'token',
-      client_id: this.clientId,
+      client_id: this.#clientId,
       redirect_uri: encodeURIComponent(this.redirectUrl),
-      scope: this.scopes.join('+'),
-      state: uid(),
+      scope: this.#scopes.join('+'),
+      state: `${this.#name}:${uid()}`,
       /**
        * @todo Remove after debug
        */
@@ -26,6 +43,6 @@ export default class OAuth implements OAuthInterface {
   }
 
   public get url (): string {
-    return `${this.path}?${this.query}`;
+    return `${this.#path}?${this.query}`;
   }
 }

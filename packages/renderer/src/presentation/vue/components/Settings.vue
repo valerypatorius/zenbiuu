@@ -76,7 +76,7 @@ const { available: availableProviders } = useProviders();
 @import '@/presentation/styles/typography.pcss';
 
 .settings {
-  width: 320px;
+  width: 380px;
   /* border-radius: 0 12px 12px 0; */
   position: fixed;
   top: var(--layout-titlebar-height);

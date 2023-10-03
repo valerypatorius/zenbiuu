@@ -9,6 +9,7 @@
 
       <div class="account__details">
         {{ provider }}
+        {{ expirationDate }}
       </div>
     </div>
 
@@ -41,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon.vue';
 import type AccountEntity from '@/entities/AccountEntity';
@@ -49,12 +51,14 @@ type Props = AccountEntity & {
   isPrimary?: boolean;
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   select: [];
   remove: [];
 }>();
+
+const expirationDate = computed(() => props.tokenExpirationDate !== undefined ? new Date(props.tokenExpirationDate).toLocaleString() : '');
 </script>
 
 <style lang="postcss">
@@ -81,6 +85,9 @@ const emit = defineEmits<{
   &__details {
     @extend %text-small;
     color: var(--theme-color-text-secondary);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   &__actions {

@@ -26,19 +26,23 @@ const Day = 24 * Hour;
 /**
  * Returns current timestamp in ms
  */
-export const now = (): number => {
-  const date = new Date();
+// export const now = (): number => {
+//   const date = new Date();
 
-  return date.getTime();
-};
+//   return date.getTime();
+// };
 
 /**
  * Converts date string to unix timestamp
  */
-export const unixtime = (dateString: string): number => {
-  const date = new Date(dateString);
+export const unixtime = (dateString?: string): number => {
+  const date = dateString !== undefined ? new Date(dateString) : new Date();
 
-  return date.getTime() / MS;
+  return date.getTime();
+};
+
+export const getExpirationDateFromNow = (remainingTime: number): string => {
+  return new Date(unixtime() + remainingTime * 1000).toISOString();
 };
 
 export default {

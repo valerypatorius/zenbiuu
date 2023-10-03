@@ -2,7 +2,14 @@
  * Parse a string and return a primitive value
  * @param value - string to parse
  */
-export function parseString (value: string): string | boolean | null | undefined {
+export function parseString (value: string): string | number | boolean | null | undefined {
+  const numericValue = Number(value);
+  const isValidNumber = !Number.isNaN(numericValue);
+
+  if (isValidNumber) {
+    return numericValue;
+  }
+
   switch (value) {
     case 'undefined':
       return undefined;

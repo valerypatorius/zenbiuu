@@ -6,4 +6,5 @@ export default interface AccountEntity {
   avatar: string;
   token: string;
   provider: Provider;
+  tokenExpirationDate?: string;
 }
