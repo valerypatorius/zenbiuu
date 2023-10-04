@@ -1,4 +1,3 @@
-import ParseInterceptedLinkError from './errors/ParseInterceptedLinkError';
 import type AppProperties from '$/entities/AppProperties';
 import type HubInterface from '@/interfaces/Hub.interface';
 import type InterceptedLink from '@/entities/InterceptedLink';
@@ -37,15 +36,11 @@ export default class Hub implements HubInterface {
    * @param event - custom event, dispatched by main process
    */
   private handleInterceptedLinkEvent ({ detail }: InterceptedLinkEvent): void {
-    try {
-      const data = Hub.parseInterceptedLink(detail.link);
+    const data = Hub.parseInterceptedLink(detail.link);
 
-      this.#interceptedEventsHooks.forEach((hook) => {
-        hook(data);
-      });
-    } catch (error) {
-      throw new ParseInterceptedLinkError();
-    }
+    this.#interceptedEventsHooks.forEach((hook) => {
+      hook(data);
+    });
   }
 
   /**

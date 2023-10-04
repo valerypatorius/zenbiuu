@@ -10,9 +10,9 @@ import Account from '@/modules/account';
 const hub = new Hub();
 const providers = new Providers(hub);
 
-const account = await Account.build(providers);
-
 const appProperties = await hub.getAppProperties();
+
+const account = await Account.build(providers);
 
 const app = createApp(App);
 

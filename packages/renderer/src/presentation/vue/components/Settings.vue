@@ -28,10 +28,10 @@
 
         <Button
           v-for="provider in availableProviders"
-          :key="provider"
-          @click="login(provider)"
+          :key="provider.name"
+          @click="login(provider.name)"
         >
-          Добавить {{ provider }}
+          Добавить {{ provider.displayName }}
         </Button>
       </div>
 

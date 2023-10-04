@@ -1,11 +1,8 @@
 import type AccountEntity from '@/entities/AccountEntity';
-import ObservableStore from '@/modules/shared/store/ObservableStore';
+import ObservableStore from '@/modules/shared/ObservableStore';
 
 interface Schema {
   accounts: AccountEntity[];
-  /**
-   * @todo Store only provider & token as primary account properties?
-   */
   primary?: AccountEntity;
 }
 
@@ -30,8 +27,8 @@ export default class AccountStore extends ObservableStore<Schema> {
     }
   }
 
-  public getAccountByProperties (account: Partial<AccountEntity>): AccountEntity | undefined {
-    return this.stateProxy.accounts.find((storedAccount) => storedAccount.provider === account.provider && storedAccount.token === account.token);
+  public getAccountByProperties (properties: Partial<AccountEntity>): AccountEntity | undefined {
+    return this.stateProxy.accounts.find((storedAccount) => Object.entries(properties).every(([key, value]) => storedAccount[key as keyof AccountEntity] === value));
   }
 
   public getPrimaryAccount (): AccountEntity | undefined {
@@ -64,5 +61,9 @@ export default class AccountStore extends ObservableStore<Schema> {
     }
 
     return account.provider === this.stateProxy.primary.provider && account.token === this.stateProxy.primary.token;
+  }
+
+  public refreshAccount (account: AccountEntity, properties: Partial<AccountEntity>): void {
+    Object.assign(account, properties);
   }
 }

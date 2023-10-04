@@ -1,19 +1,21 @@
 import AbstractProvider from '../AbstractProvider';
 import { type TwitchValidTokenProperties, type TwitchUser } from './types';
+import config from './config';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import OAuth from '@/oauth/OAuth';
-import Provider from '@/entities/Provider';
 import Transport from '@/transport/Transport';
 import { getExpirationDateFromNow } from '@/utils/date';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
-  #clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
+  protected readonly config = config;
+
+  protected readonly clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
 
   protected readonly oauth = new OAuth({
-    name: Provider.Twitch,
-    path: 'https://id.twitch.tv/oauth2/authorize',
-    clientId: this.#clientId,
+    name: this.config.name,
+    path: this.config.oauthPath,
+    clientId: this.clientId,
     scopes: [
       'chat:read',
       'chat:edit',
@@ -37,7 +39,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     const { expires_in: expiresIn } = await this.transport.get<TwitchValidTokenProperties>('https://id.twitch.tv/oauth2/validate');
 
-    this.transportHeaders['Client-Id'] = this.#clientId;
+    this.transportHeaders['Client-Id'] = this.clientId;
 
     return getExpirationDateFromNow(expiresIn);
   }
@@ -64,7 +66,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       name: user.display_name,
       avatar: user.profile_image_url,
       token,
-      provider: Provider.Twitch,
+      provider: this.config.name,
       tokenExpirationDate,
     };
   }
@@ -75,6 +77,6 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   public async logout (token: string): Promise<void> {
     this.disconnect();
 
-    await this.transport.post(`https://id.twitch.tv/oauth2/revoke?client_id=${this.#clientId}&token=${token}`);
+    await this.transport.post(`https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
   }
 }

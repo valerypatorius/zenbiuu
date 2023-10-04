@@ -16,8 +16,6 @@
       loading="lazy"
       @load.once="onLoad"
     >
-
-    <slot />
   </div>
 </template>
 

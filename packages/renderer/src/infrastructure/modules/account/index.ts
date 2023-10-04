@@ -1,7 +1,6 @@
 import AccountStore from './store';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
-import type Provider from '@/entities/Provider';
 
 export default class Account {
   #store: AccountStore;
@@ -38,11 +37,20 @@ export default class Account {
     return this.#store;
   }
 
-  public async login (provider: Provider): Promise<void> {
+  public async login (provider: string): Promise<void> {
     const providerApi = await this.providers.getApi(provider);
     const account = await providerApi.login();
+    const storedAccount = this.#store.getAccountByProperties({
+      id: account.id,
+      provider: account.provider,
+    });
 
-    this.#store.addAccount(account);
+    if (storedAccount !== undefined) {
+      this.#store.refreshAccount(storedAccount, account);
+    } else {
+      this.#store.addAccount(account);
+    }
+
     this.#store.setPrimaryAccount(account);
   }
 

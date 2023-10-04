@@ -13,11 +13,12 @@ import { computed } from 'vue';
 import icons from '@/assets/icons';
 
 const props = defineProps<{
-  name: keyof typeof icons;
+  name?: keyof typeof icons;
+  raw?: string;
   size?: number;
 }>();
 
-const svg = computed(() => icons[props.name]);
+const svg = computed(() => props.name !== undefined ? icons[props.name] : (props.raw ?? ''));
 </script>
 
 <style lang="postcss">

@@ -1,6 +1,6 @@
 import { shallowRef, type ShallowRef } from 'vue';
 import { tryOnBeforeMount, tryOnBeforeUnmount } from '@vueuse/core';
-import type ObservableStore from '@/modules/shared/store/ObservableStore';
+import type ObservableStore from '@/modules/shared/ObservableStore';
 
 export function useObservableState<T extends object> (store: ObservableStore<T>): { state: ShallowRef<T> } {
   /**

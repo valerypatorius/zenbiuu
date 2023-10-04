@@ -8,13 +8,6 @@ export enum RequestAction {
   Post = 'post',
 }
 
-export enum RequestError {
-  NotFound = 'Not found',
-  NotAuthorized = 'Authorization required',
-  Queued = 'Request still processing',
-  Unknown = 'Unknown error',
-}
-
 export enum RequestStatusCode {
   Success = 200,
   NoContent = 204,

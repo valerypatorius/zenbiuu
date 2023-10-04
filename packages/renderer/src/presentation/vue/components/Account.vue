@@ -1,6 +1,23 @@
 <template>
   <div class="account">
-    <Avatar :src="avatar" />
+    <div class="account__avatar">
+      <Avatar
+        :src="avatar"
+      />
+
+      <div
+        class="account__provider"
+        :style="{
+          'background-color': availableProviders[provider].color,
+        }"
+      >
+        <Icon
+          class="account__primary"
+          :raw="availableProviders[provider].icon"
+          :size="18"
+        />
+      </div>
+    </div>
 
     <div class="account__main">
       <div class="account__name">
@@ -8,7 +25,6 @@
       </div>
 
       <div class="account__details">
-        {{ provider }}
         {{ expirationDate }}
       </div>
     </div>
@@ -43,6 +59,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useProviders } from '../services/useProviders';
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon.vue';
 import type AccountEntity from '@/entities/AccountEntity';
@@ -57,6 +74,8 @@ const emit = defineEmits<{
   select: [];
   remove: [];
 }>();
+
+const { available: availableProviders } = useProviders();
 
 const expirationDate = computed(() => props.tokenExpirationDate !== undefined ? new Date(props.tokenExpirationDate).toLocaleString() : '');
 </script>
@@ -73,6 +92,29 @@ const expirationDate = computed(() => props.tokenExpirationDate !== undefined ? 
 
   &__main {
     min-width: 0;
+  }
+
+  &__avatar {
+    position: relative;
+  }
+
+  &__provider {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    z-index: 1;
+
+    svg {
+      width: 100%;
+      height: auto;
+    }
   }
 
   &__name {

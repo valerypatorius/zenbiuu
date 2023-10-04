@@ -15,10 +15,10 @@
       <div class="auth__buttons">
         <Button
           v-for="provider in availableProviders"
-          :key="provider"
-          @click="login(provider)"
+          :key="provider.name"
+          @click="login(provider.name)"
         >
-          {{ provider }}
+          {{ provider.displayName }}
         </Button>
       </div>
 

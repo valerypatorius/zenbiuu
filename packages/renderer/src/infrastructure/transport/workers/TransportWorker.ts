@@ -1,7 +1,4 @@
-import TransportNotAuthorizedError from '../errors/TransportNotAuthorizedError';
-import TransportNotFoundError from '../errors/TransportNotFoundError';
-import TransportUnknownError from '../errors/TransportUnknownError';
-import { RequestAction, RequestError, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from '../types';
+import { RequestAction, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from '../types';
 
 const context = self as unknown as Worker;
 
@@ -25,14 +22,14 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response is not found, do not proceed
      */
     if (response.status === RequestStatusCode.NotFound) {
-      throw new TransportNotFoundError();
+      throw new Error(`Resource ${payload.url} was not found`, { cause: RequestStatusCode.NotFound });
     }
 
     /**
      * If authorization is required, do not proceed
      */
     if (response.status === RequestStatusCode.NotAuthorized) {
-      throw new TransportNotAuthorizedError();
+      throw new Error(`Authorization is required to access ${payload.url}`, { cause: RequestStatusCode.NotAuthorized });
     }
 
     /**
@@ -72,7 +69,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
     const responseData = await response.clone().json();
 
     if (responseData === null || responseData === undefined) {
-      throw new TransportUnknownError();
+      throw new Error(`Response of ${payload.url} is empty`);
     }
 
     /**
@@ -85,7 +82,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
       context.postMessage(message);
     }
 
-    const errormessage = typeof responseData.message === 'string' ? responseData.message : RequestError.Unknown;
+    const errormessage = typeof responseData.message === 'string' ? responseData.message : `Unknown error occured when requesting ${payload.url}`;
 
     throw new Error(errormessage);
   } catch (error) {

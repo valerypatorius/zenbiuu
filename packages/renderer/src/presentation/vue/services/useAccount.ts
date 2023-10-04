@@ -3,7 +3,6 @@ import { computed, inject } from 'vue';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useObservableState } from './useObservableState';
-import type Provider from '@/entities/Provider';
 import type AccountEntity from '@/entities/AccountEntity';
 
 export const useAccount = createSharedComposable(() => {
@@ -19,7 +18,7 @@ export const useAccount = createSharedComposable(() => {
 
   const hasPrimaryAccount = computed(() => state.value.primary !== undefined);
 
-  async function login (provider: Provider): Promise<void> {
+  async function login (provider: string): Promise<void> {
     await account?.login(provider);
   }
 

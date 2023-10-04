@@ -1,7 +1,4 @@
 import * as localforage from 'localforage';
-import StoreSaveError from './errors/StoreSaveError';
-import StoreGetError from './errors/StoreGetError';
-import StoreBuildError from './errors/StoreBuildError';
 import { observable } from '@/utils/object';
 
 type Observer<S extends Record<string, any>> = (state: S) => void;
@@ -80,46 +77,32 @@ export default class ObservableStore<S extends Record<string, any>, O extends Ob
   }
 
   static async prepare <S extends Record<string, any>>(name: string, defaultData: S): Promise<{ name: string; data: S }> {
-    try {
-      const storedData = await ObservableStore.getStateFromStore<S>(name);
-      const data = storedData ?? defaultData;
+    const storedData = await ObservableStore.getStateFromStore<S>(name);
+    const data = storedData ?? defaultData;
 
-      if (storedData === null) {
-        await ObservableStore.saveStateToStore(name, defaultData);
-      }
-
-      return {
-        name,
-        data,
-      };
-    } catch (error) {
-      throw new StoreBuildError();
+    if (storedData === null) {
+      await ObservableStore.saveStateToStore(name, defaultData);
     }
+
+    return {
+      name,
+      data,
+    };
   }
 
   /**
    * Save state in store
    */
   static async saveStateToStore <T>(name: string, state: T): Promise<void> {
-    try {
-      await store.setItem(name, state);
-    } catch (error) {
-      console.log(error);
-
-      throw new StoreSaveError();
-    }
+    await store.setItem(name, state);
   }
 
   /**
    * Returns state, previously saved in store
    */
   static async getStateFromStore <T>(name: string): Promise<T | null> {
-    try {
-      const state = await store.getItem<T>(name);
+    const state = await store.getItem<T>(name);
 
-      return state;
-    } catch (error) {
-      throw new StoreGetError();
-    }
+    return state;
   }
 }
