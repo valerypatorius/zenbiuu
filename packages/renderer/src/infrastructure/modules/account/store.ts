@@ -45,11 +45,13 @@ export default class AccountStore extends ObservableStore<Schema> {
     this.stateProxy.primary = storedAccount;
   }
 
-  public resetPrimaryAccount (): void {
+  public resetPrimaryAccount (): AccountEntity | undefined {
     const fallbackPrimaryAccount = this.stateProxy.accounts[0];
 
     if (fallbackPrimaryAccount !== undefined) {
       this.stateProxy.primary = fallbackPrimaryAccount;
+
+      return this.stateProxy.primary;
     } else {
       delete this.stateProxy.primary;
     }

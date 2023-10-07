@@ -14,5 +14,5 @@ export default interface ProvidersInterface {
    * Returns api to work with specified provider
    * @param provider - provider name
    */
-  getApi: (provider: string) => Promise<ProviderApi>;
+  getApi: (provider: string) => ProviderApi;
 }

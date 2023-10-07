@@ -17,20 +17,17 @@ export default class Account {
 
     const primaryAccount = store.getPrimaryAccount();
 
-    /**
-     * @todo Do we really need to wait for connection?
-     */
     if (primaryAccount !== undefined) {
-      await Account.connectProviderToAccount(primaryAccount, providers);
+      Account.connectAccountToProvider(primaryAccount, providers);
     }
 
     return new Account(store, providers);
   }
 
-  static async connectProviderToAccount (account: AccountEntity, providers: ProvidersInterface): Promise<void> {
-    const providerApi = await providers.getApi(account.provider);
+  static connectAccountToProvider (account: AccountEntity, providers: ProvidersInterface): void {
+    const providerApi = providers.getApi(account.provider);
 
-    await providerApi.connect(account.token);
+    providerApi.connect(account.token);
   }
 
   public get store (): AccountStore {
@@ -38,7 +35,7 @@ export default class Account {
   }
 
   public async login (provider: string): Promise<void> {
-    const providerApi = await this.providers.getApi(provider);
+    const providerApi = this.providers.getApi(provider);
     const account = await providerApi.login();
     const storedAccount = this.#store.getAccountByProperties({
       id: account.id,
@@ -51,24 +48,32 @@ export default class Account {
       this.#store.addAccount(account);
     }
 
-    this.#store.setPrimaryAccount(account);
+    this.setPrimaryAccount(account, false);
   }
 
   public async logout (entity: AccountEntity): Promise<void> {
-    const providerApi = await this.providers.getApi(entity.provider);
+    const providerApi = this.providers.getApi(entity.provider);
 
     await providerApi.logout(entity.token);
 
     this.#store.removeAccount(entity);
 
-    if (this.#store.isPrimaryAccount(entity)) {
-      this.#store.resetPrimaryAccount();
+    if (!this.#store.isPrimaryAccount(entity)) {
+      return;
+    }
+
+    const newPrimaryAccount = this.#store.resetPrimaryAccount();
+
+    if (newPrimaryAccount !== undefined) {
+      Account.connectAccountToProvider(newPrimaryAccount, this.providers);
     }
   }
 
-  public async setPrimaryAccount (account: AccountEntity): Promise<void> {
+  public setPrimaryAccount (account: AccountEntity, isNeedConnect = true): void {
     this.#store.setPrimaryAccount(account);
 
-    await Account.connectProviderToAccount(account, this.providers);
+    if (isNeedConnect) {
+      Account.connectAccountToProvider(account, this.providers);
+    }
   }
 }

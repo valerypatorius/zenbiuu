@@ -1,35 +1,52 @@
-import { RequestAction, RequestStatusCode, type RequestWorkerMessage, type RequestResponse, type RequestPayload } from '../types';
+import { type TransportPayload } from '../types';
+import type TransportResponse from '@/entities/TransportResponse';
+import TransportStatus from '@/entities/TransportStatus';
 
 const context = self as unknown as Worker;
+
+const controllersByUrl = new Map<string, AbortController>();
 
 /**
  * Handle request to a specified url
  * @param method - method for request
- * @param options - payload for request
+ * @param payload - payload for request
  */
-async function handle (method: string, payload: RequestPayload): Promise<void> {
-  const message: RequestResponse = {
+async function handle (method: string, payload: TransportPayload): Promise<void> {
+  const pendingRequest = controllersByUrl.get(payload.url);
+
+  if (pendingRequest !== undefined) {
+    pendingRequest.abort();
+  }
+
+  const message: TransportResponse = {
     url: payload.url,
   };
 
   try {
+    const controller = new AbortController();
+
+    controllersByUrl.set(payload.url, controller);
+
     const response = await fetch(payload.url, {
       method,
+      signal: controller.signal,
       ...payload.options,
     });
+
+    controllersByUrl.delete(payload.url);
 
     /**
      * If response is not found, do not proceed
      */
-    if (response.status === RequestStatusCode.NotFound) {
-      throw new Error(`Resource ${payload.url} was not found`, { cause: RequestStatusCode.NotFound });
+    if (response.status === TransportStatus.NotFound) {
+      throw new Error(`Resource ${payload.url} was not found`, { cause: TransportStatus.NotFound });
     }
 
     /**
      * If authorization is required, do not proceed
      */
-    if (response.status === RequestStatusCode.NotAuthorized) {
-      throw new Error(`Authorization is required to access ${payload.url}`, { cause: RequestStatusCode.NotAuthorized });
+    if (response.status === TransportStatus.NotAuthorized) {
+      throw new Error(`Authorization is required to access ${payload.url}`, { cause: TransportStatus.NotAuthorized });
     }
 
     /**
@@ -41,7 +58,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response should be parsed as text, return it right away
      */
     if (
-      (response.status === RequestStatusCode.Success || response.status === RequestStatusCode.NoContent) &&
+      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
       payload.parseResponse === 'text'
     ) {
       message.data = responseText;
@@ -55,7 +72,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response should be empty and it is, post message and do not proceed
      */
     if (
-      (response.status === RequestStatusCode.Success || response.status === RequestStatusCode.NoContent) &&
+      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
       responseText.length === 0
     ) {
       context.postMessage(message);
@@ -76,7 +93,7 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
      * If response is successfull and error field is not present in it,
      * add data to message and post it
      */
-    if (response.status === RequestStatusCode.Success && !('error' in responseData)) {
+    if (response.status === TransportStatus.Success && !('error' in responseData)) {
       message.data = responseData;
 
       context.postMessage(message);
@@ -86,18 +103,22 @@ async function handle (method: string, payload: RequestPayload): Promise<void> {
 
     throw new Error(errormessage);
   } catch (error) {
-    message.error = error as Error & { cause?: RequestStatusCode };
+    if (error instanceof Error && error.name === 'AbortError') {
+      message.error = new Error(`User aborted request ${payload.url}`, { cause: TransportStatus.Canceled });
+    } else {
+      message.error = error as Error;
+    }
 
     context.postMessage(message);
   }
 }
 
-context.onmessage = ({ data: messageData }: RequestWorkerMessage) => {
+context.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload }>) => {
   switch (messageData.action) {
-    case RequestAction.Get:
+    case 'get':
       void handle('GET', messageData.data);
       break;
-    case RequestAction.Post:
+    case 'post':
       void handle('POST', messageData.data);
       break;
   }

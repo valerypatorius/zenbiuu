@@ -4,9 +4,7 @@
   <main>
     <Settings />
 
-    <div v-if="hasPrimaryAccount">
-      Library
-    </div>
+    <Library v-if="hasPrimaryAccount" />
 
     <Auth v-else />
   </main>
@@ -17,6 +15,7 @@ import { useAccount } from '../services/useAccount';
 import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
 import Settings from './Settings.vue';
+import Library from './Library.vue';
 
 const { hasPrimaryAccount } = useAccount();
 

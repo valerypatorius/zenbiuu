@@ -1,7 +1,7 @@
 import type HubInterface from '@/interfaces/Hub.interface';
 import type OAuthInterface from '@/interfaces/OAuth.interface';
 import type ProviderConfig from '@/entities/ProviderConfig';
-import { type TransportInterface } from '@/transport/types';
+import type TransportInterface from '@/interfaces/Transport.interface';
 
 export default abstract class AbstractProvider {
   protected readonly abstract config: ProviderConfig;

@@ -1,16 +1,11 @@
-import { RequestAction, type RequestResponse, type RequestPayload, type TransportInterface } from './types';
 import TransportWorker from './workers/TransportWorker?worker';
+import type { TransportPayload } from './types';
+import type TransportInterface from '@/interfaces/Transport.interface';
+import type TransportResponse from '@/entities/TransportResponse';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason: Error) => void;
-}
-
-interface RequestHandlerPayload {
-  url: string;
-  body?: any;
-  options?: RequestInit;
-  parseResponse?: RequestPayload['parseResponse'];
 }
 
 export default class Transport implements TransportInterface {
@@ -24,7 +19,7 @@ export default class Transport implements TransportInterface {
     this.worker.addEventListener('message', this.handleWorkerMessage.bind(this));
   }
 
-  private handleWorkerMessage (event: MessageEvent<RequestResponse>): void {
+  private handleWorkerMessage (event: MessageEvent<TransportResponse>): void {
     const data = event.data;
     const handlers = this.queue.get(data.url);
 
@@ -41,36 +36,37 @@ export default class Transport implements TransportInterface {
     this.queue.delete(data.url);
   }
 
-  private async handle<T> (action: RequestAction, payload: RequestHandlerPayload): Promise<T> {
+  private async handle<T> (action: 'get' | 'post', payload: TransportPayload): Promise<T> {
     return await new Promise((resolve, reject) => {
-      /**
-       * @todo Handle with abort controller?
-       */
-      if (this.queue.has(payload.url)) {
-        reject(new Error('Endpoint has been processing', { cause: payload.url }));
+      try {
+        if (
+          action === 'post' &&
+          payload.options?.body !== undefined &&
+          payload.options.body !== null &&
+          typeof payload.options.body !== 'string'
+        ) {
+          payload.options.body = JSON.stringify(payload.options.body);
+        }
+      } catch (error) {
+        reject(new Error('Failed to prepare body', { cause: payload.options?.body }));
 
         return;
       }
+
+      const data: TransportPayload = {
+        url: payload.url,
+        parseResponse: payload.parseResponse,
+        options: {
+          headers: this.headers,
+          referrerPolicy: 'origin',
+          ...payload.options,
+        },
+      };
 
       this.queue.set(payload.url, {
         resolve,
         reject,
       });
-
-      const data: RequestPayload = {
-        url: payload.url,
-        parseResponse: payload.parseResponse ?? 'json',
-      };
-
-      data.options = {
-        headers: this.headers,
-        referrerPolicy: 'origin',
-        ...payload.options,
-      };
-
-      if (action === RequestAction.Post && payload.body !== undefined) {
-        data.options.body = typeof payload.body === 'string' ? payload.body : JSON.stringify(payload.body);
-      }
 
       this.worker.postMessage({
         action,
@@ -79,18 +75,17 @@ export default class Transport implements TransportInterface {
     });
   }
 
-  public async get<T> (url: string, options?: RequestInit, parseResponse?: RequestPayload['parseResponse']): Promise<T> {
-    return await this.handle<T>(RequestAction.Get, {
+  public async get<T> (url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+    return await this.handle<T>('get', {
       url,
       options,
       parseResponse,
     });
   }
 
-  public async post<T> (url: string, body?: any, options?: RequestInit, parseResponse?: RequestPayload['parseResponse']): Promise<T> {
-    return await this.handle<T>(RequestAction.Post, {
+  public async post<T> (url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+    return await this.handle<T>('post', {
       url,
-      body,
       options,
       parseResponse,
     });

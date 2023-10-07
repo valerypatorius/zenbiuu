@@ -33,8 +33,8 @@ export const useAccount = createSharedComposable(() => {
     return account?.store.isPrimaryAccount(entity) ?? false;
   }
 
-  async function setPrimaryAccount (entity: AccountEntity): Promise<void> {
-    await account?.setPrimaryAccount(entity);
+  function setPrimaryAccount (entity: AccountEntity): void {
+    account?.setPrimaryAccount(entity);
   }
 
   return {

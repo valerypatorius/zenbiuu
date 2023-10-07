@@ -1,3 +1,4 @@
+import type AbstractProvider from './AbstractProvider';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type HubInterface from '@/interfaces/Hub.interface';
@@ -17,19 +18,25 @@ export default class Providers implements ProvidersInterface {
     return Object.fromEntries(Object.entries(imports).map(([path, config]) => [config.name, config]));
   }
 
-  public async getApi (provider: string): Promise<ProviderApiInterface> {
+  public getApi (provider: string): ProviderApiInterface {
     const storedProviderInstance = this.#providersInstances.get(provider);
 
     if (storedProviderInstance !== undefined) {
       return storedProviderInstance;
     }
 
-    const { default: Provider } = await import(`./${provider.toLowerCase()}/index.ts`);
+    const imports = import.meta.glob<AbstractProvider & (new(hub: HubInterface) => ProviderApiInterface)>('./+([a-z])/index.ts', { import: 'default', eager: true });
 
-    const providerInstance = new Provider(this.hub) as ProviderApiInterface;
+    for (const path in imports) {
+      if (path.includes(provider)) {
+        const providerInstance = new imports[path](this.hub);
 
-    this.#providersInstances.set(provider, providerInstance);
+        this.#providersInstances.set(provider, providerInstance);
 
-    return providerInstance;
+        return providerInstance;
+      }
+    }
+
+    throw new Error('Provider not found', { cause: provider });
   }
 }
