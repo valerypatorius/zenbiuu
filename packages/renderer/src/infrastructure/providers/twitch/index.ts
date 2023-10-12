@@ -4,13 +4,13 @@ import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollow
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
-import type FollowedChannel from '@/entities/FollowedChannel';
-import type UserEntity from '@/entities/UserEntity';
+import type ChannelEntity from '@/entities/ChannelEntity';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
 import { getExpirationDateFromNow } from '@/utils/date';
 import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
+import { deleteObjectProperty } from '@/utils/object';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   protected readonly config = config;
@@ -113,8 +113,8 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     this.accessToken = undefined;
     this.isTokenValidated = false;
 
-    delete this.transportHeaders.Authorization;
-    delete this.transportHeaders['Client-Id'];
+    deleteObjectProperty(this.transportHeaders, 'Authorization');
+    deleteObjectProperty(this.transportHeaders, 'Client-Id');
   }
 
   /**
@@ -184,13 +184,10 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
    */
-  public async getFollowedChannelsByUserId (id: string): Promise<FollowedChannel[]> {
+  public async getFollowedChannelsNamesByUserId (id: string): Promise<string[]> {
     const data = await this.callTwitchApi<TwitchFollowedChannel>(`https://api.twitch.tv/helix/channels/followed?user_id=${id}&first=100`);
 
-    return data.map((item) => ({
-      id: item.broadcaster_id,
-      name: item.broadcaster_name,
-    }));
+    return data.map((item) => item.broadcaster_name);
   }
 
   /**
@@ -204,10 +201,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       title: item.title,
       cover: item.thumbnail_url.replace('{width}x{height}', '640x360'),
       category: item.game_name,
-      channel: {
-        id: item.user_id,
-        name: item.user_name,
-      },
+      channelName: item.user_name,
       viewersCount: item.viewer_count,
       dateStarted: item.started_at,
     }));
@@ -216,14 +210,21 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-users
    */
-  public async getUsersByIds (ids: string[]): Promise<UserEntity[]> {
-    const idsQuery = `id=${ids.join('&id=')}`;
+  public async getChannelsByNames (names: string[]): Promise<ChannelEntity[]> {
+    if (names.length === 0) {
+      throw new Error('Users names are not provided');
+    }
+
+    const searchQuery = `login=${names.map((name) => name.toLowerCase()).join('&login=')}`;
 
     /**
      * @todo Deal with exceeding 100 items limit
      */
-    const data = await this.callTwitchApi<TwitchUser>(`https://api.twitch.tv/helix/users?${idsQuery}`);
+    const data = await this.callTwitchApi<TwitchUser>(`https://api.twitch.tv/helix/users?${searchQuery}`);
 
+    /**
+     * @todo Deal with banned channels
+     */
     return data.map((item) => ({
       id: item.id,
       name: item.display_name,

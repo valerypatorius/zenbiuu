@@ -1,11 +1,9 @@
-import type FollowedChannel from './FollowedChannel';
-
 export default interface LiveStream {
   id: string;
   title: string;
   cover: string;
   category: string;
-  channel: FollowedChannel;
+  channelName: string;
   viewersCount: number;
   dateStarted: string;
 }

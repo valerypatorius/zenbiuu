@@ -8,45 +8,30 @@
         {{ t('library') }}
       </Button>
 
-      <div
-        v-for="channel in followedChannels"
-        :key="channel.id"
-        :class="[
-          'library__channel',
-          channel.isOnline === true && 'library__channel--online',
-        ]"
-        @click="activateChannel(channel.id)"
+      <Channel
+        v-for="name in followedChannelsNames"
+        :key="name"
+        class="library__channel"
+        :name="name"
+        :is-interactable="true"
+        @click="activateChannel(name)"
       >
-        <Avatar
-          :src="channel.avatar"
-          :size="28"
+        <IconButton
+          icon="gridAdd"
+          :size="20"
+          @click="activateChannel(name, true)"
         />
-
-        <div class="library__channel__name">
-          {{ channel.name }}
-        </div>
-
-        <div
-          class="library__channel__split"
-          @click.stop="activateChannel(channel.id, true)"
-        >
-          <Icon
-            name="gridAdd"
-            :size="20"
-          />
-        </div>
-      </div>
+      </Channel>
     </aside>
 
     <div
-      v-if="activeChannelsIds.length > 0"
+      v-if="activeChannelsNames.length > 0"
       class="library__playing"
     >
-      <Channel
-        v-for="channelId in activeChannelsIds"
-        :key="channelId"
-        :cover="liveStreams.find((stream) => stream.channel.id === channelId)?.cover"
-        @close="deactivateChannel(channelId)"
+      <Stream
+        v-for="name in activeChannelsNames"
+        :key="name"
+        @close="deactivateChannel(name)"
       />
     </div>
 
@@ -58,7 +43,7 @@
         v-for="stream in liveStreams"
         :key="stream.id"
         v-bind="stream"
-        @click="activateChannel(stream.channel.id)"
+        @click="activateChannel(stream.channelName)"
       />
     </div>
   </div>
@@ -68,15 +53,15 @@
 import { useI18n } from 'vue-i18n';
 import { useLibrary } from '../services/useLibrary';
 import LibraryItem from './LibraryItem.vue';
-import Avatar from './ui/Avatar.vue';
-import Channel from './Channel.vue';
+import Stream from './Stream.vue';
 import Button from './ui/Button.vue';
-import Icon from './ui/Icon.vue';
+import IconButton from './ui/IconButton.vue';
+import Channel from './Channel.vue';
 
 const {
   liveStreams,
-  followedChannels,
-  activeChannelsIds,
+  followedChannelsNames,
+  activeChannelsNames,
   activateChannel,
   deactivateChannel,
   deactivateAllChannels,
@@ -96,49 +81,12 @@ const { t } = useI18n();
   &__channels {
     display: grid;
     align-content: start;
+    padding-top: 12px;
   }
 
   &__channel {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     color: var(--theme-color-text-secondary);
-    cursor: pointer;
-    padding-left: 12px;
-
-    &--online {
-      color: var(--theme-color-text);
-    }
-
-    &__name {
-      flex-grow: 1;
-      padding: 8px 0;
-    }
-
-    &__category {
-      @extend %text-small;
-      color: var(--theme-color-text-secondary);
-    }
-
-    &__split {
-      align-self: stretch;
-      display: flex;
-      align-items: center;
-      color: var(--theme-color-text-tertiary);
-      cursor: pointer;
-      padding: 0 12px;
-
-      &:hover {
-        background-color: var(--theme-color-button-background);
-        color: var(--theme-color-text);
-      }
-    }
-
-    &:hover {
-      .library__channel__name {
-        color: var(--theme-color-text);
-      }
-    }
+    padding: 6px 12px;
   }
 
   &__main {

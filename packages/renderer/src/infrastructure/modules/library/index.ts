@@ -1,6 +1,7 @@
 import LibraryStore from './store';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
+import type LiveStream from '@/entities/LiveStream';
 
 export default class Library {
   #store: LibraryStore;
@@ -22,40 +23,61 @@ export default class Library {
     return this.#store;
   }
 
-  public async getFollowedChannels (account: AccountEntity): Promise<void> {
-    const channels = await this.providers.getApi(account.provider).getFollowedChannelsByUserId(account.id);
+  public async requestFollowedChannelsNames (account: AccountEntity): Promise<void> {
+    const ids = await this.providers.getApi(account.provider).getFollowedChannelsNamesByUserId(account.id);
 
-    this.#store.setFollowedChannels(channels);
+    this.#store.followedChannelsNames.set(ids);
   }
 
-  public async getFollowedLiveStreams (account: AccountEntity): Promise<void> {
+  public async requestFollowedLiveStreams (account: AccountEntity): Promise<void> {
     const streams = await this.providers.getApi(account.provider).getFollowedStreamsByUserId(account.id);
 
-    this.#store.setLiveStreams(streams);
+    const streamsByChannelName = streams.reduce<Record<string, LiveStream>>((result, item) => {
+      result[item.channelName] = item;
+
+      return result;
+    }, {});
+
+    this.#store.liveStreamsByChannelName.set(streamsByChannelName);
   }
 
-  /**
-   * @todo Improve saving
-   */
-  public async getUsersByIds (account: AccountEntity, ids: string[]): Promise<void> {
-    const users = await this.providers.getApi(account.provider).getUsersByIds(ids);
+  private readonly namesBuffer = new Set<string>();
 
-    this.#store.setUsers(users);
+  private namesTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  public async requestChannelByName (account: AccountEntity, name: string): Promise<void> {
+    if (name in this.#store.channelsByName.state || this.namesBuffer.has(name)) {
+      return;
+    }
+
+    this.namesBuffer.add(name);
+
+    clearTimeout(this.namesTimeoutId);
+
+    this.namesTimeoutId = setTimeout(() => {
+      this.providers.getApi(account.provider).getChannelsByNames(Array.from(this.namesBuffer)).then((channels) => {
+        channels.forEach((channel) => {
+          this.#store.channelsByName.add(channel.name, channel);
+        });
+      });
+
+      this.namesBuffer.clear();
+    }, 300);
   }
 
-  public activateChannel (id: string): void {
-    this.#store.addActiveChannelId(id);
+  public activateChannel (name: string): void {
+    this.#store.activeChannelsNames.add(name);
   }
 
-  public deactivateChannel (id: string): void {
-    this.#store.removeActiveChannelId(id);
+  public deactivateChannel (name: string): void {
+    this.#store.activeChannelsNames.remove(name);
   }
 
   public deactivateAllChannels (): void {
-    this.#store.clearActiveChannelIds();
+    this.#store.activeChannelsNames.clear();
   }
 
-  public clear (): void {
-    this.#store.clearAll();
+  public destroy (): void {
+    this.#store.clear();
   }
 }

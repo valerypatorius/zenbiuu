@@ -1,63 +1,40 @@
 import type LiveStream from '@/entities/LiveStream';
-import type FollowedChannel from '@/entities/FollowedChannel';
-import type UserEntity from '@/entities/UserEntity';
+import type ChannelEntity from '@/entities/ChannelEntity';
 import ObservableStore from '@/modules/shared/ObservableStore';
-import { clearArray, removeFromArray } from '@/utils/array';
+import { statefulArray } from '@/utils/array';
+import { statefulObject } from '@/utils/object';
 
-/**
- * @todo Make dictionaries for channels ids
- */
 interface Schema {
-  followedChannels: FollowedChannel[];
-  activeChannelsIds: string[];
-  liveStreams: LiveStream[];
-  usersById: Record<string, UserEntity>;
+  followedChannelsNames: string[];
+  activeChannelsNames: string[];
+  liveStreamsByChannelName: Record<string, LiveStream>;
+  channelsByName: Record<string, ChannelEntity>;
 }
 
 export default class LibraryStore extends ObservableStore<Schema> {
   static async build (): Promise<LibraryStore> {
     const { name, data } = await LibraryStore.prepare<Schema>('store:library', {
-      followedChannels: [],
-      activeChannelsIds: [],
-      liveStreams: [],
-      usersById: {},
+      followedChannelsNames: [],
+      activeChannelsNames: [],
+      liveStreamsByChannelName: {},
+      channelsByName: {},
     });
 
     return new LibraryStore(name, data);
   }
 
-  public setFollowedChannels (value: FollowedChannel[]): void {
-    this.stateProxy.followedChannels = value;
-  }
+  public readonly followedChannelsNames = statefulArray(this.stateProxy.followedChannelsNames);
 
-  public setLiveStreams (value: LiveStream[]): void {
-    this.stateProxy.liveStreams = value;
-  }
+  public readonly activeChannelsNames = statefulArray(this.stateProxy.activeChannelsNames);
 
-  public addActiveChannelId (value: string): void {
-    this.removeActiveChannelId(value);
+  public readonly liveStreamsByChannelName = statefulObject(this.stateProxy.liveStreamsByChannelName);
 
-    this.stateProxy.activeChannelsIds.push(value);
-  }
+  public readonly channelsByName = statefulObject(this.stateProxy.channelsByName);
 
-  public removeActiveChannelId (id: string): void {
-    removeFromArray(this.stateProxy.activeChannelsIds, id);
-  }
-
-  public clearActiveChannelIds (): void {
-    clearArray(this.stateProxy.activeChannelsIds);
-  }
-
-  public clearAll (): void {
-    this.clearActiveChannelIds();
-
-    clearArray(this.stateProxy.followedChannels);
-    clearArray(this.stateProxy.liveStreams);
-  }
-
-  public setUsers (value: UserEntity[]): void {
-    value.forEach((user) => {
-      this.stateProxy.usersById[user.id] = user;
-    });
+  public clear (): void {
+    this.followedChannelsNames.clear();
+    this.activeChannelsNames.clear();
+    this.liveStreamsByChannelName.clear();
+    this.channelsByName.clear();
   }
 }

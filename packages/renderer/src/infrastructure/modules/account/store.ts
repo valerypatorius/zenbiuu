@@ -1,5 +1,6 @@
 import type AccountEntity from '@/entities/AccountEntity';
 import ObservableStore from '@/modules/shared/ObservableStore';
+import { deleteObjectProperty } from '@/utils/object';
 
 interface Schema {
   accounts: AccountEntity[];
@@ -53,7 +54,7 @@ export default class AccountStore extends ObservableStore<Schema> {
 
       return this.stateProxy.primary;
     } else {
-      delete this.stateProxy.primary;
+      deleteObjectProperty(this.stateProxy, 'primary');
     }
   }
 

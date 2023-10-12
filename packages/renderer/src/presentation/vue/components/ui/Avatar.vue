@@ -44,12 +44,12 @@ function onLoad (): void {
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
-  overflow: hidden;
   box-shadow: 0 5px 15px -5px var(--theme-color-shadow);
   overflow: hidden;
-  color: var(--theme-color-text-tertiary);
+  color: var(--theme-color-text-secondary);
   display: grid;
   place-items: center;
+  background-color: var(--theme-color-text-tertiary);
 
   img,
   .icon {

@@ -14,22 +14,15 @@
       {{ title }}
     </div>
 
-    <!-- <div class="library-item__details">
-      {{ dateStarted }}<br>
-      {{ viewersCount }}
-    </div> -->
-
-    <div class="library-item__details">
-      <Avatar :src="channel.avatar" />
-
-      {{ channel.name }}<br>
-      {{ category }}
-    </div>
+    <Channel
+      :name="channelName"
+      :details="category"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import Avatar from './ui/Avatar.vue';
+import Channel from './Channel.vue';
 import type LiveStream from '@/entities/LiveStream';
 
 defineProps<LiveStream>();
@@ -63,15 +56,6 @@ const emit = defineEmits<{
 
   &__title {
     font-weight: 500;
-  }
-
-  &__details {
-    @extend %text-small;
-    color: var(--theme-color-text-secondary);
-    display: grid;
-    gap: 12px;
-    grid-template-columns: auto 1fr;
-    align-items: center;
   }
 }
 </style>

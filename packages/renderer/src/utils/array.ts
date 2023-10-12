@@ -18,3 +18,29 @@ export function removeFromArray<T> (arr: T[], value: T): void {
 export function clearArray<T> (arr: T[]): void {
   arr.length = 0;
 }
+
+export function statefulArray<T> (arr: T[]): {
+  state: T[];
+  set: (value: T[]) => void;
+  add: (value: T) => void;
+  remove: (value: T) => void;
+  clear: () => void;
+} {
+  return {
+    state: arr,
+    set (value) {
+      this.clear();
+      this.state.push(...value);
+    },
+    add (value) {
+      removeFromArray(this.state, value);
+      this.state.push(value);
+    },
+    remove (value) {
+      removeFromArray(this.state, value);
+    },
+    clear () {
+      clearArray(this.state);
+    },
+  };
+}

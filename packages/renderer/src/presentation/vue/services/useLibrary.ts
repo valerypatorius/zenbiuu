@@ -4,8 +4,6 @@ import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useObservableState } from './useObservableState';
 import { useAccount } from './useAccount';
-import type FollowedChannel from '@/entities/FollowedChannel';
-import type LiveStream from '@/entities/LiveStream';
 
 export const useLibrary = createSharedComposable(() => {
   const library = inject(Injection.Module.Library);
@@ -18,81 +16,80 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  const usersById = computed(() => state.value.usersById);
+  // const usersById = computed(() => state.value.usersById);
 
-  const liveStreams = computed<LiveStream[]>(() => state.value.liveStreams.map((stream) => {
-    return {
-      ...stream,
-      channel: {
-        ...stream.channel,
-        avatar: stream.channel.id in usersById.value ? usersById.value[stream.channel.id].avatar : undefined,
-      },
-    };
-  }));
+  const liveStreams = computed(() => Object.values(state.value.liveStreamsByChannelName));
 
-  const activeChannelsIds = computed(() => state.value.activeChannelsIds);
+  const followedChannelsNames = computed(() => state.value.followedChannelsNames);
+
+  const activeChannelsNames = computed(() => state.value.activeChannelsNames);
+
+  const channelsByName = computed(() => state.value.channelsByName);
 
   /**
    * @todo Improve array forming and provide additional data (e.g. game name)
    */
-  const followedChannels = computed<Array<FollowedChannel & { isOnline?: boolean; category?: string }>>(() => {
-    const onlineChannels = liveStreams.value.map((stream) => ({
-      id: stream.channel.id,
-      name: stream.channel.name,
-      category: stream.category,
-      isOnline: true,
-      avatar: stream.channel.id in usersById.value ? usersById.value[stream.channel.id].avatar : undefined,
-    }));
+  // const followedChannels = computed<Array<FollowedChannel & { isOnline?: boolean; category?: string }>>(() => {
+  //   const onlineChannels = liveStreams.value.map((stream) => ({
+  //     id: stream.channel.id,
+  //     name: stream.channel.name,
+  //     category: stream.category,
+  //     isOnline: true,
+  //     avatar: stream.channel.id in usersById.value ? usersById.value[stream.channel.id].avatar : undefined,
+  //   }));
 
-    const offlineChannels = state.value.followedChannels.filter((channel) => {
-      return onlineChannels.findIndex((onlineChannelId) => channel.id === onlineChannelId.id);
-    });
+  //   const offlineChannels = state.value.followedChannels.filter((channel) => {
+  //     return onlineChannels.findIndex((onlineChannelId) => channel.id === onlineChannelId.id);
+  //   });
 
-    return [
-      ...onlineChannels,
-      ...offlineChannels,
-    ];
-  });
+  //   return [
+  //     ...onlineChannels,
+  //     ...offlineChannels,
+  //   ];
+  // });
 
   watchEffect(() => {
     if (primaryAccount.value !== undefined) {
       /**
        * @todo Cache followed channels to reduce API calls
        */
-      library?.getFollowedChannels(primaryAccount.value);
-      library?.getFollowedLiveStreams(primaryAccount.value).then(() => {
-        if (primaryAccount.value !== undefined) {
-          library?.getUsersByIds(primaryAccount.value, liveStreams.value.map((stream) => stream.channel.id));
-        }
-      });
+      library?.requestFollowedChannelsNames(primaryAccount.value);
+      library?.requestFollowedLiveStreams(primaryAccount.value);
     } else {
-      library?.clear();
+      library?.destroy();
     }
   });
 
-  function activateChannel (id: string, isParallel = false): void {
+  function activateChannel (name: string, isParallel = false): void {
     if (!isParallel) {
       deactivateAllChannels();
     }
 
-    library?.activateChannel(id);
+    library?.activateChannel(name);
   }
 
-  function deactivateChannel (id: string): void {
-    library?.deactivateChannel(id);
+  function deactivateChannel (name: string): void {
+    library?.deactivateChannel(name);
   }
 
   function deactivateAllChannels (): void {
     library?.deactivateAllChannels();
   }
 
+  function requestChannelByName (id: string): void {
+    if (primaryAccount.value !== undefined) {
+      library?.requestChannelByName(primaryAccount.value, id);
+    }
+  }
+
   return {
     liveStreams,
-    followedChannels,
-    activeChannelsIds,
-    usersById,
+    channelsByName,
+    followedChannelsNames,
+    activeChannelsNames,
     activateChannel,
     deactivateChannel,
     deactivateAllChannels,
+    requestChannelByName,
   };
 });
