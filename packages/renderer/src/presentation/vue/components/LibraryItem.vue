@@ -17,6 +17,8 @@
     <Channel
       :name="channelName"
       :details="category"
+      :data="channel"
+      @visible="emit('channelVisible')"
     />
   </div>
 </template>
@@ -24,11 +26,17 @@
 <script setup lang="ts">
 import Channel from './Channel.vue';
 import type LiveStream from '@/entities/LiveStream';
+import type ChannelEntity from '@/entities/ChannelEntity';
 
-defineProps<LiveStream>();
+type Props = LiveStream & {
+  channel?: ChannelEntity;
+};
+
+defineProps<Props>();
 
 const emit = defineEmits<{
   click: [];
+  channelVisible: [];
 }>();
 </script>
 

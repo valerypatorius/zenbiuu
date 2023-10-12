@@ -13,14 +13,19 @@
         :key="name"
         class="library__channel"
         :name="name"
+        :data="channelsByName[name]"
+        :is-live="name in liveStreamsByChannelName"
         :is-interactable="true"
         @click="activateChannel(name)"
+        @visible="requestChannelByName(name)"
       >
-        <IconButton
-          icon="gridAdd"
-          :size="20"
-          @click="activateChannel(name, true)"
-        />
+        <div class="library__actions">
+          <IconButton
+            icon="gridAdd"
+            :size="20"
+            @click="activateChannel(name, true)"
+          />
+        </div>
       </Channel>
     </aside>
 
@@ -31,6 +36,7 @@
       <Stream
         v-for="name in activeChannelsNames"
         :key="name"
+        :cover="liveStreamsByChannelName[name]?.cover ?? channelsByName[name]?.offlineCover"
         @close="deactivateChannel(name)"
       />
     </div>
@@ -43,7 +49,9 @@
         v-for="stream in liveStreams"
         :key="stream.id"
         v-bind="stream"
+        :channel="channelsByName[stream.channelName]"
         @click="activateChannel(stream.channelName)"
+        @channel-visible="requestChannelByName(stream.channelName)"
       />
     </div>
   </div>
@@ -60,11 +68,14 @@ import Channel from './Channel.vue';
 
 const {
   liveStreams,
+  liveStreamsByChannelName,
+  channelsByName,
   followedChannelsNames,
   activeChannelsNames,
   activateChannel,
   deactivateChannel,
   deactivateAllChannels,
+  requestChannelByName,
 } = useLibrary();
 
 const { t } = useI18n();
@@ -81,12 +92,21 @@ const { t } = useI18n();
   &__channels {
     display: grid;
     align-content: start;
-    padding-top: 12px;
+    padding: 12px 0;
   }
 
   &__channel {
-    color: var(--theme-color-text-secondary);
     padding: 6px 12px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    color: var(--theme-color-text-tertiary);
+
+    &:hover {
+      color: var(--theme-color-text);
+    }
   }
 
   &__main {

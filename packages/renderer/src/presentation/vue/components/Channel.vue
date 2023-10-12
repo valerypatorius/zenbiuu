@@ -6,6 +6,7 @@
       details !== undefined && 'channel--with-details',
       slots.default !== undefined && 'channel--with-slot',
       isInteractable === true && 'channel--interactable',
+      isLive === true && 'channel--live',
     ]"
   >
     <div
@@ -14,8 +15,9 @@
     >
       <Avatar
         class="channel__avatar"
-        :src="channel?.avatar"
+        :src="data?.avatar"
         :size="details !== undefined ? 36 : 28"
+        :is-online="isLive"
       />
 
       <div class="channel__info">
@@ -32,16 +34,13 @@
       </div>
     </div>
 
-    <div v-if="slots.default !== undefined">
-      <slot name="default" />
-    </div>
+    <slot name="default" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useElementVisibility, watchOnce } from '@vueuse/core';
-import { useLibrary } from '../services/useLibrary';
 import Avatar from './ui/Avatar.vue';
 import type ChannelEntity from '@/entities/ChannelEntity';
 
@@ -51,23 +50,26 @@ const slots = defineSlots<{
 
 const emit = defineEmits<{
   click: [event: MouseEvent];
+  visible: [];
 }>();
 
-const props = defineProps<{
+defineProps<{
   name: string;
+  data?: ChannelEntity;
   details?: string;
+  isLive?: boolean;
   isInteractable?: boolean;
 }>();
 
 const rootElement = ref<HTMLDivElement>();
 
-const { channelsByName, requestChannelByName } = useLibrary();
+/**
+ * @todo Improve by clearing observers after "visible" event is emitted
+ */
 const isRootElementVisible = useElementVisibility(rootElement);
 
-const channel = computed<ChannelEntity | undefined>(() => channelsByName.value[props.name]);
-
 watchOnce(isRootElementVisible, () => {
-  requestChannelByName(props.name);
+  emit('visible');
 });
 </script>
 
@@ -93,6 +95,11 @@ watchOnce(isRootElementVisible, () => {
     align-items: center;
     grid-template-columns: auto 1fr;
     gap: 0 12px;
+    color: var(--theme-color-text-secondary);
+
+    .channel--live & {
+      color: var(--theme-color-text);
+    }
 
     .channel--interactable &:hover  {
       color: var(--theme-color-text);

@@ -16,37 +16,25 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  // const usersById = computed(() => state.value.usersById);
-
   const liveStreams = computed(() => Object.values(state.value.liveStreamsByChannelName));
 
-  const followedChannelsNames = computed(() => state.value.followedChannelsNames);
+  const liveStreamsByChannelName = computed(() => state.value.liveStreamsByChannelName);
+
+  /**
+   * @todo Find a better way of sorting?
+   */
+  const followedChannelsNames = computed(() => {
+    return [...state.value.followedChannelsNames].sort((a, b) => {
+      const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
+      const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
+
+      return (indexA >= 0 ? indexA : Infinity) - (indexB >= 0 ? indexB : Infinity);
+    });
+  });
 
   const activeChannelsNames = computed(() => state.value.activeChannelsNames);
 
   const channelsByName = computed(() => state.value.channelsByName);
-
-  /**
-   * @todo Improve array forming and provide additional data (e.g. game name)
-   */
-  // const followedChannels = computed<Array<FollowedChannel & { isOnline?: boolean; category?: string }>>(() => {
-  //   const onlineChannels = liveStreams.value.map((stream) => ({
-  //     id: stream.channel.id,
-  //     name: stream.channel.name,
-  //     category: stream.category,
-  //     isOnline: true,
-  //     avatar: stream.channel.id in usersById.value ? usersById.value[stream.channel.id].avatar : undefined,
-  //   }));
-
-  //   const offlineChannels = state.value.followedChannels.filter((channel) => {
-  //     return onlineChannels.findIndex((onlineChannelId) => channel.id === onlineChannelId.id);
-  //   });
-
-  //   return [
-  //     ...onlineChannels,
-  //     ...offlineChannels,
-  //   ];
-  // });
 
   watchEffect(() => {
     if (primaryAccount.value !== undefined) {
@@ -84,6 +72,7 @@ export const useLibrary = createSharedComposable(() => {
 
   return {
     liveStreams,
+    liveStreamsByChannelName,
     channelsByName,
     followedChannelsNames,
     activeChannelsNames,
