@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light;
+
   --theme-color-background: #fefefe;
   --theme-color-text: #121212;
   --theme-color-text-secondary: #757575;
@@ -6,9 +8,15 @@
   --theme-color-button-background: #1a5cff;
   --theme-color-button-background-hover: #164bcc;
   --theme-color-button-text: #ffffff;
+  --theme-color-shadow: #757575;
 
-  /* @media (prefers-color-scheme: dark) {
-    --theme-color-background: #121212;
-    --theme-color-text: #ffffff;
-  } */
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+
+    --theme-color-background: #1c1c1c;
+    --theme-color-text: #f2f2f2;
+    --theme-color-text-secondary: #858585;
+    --theme-color-text-tertiary: #444;
+    --theme-color-shadow: #000;
+  }
 }

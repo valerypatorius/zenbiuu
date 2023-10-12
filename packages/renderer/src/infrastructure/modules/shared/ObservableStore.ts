@@ -86,7 +86,13 @@ export default class ObservableStore<S extends Record<string, any>, O extends Ob
 
     return {
       name,
-      data,
+      /**
+       * In case default data fields are different from stored ones, perform merge
+       */
+      data: {
+        ...defaultData,
+        ...data,
+      },
     };
   }
 

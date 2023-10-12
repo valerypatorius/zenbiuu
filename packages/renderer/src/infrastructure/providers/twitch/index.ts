@@ -1,8 +1,11 @@
 import AbstractProvider from '../AbstractProvider';
-import { type TwitchValidTokenProperties, type TwitchUser } from './types';
 import config from './config';
+import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollowedChannel, TwitchResponse } from './types';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
+import type LiveStream from '@/entities/LiveStream';
+import type FollowedChannel from '@/entities/FollowedChannel';
+import type UserEntity from '@/entities/UserEntity';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
 import { getExpirationDateFromNow } from '@/utils/date';
@@ -61,6 +64,30 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     });
   }
 
+  private async callTwitchApi<T> (endpoint: string): Promise<TwitchResponse<T>['data']> {
+    const chunk = await this.catchable<TwitchResponse<T>>('get', endpoint);
+    const result = chunk.data;
+
+    let cursor = chunk.pagination?.cursor;
+
+    /**
+     * If pagination cursor is present, call API again and again until all data is received
+     */
+    while (cursor !== undefined) {
+      const url = new URL(endpoint);
+
+      url.searchParams.append('after', cursor);
+
+      const chunk = await this.catchable<TwitchResponse<T>>('get', url.href);
+
+      result.push(...chunk.data);
+
+      cursor = chunk.pagination?.cursor;
+    }
+
+    return result;
+  }
+
   public connect (token: string): void {
     /**
      * When connecting provider to token, reset its validation state
@@ -90,6 +117,9 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     delete this.transportHeaders['Client-Id'];
   }
 
+  /**
+   * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
+   */
   private async validate (token: string): Promise<string> {
     const { expires_in: expiresIn } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
       headers: {
@@ -129,7 +159,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     /**
      * Receive user data
      */
-    const { data } = await this.catchable<{ data: TwitchUser[] }>('get', 'https://api.twitch.tv/helix/users');
+    const data = await this.callTwitchApi<TwitchUser>('https://api.twitch.tv/helix/users');
     const user = data[0];
 
     return {
@@ -148,6 +178,57 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   public async logout (token: string): Promise<void> {
     this.disconnect();
 
-    await this.catchable('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
+    await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
+  }
+
+  /**
+   * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+   */
+  public async getFollowedChannelsByUserId (id: string): Promise<FollowedChannel[]> {
+    const data = await this.callTwitchApi<TwitchFollowedChannel>(`https://api.twitch.tv/helix/channels/followed?user_id=${id}&first=100`);
+
+    return data.map((item) => ({
+      id: item.broadcaster_id,
+      name: item.broadcaster_name,
+    }));
+  }
+
+  /**
+   * @link https://dev.twitch.tv/docs/api/reference/#get-followed-streams
+   */
+  public async getFollowedStreamsByUserId (id: string): Promise<LiveStream[]> {
+    const data = await this.callTwitchApi<TwitchStream>(`https://api.twitch.tv/helix/streams/followed?user_id=${id}&first=100`);
+
+    return data.map((item) => ({
+      id: item.id,
+      title: item.title,
+      cover: item.thumbnail_url.replace('{width}x{height}', '640x360'),
+      category: item.game_name,
+      channel: {
+        id: item.user_id,
+        name: item.user_name,
+      },
+      viewersCount: item.viewer_count,
+      dateStarted: item.started_at,
+    }));
+  }
+
+  /**
+   * @link https://dev.twitch.tv/docs/api/reference/#get-users
+   */
+  public async getUsersByIds (ids: string[]): Promise<UserEntity[]> {
+    const idsQuery = `id=${ids.join('&id=')}`;
+
+    /**
+     * @todo Deal with exceeding 100 items limit
+     */
+    const data = await this.callTwitchApi<TwitchUser>(`https://api.twitch.tv/helix/users?${idsQuery}`);
+
+    return data.map((item) => ({
+      id: item.id,
+      name: item.display_name,
+      avatar: item.profile_image_url,
+      offlineCover: item.offline_image_url,
+    }));
   }
 }

@@ -7,7 +7,7 @@
   >
     <Icon
       name="user"
-      :size="20"
+      :size="size * 0.5"
     />
 
     <img
@@ -45,7 +45,7 @@ function onLoad (): void {
   height: var(--size);
   border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 5px 15px -5px var(--theme-color-text-secondary);
+  box-shadow: 0 5px 15px -5px var(--theme-color-shadow);
   overflow: hidden;
   color: var(--theme-color-text-tertiary);
   display: grid;

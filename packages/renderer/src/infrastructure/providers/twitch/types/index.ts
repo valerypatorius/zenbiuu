@@ -10,6 +10,16 @@ export interface TwitchValidTokenProperties {
 }
 
 /**
+ * Twitch API response structure
+ */
+export interface TwitchResponse<T> {
+  data: T[];
+  pagination?: {
+    cursor?: string;
+  };
+}
+
+/**
  * @link https://dev.twitch.tv/docs/api/reference#get-users
  */
 export interface TwitchUser {
@@ -21,6 +31,35 @@ export interface TwitchUser {
   description: string;
   profile_image_url: string;
   offline_image_url: string;
-  view_count: number;
   created_at: string;
+}
+
+/**
+ * @link https://dev.twitch.tv/docs/api/reference#get-streams
+ */
+export interface TwitchStream {
+  id: string;
+  user_id: string;
+  user_login: string;
+  user_name: string;
+  game_id: string;
+  game_name: string;
+  type: string;
+  title: string;
+  viewer_count: number;
+  started_at: string;
+  language: string;
+  thumbnail_url: string;
+  tags: string[];
+  is_mature: boolean;
+}
+
+/**
+ * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
+ */
+export interface TwitchFollowedChannel {
+  broadcaster_id: string;
+  broadcaster_login: string;
+  broadcaster_name: string;
+  followed_at: string;
 }

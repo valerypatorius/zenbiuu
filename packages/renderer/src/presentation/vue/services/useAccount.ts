@@ -16,7 +16,7 @@ export const useAccount = createSharedComposable(() => {
 
   const accounts = computed(() => state.value.accounts);
 
-  const hasPrimaryAccount = computed(() => state.value.primary !== undefined);
+  const primaryAccount = computed(() => state.value.primary);
 
   async function login (provider: string): Promise<void> {
     await account?.login(provider);
@@ -42,7 +42,7 @@ export const useAccount = createSharedComposable(() => {
     login,
     logout,
     isPrimaryAccount,
-    hasPrimaryAccount,
+    primaryAccount,
     setPrimaryAccount,
   };
 });

@@ -2,12 +2,8 @@
   <Transition name="settings">
     <div
       v-if="isSettingsOpened"
-      class="settings"
+      class="settings scrollable"
     >
-      <div class="settings__title">
-        {{ t('settings.title') }}
-      </div>
-
       <!-- Accounts management -->
       <div
         v-if="accounts.length > 0"
@@ -76,18 +72,16 @@ const { available: availableProviders } = useProviders();
 @import '@/presentation/styles/typography.pcss';
 
 .settings {
-  width: 380px;
+  width: 420px;
   /* border-radius: 0 12px 12px 0; */
   position: fixed;
   top: var(--layout-titlebar-height);
   bottom: 0;
   left: 0;
   background-color: var(--theme-color-background);
-  box-shadow: 10px 0 40px -40px var(--theme-color-text-secondary);
+  box-shadow: 10px 0 40px -40px var(--theme-color-shadow);
   /* border-right: 1px solid var(--theme-color-text-tertiary); */
-  overflow-x: hidden;
-  overflow-y: auto;
-  z-index: 1;
+  z-index: 2;
 
   &__title {
     @extend %text-small;
@@ -107,6 +101,11 @@ const { available: availableProviders } = useProviders();
     display: grid;
     gap: 12px;
     padding: 20px;
+
+    .button {
+      justify-self: start;
+      margin-top: 12px;
+    }
   }
 
   &__about {

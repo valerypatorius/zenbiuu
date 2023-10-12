@@ -4,7 +4,7 @@
   <main>
     <Settings />
 
-    <Library v-if="hasPrimaryAccount" />
+    <Library v-if="primaryAccount !== undefined" />
 
     <Auth v-else />
   </main>
@@ -17,7 +17,7 @@ import Auth from './Auth.vue';
 import Settings from './Settings.vue';
 import Library from './Library.vue';
 
-const { hasPrimaryAccount } = useAccount();
+const { primaryAccount } = useAccount();
 
 // const route = useRoute();
 // const { isSettingsActive } = useInterface();
@@ -41,6 +41,7 @@ const { hasPrimaryAccount } = useAccount();
 @import '@/presentation/styles/themes.pcss';
 @import '@/presentation/styles/typography.pcss';
 @import '@/presentation/styles/layout.pcss';
+@import '@/presentation/styles/scrollbar.pcss';
 
 ::selection {
   color: var(--theme-color-button-text);
@@ -57,11 +58,14 @@ body {
 }
 
 main {
+  /* display: grid;
+  place-items: center; */
+  /* overflow: auto; */
+  /* padding: 20px; */
+  /* position: relative; */
   display: grid;
-  place-items: center;
-  overflow: auto;
-  padding: 20px;
-  position: relative;
+  grid-template-columns: 100%;
+  grid-template-rows: 100%;
 }
 
 /* .window {

@@ -25,7 +25,7 @@
       </div>
 
       <div class="account__details">
-        {{ expirationDate }}
+        Активен до {{ expirationDate }}
       </div>
     </div>
 
@@ -87,7 +87,7 @@ const expirationDate = computed(() => props.tokenExpirationDate !== undefined ? 
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   min-width: 0;
 
   &__main {

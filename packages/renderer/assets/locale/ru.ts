@@ -1,10 +1,5 @@
 export default {
-  errors: {
-    AUTH_PROVIDER_MISSING: 'Провайдер для авторизации не найден',
-    AUTH_FAILED_ERROR: 'Не удалось авторизоваться',
-    PARSE_INTERCEPTED_LINK_ERROR: 'Не удалось обработать ссылку',
-  },
-
+  library: 'Библиотека',
   router: {
     auth: 'Войти',
     library: 'Библиотека',
