@@ -86,10 +86,6 @@ watchOnce(isRootElementVisible, () => {
     @extend %text-small;
   }
 
-  &--interactable {
-    cursor: pointer;
-  }
-
   &__main {
     display: grid;
     align-items: center;
@@ -99,6 +95,10 @@ watchOnce(isRootElementVisible, () => {
 
     .channel--live & {
       color: var(--theme-color-text);
+    }
+
+    .channel--interactable & {
+      cursor: pointer;
     }
 
     .channel--interactable &:hover  {
