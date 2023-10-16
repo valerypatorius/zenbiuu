@@ -1,5 +1,5 @@
 import path from 'path';
-import { app } from 'electron';
+import { app, Menu } from 'electron';
 import type AppInterface from '@/interfaces/App.interface';
 
 export default class App implements AppInterface {
@@ -17,6 +17,16 @@ export default class App implements AppInterface {
     this.registerProtocol();
 
     app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
+
+    /**
+     * @todo Research GPU related flags
+     */
+    // app.commandLine.appendSwitch('use-gl', 'desktop');
+
+    /**
+     * @see https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
+     */
+    Menu.setApplicationMenu(null);
 
     /**
      * Allow only one running instance of the app

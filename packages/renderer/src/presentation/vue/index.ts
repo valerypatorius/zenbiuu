@@ -7,6 +7,7 @@ import Hub from '@/hub/Hub';
 import Providers from '@/providers/Providers';
 import Account from '@/modules/account';
 import Library from '@/modules/library';
+import Chat from '@/modules/chat';
 
 const hub = new Hub();
 const providers = new Providers(hub);
@@ -15,6 +16,7 @@ const appProperties = await hub.getAppProperties();
 
 const account = await Account.build(providers);
 const library = await Library.build(providers);
+const chat = await Chat.build(providers);
 
 const app = createApp(App);
 
@@ -25,5 +27,6 @@ app.provide(Injection.AppProperties, appProperties);
 app.provide(Injection.Providers, providers);
 app.provide(Injection.Module.Account, account);
 app.provide(Injection.Module.Library, library);
+app.provide(Injection.Module.Chat, chat);
 
 app.mount('body');

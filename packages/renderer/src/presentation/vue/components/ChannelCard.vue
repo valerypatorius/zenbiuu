@@ -2,32 +2,32 @@
   <div
     ref="rootElement"
     :class="[
-      'channel',
-      details !== undefined && 'channel--with-details',
-      slots.default !== undefined && 'channel--with-slot',
-      isInteractable === true && 'channel--interactable',
-      isLive === true && 'channel--live',
+      'channel-card',
+      details !== undefined && 'channel-card--with-details',
+      slots.default !== undefined && 'channel-card--with-slot',
+      isInteractable === true && 'channel-card--interactable',
+      isLive === true && 'channel-card--live',
     ]"
   >
     <div
-      class="channel__main"
+      class="channel-card__main"
       @click="(event) => emit('click', event)"
     >
       <Avatar
-        class="channel__avatar"
+        class="channel-card__avatar"
         :src="data?.avatar"
-        :size="details !== undefined ? 36 : 28"
+        :size="details !== undefined ? 36 : 24"
         :is-online="isLive"
       />
 
-      <div class="channel__info">
-        <div class="channel__name">
+      <div class="channel-card__info">
+        <div class="channel-card__name">
           {{ name }}
         </div>
 
         <div
           v-if="details"
-          class="channel__category"
+          class="channel-card__category"
         >
           {{ details }}
         </div>
@@ -76,7 +76,7 @@ watchOnce(isRootElementVisible, () => {
 <style lang="postcss">
 @import '@/presentation/styles/typography.pcss';
 
-.channel {
+.channel-card {
   &--with-slot {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -93,15 +93,11 @@ watchOnce(isRootElementVisible, () => {
     gap: 0 12px;
     color: var(--theme-color-text-secondary);
 
-    .channel--live & {
-      color: var(--theme-color-text);
-    }
-
-    .channel--interactable & {
+    .channel-card--interactable & {
       cursor: pointer;
     }
 
-    .channel--interactable &:hover  {
+    .channel-card--interactable &:hover  {
       color: var(--theme-color-text);
     }
   }

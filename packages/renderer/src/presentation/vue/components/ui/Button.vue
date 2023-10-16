@@ -1,10 +1,18 @@
 <template>
-  <button class="button">
+  <button
+    :class="[
+      'button',
+      type && `button--${type}`,
+    ]"
+  >
     <slot />
   </button>
 </template>
 
 <script lang="ts" setup>
+defineProps<{
+  type?: 'secondary';
+}>();
 </script>
 
 <style lang="postcss">
@@ -30,6 +38,21 @@
   &:active {
     transform: translateY(1px);
     box-shadow: 0 5px 10px -5px var(--theme-color-button-background);
+  }
+
+  &--secondary {
+    background-color: #252525;
+    /* color: var(--theme-color-text-secondary); */
+    box-shadow: 0 10px 20px -10px #111;
+
+    &:hover {
+      background-color: #212121;
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 10px -5px #111;
+    }
   }
 }
 </style>

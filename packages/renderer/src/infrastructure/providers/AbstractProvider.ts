@@ -2,6 +2,7 @@ import type HubInterface from '@/interfaces/Hub.interface';
 import type OAuthInterface from '@/interfaces/OAuth.interface';
 import type ProviderConfig from '@/entities/ProviderConfig';
 import type TransportInterface from '@/interfaces/Transport.interface';
+import type SocketsInterface from '@/interfaces/Sockets.interface';
 
 export default abstract class AbstractProvider {
   protected readonly abstract config: ProviderConfig;
@@ -11,6 +12,8 @@ export default abstract class AbstractProvider {
   protected readonly abstract oauth: OAuthInterface;
 
   protected readonly abstract transport: TransportInterface;
+
+  protected readonly abstract chat: SocketsInterface;
 
   protected accessToken: string | undefined = undefined;
 

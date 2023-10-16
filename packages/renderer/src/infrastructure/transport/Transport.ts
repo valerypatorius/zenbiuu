@@ -38,21 +38,6 @@ export default class Transport implements TransportInterface {
 
   private async handle<T> (action: 'get' | 'post', payload: TransportPayload): Promise<T> {
     return await new Promise((resolve, reject) => {
-      try {
-        if (
-          action === 'post' &&
-          payload.options?.body !== undefined &&
-          payload.options.body !== null &&
-          typeof payload.options.body !== 'string'
-        ) {
-          payload.options.body = JSON.stringify(payload.options.body);
-        }
-      } catch (error) {
-        reject(new Error('Failed to prepare body', { cause: payload.options?.body }));
-
-        return;
-      }
-
       const data: TransportPayload = {
         url: payload.url,
         parseResponse: payload.parseResponse,

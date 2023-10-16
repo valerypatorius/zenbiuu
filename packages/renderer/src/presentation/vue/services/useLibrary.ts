@@ -64,9 +64,15 @@ export const useLibrary = createSharedComposable(() => {
     library?.deactivateAllChannels();
   }
 
-  function requestChannelByName (id: string): void {
+  function requestChannelByName (name: string): void {
     if (primaryAccount.value !== undefined) {
-      library?.requestChannelByName(primaryAccount.value, id);
+      library?.requestChannelByName(primaryAccount.value, name);
+    }
+  }
+
+  async function getChannelPlaylistUrl (name: string): Promise<string | undefined> {
+    if (primaryAccount.value !== undefined) {
+      return library?.getChannelPlaylistUrl(primaryAccount.value, name);
     }
   }
 
@@ -80,5 +86,6 @@ export const useLibrary = createSharedComposable(() => {
     deactivateChannel,
     deactivateAllChannels,
     requestChannelByName,
+    getChannelPlaylistUrl,
   };
 });

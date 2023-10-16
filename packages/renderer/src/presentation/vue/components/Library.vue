@@ -3,17 +3,19 @@
     <aside class="scrollable library__channels">
       <Button
         class="library__reset"
+        type="secondary"
         @click="deactivateAllChannels()"
       >
         {{ t('library') }}
       </Button>
 
-      <Channel
+      <ChannelCard
         v-for="name in followedChannelsNames"
         :key="name"
         class="library__channel"
         :name="name"
         :data="channelsByName[name]"
+        :details="liveStreamsByChannelName[name]?.category"
         :is-live="name in liveStreamsByChannelName"
         :is-interactable="true"
         @click="activateChannel(name)"
@@ -26,7 +28,7 @@
             @click="activateChannel(name, true)"
           />
         </div>
-      </Channel>
+      </ChannelCard>
     </aside>
 
     <div
@@ -36,6 +38,8 @@
       <Stream
         v-for="name in activeChannelsNames"
         :key="name"
+        :channel-name="name"
+        :playlist="getChannelPlaylistUrl"
         :cover="liveStreamsByChannelName[name]?.cover ?? channelsByName[name]?.offlineCover"
         @close="deactivateChannel(name)"
       />
@@ -64,7 +68,7 @@ import LibraryItem from './LibraryItem.vue';
 import Stream from './Stream.vue';
 import Button from './ui/Button.vue';
 import IconButton from './ui/IconButton.vue';
-import Channel from './Channel.vue';
+import ChannelCard from './ChannelCard.vue';
 
 const {
   liveStreams,
@@ -76,6 +80,7 @@ const {
   deactivateChannel,
   deactivateAllChannels,
   requestChannelByName,
+  getChannelPlaylistUrl,
 } = useLibrary();
 
 const { t } = useI18n();
@@ -96,10 +101,11 @@ const { t } = useI18n();
   }
 
   &__channel {
-    padding: 6px 12px;
+    padding: 5px 12px;
   }
 
   &__actions {
+    align-self: center;
     display: flex;
     gap: 8px;
     color: var(--theme-color-text-tertiary);
@@ -110,11 +116,12 @@ const { t } = useI18n();
   }
 
   &__main {
-    --size-offset: 60px;
-    --size-grid: 300px;
+    --size-offset: 30px;
+    --size-grid: 360px;
 
     display: grid;
-    gap: var(--size-offset) calc(var(--size-offset) * 1.2);
+    /* gap: var(--size-offset) calc(var(--size-offset) * 1.75); */
+    gap: 20px;
     align-content: start;
     grid-template-columns: repeat(auto-fill, minmax(var(--size-grid), 1fr));
     padding: 12px 30px;

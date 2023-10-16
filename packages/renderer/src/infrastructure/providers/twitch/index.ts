@@ -1,21 +1,28 @@
 import AbstractProvider from '../AbstractProvider';
 import config from './config';
-import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollowedChannel, TwitchResponse } from './types';
+import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollowedChannel, TwitchResponse, TwitchPlaylistAccessTokenResponse } from './types';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
+import Sockets from '@/sockets/Sockets';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
 import { getExpirationDateFromNow } from '@/utils/date';
 import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
 import { deleteObjectProperty } from '@/utils/object';
+import { uid } from '@/utils/string';
+import { parseMessage } from '@/utils/irc';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   protected readonly config = config;
 
   protected readonly clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
+
+  protected readonly deviceId = uid();
+
+  protected username: string | undefined;
 
   protected readonly oauth = new OAuth({
     name: this.config.name,
@@ -31,6 +38,35 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   });
 
   protected readonly transport = new Transport(this.transportHeaders);
+
+  protected readonly chat = new Sockets('wss://irc-ws.chat.twitch.tv:443', {
+    onMessage: ({ data }) => {
+      if (data.startsWith('PING') === true) {
+        this.chat.send(data.replace('PING', 'PONG'));
+
+        return;
+      }
+
+      /**
+       * @todo Move to Twitch provider dir
+       */
+      const message = parseMessage(data);
+
+      if (message === undefined) {
+        return;
+      }
+
+      if (message.channel !== undefined) {
+        const handler = this.chatMessageHandlers.get(message.channel);
+
+        if (handler !== undefined && message.text !== undefined) {
+          handler(`${message.tags?.['display-name'] ?? '???'}: ${message.text}`);
+        }
+      }
+    },
+  });
+
+  private readonly chatMessageHandlers = new Map<string, (message: string) => void>();
 
   private isTokenValidated = false;
 
@@ -49,7 +85,6 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
         }
 
         if (error.cause === TransportStatus.NotAuthorized) {
-          console.log('not authorized');
           const event = new CustomEvent(ProviderEvent.Disconnect, {
             detail: {
               api: this,
@@ -88,7 +123,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     return result;
   }
 
-  public connect (token: string): void {
+  public connect (token: string, username: string): void {
     /**
      * When connecting provider to token, reset its validation state
      */
@@ -97,9 +132,17 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     }
 
     this.accessToken = token;
+    this.username = username.toLowerCase();
 
     this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
     this.transportHeaders['Client-Id'] = this.clientId;
+
+    /**
+     * @todo Deal with reconnecting when switching accounts
+     */
+    this.chat.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+    this.chat.send(`PASS oauth:${this.accessToken}`);
+    this.chat.send(`NICK ${this.username}`);
 
     /**
      * If token is not validated, call validation, but do not wait for it
@@ -111,6 +154,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
   public disconnect (): void {
     this.accessToken = undefined;
+    this.username = undefined;
     this.isTokenValidated = false;
 
     deleteObjectProperty(this.transportHeaders, 'Authorization');
@@ -120,8 +164,8 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
    */
-  private async validate (token: string): Promise<string> {
-    const { expires_in: expiresIn } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
+  private async validate (token: string): Promise<{ username: string; expiresIn: string }> {
+    const { expires_in: expiresIn, login: username } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -129,7 +173,10 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     this.isTokenValidated = true;
 
-    return getExpirationDateFromNow(expiresIn);
+    return {
+      username,
+      expiresIn: getExpirationDateFromNow(expiresIn),
+    };
   }
 
   /**
@@ -149,12 +196,12 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     /**
      * Validate received token and receive token expiration date
      */
-    const tokenExpirationDate = await this.validate(token);
+    const { expiresIn, username } = await this.validate(token);
 
     /**
      * Connect provider with new token
      */
-    this.connect(token);
+    this.connect(token, username);
 
     /**
      * Receive user data
@@ -168,7 +215,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       avatar: user.profile_image_url,
       token,
       provider: this.config.name,
-      tokenExpirationDate,
+      tokenExpirationDate: expiresIn,
     };
   }
 
@@ -179,6 +226,16 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     this.disconnect();
 
     await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
+  }
+
+  public joinChat (channel: string, onMessage: (message: string) => void): void {
+    this.chatMessageHandlers.set(channel, onMessage);
+
+    this.chat.send(`JOIN #${channel}`);
+  }
+
+  public leaveChat (channel: string): void {
+    this.chat.send(`PART #${channel}`);
   }
 
   /**
@@ -231,5 +288,43 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       avatar: item.profile_image_url,
       offlineCover: item.offline_image_url,
     }));
+  }
+
+  public async getChannelPlaylistUrl (name: string): Promise<string | undefined> {
+    const { data } = await this.catchable<TwitchPlaylistAccessTokenResponse>('post', 'https://gql.twitch.tv/gql', {
+      body: JSON.stringify({
+        operationName: 'PlaybackAccessToken_Template',
+        query: 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) {  streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) {    value    signature    __typename  }  videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) {    value    signature    __typename  }}',
+        variables: {
+          isLive: true,
+          login: name,
+          isVod: false,
+          vodID: '',
+          playerType: 'site',
+        },
+      }),
+      headers: {
+        'Client-ID': import.meta.env.VITE_TWITCH_STREAM_CLIENT_ID,
+        'Device-ID': this.deviceId,
+      },
+    });
+
+    const params = {
+      sig: data.streamPlaybackAccessToken.signature,
+      type: 'any',
+      p: Math.floor(Math.random() * 999999),
+      token: encodeURIComponent(data.streamPlaybackAccessToken.value),
+      player: 'twitchweb',
+      allow_source: true,
+      allow_audio_only: true,
+      allow_spectre: false,
+      fast_bread: true,
+      playlist_include_framerate: true,
+      reassignments_supported: true,
+    };
+
+    const query = Object.entries(params).map((param) => param.join('=')).join('&');
+
+    return `https://usher.ttvnw.net/api/channel/hls/${name.toLowerCase()}.m3u8?${query}`;
   }
 }

@@ -46,7 +46,7 @@
     "@vitejs/plugin-vue": "^4.3.4",
     "@vitejs/plugin-vue-jsx": "^3.0.2",
     "cross-env": "^7.0.3",
-    "electron": "^27.0.0-beta.5",
+    "electron": "^27.0.0",
     "electron-builder": "^24.6.4",
     "electron-icon-builder": "^2.0.1",
     "electron-store": "^8.1.0",

@@ -2,8 +2,6 @@ import { type TransportPayload } from '../types';
 import type TransportResponse from '@/entities/TransportResponse';
 import TransportStatus from '@/entities/TransportStatus';
 
-const context = self as unknown as Worker;
-
 const controllersByUrl = new Map<string, AbortController>();
 
 /**
@@ -63,7 +61,7 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
     ) {
       message.data = responseText;
 
-      context.postMessage(message);
+      self.postMessage(message);
 
       return;
     }
@@ -75,7 +73,7 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
       (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
       responseText.length === 0
     ) {
-      context.postMessage(message);
+      self.postMessage(message);
 
       return;
     }
@@ -96,7 +94,7 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
     if (response.status === TransportStatus.Success && !('error' in responseData)) {
       message.data = responseData;
 
-      context.postMessage(message);
+      self.postMessage(message);
     }
 
     const errormessage = typeof responseData.message === 'string' ? responseData.message : `Unknown error occured when requesting ${payload.url}`;
@@ -109,11 +107,11 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
       message.error = error as Error;
     }
 
-    context.postMessage(message);
+    self.postMessage(message);
   }
 }
 
-context.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload }>) => {
+self.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload }>) => {
   switch (messageData.action) {
     case 'get':
       void handle('GET', messageData.data);

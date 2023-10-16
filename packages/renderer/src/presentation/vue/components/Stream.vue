@@ -2,10 +2,14 @@
   <div class="stream">
     <Player
       :cover="cover"
+      :channel-name="channelName"
+      :playlist="playlist"
       @close="emit('close')"
     />
 
-    <Chat />
+    <Chat
+      :channel-name="channelName"
+    />
   </div>
 </template>
 
@@ -14,7 +18,9 @@ import Player from './Player.vue';
 import Chat from './Chat.vue';
 
 defineProps<{
+  channelName: string;
   cover?: string;
+  playlist: (channel: string) => Promise<string | undefined>;
 }>();
 
 const emit = defineEmits<{

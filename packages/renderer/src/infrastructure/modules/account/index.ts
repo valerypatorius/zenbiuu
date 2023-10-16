@@ -27,7 +27,7 @@ export default class Account {
   static connectAccountToProvider (account: AccountEntity, providers: ProvidersInterface): void {
     const providerApi = providers.getApi(account.provider);
 
-    providerApi.connect(account.token);
+    providerApi.connect(account.token, account.name);
   }
 
   public get store (): AccountStore {

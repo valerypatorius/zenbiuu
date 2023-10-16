@@ -63,3 +63,17 @@ export interface TwitchFollowedChannel {
   broadcaster_name: string;
   followed_at: string;
 }
+
+export interface TwitchPlaylistAccessTokenResponse {
+  data: {
+    streamPlaybackAccessToken: {
+      signature: string;
+      value: string;
+    };
+  };
+  extensions: {
+    durationMilliseconds: number;
+    operationName: string;
+    requestID: string;
+  };
+}

@@ -77,6 +77,10 @@ export default class Library {
     this.#store.activeChannelsNames.clear();
   }
 
+  public async getChannelPlaylistUrl (account: AccountEntity, name: string): Promise<string | undefined> {
+    return this.providers.getApi(account.provider).getChannelPlaylistUrl(name);
+  }
+
   public destroy (): void {
     this.#store.clear();
   }

@@ -22,7 +22,7 @@
       {{ title }}
     </div>
 
-    <Channel
+    <ChannelCard
       :name="channelName"
       :details="category"
       :data="channel"
@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import Channel from './Channel.vue';
+import ChannelCard from './ChannelCard.vue';
 import Icon from './ui/Icon.vue';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
@@ -55,7 +55,13 @@ const emit = defineEmits<{
 .library-item {
   display: grid;
   align-content: start;
-  gap: 12px;
+  cursor: pointer;
+  padding: 20px;
+  border-radius: 12px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
 
   &__cover {
     aspect-ratio: 16 / 9;
@@ -63,6 +69,7 @@ const emit = defineEmits<{
     border-radius: 12px;
     box-shadow: 0 10px 20px -10px var(--theme-color-shadow);
     position: relative;
+    margin-bottom: 24px;
 
     img {
       width: 100%;
@@ -74,6 +81,11 @@ const emit = defineEmits<{
 
   &__title {
     font-weight: 500;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-bottom: 12px;
   }
 
   &__counter {
