@@ -76,7 +76,7 @@ function onLoad (): void {
 
   &--online {
     &::after {
-      --size: 8px;
+      --size: 6px;
       content: '';
       width: var(--size);
       height: var(--size);

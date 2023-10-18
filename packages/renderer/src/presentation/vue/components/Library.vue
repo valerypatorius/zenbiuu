@@ -12,10 +12,13 @@
       <ChannelCard
         v-for="name in followedChannelsNames"
         :key="name"
-        class="library__channel"
+        :class="[
+          'library__channel',
+          activeChannelsNames.includes(name) && 'library__channel--active',
+        ]"
         :name="name"
+        :category="liveStreamsByChannelName[name]?.category"
         :data="channelsByName[name]"
-        :details="liveStreamsByChannelName[name]?.category"
         :is-live="name in liveStreamsByChannelName"
         :is-interactable="true"
         @click="activateChannel(name)"
@@ -24,7 +27,7 @@
         <div class="library__actions">
           <IconButton
             icon="gridAdd"
-            :size="20"
+            :size="18"
             @click="activateChannel(name, true)"
           />
         </div>
@@ -91,17 +94,37 @@ const { t } = useI18n();
 
 .library {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 320px 1fr;
   grid-template-rows: 100%;
 
   &__channels {
     display: grid;
     align-content: start;
-    padding: 12px 0;
+    padding: 12px 6px;
+    gap: 2px;
   }
 
   &__channel {
-    padding: 5px 12px;
+    border-radius: 12px;
+    padding: 6px;
+    color: var(--theme-color-text-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--theme-color-text);
+    }
+
+    &--active {
+      color: var(--theme-color-text);
+    }
+
+    /* &--active {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    } */
   }
 
   &__actions {
@@ -110,9 +133,9 @@ const { t } = useI18n();
     gap: 8px;
     color: var(--theme-color-text-tertiary);
 
-    &:hover {
+    /* &:hover {
       color: var(--theme-color-text);
-    }
+    } */
   }
 
   &__main {
@@ -139,6 +162,7 @@ const { t } = useI18n();
     top: 0;
     left: 12px;
     margin-bottom: 12px;
+    z-index: 1;
   }
 }
 </style>

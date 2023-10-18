@@ -8,15 +8,17 @@
   --theme-color-button-background: #1a5cff;
   --theme-color-button-background-hover: #164bcc;
   --theme-color-button-text: #ffffff;
-  --theme-color-shadow: #757575;
+  --theme-color-shadow: rgba(0, 0, 0, 0.6);
+  --theme-color-overlay: rgba(255, 255, 255, 0.5);
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
 
-    --theme-color-background: #1c1c1c;
-    --theme-color-text: #f2f2f2;
-    --theme-color-text-secondary: #858585;
-    --theme-color-text-tertiary: #444;
-    --theme-color-shadow: #000;
+    --theme-color-background: #1d1d22;
+    --theme-color-text: #dedede;
+    --theme-color-text-secondary: rgba(255, 255, 255, 0.4);
+    --theme-color-text-tertiary: rgba(255, 255, 255, 0.1);
+    --theme-color-shadow: rgba(0, 0, 0, 0.3);
+    --theme-color-overlay: rgba(0, 0, 0, 0.5);
   }
 }

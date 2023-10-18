@@ -1,6 +1,7 @@
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
+import type ChatMessage from '@/entities/ChatMessage';
 
 /**
  * Describes public properties and methods of a single provider
@@ -14,6 +15,6 @@ export default interface ProviderApiInterface {
   getFollowedStreamsByUserId: (id: string) => Promise<LiveStream[]>;
   getChannelsByNames: (names: string[]) => Promise<ChannelEntity[]>;
   getChannelPlaylistUrl: (name: string) => Promise<string | undefined>;
-  joinChat: (channel: string, onMessage: (message: string) => void) => void;
+  joinChat: (channel: string, onMessage: (message: ChatMessage) => void) => void;
   leaveChat: (channel: string) => void;
 }

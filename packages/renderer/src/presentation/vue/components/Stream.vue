@@ -33,7 +33,7 @@ const emit = defineEmits<{
 
 .stream {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 360px;
   grid-template-rows: 100%;
 }
 </style>

@@ -28,12 +28,12 @@ const emit = defineEmits<{
 .icon-button {
   background-color: transparent;
   color: inherit;
-  padding: 6px;
+  padding: 4px;
   border-radius: 50%;
   transition: all 0.1s;
 
   &:hover {
-    background-color: var(--theme-color-text-tertiary);
+    background-color: rgba(255, 255, 255, 0.05);
   }
 
   &:active {

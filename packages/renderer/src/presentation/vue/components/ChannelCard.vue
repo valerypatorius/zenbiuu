@@ -5,7 +5,6 @@
       'channel-card',
       details !== undefined && 'channel-card--with-details',
       slots.default !== undefined && 'channel-card--with-slot',
-      isInteractable === true && 'channel-card--interactable',
       isLive === true && 'channel-card--live',
     ]"
   >
@@ -23,11 +22,21 @@
       <div class="channel-card__info">
         <div class="channel-card__name">
           {{ name }}
+
+          <span
+            v-if="category"
+            class="channel-card__category"
+          >
+            <Icon
+              name="playFilled"
+              :size="8"
+            /> {{ category }}
+          </span>
         </div>
 
         <div
           v-if="details"
-          class="channel-card__category"
+          class="channel-card__details"
         >
           {{ details }}
         </div>
@@ -42,6 +51,7 @@
 import { ref } from 'vue';
 import { useElementVisibility, watchOnce } from '@vueuse/core';
 import Avatar from './ui/Avatar.vue';
+import Icon from './ui/Icon.vue';
 import type ChannelEntity from '@/entities/ChannelEntity';
 
 const slots = defineSlots<{
@@ -56,9 +66,9 @@ const emit = defineEmits<{
 defineProps<{
   name: string;
   data?: ChannelEntity;
+  category?: string;
   details?: string;
   isLive?: boolean;
-  isInteractable?: boolean;
 }>();
 
 const rootElement = ref<HTMLDivElement>();
@@ -91,15 +101,6 @@ watchOnce(isRootElementVisible, () => {
     align-items: center;
     grid-template-columns: auto 1fr;
     gap: 0 12px;
-    color: var(--theme-color-text-secondary);
-
-    .channel-card--interactable & {
-      cursor: pointer;
-    }
-
-    .channel-card--interactable &:hover  {
-      color: var(--theme-color-text);
-    }
   }
 
   &__info {
@@ -111,6 +112,19 @@ watchOnce(isRootElementVisible, () => {
   }
 
   &__category {
+    @extend %text-small;
+    color: var(--theme-color-text-secondary);
+    margin-left: 4px;
+    display: flex;
+    align-items: baseline;
+
+    .icon {
+      color: var(--theme-color-text-tertiary);
+      margin-right: 4px;
+    }
+  }
+
+  &__details {
     @extend %text-overflow;
     color: var(--theme-color-text-secondary);
   }

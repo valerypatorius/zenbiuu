@@ -5,6 +5,7 @@ import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
+import type ChatMessage from '@/entities/ChatMessage';
 import Sockets from '@/sockets/Sockets';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
@@ -52,21 +53,29 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
        */
       const message = parseMessage(data);
 
-      if (message === undefined) {
+      if (message === undefined || message.command !== 'PRIVMSG') {
         return;
       }
 
-      if (message.channel !== undefined) {
-        const handler = this.chatMessageHandlers.get(message.channel);
+      if (message.channel?.toLowerCase() !== undefined) {
+        const handler = this.chatMessageHandlers.get(message.channel.toLowerCase());
 
-        if (handler !== undefined && message.text !== undefined) {
-          handler(`${message.tags?.['display-name'] ?? '???'}: ${message.text}`);
+        if (handler !== undefined && message.text !== undefined && message.tags !== undefined) {
+          handler({
+            /**
+             * @todo Properly type message tags
+             */
+            id: message.tags.id,
+            author: message.tags['display-name'],
+            text: message.text,
+            color: message.tags.color,
+          });
         }
       }
     },
   });
 
-  private readonly chatMessageHandlers = new Map<string, (message: string) => void>();
+  private readonly chatMessageHandlers = new Map<string, (message: ChatMessage) => void>();
 
   private isTokenValidated = false;
 
@@ -132,7 +141,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     }
 
     this.accessToken = token;
-    this.username = username.toLowerCase();
+    this.username = username;
 
     this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
     this.transportHeaders['Client-Id'] = this.clientId;
@@ -228,8 +237,8 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
   }
 
-  public joinChat (channel: string, onMessage: (message: string) => void): void {
-    this.chatMessageHandlers.set(channel, onMessage);
+  public joinChat (channel: string, onMessage: (message: ChatMessage) => void): void {
+    this.chatMessageHandlers.set(channel.toLowerCase(), onMessage);
 
     this.chat.send(`JOIN #${channel}`);
   }

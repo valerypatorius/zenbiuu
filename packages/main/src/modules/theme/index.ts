@@ -24,6 +24,6 @@ export default class Theme implements ThemeInterface {
    * Returns hex color string for browser window, depending on current theme
    */
   public get windowColor (): string {
-    return nativeTheme.shouldUseDarkColors ? '#1c1c1c' : '#fefefe';
+    return nativeTheme.shouldUseDarkColors ? '#1d1d22' : '#fefefe';
   }
 }

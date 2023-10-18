@@ -1,8 +1,9 @@
+import type ChatMessage from '@/entities/ChatMessage';
 import ObservableStore from '@/modules/shared/ObservableStore';
 import { deleteObjectProperty, statefulObject } from '@/utils/object';
 
 interface Schema {
-  messagesByChannelName: Record<string, string[]>;
+  messagesByChannelName: Record<string, ChatMessage[]>;
 }
 
 export default class ChatStore extends ObservableStore<Schema> {
@@ -21,7 +22,7 @@ export default class ChatStore extends ObservableStore<Schema> {
 
   public readonly messagesByChannelName = statefulObject(this.stateProxy.messagesByChannelName);
 
-  public addChatMessage (channelName: string, message: string): void {
+  public addChatMessage (channelName: string, message: ChatMessage): void {
     const messages = this.messagesByChannelName.state[channelName];
 
     if (messages === undefined) {

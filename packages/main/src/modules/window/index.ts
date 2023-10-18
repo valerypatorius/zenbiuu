@@ -26,7 +26,7 @@ export default class Window implements WindowInterface {
       titleBarStyle: 'hidden',
       titleBarOverlay: {
         // color: '#fefefe',
-        color: '#1c1c1c',
+        color: '#1d1d22',
         symbolColor: '#f2f2f2',
         height: 40,
       },

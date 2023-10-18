@@ -55,6 +55,7 @@ body {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: auto minmax(0, 1fr);
+  word-break: break-word;
 }
 
 main {

@@ -100,7 +100,7 @@ const emit = defineEmits<{
     padding: 4px 12px;
     border-radius: 20px;
     backdrop-filter: blur(20px);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--theme-color-overlay);
     box-shadow: 0 5px 10px -5px var(--theme-color-shadow);
   }
 }

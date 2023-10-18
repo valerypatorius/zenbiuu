@@ -41,17 +41,17 @@ defineProps<{
   }
 
   &--secondary {
-    background-color: #252525;
-    /* color: var(--theme-color-text-secondary); */
-    box-shadow: 0 10px 20px -10px #111;
+    background-color: #292931;
+    color: var(--theme-color-text-secondary);
+    box-shadow: 0 10px 20px -10px var(--theme-color-shadow);
 
     &:hover {
-      background-color: #212121;
+      background-color: #25252c;
     }
 
     &:active {
       transform: translateY(1px);
-      box-shadow: 0 5px 10px -5px #111;
+      box-shadow: 0 5px 10px -5px var(--theme-color-shadow);
     }
   }
 }

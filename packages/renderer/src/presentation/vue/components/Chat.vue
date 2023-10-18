@@ -10,13 +10,11 @@
     </div>
 
     <template v-else>
-      <div
+      <ChatMessage
         v-for="message in messages"
-        :key="message"
-        class="chat__message"
-      >
-        {{ message }}
-      </div>
+        :key="message.id"
+        v-bind="message"
+      />
 
       <div
         ref="horizon"
@@ -28,6 +26,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import ChatMessage from './ChatMessage';
 import { useChat } from '@/presentation/vue/services/useChat';
 
 const props = defineProps<{
@@ -40,7 +39,9 @@ const horizon = ref<HTMLDivElement>();
 
 const messages = computed(() => messagesByChannel.value[props.channelName] ?? []);
 
-watch(() => messages.value.length, () => {
+const lastMessage = computed(() => messages.value[messages.value.length - 1]);
+
+watch(lastMessage, () => {
   requestAnimationFrame(() => {
     horizon.value?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   });
@@ -59,18 +60,14 @@ onBeforeUnmount(() => {
 
 <style lang="postcss">
 .chat {
+  padding: 12px 6px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+
   &__welcome {
     text-align: center;
     padding: 12px;
-  }
-
-  &__message {
-    padding: 6px 12px;
-    color: var(--theme-color-text-secondary);
-
-    &:nth-child(2n) {
-      background-color: rgba(0, 0, 0, 0.15);
-    }
   }
 }
 </style>
