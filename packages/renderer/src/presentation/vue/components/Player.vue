@@ -18,12 +18,12 @@
         {{ channelName }}
       </div>
 
-      <Button
+      <IconButton
         class="player__close"
+        :size="24"
+        icon="close"
         @click="emit('close')"
-      >
-        Close
-      </Button>
+      />
     </div>
   </div>
 </template>
@@ -32,7 +32,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
-import Button from './ui/Button.vue';
+import IconButton from './ui/IconButton.vue';
 
 const props = defineProps<{
   channelName: string;
@@ -121,9 +121,13 @@ onBeforeUnmount(() => {
     width: 100%;
     height: 100%;
     display: flex;
+    align-items: start;
     justify-content: space-between;
-    pointer-events: none;
-    visibility: hidden;
+    opacity: 0;
+
+    .player:hover & {
+      opacity: 1;
+    }
 
     button {
       pointer-events: auto;

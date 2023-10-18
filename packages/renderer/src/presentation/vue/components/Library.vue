@@ -26,8 +26,9 @@
       >
         <div class="library__actions">
           <IconButton
-            icon="gridAdd"
+            :icon="activeChannelsNames.includes(name) ? 'playFilled' : 'gridAdd'"
             :size="18"
+            :disabled="activeChannelsNames.includes(name)"
             @click="activateChannel(name, true)"
           />
         </div>
@@ -116,6 +117,7 @@ const { t } = useI18n();
 
     &--active {
       color: var(--theme-color-text);
+      pointer-events: none;
     }
 
     /* &--active {

@@ -27,10 +27,7 @@
             v-if="category"
             class="channel-card__category"
           >
-            <Icon
-              name="playFilled"
-              :size="8"
-            /> {{ category }}
+            - {{ category }}
           </span>
         </div>
 
@@ -51,7 +48,6 @@
 import { ref } from 'vue';
 import { useElementVisibility, watchOnce } from '@vueuse/core';
 import Avatar from './ui/Avatar.vue';
-import Icon from './ui/Icon.vue';
 import type ChannelEntity from '@/entities/ChannelEntity';
 
 const slots = defineSlots<{
@@ -113,15 +109,10 @@ watchOnce(isRootElementVisible, () => {
 
   &__category {
     @extend %text-small;
-    color: var(--theme-color-text-secondary);
+    color: var(--theme-color-text-tertiary);
     margin-left: 4px;
     display: flex;
     align-items: baseline;
-
-    .icon {
-      color: var(--theme-color-text-tertiary);
-      margin-right: 4px;
-    }
   }
 
   &__details {
