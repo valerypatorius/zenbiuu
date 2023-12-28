@@ -96,11 +96,11 @@ export function parse7TVEmotes (source: SevenTvEmoteData[]): Record<string, Chat
     result[emote.name] = {
       name: emote.name,
       provider: EmoteProvider.SevenTV,
-      urls: emote.urls.reduce<ChatEmote['urls']>((result, [size, url]) => {
-        result[`${size}x`] = url;
+      urls: emote.data.host.files.filter((file) => file.format === 'AVIF').reduce<ChatEmote['urls']>((result, file) => {
+        result[`${file.name.charAt(0)}x`] = `${emote.data.host.url}/${file.name}`;
         return result;
       }, {}),
-      isZeroWidth: emote.visibility_simple.includes('ZERO_WIDTH'),
+      // isZeroWidth: emote.visibility_simple.includes('ZERO_WIDTH'),
     };
 
     return result;

@@ -122,18 +122,33 @@ export interface FfzChannelEmotes {
  */
 export interface SevenTvEmoteData {
   id: string;
-  mime: string;
   name: string;
-  width: number[];
-  height: number[];
-  urls: Array<[`${number}`, string]>;
-  visibility_simple: Array<string | 'ZERO_WIDTH'>;
+  data: {
+    host: {
+      url: string;
+      files: Array<{
+        name: `${number}x.${string}`;
+        static_name: `${number}x_static.${string}`;
+        width: number;
+        height: number;
+        format: 'AVIF' | 'WEBP';
+      }>;
+    };
+  };
+}
+
+interface SevenTvEmoteSet {
+  id: string;
+  name: string;
+  emotes: SevenTvEmoteData[];
 }
 
 /**
  * 7tv response for emotes request
  */
-export type SevenTvEmotes = SevenTvEmoteData[];
+export type SevenTvEmotes = SevenTvEmoteSet | {
+  emote_set: SevenTvEmoteSet;
+};
 
 /**
  * Native Twitch emote data
