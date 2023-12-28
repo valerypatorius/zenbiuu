@@ -97,7 +97,7 @@ export function parse7TVEmotes (source: SevenTvEmoteData[]): Record<string, Chat
       name: emote.name,
       provider: EmoteProvider.SevenTV,
       urls: emote.data.host.files.filter((file) => file.format === 'AVIF').reduce<ChatEmote['urls']>((result, file) => {
-        result[`${file.name.charAt(0)}x`] = `${emote.data.host.url}/${file.name}`;
+        result[`${file.name.charAt(0)}x`] = `https:${emote.data.host.url}/${file.name}`;
         return result;
       }, {}),
       // isZeroWidth: emote.visibility_simple.includes('ZERO_WIDTH'),
