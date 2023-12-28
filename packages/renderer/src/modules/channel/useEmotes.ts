@@ -13,8 +13,8 @@ enum EmotesEndpoint {
   BttvGlobal = 'https://api.betterttv.net/3/cached/emotes/global',
   BttvChannel = 'https://api.betterttv.net/3/cached/users/twitch',
   FfzChannel = 'https://api.frankerfacez.com/v1/room',
-  SevenTvGlobal = 'https://api.7tv.app/v2/emotes/global',
-  SevenTvChannel = 'https://api.7tv.app/v2/users',
+  SevenTvGlobal = 'https://7tv.io/v3/emote-sets/global',
+  SevenTvChannel = 'https://7tv.io/v3/users/twitch',
 }
 
 const RECENT_EMOTES_LIMIT = 50;
@@ -132,13 +132,13 @@ export const useEmotes = createSharedComposable(() => {
   async function getSevenTvGlobalEmotes (): Promise<Record<string, ChatEmote>> {
     const response = await get<SevenTvEmotes>(EmotesEndpoint.SevenTvGlobal, { headers: undefined });
 
-    return parse7TVEmotes(response);
+    return parse7TVEmotes('emotes' in response ? response.emotes : response.emote_set.emotes);
   }
 
   async function getSevenTvChannelEmotes (channelId: string): Promise<Record<string, ChatEmote>> {
-    const response = await get<SevenTvEmotes>(`${EmotesEndpoint.SevenTvChannel}/${channelId}/emotes`, { headers: undefined });
+    const response = await get<SevenTvEmotes>(`${EmotesEndpoint.SevenTvChannel}/${channelId}`, { headers: undefined });
 
-    return parse7TVEmotes(response);
+    return parse7TVEmotes('emotes' in response ? response.emotes : response.emote_set.emotes);
   }
 
   function addGlobalEmotes (list: Record<string, ChatEmote>): void {
