@@ -59,7 +59,7 @@ export default {
   },
   chat: {
     connectingTo: 'Connecting to {channel} chat room...',
-    joinedAs: 'Joined {channel} chat room as {name}',
+    joinedAs: 'Joined {channel}\'s chat room as {name}',
     scrollToBottom: 'Scroll to bottom',
     message: 'Message',
     emotes: {

@@ -1,46 +1,52 @@
+import { type ModuleChatStoreSchema } from './types';
 import type ChatMessage from '@/entities/ChatMessage';
-import ObservableStore from '@/modules/shared/ObservableStore';
-import { deleteObjectProperty, statefulObject } from '@/utils/object';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
+import { clearObject, deleteObjectProperty } from '@/utils/object';
 
-interface Schema {
-  messagesByChannelName: Record<string, ChatMessage[]>;
-}
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export async function createChatStore (createState: ModuleStateFactoryFn<ModuleChatStoreSchema>) {
+  const { state, save } = await createState('store:chat', {
+    messagesByChannelName: {},
+  });
 
-export default class ChatStore extends ObservableStore<Schema> {
-  #limit = 100;
+  const limit = 100;
 
-  static async build (): Promise<ChatStore> {
-    /**
-     * @todo Do not put chat messages in IDB
-     */
-    const { name, data } = await ChatStore.prepare<Schema>('store:chat', {
-      messagesByChannelName: {},
-    });
-
-    return new ChatStore(name, data);
+  function getMessagesByChannelName (): Record<string, ChatMessage[]> {
+    return state.messagesByChannelName;
   }
 
-  public readonly messagesByChannelName = statefulObject(this.stateProxy.messagesByChannelName);
-
-  public addChatMessage (channelName: string, message: ChatMessage): void {
-    const messages = this.messagesByChannelName.state[channelName];
+  function addChatMessage (channelName: string, message: ChatMessage): void {
+    const messages = state.messagesByChannelName[channelName];
 
     if (messages === undefined) {
-      this.messagesByChannelName.state[channelName] = [];
+      state.messagesByChannelName[channelName] = [];
     }
 
-    if (messages !== undefined && messages.length >= this.#limit) {
-      this.messagesByChannelName.state[channelName].shift();
+    if (messages !== undefined && messages.length >= limit) {
+      state.messagesByChannelName[channelName].shift();
     }
 
-    this.messagesByChannelName.state[channelName].push(message);
+    state.messagesByChannelName[channelName].push(message);
+
+    save();
   }
 
-  public clearChannelMessages (channelName: string): void {
-    deleteObjectProperty(this.messagesByChannelName.state, channelName);
+  function clearChannelMessages (channelName: string): void {
+    deleteObjectProperty(state.messagesByChannelName, channelName);
+
+    save();
   }
 
-  public clear (): void {
-    this.messagesByChannelName.clear();
+  function clearAll (): void {
+    clearObject(state.messagesByChannelName);
+
+    save();
   }
+
+  return {
+    getMessagesByChannelName,
+    addChatMessage,
+    clearChannelMessages,
+    clearAll,
+  };
 }

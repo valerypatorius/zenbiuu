@@ -1,20 +1,17 @@
 import { computed, inject } from 'vue';
+import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
-import { useObservableState } from './useObservableState';
 import { useAccount } from './useAccount';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function useChat () {
+export const useChat = createSharedComposable(() => {
   const chat = inject(Injection.Module.Chat);
 
   if (chat === undefined) {
     throw new MissingModuleInjection(Injection.Module.Chat);
   }
 
-  const { state } = useObservableState(chat.store);
-
-  const messagesByChannel = computed(() => state.value.messagesByChannelName);
+  const messagesByChannel = computed(() => chat.getMessagesByChannelName());
 
   const { primaryAccount } = useAccount();
 
@@ -35,4 +32,4 @@ export function useChat () {
     leave,
     messagesByChannel,
   };
-}
+});

@@ -3,6 +3,7 @@ import type OAuthInterface from '@/interfaces/OAuth.interface';
 import type ProviderConfig from '@/entities/ProviderConfig';
 import type TransportInterface from '@/interfaces/Transport.interface';
 import type SocketsInterface from '@/interfaces/Sockets.interface';
+import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
 
 export default abstract class AbstractProvider {
   protected readonly abstract config: ProviderConfig;
@@ -21,6 +22,7 @@ export default abstract class AbstractProvider {
 
   constructor (
     protected readonly hub: HubInterface,
+    protected readonly emotesProviders: EmotesProvidersInterface,
   ) {}
 
   public async requestAuthorization (): Promise<{

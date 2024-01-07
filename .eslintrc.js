@@ -47,24 +47,21 @@ module.exports = {
     'node/no-callback-literal': 'off',
 
     /** Does not work well with imported types for some reason */
-    '@typescript-eslint/restrict-template-expressions': [
-      'error', {
-        allowAny: true,
-      },
-    ],
+    // '@typescript-eslint/restrict-template-expressions': [
+    //   'error', {
+    //     allowAny: true,
+    //   },
+    // ],
 
     /** Require trailing comma for better git diffs */
     'comma-dangle': 'off',
     '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
 
     /** Disable because of not doing well with TS call Signatures */
-    'func-call-spacing': 'off',
+    // 'func-call-spacing': 'off',
 
     /** These cases are rare */
     'vue/no-v-html': 'off',
-
-    /** Allow props destructruringm when reactivityTransform is enabled */
-    'vue/no-setup-props-destructure': 'off',
 
     /** Allow single-word component names */
     'vue/multi-word-component-names': 'off',
@@ -73,5 +70,10 @@ module.exports = {
     'import/order': ['error', {
       groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
     }],
+
+    /**
+     * Buggy rule
+     */
+    '@typescript-eslint/no-unsafe-argument': 'off',
   },
 };

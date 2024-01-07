@@ -3,12 +3,14 @@ import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type HubInterface from '@/interfaces/Hub.interface';
 import type ProviderConfig from '@/entities/ProviderConfig';
+import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
 
 export default class Providers implements ProvidersInterface {
-  #providersInstances = new Map<string, ProviderApiInterface>();
+  readonly #providersInstances = new Map<string, ProviderApiInterface>();
 
   constructor (
     private readonly hub: HubInterface,
+    private readonly emotesProviders: EmotesProvidersInterface,
   ) {
   }
 
@@ -25,11 +27,11 @@ export default class Providers implements ProvidersInterface {
       return storedProviderInstance;
     }
 
-    const imports = import.meta.glob<AbstractProvider & (new(hub: HubInterface) => ProviderApiInterface)>('./+([a-z])/index.ts', { import: 'default', eager: true });
+    const imports = import.meta.glob<AbstractProvider & (new(hub: HubInterface, emotesProviders: EmotesProvidersInterface) => ProviderApiInterface)>('./+([0-9a-z])/index.ts', { import: 'default', eager: true });
 
     for (const path in imports) {
       if (path.includes(provider)) {
-        const providerInstance = new imports[path](this.hub);
+        const providerInstance = new imports[path](this.hub, this.emotesProviders);
 
         this.#providersInstances.set(provider, providerInstance);
 

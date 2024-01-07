@@ -17,4 +17,5 @@ export default interface ProviderApiInterface {
   getChannelPlaylistUrl: (name: string) => Promise<string | undefined>;
   joinChat: (channel: string, onMessage: (message: ChatMessage) => void) => void;
   leaveChat: (channel: string) => void;
+  requestEmotesForChannelId: (id: string) => void;
 }

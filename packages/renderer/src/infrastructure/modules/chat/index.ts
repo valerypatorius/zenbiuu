@@ -1,40 +1,36 @@
-import ChatStore from './store';
+import { createChatStore } from './store';
+import { type ModuleChat, type ModuleChatStoreSchema } from './types';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export default class Chat {
-  #store: ChatStore;
+export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSchema>, {
+  providers,
+}: {
+  providers: ProvidersInterface;
+}): Promise<ModuleChat> {
+  const store = await createChatStore(state);
 
-  private constructor (
-    store: ChatStore,
-    private readonly providers: ProvidersInterface,
-  ) {
-    this.#store = store;
-  }
-
-  static async build (providers: ProvidersInterface): Promise<Chat> {
-    const store = await ChatStore.build();
-
-    return new Chat(store, providers);
-  }
-
-  public get store (): ChatStore {
-    return this.#store;
-  }
-
-  public join (account: AccountEntity, channelName: string): void {
-    this.providers.getApi(account.provider).joinChat(channelName, (message) => {
-      this.#store.addChatMessage(channelName, message);
+  function join (account: AccountEntity, channelName: string): void {
+    providers.getApi(account.provider).joinChat(channelName, (message) => {
+      store.addChatMessage(channelName, message);
     });
   }
 
-  public leave (account: AccountEntity, channelName: string): void {
-    this.providers.getApi(account.provider).leaveChat(channelName);
+  function leave (account: AccountEntity, channelName: string): void {
+    providers.getApi(account.provider).leaveChat(channelName);
 
-    this.#store.clearChannelMessages(channelName);
+    store.clearChannelMessages(channelName);
   }
 
-  public destroy (): void {
-    this.#store.clear();
+  function destroy (): void {
+    store.clearAll();
   }
+
+  return {
+    join,
+    leave,
+    destroy,
+    getMessagesByChannelName: store.getMessagesByChannelName,
+  };
 }

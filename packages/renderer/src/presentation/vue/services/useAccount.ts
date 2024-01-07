@@ -2,7 +2,6 @@ import { createSharedComposable } from '@vueuse/core';
 import { computed, inject } from 'vue';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
-import { useObservableState } from './useObservableState';
 import type AccountEntity from '@/entities/AccountEntity';
 
 export const useAccount = createSharedComposable(() => {
@@ -12,11 +11,9 @@ export const useAccount = createSharedComposable(() => {
     throw new MissingModuleInjection(Injection.Module.Account);
   }
 
-  const { state } = useObservableState(account.store);
+  const accounts = computed(() => account.getAccounts());
 
-  const accounts = computed(() => state.value.accounts);
-
-  const primaryAccount = computed(() => state.value.primary);
+  const primaryAccount = computed(() => account.getPrimaryAccount());
 
   async function login (provider: string): Promise<void> {
     await account?.login(provider);
@@ -26,11 +23,8 @@ export const useAccount = createSharedComposable(() => {
     await account?.logout(entity);
   }
 
-  /**
-   * @todo Maybe do not allow calling store methods from composables?
-   */
   function isPrimaryAccount (entity: AccountEntity): boolean {
-    return account?.store.isPrimaryAccount(entity) ?? false;
+    return account?.isPrimaryAccount(entity) ?? false;
   }
 
   function setPrimaryAccount (entity: AccountEntity): void {

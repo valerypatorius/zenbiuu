@@ -1,36 +1,29 @@
-import LibraryStore from './store';
+import { createLibraryStore } from './store';
+import { type ModuleLibraryStoreSchema, type ModuleLibrary } from './types';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export default class Library {
-  #store: LibraryStore;
+export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibraryStoreSchema>, {
+  providers,
+}: {
+  providers: ProvidersInterface;
+}): Promise<ModuleLibrary> {
+  const store = await createLibraryStore(state);
 
-  private constructor (
-    store: LibraryStore,
-    private readonly providers: ProvidersInterface,
-  ) {
-    this.#store = store;
+  const namesBuffer = new Set<string>();
+
+  let namesTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  async function requestFollowedChannelsNames (account: AccountEntity): Promise<void> {
+    const names = await providers.getApi(account.provider).getFollowedChannelsNamesByUserId(account.id);
+
+    store.setFollowedChannelsNames(names);
   }
 
-  static async build (providers: ProvidersInterface): Promise<Library> {
-    const store = await LibraryStore.build();
-
-    return new Library(store, providers);
-  }
-
-  public get store (): LibraryStore {
-    return this.#store;
-  }
-
-  public async requestFollowedChannelsNames (account: AccountEntity): Promise<void> {
-    const ids = await this.providers.getApi(account.provider).getFollowedChannelsNamesByUserId(account.id);
-
-    this.#store.followedChannelsNames.set(ids);
-  }
-
-  public async requestFollowedLiveStreams (account: AccountEntity): Promise<void> {
-    const streams = await this.providers.getApi(account.provider).getFollowedStreamsByUserId(account.id);
+  async function requestFollowedLiveStreams (account: AccountEntity): Promise<void> {
+    const streams = await providers.getApi(account.provider).getFollowedStreamsByUserId(account.id);
 
     const streamsByChannelName = streams.reduce<Record<string, LiveStream>>((result, item) => {
       result[item.channelName] = item;
@@ -38,50 +31,63 @@ export default class Library {
       return result;
     }, {});
 
-    this.#store.liveStreamsByChannelName.set(streamsByChannelName);
+    store.setLiveStreamsByChannelName(streamsByChannelName);
   }
 
-  private readonly namesBuffer = new Set<string>();
+  async function requestChannelByName (account: AccountEntity, name: string): Promise<void> {
+    const channels = store.getChannelsByName();
 
-  private namesTimeoutId: ReturnType<typeof setTimeout> | undefined;
-
-  public async requestChannelByName (account: AccountEntity, name: string): Promise<void> {
-    if (name in this.#store.channelsByName.state || this.namesBuffer.has(name)) {
+    if (name in channels || namesBuffer.has(name)) {
       return;
     }
 
-    this.namesBuffer.add(name);
+    namesBuffer.add(name);
 
-    clearTimeout(this.namesTimeoutId);
+    clearTimeout(namesTimeoutId);
 
-    this.namesTimeoutId = setTimeout(() => {
-      this.providers.getApi(account.provider).getChannelsByNames(Array.from(this.namesBuffer)).then((channels) => {
+    namesTimeoutId = setTimeout(() => {
+      providers.getApi(account.provider).getChannelsByNames(Array.from(namesBuffer)).then((channels) => {
         channels.forEach((channel) => {
-          this.#store.channelsByName.add(channel.name, channel);
+          store.addChannelByName(channel.name, channel);
         });
       });
 
-      this.namesBuffer.clear();
+      namesBuffer.clear();
     }, 300);
   }
 
-  public activateChannel (name: string): void {
-    this.#store.activeChannelsNames.add(name);
+  async function getChannelPlaylistUrl (account: AccountEntity, name: string): Promise<string | undefined> {
+    return providers.getApi(account.provider).getChannelPlaylistUrl(name);
   }
 
-  public deactivateChannel (name: string): void {
-    this.#store.activeChannelsNames.remove(name);
+  function activateChannel (name: string): void {
+    store.addActiveChannelName(name);
   }
 
-  public deactivateAllChannels (): void {
-    this.#store.activeChannelsNames.clear();
+  function deactivateChannel (name: string): void {
+    store.removeActiveChannelName(name);
   }
 
-  public async getChannelPlaylistUrl (account: AccountEntity, name: string): Promise<string | undefined> {
-    return this.providers.getApi(account.provider).getChannelPlaylistUrl(name);
+  function deactivateAllChannels (): void {
+    store.clearActiveChannelNames();
   }
 
-  public destroy (): void {
-    this.#store.clear();
+  function destroy (): void {
+    store.clear();
   }
+
+  return {
+    requestFollowedChannelsNames,
+    requestFollowedLiveStreams,
+    requestChannelByName,
+    getChannelPlaylistUrl,
+    activateChannel,
+    deactivateChannel,
+    deactivateAllChannels,
+    destroy,
+    getLiveStreamsByChannelName: store.getLiveStreamsByChannelName,
+    getChannelsByNames: store.getChannelsByName,
+    getActiveChannelsNames: store.getActiveChannelsNames,
+    getFollowedChannelsNames: store.getFollowedChannelsNames,
+  };
 }

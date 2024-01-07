@@ -23,11 +23,11 @@ export default class Window implements WindowInterface {
       height,
       // frame: false,
       // titleBarStyle: 'hiddenInset',
+      // backgroundMaterial: 'none',
       titleBarStyle: 'hidden',
       titleBarOverlay: {
-        // color: '#fefefe',
-        color: '#1d1d22',
-        symbolColor: '#f2f2f2',
+        color: 'rgba(0, 0, 0, 0)',
+        symbolColor: 'rgba(255, 255, 255, 0.4)',
         height: 40,
       },
       webPreferences: {

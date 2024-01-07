@@ -8,6 +8,19 @@
         :src="cover"
         loading="lazy"
       >
+    </div>
+
+    <div class="library-item__info">
+      <div class="library-item__title">
+        {{ title }}
+      </div>
+
+      <ChannelCard
+        :name="channelName"
+        :data="channel"
+        :category="category"
+        @visible="emit('channelVisible')"
+      />
 
       <div class="library-item__counter">
         <Icon
@@ -17,17 +30,6 @@
         {{ viewersCount }}
       </div>
     </div>
-
-    <div class="library-item__title">
-      {{ title }}
-    </div>
-
-    <ChannelCard
-      :name="channelName"
-      :details="category"
-      :data="channel"
-      @visible="emit('channelVisible')"
-    />
   </div>
 </template>
 
@@ -53,39 +55,42 @@ const emit = defineEmits<{
 @import '@/presentation/styles/typography.pcss';
 
 .library-item {
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
-  padding: 20px;
   border-radius: 12px;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.02);
-  }
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  background-color: var(--theme-color-background);
 
   &__cover {
     aspect-ratio: 16 / 9;
-    background-color: black;
-    border-radius: 12px;
-    box-shadow: 0 10px 20px -10px var(--theme-color-shadow);
-    position: relative;
-    margin-bottom: 24px;
+    border-radius: inherit;
+    overflow: hidden;
+    filter: contrast(90%);
+    background-color: #000;
+    box-shadow: 0 10px 20px -15px var(--theme-color-shadow);
 
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: inherit;
     }
   }
 
+  &__info {
+    padding: 12px 0;
+    display: grid;
+    align-content: end;
+    grid-template-columns: 1fr auto;
+    gap: 6px;
+  }
+
   &__title {
+    @extend %text-overflow;
+    grid-column: span 2;
     font-weight: 500;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    margin-bottom: 12px;
   }
 
   &__counter {
@@ -94,14 +99,6 @@ const emit = defineEmits<{
     align-items: center;
     gap: 6px;
     color: var(--theme-color-text-secondary);
-    position: absolute;
-    top: -12px;
-    right: -12px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
-    background-color: var(--theme-color-overlay);
-    box-shadow: 0 5px 10px -5px var(--theme-color-shadow);
   }
 }
 </style>

@@ -19,6 +19,7 @@ export default defineConfig({
       '@/transport': join(root, 'src/infrastructure/transport'),
       '@/sockets': join(root, 'src/infrastructure/sockets'),
       '@/providers': join(root, 'src/infrastructure/providers'),
+      '@/emotes-providers': join(root, 'src/infrastructure/emotes-providers'),
       '@/modules': join(root, 'src/infrastructure/modules'),
       '@/utils': join(root, 'src/utils'),
       '@/presentation': join(root, 'src/presentation'),

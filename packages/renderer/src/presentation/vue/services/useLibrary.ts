@@ -2,7 +2,6 @@ import { computed, inject, watchEffect } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
-import { useObservableState } from './useObservableState';
 import { useAccount } from './useAccount';
 
 export const useLibrary = createSharedComposable(() => {
@@ -12,19 +11,17 @@ export const useLibrary = createSharedComposable(() => {
     throw new MissingModuleInjection(Injection.Module.Library);
   }
 
-  const { state } = useObservableState(library.store);
-
   const { primaryAccount } = useAccount();
 
-  const liveStreams = computed(() => Object.values(state.value.liveStreamsByChannelName));
+  const liveStreamsByChannelName = computed(() => library.getLiveStreamsByChannelName());
 
-  const liveStreamsByChannelName = computed(() => state.value.liveStreamsByChannelName);
+  const liveStreams = computed(() => Object.values(liveStreamsByChannelName.value));
 
   /**
    * @todo Find a better way of sorting?
    */
   const followedChannelsNames = computed(() => {
-    return [...state.value.followedChannelsNames].sort((a, b) => {
+    return [...library.getFollowedChannelsNames()].sort((a, b) => {
       const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
       const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
 
@@ -32,9 +29,9 @@ export const useLibrary = createSharedComposable(() => {
     });
   });
 
-  const activeChannelsNames = computed(() => state.value.activeChannelsNames);
+  const channelsByName = computed(() => library.getChannelsByNames());
 
-  const channelsByName = computed(() => state.value.channelsByName);
+  const activeChannels = computed(() => library.getActiveChannelsNames().map((name) => channelsByName.value[name]));
 
   watchEffect(() => {
     if (primaryAccount.value !== undefined) {
@@ -81,7 +78,7 @@ export const useLibrary = createSharedComposable(() => {
     liveStreamsByChannelName,
     channelsByName,
     followedChannelsNames,
-    activeChannelsNames,
+    activeChannels,
     activateChannel,
     deactivateChannel,
     deactivateAllChannels,

@@ -2,7 +2,7 @@
   <Transition name="settings">
     <div
       v-if="isSettingsOpened"
-      class="settings scrollable"
+      class="settings"
     >
       <!-- Accounts management -->
       <div
@@ -73,13 +73,15 @@ const { available: availableProviders } = useProviders();
 
 .settings {
   width: 420px;
+  padding-top: calc(var(--layout-titlebar-height) + 6px);
   /* border-radius: 0 12px 12px 0; */
   position: fixed;
-  top: var(--layout-titlebar-height);
+  top: 0;
   bottom: 0;
   left: 0;
-  background-color: var(--theme-color-background);
-  box-shadow: 10px 0 40px -40px var(--theme-color-shadow);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  /* box-shadow: 10px 0 40px -40px var(--theme-color-shadow); */
   /* border-right: 1px solid var(--theme-color-text-tertiary); */
   z-index: 2;
 

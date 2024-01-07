@@ -34,7 +34,6 @@ const svg = computed(() => props.name !== undefined ? icons[props.name] : (props
     width: 100%;
     height: auto;
     pointer-events: none;
-    opacity: var(--icon-opacity, 1);
 
     /* By default inherit text color for fill */
     fill: currentColor;

@@ -296,6 +296,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       name: item.display_name,
       avatar: item.profile_image_url,
       offlineCover: item.offline_image_url,
+      description: item.description,
     }));
   }
 
@@ -335,5 +336,51 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     const query = Object.entries(params).map((param) => param.join('=')).join('&');
 
     return `https://usher.ttvnw.net/api/channel/hls/${name.toLowerCase()}.m3u8?${query}`;
+  }
+
+  public requestEmotesForChannelId (id: string): void {
+    /**
+     * 1. 3rd party emotes
+     * 2. Twitch emotes in "emotes=305502502:0-6" format
+     * @see https://dev.twitch.tv/docs/irc/emotes/#cdn-template
+     * @see https://static-cdn.jtvnw.net/emoticons/v2/305502502/default/dark/3.0
+     */
+
+    /**
+     * @todo Improve and handle 404
+     */
+
+    this.emotesProviders.getApi('7tv').getChannelEmotes(id).then((emotes) => {
+      const event = new CustomEvent(ProviderEvent.EmotesReceived, {
+        detail: {
+          id,
+          emotes,
+        },
+      });
+
+      window.dispatchEvent(event);
+    });
+
+    this.emotesProviders.getApi('ffz').getChannelEmotes(id).then((emotes) => {
+      const event = new CustomEvent(ProviderEvent.EmotesReceived, {
+        detail: {
+          id,
+          emotes,
+        },
+      });
+
+      window.dispatchEvent(event);
+    });
+
+    this.emotesProviders.getApi('bttv').getChannelEmotes(id).then((emotes) => {
+      const event = new CustomEvent(ProviderEvent.EmotesReceived, {
+        detail: {
+          id,
+          emotes,
+        },
+      });
+
+      window.dispatchEvent(event);
+    });
   }
 }

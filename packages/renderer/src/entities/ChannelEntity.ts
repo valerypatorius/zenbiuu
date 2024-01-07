@@ -3,4 +3,5 @@ export default interface ChannelEntity {
   name: string;
   avatar: string;
   offlineCover: string;
+  description: string;
 }

@@ -9,6 +9,7 @@
 
     <Chat
       :channel-name="channelName"
+      :channel-id="channelId"
     />
   </div>
 </template>
@@ -19,8 +20,9 @@ import Chat from './Chat.vue';
 
 defineProps<{
   channelName: string;
+  channelId: string;
   cover?: string;
-  playlist: (channel: string) => Promise<string | undefined>;
+  playlist?: (channel: string) => Promise<string | undefined>;
 }>();
 
 const emit = defineEmits<{

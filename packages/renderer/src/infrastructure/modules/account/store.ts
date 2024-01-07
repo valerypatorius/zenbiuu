@@ -1,72 +1,91 @@
+import { type ModuleAccountStoreSchema } from './types';
 import type AccountEntity from '@/entities/AccountEntity';
-import ObservableStore from '@/modules/shared/ObservableStore';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 import { deleteObjectProperty } from '@/utils/object';
 
-interface Schema {
-  accounts: AccountEntity[];
-  primary?: AccountEntity;
-}
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export async function createAccountStore (createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>) {
+  const { state, save } = await createState('store:account', {
+    accounts: [],
+  });
 
-export default class AccountStore extends ObservableStore<Schema> {
-  static async build (): Promise<AccountStore> {
-    const { name, data } = await AccountStore.prepare<Schema>('store:account', {
-      accounts: [],
-    });
+  function addAccount (account: AccountEntity): void {
+    state.accounts.push(account);
 
-    return new AccountStore(name, data);
+    save();
   }
 
-  public addAccount (account: AccountEntity): void {
-    this.stateProxy.accounts.push(account);
-  }
-
-  public removeAccount ({ provider, token }: AccountEntity): void {
-    const accountIndex = this.stateProxy.accounts.findIndex((storedAccount) => storedAccount.provider === provider && storedAccount.token === token);
+  function removeAccount ({ provider, token }: AccountEntity): void {
+    const accountIndex = state.accounts.findIndex((storedAccount) => storedAccount.provider === provider && storedAccount.token === token);
 
     if (accountIndex >= 0) {
-      this.stateProxy.accounts.splice(accountIndex, 1);
+      state.accounts.splice(accountIndex, 1);
     }
+
+    save();
   }
 
-  public getAccountByProperties (properties: Partial<AccountEntity>): AccountEntity | undefined {
-    return this.stateProxy.accounts.find((storedAccount) => Object.entries(properties).every(([key, value]) => storedAccount[key as keyof AccountEntity] === value));
+  function getAccountByProperties (properties: Partial<AccountEntity>): AccountEntity | undefined {
+    return state.accounts.find((storedAccount) => Object.entries(properties).every(([key, value]) => storedAccount[key as keyof AccountEntity] === value));
   }
 
-  public getPrimaryAccount (): AccountEntity | undefined {
-    return this.stateProxy.primary;
+  function getAccounts (): AccountEntity[] {
+    return state.accounts;
   }
 
-  public setPrimaryAccount (account: AccountEntity): void {
-    const storedAccount = this.getAccountByProperties(account);
+  function getPrimaryAccount (): AccountEntity | undefined {
+    return state.primary;
+  }
+
+  function setPrimaryAccount (account: AccountEntity): void {
+    const storedAccount = getAccountByProperties(account);
 
     if (storedAccount === undefined) {
       throw new Error('Failed to set primary account', { cause: account });
     }
 
-    this.stateProxy.primary = storedAccount;
+    state.primary = storedAccount;
+
+    save();
   }
 
-  public resetPrimaryAccount (): AccountEntity | undefined {
-    const fallbackPrimaryAccount = this.stateProxy.accounts[0];
+  function resetPrimaryAccount (): AccountEntity | undefined {
+    const fallbackPrimaryAccount = state.accounts[0];
 
     if (fallbackPrimaryAccount !== undefined) {
-      this.stateProxy.primary = fallbackPrimaryAccount;
+      state.primary = fallbackPrimaryAccount;
 
-      return this.stateProxy.primary;
+      return state.primary;
     } else {
-      deleteObjectProperty(this.stateProxy, 'primary');
+      deleteObjectProperty(state, 'primary');
     }
+
+    save();
   }
 
-  public isPrimaryAccount (account: AccountEntity): boolean {
-    if (this.stateProxy.primary === undefined) {
+  function isPrimaryAccount (account: AccountEntity): boolean {
+    if (state.primary === undefined) {
       return false;
     }
 
-    return account.provider === this.stateProxy.primary.provider && account.token === this.stateProxy.primary.token;
+    return account.provider === state.primary.provider && account.token === state.primary.token;
   }
 
-  public refreshAccount (account: AccountEntity, properties: Partial<AccountEntity>): void {
+  function refreshAccount (account: AccountEntity, properties: Partial<AccountEntity>): void {
     Object.assign(account, properties);
+
+    save();
   }
+
+  return {
+    addAccount,
+    removeAccount,
+    getAccountByProperties,
+    getAccounts,
+    getPrimaryAccount,
+    setPrimaryAccount,
+    resetPrimaryAccount,
+    isPrimaryAccount,
+    refreshAccount,
+  };
 }

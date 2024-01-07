@@ -1,40 +1,93 @@
-import type LiveStream from '@/entities/LiveStream';
+import { type ModuleLibraryStoreSchema } from './types';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 import type ChannelEntity from '@/entities/ChannelEntity';
-import ObservableStore from '@/modules/shared/ObservableStore';
-import { statefulArray } from '@/utils/array';
-import { statefulObject } from '@/utils/object';
+import type LiveStream from '@/entities/LiveStream';
+import { clearArray, removeFromArray } from '@/utils/array';
+import { clearObject } from '@/utils/object';
 
-interface Schema {
-  followedChannelsNames: string[];
-  activeChannelsNames: string[];
-  liveStreamsByChannelName: Record<string, LiveStream>;
-  channelsByName: Record<string, ChannelEntity>;
-}
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export async function createLibraryStore (createState: ModuleStateFactoryFn<ModuleLibraryStoreSchema>) {
+  const { state, save } = await createState('store:library', {
+    followedChannelsNames: [],
+    activeChannelsNames: [],
+    liveStreamsByChannelName: {},
+    channelsByName: {},
+  });
 
-export default class LibraryStore extends ObservableStore<Schema> {
-  static async build (): Promise<LibraryStore> {
-    const { name, data } = await LibraryStore.prepare<Schema>('store:library', {
-      followedChannelsNames: [],
-      activeChannelsNames: [],
-      liveStreamsByChannelName: {},
-      channelsByName: {},
-    });
-
-    return new LibraryStore(name, data);
+  function getFollowedChannelsNames (): string[] {
+    return state.followedChannelsNames;
   }
 
-  public readonly followedChannelsNames = statefulArray(this.stateProxy.followedChannelsNames);
+  function setFollowedChannelsNames (value: string[]): void {
+    state.followedChannelsNames = value;
 
-  public readonly activeChannelsNames = statefulArray(this.stateProxy.activeChannelsNames);
-
-  public readonly liveStreamsByChannelName = statefulObject(this.stateProxy.liveStreamsByChannelName);
-
-  public readonly channelsByName = statefulObject(this.stateProxy.channelsByName);
-
-  public clear (): void {
-    this.followedChannelsNames.clear();
-    this.activeChannelsNames.clear();
-    this.liveStreamsByChannelName.clear();
-    this.channelsByName.clear();
+    save();
   }
+
+  function setLiveStreamsByChannelName (value: Record<string, LiveStream>): void {
+    state.liveStreamsByChannelName = value;
+
+    save();
+  }
+
+  function getChannelsByName (): Record<string, ChannelEntity> {
+    return state.channelsByName;
+  }
+
+  function getLiveStreamsByChannelName (): Record<string, LiveStream> {
+    return state.liveStreamsByChannelName;
+  }
+
+  function addChannelByName (name: string, channel: ChannelEntity): void {
+    state.channelsByName[name] = channel;
+
+    save();
+  }
+
+  function getActiveChannelsNames (): string[] {
+    return state.activeChannelsNames;
+  }
+
+  function addActiveChannelName (name: string): void {
+    removeFromArray(state.activeChannelsNames, name);
+    state.activeChannelsNames.push(name);
+
+    save();
+  }
+
+  function removeActiveChannelName (name: string): void {
+    removeFromArray(state.activeChannelsNames, name);
+
+    save();
+  }
+
+  function clearActiveChannelNames (): void {
+    clearArray(state.activeChannelsNames);
+
+    save();
+  }
+
+  function clear (): void {
+    clearArray(state.followedChannelsNames);
+    clearArray(state.activeChannelsNames);
+
+    clearObject(state.liveStreamsByChannelName);
+    clearObject(state.channelsByName);
+
+    save();
+  }
+
+  return {
+    getFollowedChannelsNames,
+    setFollowedChannelsNames,
+    setLiveStreamsByChannelName,
+    getChannelsByName,
+    getLiveStreamsByChannelName,
+    addChannelByName,
+    getActiveChannelsNames,
+    addActiveChannelName,
+    removeActiveChannelName,
+    clearActiveChannelNames,
+    clear,
+  };
 }

@@ -1,23 +1,39 @@
 <template>
-  <TitleBar />
+  <TitleBar
+    :is-stream-active="activeChannels.length > 0"
+    :is-sidebar-active="isSidebarActive"
+    @toggle-settings="toggleSettingsState()"
+    @go-home="goHome()"
+    @toggle-left-sidebar="isSidebarActive = !isSidebarActive"
+  />
 
   <main>
     <Settings />
 
-    <Library v-if="primaryAccount !== undefined" />
+    <Library
+      v-if="primaryAccount !== undefined"
+      :is-sidebar-active="isSidebarActive"
+    />
 
     <Auth v-else />
   </main>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useAccount } from '../services/useAccount';
+import { useSettings } from '../services/useSettings';
+import { useLibrary } from '../services/useLibrary';
 import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
 import Settings from './Settings.vue';
 import Library from './Library.vue';
 
 const { primaryAccount } = useAccount();
+const { toggleState: toggleSettingsState } = useSettings();
+const { deactivateAllChannels: goHome, activeChannels } = useLibrary();
+
+const isSidebarActive = ref(true);
 
 // const route = useRoute();
 // const { isSettingsActive } = useInterface();
@@ -41,7 +57,6 @@ const { primaryAccount } = useAccount();
 @import '@/presentation/styles/themes.pcss';
 @import '@/presentation/styles/typography.pcss';
 @import '@/presentation/styles/layout.pcss';
-@import '@/presentation/styles/scrollbar.pcss';
 
 ::selection {
   color: var(--theme-color-button-text);
@@ -54,14 +69,16 @@ body {
   color: var(--theme-color-text);
   display: grid;
   grid-template-columns: 100%;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: 100%;
+  /* grid-template-rows: 100%; */
   word-break: break-word;
+  overflow: hidden;
 }
 
 main {
   /* display: grid;
   place-items: center; */
-  /* overflow: auto; */
+  overflow: auto;
   /* padding: 20px; */
   /* position: relative; */
   display: grid;

@@ -1,79 +1,79 @@
-import AccountStore from './store';
+import { createAccountStore } from './store';
+import { type ModuleAccountStoreSchema, type ModuleAccount } from './types';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
+import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export default class Account {
-  #store: AccountStore;
+export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountStoreSchema>, {
+  providers,
+}: {
+  providers: ProvidersInterface;
+}): Promise<ModuleAccount> {
+  const store = await createAccountStore(state);
 
-  private constructor (
-    store: AccountStore,
-    private readonly providers: ProvidersInterface,
-  ) {
-    this.#store = store;
+  const primaryAccount = store.getPrimaryAccount();
+
+  if (primaryAccount !== undefined) {
+    connectAccountToProvider(primaryAccount);
   }
 
-  static async build (providers: ProvidersInterface): Promise<Account> {
-    const store = await AccountStore.build();
+  function connectAccountToProvider (account: AccountEntity): void {
+    providers
+      .getApi(account.provider)
+      .connect(account.token, account.name);
+  }
 
-    const primaryAccount = store.getPrimaryAccount();
+  function setPrimaryAccount (account: AccountEntity, isNeedConnect = true): void {
+    store.setPrimaryAccount(account);
 
-    if (primaryAccount !== undefined) {
-      Account.connectAccountToProvider(primaryAccount, providers);
+    if (isNeedConnect) {
+      connectAccountToProvider(account);
     }
-
-    return new Account(store, providers);
   }
 
-  static connectAccountToProvider (account: AccountEntity, providers: ProvidersInterface): void {
-    const providerApi = providers.getApi(account.provider);
+  async function login (provider: string): Promise<void> {
+    const account = await providers
+      .getApi(provider)
+      .login();
 
-    providerApi.connect(account.token, account.name);
-  }
-
-  public get store (): AccountStore {
-    return this.#store;
-  }
-
-  public async login (provider: string): Promise<void> {
-    const providerApi = this.providers.getApi(provider);
-    const account = await providerApi.login();
-    const storedAccount = this.#store.getAccountByProperties({
+    const storedAccount = store.getAccountByProperties({
       id: account.id,
       provider: account.provider,
     });
 
     if (storedAccount !== undefined) {
-      this.#store.refreshAccount(storedAccount, account);
+      store.refreshAccount(storedAccount, account);
     } else {
-      this.#store.addAccount(account);
+      store.addAccount(account);
     }
 
-    this.setPrimaryAccount(account, false);
+    setPrimaryAccount(account, false);
   }
 
-  public async logout (entity: AccountEntity): Promise<void> {
-    const providerApi = this.providers.getApi(entity.provider);
+  async function logout (entity: AccountEntity): Promise<void> {
+    await providers
+      .getApi(entity.provider)
+      .logout(entity.token);
 
-    await providerApi.logout(entity.token);
+    store.removeAccount(entity);
 
-    this.#store.removeAccount(entity);
-
-    if (!this.#store.isPrimaryAccount(entity)) {
+    if (!store.isPrimaryAccount(entity)) {
       return;
     }
 
-    const newPrimaryAccount = this.#store.resetPrimaryAccount();
+    const newPrimaryAccount = store.resetPrimaryAccount();
 
     if (newPrimaryAccount !== undefined) {
-      Account.connectAccountToProvider(newPrimaryAccount, this.providers);
+      connectAccountToProvider(newPrimaryAccount);
     }
   }
 
-  public setPrimaryAccount (account: AccountEntity, isNeedConnect = true): void {
-    this.#store.setPrimaryAccount(account);
-
-    if (isNeedConnect) {
-      Account.connectAccountToProvider(account, this.providers);
-    }
-  }
+  return {
+    login,
+    logout,
+    getAccounts: store.getAccounts,
+    setPrimaryAccount,
+    getPrimaryAccount: store.getPrimaryAccount,
+    isPrimaryAccount: store.isPrimaryAccount,
+  };
 }

@@ -1,93 +1,101 @@
 <template>
-  <div class="library">
-    <aside class="scrollable library__channels">
-      <Button
-        class="library__reset"
-        type="secondary"
-        @click="deactivateAllChannels()"
-      >
-        {{ t('library') }}
-      </Button>
-
-      <ChannelCard
-        v-for="name in followedChannelsNames"
-        :key="name"
-        :class="[
-          'library__channel',
-          activeChannelsNames.includes(name) && 'library__channel--active',
-        ]"
-        :name="name"
-        :category="liveStreamsByChannelName[name]?.category"
-        :data="channelsByName[name]"
-        :is-live="name in liveStreamsByChannelName"
-        :is-interactable="true"
-        @click="activateChannel(name)"
-        @visible="requestChannelByName(name)"
-      >
-        <div class="library__actions">
-          <IconButton
-            :icon="activeChannelsNames.includes(name) ? 'playFilled' : 'gridAdd'"
-            :size="18"
-            :disabled="activeChannelsNames.includes(name)"
-            @click="activateChannel(name, true)"
+  <div
+    :class="[
+      'library',
+      isSidebarActive && 'library--with-sidebar',
+    ]"
+  >
+    <aside
+      v-show="isSidebarActive"
+      class="library__sidebar"
+    >
+      <Scrollable>
+        <div class="library__channels">
+          <ChannelCard
+            v-for="name in followedChannelsNames"
+            :key="name"
+            :class="[
+              'library__channel',
+              activeChannels.find((channel) => channel.name === name) && 'library__channel--active',
+            ]"
+            :name="name"
+            :category="liveStreamsByChannelName[name]?.category"
+            :data="channelsByName[name]"
+            :is-live="name in liveStreamsByChannelName"
+            @click="activateChannel(name)"
+            @visible="requestChannelByName(name)"
           />
         </div>
-      </ChannelCard>
+      </Scrollable>
     </aside>
 
     <div
-      v-if="activeChannelsNames.length > 0"
+      v-if="activeChannels.length > 0"
       class="library__playing"
     >
       <Stream
-        v-for="name in activeChannelsNames"
+        v-for="{ name, id, offlineCover } in activeChannels"
         :key="name"
         :channel-name="name"
-        :playlist="getChannelPlaylistUrl"
-        :cover="liveStreamsByChannelName[name]?.cover ?? channelsByName[name]?.offlineCover"
+        :channel-id="id"
+        :playlist="name in liveStreamsByChannelName ? getChannelPlaylistUrl : undefined"
+        :cover="liveStreamsByChannelName[name]?.cover ?? offlineCover"
         @close="deactivateChannel(name)"
       />
     </div>
 
     <div
-      v-else
-      class="scrollable library__main"
+      v-else-if="liveStreams.length > 0"
+      class="library__main"
     >
-      <LibraryItem
-        v-for="stream in liveStreams"
-        :key="stream.id"
-        v-bind="stream"
-        :channel="channelsByName[stream.channelName]"
-        @click="activateChannel(stream.channelName)"
-        @channel-visible="requestChannelByName(stream.channelName)"
-      />
+      <Scrollable>
+        <div class="library__grid">
+          <LibraryItem
+            v-for="stream in liveStreams"
+            :key="stream.id"
+            v-bind="stream"
+            :channel="channelsByName[stream.channelName]"
+            @click="activateChannel(stream.channelName)"
+            @channel-visible="requestChannelByName(stream.channelName)"
+          />
+        </div>
+      </Scrollable>
+    </div>
+
+    <div
+      v-else
+      class="library__empty"
+    >
+      <img
+        :src="appIconPath"
+      >
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { useLibrary } from '../services/useLibrary';
 import LibraryItem from './LibraryItem.vue';
 import Stream from './Stream.vue';
-import Button from './ui/Button.vue';
-import IconButton from './ui/IconButton.vue';
 import ChannelCard from './ChannelCard.vue';
+import Scrollable from './ui/Scrollable.vue';
+import appIconPath from '@/assets/icon.svg';
+
+defineProps<{
+  isSidebarActive?: boolean;
+}>();
 
 const {
   liveStreams,
   liveStreamsByChannelName,
   channelsByName,
   followedChannelsNames,
-  activeChannelsNames,
+  activeChannels,
   activateChannel,
   deactivateChannel,
-  deactivateAllChannels,
   requestChannelByName,
   getChannelPlaylistUrl,
 } = useLibrary();
-
-const { t } = useI18n();
 </script>
 
 <style lang="postcss">
@@ -95,76 +103,73 @@ const { t } = useI18n();
 
 .library {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 100%;
   grid-template-rows: 100%;
 
-  &__channels {
+  &--with-sidebar {
+    grid-template-columns: var(--layout-left-sidebar-width) 1fr;
+  }
+
+  &__sidebar {
     display: grid;
-    align-content: start;
-    padding: 12px 6px;
-    gap: 2px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding-top: var(--layout-titlebar-height);
+  }
+
+  &__channels {
+    padding: 6px 0 12px 6px;
   }
 
   &__channel {
     border-radius: 12px;
-    padding: 6px;
+    padding: 8px 12px;
     color: var(--theme-color-text-secondary);
     cursor: pointer;
+    background-image: var(--background-image);
 
     &:hover {
-      color: var(--theme-color-text);
+      background-color: var(--theme-color-background);
     }
 
     &--active {
-      color: var(--theme-color-text);
       pointer-events: none;
+      background-color: var(--theme-color-background);
+      position: sticky;
+      top: 0;
+      bottom: 0;
+      z-index: 2;
     }
-
-    /* &--active {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.03);
-    } */
-  }
-
-  &__actions {
-    align-self: center;
-    display: flex;
-    gap: 8px;
-    color: var(--theme-color-text-tertiary);
-
-    /* &:hover {
-      color: var(--theme-color-text);
-    } */
   }
 
   &__main {
-    --size-offset: 30px;
-    --size-grid: 360px;
-
     display: grid;
-    /* gap: var(--size-offset) calc(var(--size-offset) * 1.75); */
-    gap: 20px;
+    padding-top: var(--layout-titlebar-height);
+  }
+
+  &__grid {
+    display: grid;
+    gap: 44px;
     align-content: start;
-    grid-template-columns: repeat(auto-fill, minmax(var(--size-grid), 1fr));
-    padding: 12px 30px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    padding: 6px 36px 12px;
   }
 
   &__playing {
     display: grid;
     grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
-    gap: 4px;
   }
 
-  &__reset {
-    justify-self: center;
-    position: sticky;
-    top: 0;
-    left: 12px;
-    margin-bottom: 12px;
-    z-index: 1;
+  &__empty {
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    grid-template-columns: minmax(0, 300px);
+
+    img {
+      width: 100%;
+      filter: grayscale(1);
+      opacity: 0.1;
+    }
   }
 }
 </style>

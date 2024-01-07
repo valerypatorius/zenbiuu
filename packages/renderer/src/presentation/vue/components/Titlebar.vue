@@ -1,63 +1,92 @@
 <template>
   <div class="titlebar">
-    <div class="titlebar__actions">
+    <div
+      :class="[
+        'titlebar__actions',
+        isSidebarActive && 'titlebar__actions--with-sidebar',
+      ]"
+    >
       <div
         class="titlebar__button"
-        @click="toggleSettingsState"
+        @click="emit('toggleSettings')"
       >
-        <Icon name="settings" />
+        <Icon
+          name="settings"
+          :size="20"
+        />
+      </div>
+
+      <div
+        class="titlebar__button"
+        @click="emit('toggleLeftSidebar')"
+      >
+        <Icon
+          :name="isSidebarActive ? 'sidebarLeftCollapse' : 'sidebarRightCollapse'"
+          :size="20"
+        />
       </div>
     </div>
 
-    {{ app.name }}
+    <div
+      v-show="isStreamActive"
+      class="titlebar__button"
+      @click="emit('goHome')"
+    >
+      <Icon
+        name="home"
+        :size="20"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useSettings } from '../services/useSettings';
 import Icon from '@/presentation/vue/components/ui/Icon.vue';
-import { useHub } from '@/presentation/vue/services/useHub';
 
-const { app } = useHub();
-const { toggleState: toggleSettingsState } = useSettings();
+defineProps<{
+  isStreamActive?: boolean;
+  isSidebarActive?: boolean;
+}>();
+
+const emit = defineEmits<{
+  toggleSettings: [];
+  goHome: [];
+  toggleLeftSidebar: [];
+}>();
 </script>
 
 <style lang="postcss">
 @import '@/presentation/styles/typography.pcss';
 
 .titlebar {
-  @extend %text-small;
   -webkit-app-region: drag;
+  width: 100%;
   height: var(--layout-titlebar-height);
   display: flex;
-  align-items: center;
-  justify-content: center;
   user-select: none;
-  position: relative;
-  color: var(--theme-color-text-secondary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
 
   &__actions {
-    height: 100%;
-    position: absolute;
-    left: 0;
     display: flex;
-    color: var(--theme-color-text);
-    -webkit-app-region: no-drag;
-    z-index: 2;
+    justify-content: space-between;
+
+    &--with-sidebar {
+      width: var(--layout-left-sidebar-width);
+    }
   }
 
   &__button {
+    -webkit-app-region: no-drag;
     display: flex;
-    padding: 0 10px;
+    padding: 0 16px;
     align-items: center;
+    color: var(--theme-color-text-secondary);
 
     &:hover {
-      /* color: var(--theme-color-button-background); */
-      background-color: var(--theme-color-text-tertiary);
-    }
-
-    .icon {
-      width: 20px;
+      background-color: rgba(255, 255, 255, 0.05);
     }
   }
 }

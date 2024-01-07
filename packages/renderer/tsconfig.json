@@ -30,6 +30,9 @@
       "@/providers/*": [
         "./src/infrastructure/providers/*"
       ],
+      "@/emotes-providers/*": [
+        "./src/infrastructure/emotes-providers/*"
+      ],
       "@/modules/*": [
         "./src/infrastructure/modules/*"
       ],
@@ -40,7 +43,8 @@
         "./src/presentation/*"
       ],
     },
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
+    "jsxImportSource": "vue"
   },
   "include": [
     "../../entities/**/*.ts",

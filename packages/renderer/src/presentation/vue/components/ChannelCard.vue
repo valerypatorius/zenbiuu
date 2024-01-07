@@ -15,7 +15,7 @@
       <Avatar
         class="channel-card__avatar"
         :src="data?.avatar"
-        :size="details !== undefined ? 36 : 24"
+        :size="details !== undefined ? 34 : 24"
         :is-online="isLive"
       />
 
@@ -27,7 +27,7 @@
             v-if="category"
             class="channel-card__category"
           >
-            - {{ category }}
+            {{ category }}
           </span>
         </div>
 
@@ -40,7 +40,7 @@
       </div>
     </div>
 
-    <slot name="default" />
+    <slot />
   </div>
 </template>
 
@@ -86,10 +86,7 @@ watchOnce(isRootElementVisible, () => {
   &--with-slot {
     display: grid;
     grid-template-columns: 1fr auto;
-  }
-
-  &--with-details {
-    @extend %text-small;
+    align-items: center;
   }
 
   &__main {
@@ -105,19 +102,25 @@ watchOnce(isRootElementVisible, () => {
 
   &__name {
     @extend %text-overflow;
+    color: var(--theme-color-text-secondary);
+  }
+
+  &__category,
+  &__details {
+    @extend %text-small;
   }
 
   &__category {
     @extend %text-small;
     color: var(--theme-color-text-tertiary);
-    margin-left: 4px;
+    margin-left: 12px;
     display: flex;
     align-items: baseline;
   }
 
   &__details {
     @extend %text-overflow;
-    color: var(--theme-color-text-secondary);
+    color: var(--theme-color-text-tertiary);
   }
 }
 </style>

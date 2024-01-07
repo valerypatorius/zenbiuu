@@ -1,24 +1,3 @@
-import * as ObservableSlim from 'observable-slim';
-import { debounce } from './debounce';
-
-/**
- * Returns proxied version of provided object, which will react to object changes
- * @param target - target object
- * @param callback - called on object modifications
- */
-export function observable<T extends object> (target: T, callback: () => void): T {
-  /**
-   * Wrap callback in debounce function for two reasons:
-   * - it will be called after target object updates;
-   * - helps to avoid unnecessary simultaneous calls;
-   */
-  const debouncedCallback = debounce(callback, 0);
-
-  return ObservableSlim.create(target, false, () => {
-    debouncedCallback();
-  }) as T;
-}
-
 /**
  * Safely delete property from object
  * @param obj - object which property should be deleted
@@ -56,4 +35,10 @@ export function statefulObject<T extends Record<string, unknown>> (obj: T): {
       }
     },
   };
+}
+
+export function clearObject<T extends Record<string, unknown>> (obj: T): void {
+  Object.keys(obj).forEach((key) => {
+    deleteObjectProperty(obj, key);
+  });
 }
