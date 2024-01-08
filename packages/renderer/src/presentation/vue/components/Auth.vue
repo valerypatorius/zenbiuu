@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useProviders } from '../services/useProviders';
-import Button from '@/presentation/vue/components/ui/Button.vue';
+import Button from '@/presentation/vue/components/ui/Button';
 import appIconPath from '@/assets/icon.svg';
 import { useAccount } from '@/presentation/vue/services/useAccount';
 

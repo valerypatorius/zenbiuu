@@ -35,7 +35,6 @@ const { deactivateAllChannels: goHome, activeChannels } = useLibrary();
 
 const isSidebarActive = ref(true);
 
-// const route = useRoute();
 // const { isSettingsActive } = useInterface();
 // const { state: appState } = useApp();
 // const { state: userState } = useUser();
@@ -70,39 +69,14 @@ body {
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 100%;
-  /* grid-template-rows: 100%; */
   word-break: break-word;
   overflow: hidden;
 }
 
 main {
-  /* display: grid;
-  place-items: center; */
   overflow: auto;
-  /* padding: 20px; */
-  /* position: relative; */
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 100%;
 }
-
-/* .window {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 100%;
-  grid-template-rows: var(--layout-titlebar-height) minmax(0, 1fr);
-  position: relative;
-  overflow: hidden;
-}
-
-.window__main {
-  display: grid;
-  grid-template-columns: 1fr;
-  position: relative;
-  overflow: hidden;
-
-  &--with-sidebar {
-    grid-template-columns: auto 1fr;
-  }
-} */
 </style>

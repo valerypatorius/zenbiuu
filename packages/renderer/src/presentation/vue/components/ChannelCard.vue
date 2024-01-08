@@ -71,6 +71,7 @@ const rootElement = ref<HTMLDivElement>();
 
 /**
  * @todo Improve by clearing observers after "visible" event is emitted
+ * @todo Move to directive and convert component to .tsx
  */
 const isRootElementVisible = useElementVisibility(rootElement);
 

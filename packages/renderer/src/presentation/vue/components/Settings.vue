@@ -59,7 +59,7 @@ import { useSettings } from '../services/useSettings';
 import { useAccount } from '../services/useAccount';
 import { useProviders } from '../services/useProviders';
 import Account from './Account.vue';
-import Button from '@/presentation/vue/components/ui/Button.vue';
+import Button from '@/presentation/vue/components/ui/Button';
 
 const { t } = useI18n();
 const { app } = useHub();

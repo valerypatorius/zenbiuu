@@ -62,9 +62,6 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
         if (handler !== undefined && message.text !== undefined && message.tags !== undefined) {
           handler({
-            /**
-             * @todo Properly type message tags
-             */
             id: message.tags.id,
             author: message.tags['display-name'],
             text: message.text,

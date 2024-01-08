@@ -3,7 +3,10 @@
     class="library-item"
     @click="emit('click')"
   >
-    <div class="library-item__cover">
+    <div
+      ref="coverElement"
+      class="library-item__cover"
+    >
       <img
         :src="cover"
         loading="lazy"
@@ -27,15 +30,17 @@
           name="users"
           :size="16"
         />
-        {{ viewersCount }}
+        <PrettyNumber :value="viewersCount" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import ChannelCard from './ChannelCard.vue';
-import Icon from './ui/Icon.vue';
+import Icon from './ui/Icon';
+import PrettyNumber from './ui/PrettyNumber';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
 
@@ -49,6 +54,8 @@ const emit = defineEmits<{
   click: [];
   channelVisible: [];
 }>();
+
+const coverElement = ref<HTMLElement | null>(null);
 </script>
 
 <style lang="postcss">
@@ -70,6 +77,7 @@ const emit = defineEmits<{
     filter: contrast(90%);
     background-color: #000;
     box-shadow: 0 10px 20px -15px var(--theme-color-shadow);
+    position: relative;
 
     img {
       width: 100%;

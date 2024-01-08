@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Icon from './Icon.vue';
+import Icon from './Icon';
 
 withDefaults(defineProps<{
   src?: string;

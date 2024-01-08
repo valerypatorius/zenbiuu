@@ -41,7 +41,7 @@ import { useI18n } from 'vue-i18n';
 import { useAccount } from '../services/useAccount';
 import ChatMessage from './ChatMessage';
 import Scrollable from './ui/Scrollable.vue';
-import Icon from './ui/Icon.vue';
+import Icon from './ui/Icon';
 import { useChat } from '@/presentation/vue/services/useChat';
 import { useEmotes } from '@/presentation/vue/services/useEmotes';
 

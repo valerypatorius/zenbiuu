@@ -61,7 +61,7 @@
 import { computed } from 'vue';
 import { useProviders } from '../services/useProviders';
 import Avatar from './ui/Avatar.vue';
-import Icon from './ui/Icon.vue';
+import Icon from './ui/Icon';
 import type AccountEntity from '@/entities/AccountEntity';
 
 type Props = AccountEntity & {

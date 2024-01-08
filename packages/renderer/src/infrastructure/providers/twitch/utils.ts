@@ -136,7 +136,6 @@ function parseEmotes (source: string): Record<string, Array<{ start: number; end
 
 /**
  * Entry point for message tags parsing
- * @todo Make an attempt to fully type all possible tags
  */
 function parseTags (source: string): Record<string, any> {
   const result: Record<string, any> = {};

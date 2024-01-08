@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import Icon from '@/presentation/vue/components/ui/Icon.vue';
+import Icon from '@/presentation/vue/components/ui/Icon';
 
 defineProps<{
   isStreamActive?: boolean;

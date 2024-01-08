@@ -1,0 +1,22 @@
+.icon {
+  width: var(--size, 24px);
+  height: var(--size, 24px);
+  flex-shrink: 0;
+  display: block;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+
+    /* By default inherit text color for fill */
+    fill: currentColor;
+
+    /* If stroke width is set, inherit text color for stroke */
+    &[stroke-width] {
+      fill: none;
+      stroke: currentColor;
+    }
+  }
+}

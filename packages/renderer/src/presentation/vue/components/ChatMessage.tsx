@@ -8,7 +8,7 @@ import { type EmoteEntity } from '@/entities/EmoteEntity';
  */
 function getEmoteSrcSet (emote: EmoteEntity): string {
   return Object.entries(emote).reduce<string[]>((result, [size, url]) => {
-    result.push(`${url} ${size}`);
+    result.push(`${url as string} ${size}`);
     return result;
   }, []).join(',');
 }

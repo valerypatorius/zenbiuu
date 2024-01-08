@@ -7,10 +7,3 @@ export default {
     postcssExtendRule,
   ],
 };
-
-// module.exports = {
-//   plugins: [
-//     require('postcss-nested'),
-//     require('postcss-extend-rule'),
-//   ],
-// };
