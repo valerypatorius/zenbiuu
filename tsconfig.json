@@ -3,7 +3,7 @@
     "module": "esnext",
     "target": "esnext",
     "sourceMap": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "strict": true,
     "isolatedModules": true,
@@ -12,7 +12,6 @@
       "node"
     ],
     "lib": ["ESNext"],
-    "esModuleInterop": true,
-    "jsx": "preserve"
+    "esModuleInterop": true
   }
 }

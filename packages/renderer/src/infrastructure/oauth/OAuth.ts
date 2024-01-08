@@ -11,10 +11,10 @@ interface OAuthConstructorParams {
 export default class OAuth implements OAuthInterface {
   protected readonly redirectUrl = import.meta.env.VITE_APP_REDIRECT_URL;
 
-  #name: string;
-  #path: string;
-  #clientId: string;
-  #scopes: string[];
+  readonly #name: string;
+  readonly #path: string;
+  readonly #clientId: string;
+  readonly #scopes: string[];
 
   constructor ({
     name,

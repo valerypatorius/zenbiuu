@@ -62,7 +62,6 @@ const emit = defineEmits<{
   overflow: hidden;
   position: relative;
   z-index: 1;
-  background-color: var(--theme-color-background);
 
   &__cover {
     aspect-ratio: 16 / 9;

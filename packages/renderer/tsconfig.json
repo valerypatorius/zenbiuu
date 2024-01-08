@@ -43,7 +43,11 @@
         "./src/presentation/*"
       ],
     },
+    "types": [
+      "vite/client"
+    ],
     "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
+    "jsx": "preserve",
     "jsxImportSource": "vue"
   },
   "include": [

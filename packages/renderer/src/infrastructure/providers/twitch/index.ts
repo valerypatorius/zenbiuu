@@ -1,5 +1,6 @@
 import AbstractProvider from '../AbstractProvider';
 import config from './config';
+import { parseMessage } from './utils';
 import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollowedChannel, TwitchResponse, TwitchPlaylistAccessTokenResponse } from './types';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
@@ -14,7 +15,6 @@ import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
 import { deleteObjectProperty } from '@/utils/object';
 import { uid } from '@/utils/string';
-import { parseMessage } from '@/utils/irc';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   protected readonly config = config;

@@ -1,0 +1,17 @@
+{
+  "name": "@zenbiuu/main",
+  "version": "2.0.0",
+  "private": "true",
+  "license": "GPL-3.0",
+  "type": "module",
+  "engines": {
+    "node": ">=21.5.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ./src --ext .ts"
+  },
+  "devDependencies": {
+    "electron-store": "^8.1.0"
+  }
+}

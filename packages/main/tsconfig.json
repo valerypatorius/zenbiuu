@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["ESNext"],
     "paths": {
       "$/*": [
         "../../*"
@@ -19,9 +18,13 @@
       "@/utils/*": [
         "./src/utils/*"
       ]
-    }
+    },
+    "types": [
+      "vite/client"
+    ],
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "../../entities/*.ts"
   ],
 }

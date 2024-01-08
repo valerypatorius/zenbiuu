@@ -13,6 +13,10 @@ export async function createEmotesStore (createState: ModuleStateFactoryFn<Modul
   }
 
   function addChannelEmotes (channelId: string, emotes: Record<string, EmoteEntity>): void {
+    if (!(channelId in state.emotesByChannelId)) {
+      state.emotesByChannelId[channelId] = {};
+    }
+
     Object.assign(state.emotesByChannelId[channelId], emotes);
 
     save();

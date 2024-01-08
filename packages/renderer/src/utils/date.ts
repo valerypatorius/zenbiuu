@@ -24,15 +24,6 @@ const Hour = 60 * Minute;
 const Day = 24 * Hour;
 
 /**
- * Returns current timestamp in ms
- */
-// export const now = (): number => {
-//   const date = new Date();
-
-//   return date.getTime();
-// };
-
-/**
  * Converts date string to unix timestamp
  */
 export const unixtime = (dateString?: string): number => {

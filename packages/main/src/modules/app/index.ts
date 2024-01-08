@@ -3,7 +3,7 @@ import { app, Menu } from 'electron';
 import type AppInterface from '@/interfaces/App.interface';
 
 export default class App implements AppInterface {
-  #protocol = app.getName();
+  readonly #protocol = app.getName();
 
   public isAllowAppStart = app.requestSingleInstanceLock();
 
