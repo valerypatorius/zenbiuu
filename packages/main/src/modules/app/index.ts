@@ -25,9 +25,10 @@ export default class App implements AppInterface {
     app.commandLine.appendSwitch('use-angle', 'gl');
 
     /**
+     * @todo Research if window shortcuts can work with this setting
      * @see https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
      */
-    Menu.setApplicationMenu(null);
+    // Menu.setApplicationMenu(null);
 
     /**
      * Allow only one running instance of the app
