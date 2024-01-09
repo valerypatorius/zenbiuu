@@ -31,7 +31,7 @@
     "@typescript-eslint/parser": "^6.17.0",
     "consola": "^3.2.3",
     "cross-env": "^7.0.3",
-    "electron": "^28.1.1",
+    "electron": "^28.1.2",
     "electron-builder": "^24.9.1",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.7",

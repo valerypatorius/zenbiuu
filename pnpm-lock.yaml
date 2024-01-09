@@ -24,8 +24,8 @@ importers:
         specifier: ^7.0.3
         version: 7.0.3
       electron:
-        specifier: ^28.1.1
-        version: 28.1.1
+        specifier: ^28.1.2
+        version: 28.1.2
       electron-builder:
         specifier: ^24.9.1
         version: 24.9.1
@@ -2794,6 +2794,19 @@ packages:
 
   /electron@28.1.1:
     resolution: {integrity: sha512-HJSbGHpRl46jWCp5G4OH57KSm2F5u15tB10ixD8iFiz9dhwojqlSQTRAcjSwvga+Vqs1jv7iqwQRrolXP4DgOA==}
+    engines: {node: '>= 12.20.55'}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      '@electron/get': 2.0.3
+      '@types/node': 18.19.5
+      extract-zip: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /electron@28.1.2:
+    resolution: {integrity: sha512-rbRuIj5pRn6K16Hx3XYlI2C4jp6s0ZJ4QptQ+wGw0blO5563cXCtZxK/wifVGfuwVfa3n/UqMuUwn3IshjZ8dw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
     requiresBuild: true
