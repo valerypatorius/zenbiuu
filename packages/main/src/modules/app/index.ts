@@ -19,9 +19,10 @@ export default class App implements AppInterface {
     app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
     /**
-     * @todo Research GPU related flags
+     * Experimental flags to decrease GPU load aka "it works on my machine"
      */
-    // app.commandLine.appendSwitch('use-gl', 'desktop');
+    app.commandLine.appendSwitch('use-gl', 'angle');
+    app.commandLine.appendSwitch('use-angle', 'gl');
 
     /**
      * @see https://www.electronjs.org/docs/latest/tutorial/performance#8-call-menusetapplicationmenunull-when-you-do-not-need-a-default-menu
