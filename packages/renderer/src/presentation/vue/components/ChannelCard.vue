@@ -14,8 +14,8 @@
     >
       <Avatar
         class="channel-card__avatar"
-        :src="data?.avatar"
-        :size="details !== undefined ? 34 : 24"
+        :src="avatar"
+        :size="details !== undefined ? 36 : 24"
         :is-online="isLive"
       />
 
@@ -48,7 +48,6 @@
 import { ref } from 'vue';
 import { useElementVisibility, watchOnce } from '@vueuse/core';
 import Avatar from './ui/Avatar.vue';
-import type ChannelEntity from '@/entities/ChannelEntity';
 
 const slots = defineSlots<{
   default?: () => any;
@@ -61,7 +60,7 @@ const emit = defineEmits<{
 
 defineProps<{
   name: string;
-  data?: ChannelEntity;
+  avatar?: string;
   category?: string;
   details?: string;
   isLive?: boolean;

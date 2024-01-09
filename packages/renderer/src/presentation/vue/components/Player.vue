@@ -55,6 +55,9 @@ const hls = new Hls({
   liveMaxLatencyDurationCount: 3,
 });
 
+/**
+ * @todo Think about performance
+ */
 function startCanvasPainting (): void {
   if (video.value === null || canvas.value === null) {
     return;

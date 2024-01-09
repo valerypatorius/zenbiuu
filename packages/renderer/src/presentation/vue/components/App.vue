@@ -2,14 +2,13 @@
   <TitleBar
     :is-stream-active="activeChannels.length > 0"
     :is-sidebar-active="isSidebarActive"
-    @toggle-settings="toggleSettingsState()"
+    :is-settings-active="isSettingsOpened"
     @go-home="goHome()"
+    @toggle-settings="toggleSettingsState()"
     @toggle-left-sidebar="isSidebarActive = !isSidebarActive"
   />
 
   <main>
-    <Settings />
-
     <Library
       v-if="primaryAccount !== undefined"
       :is-sidebar-active="isSidebarActive"
@@ -17,6 +16,8 @@
 
     <Auth v-else />
   </main>
+
+  <Settings v-if="isSettingsOpened" />
 </template>
 
 <script setup lang="ts">
@@ -30,7 +31,7 @@ import Settings from './Settings.vue';
 import Library from './Library.vue';
 
 const { primaryAccount } = useAccount();
-const { toggleState: toggleSettingsState } = useSettings();
+const { state: isSettingsOpened, toggleState: toggleSettingsState } = useSettings();
 const { deactivateAllChannels: goHome, activeChannels } = useLibrary();
 
 const isSidebarActive = ref(true);

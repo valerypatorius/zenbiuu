@@ -1,6 +1,9 @@
 <template>
   <button
-    class="icon-button"
+    :class="[
+      'icon-button',
+      active && 'icon-button--active',
+    ]"
     :disabled="disabled"
     @click="(event) => emit('click', event)"
   >
@@ -19,6 +22,7 @@ defineProps<{
   icon: keyof typeof icons;
   size?: number;
   disabled?: boolean;
+  active?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -29,10 +33,15 @@ const emit = defineEmits<{
 <style lang="postcss">
 .icon-button {
   background-color: transparent;
-  color: inherit;
-  padding: 4px;
+  color: var(--theme-color-text-secondary);
+  padding: 8px;
   border-radius: 50%;
-  transition: all 0.1s;
+  /* transition: all 0.1s; */
+
+  &--active {
+    color: #cdb432;
+    background-color: rgba(205, 180, 50, 0.1);
+  }
 
   &[disabled] {
     pointer-events: none;

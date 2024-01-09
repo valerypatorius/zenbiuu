@@ -1,5 +1,10 @@
 <template>
-  <div class="titlebar">
+  <div
+    :class="[
+      'titlebar',
+      isSettingsActive && 'titlebar--with-settings',
+    ]"
+  >
     <div
       :class="[
         'titlebar__actions',
@@ -7,7 +12,7 @@
       ]"
     >
       <div
-        class="titlebar__button"
+        class="titlebar__button titlebar__button--settings"
         @click="emit('toggleSettings')"
       >
         <Icon
@@ -46,6 +51,7 @@ import Icon from '@/presentation/vue/components/ui/Icon';
 defineProps<{
   isStreamActive?: boolean;
   isSidebarActive?: boolean;
+  isSettingsActive?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -68,6 +74,12 @@ const emit = defineEmits<{
   top: 0;
   left: 0;
   z-index: 10;
+
+  &--with-settings {
+    .titlebar__button:not(.titlebar__button--settings) {
+      display: none;
+    }
+  }
 
   &__actions {
     display: flex;

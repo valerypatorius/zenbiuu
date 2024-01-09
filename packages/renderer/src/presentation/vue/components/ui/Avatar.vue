@@ -62,7 +62,7 @@ function onLoad (): void {
     display: block;
     width: 100%;
     opacity: 0;
-    transform: scale(1.15);
+    /* transform: scale(1.15); */
     transition: all 0.1s ease-out;
     border-radius: inherit;
   }
@@ -70,7 +70,7 @@ function onLoad (): void {
   &--loaded {
     img {
       opacity: 1;
-      transform: scale(1);
+      /* transform: scale(1); */
     }
   }
 

@@ -20,7 +20,7 @@
             ]"
             :name="name"
             :category="liveStreamsByChannelName[name]?.category"
-            :data="channelsByName[name]"
+            :avatar="channelsByName[name]?.avatar"
             :is-live="name in liveStreamsByChannelName"
             @click="activateChannel(name)"
             @visible="requestChannelByName(name)"

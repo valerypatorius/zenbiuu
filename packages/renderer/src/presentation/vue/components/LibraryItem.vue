@@ -20,7 +20,7 @@
 
       <ChannelCard
         :name="channelName"
-        :data="channel"
+        :avatar="channel?.avatar"
         :category="category"
         @visible="emit('channelVisible')"
       />
