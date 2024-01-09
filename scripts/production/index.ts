@@ -1,3 +1,4 @@
+import consola from 'consola';
 import { build, loadEnv } from 'vite';
 
 /**
@@ -21,7 +22,7 @@ try {
     configFile: 'packages/renderer/vite.config.ts',
   });
 } catch (error) {
-  console.error(error);
+  consola.error(error);
 
-  process.exit(1);
+  process.exit();
 }

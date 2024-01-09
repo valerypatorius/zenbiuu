@@ -1,8 +1,13 @@
 import { createInterface } from 'readline';
 import { createServer, loadEnv, build } from 'vite';
+import { consola } from 'consola';
+import { productName, version } from '../../package.json';
 import { createElectronProcess } from './electron';
 import { createConfig } from './config';
 import { createWatchablePlugin } from './plugins';
+
+consola.box(`🐒 ${productName}@${version}`);
+consola.start('Starting development...');
 
 /**
  * Development server host
@@ -20,7 +25,7 @@ const SERVER_PORT = 5173;
  */
 const electron = createElectronProcess({
   onClose: () => {
-    process.exit(1);
+    process.exit();
   },
 });
 
@@ -78,7 +83,7 @@ if (process.platform === 'win32') {
  * Exit process without confirmation
  */
 process.on('SIGINT', () => {
-  process.exit(1);
+  process.exit();
 });
 
 /**
@@ -98,10 +103,14 @@ try {
    */
   const server = await createServer(config.renderer);
 
+  consola.success('Build renderer package');
+
   /**
    * Start server. This way HMR will be ready, when we open electron window
    */
   await server.listen();
+
+  consola.success('Start development server');
 
   /**
    * Second, build preload package.
@@ -109,13 +118,17 @@ try {
    */
   await build(config.preload);
 
+  consola.success('Build preload package');
+
   /**
    * Finally, build main process package.
    * When finished, electron window is opened with dev server url loaded
    */
   await build(config.main);
-} catch (error) {
-  console.error(error);
 
-  process.exit(1);
+  consola.success('Build main package');
+} catch (error) {
+  consola.error(error);
+
+  process.exit();
 }

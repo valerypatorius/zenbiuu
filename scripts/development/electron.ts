@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import consola from 'consola';
 import electron from 'electron';
 
 interface ElectronProcessHandlers {
@@ -46,10 +47,18 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
     handlers?.onClose?.();
   }
 
-  function start (): void {
+  function start (isInitial = true): void {
+    if (electronProcess !== undefined) {
+      return;
+    }
+
     electronProcess = spawn(electronPath, ['.']);
 
     electronProcess.on('close', handleCloseEvent);
+
+    if (isInitial) {
+      consola.success('Start electron.exe');
+    }
   }
 
   function stop (signal?: NodeJS.Signals): void {
@@ -57,15 +66,20 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
       return;
     }
 
-    electronProcess.off('close', handleCloseEvent);
+    if (signal === RESTART_SIGNAL) {
+      consola.info('Restart electron.exe');
+    }
+
     electronProcess.kill(signal);
 
     electronProcess = undefined;
   }
 
   function restart (): void {
+    const isInitialStart = electronProcess === undefined;
+
     stop(RESTART_SIGNAL);
-    start();
+    start(isInitialStart);
   }
 
   return {
