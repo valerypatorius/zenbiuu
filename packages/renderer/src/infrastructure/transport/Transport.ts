@@ -20,20 +20,20 @@ export default class Transport implements TransportInterface {
   }
 
   private handleWorkerMessage (event: MessageEvent<TransportResponse>): void {
-    const data = event.data;
-    const handlers = this.queue.get(data.url);
+    const message = event.data;
+    const handlers = this.queue.get(message.key);
 
     if (handlers === undefined) {
       return;
     }
 
-    if (data.error !== undefined) {
-      handlers.reject(data.error);
+    if (message.error !== undefined) {
+      handlers.reject(message.error);
     } else {
-      handlers.resolve(data.data);
+      handlers.resolve(message.data);
     }
 
-    this.queue.delete(data.url);
+    this.queue.delete(message.url);
   }
 
   private async handle<T> (action: 'get' | 'post', payload: TransportPayload): Promise<T> {
@@ -48,7 +48,9 @@ export default class Transport implements TransportInterface {
         },
       };
 
-      this.queue.set(payload.url, {
+      const key = Transport.getRequestKey(payload.url, payload.options?.body);
+
+      this.queue.set(key, {
         resolve,
         reject,
       });
@@ -56,6 +58,7 @@ export default class Transport implements TransportInterface {
       this.worker.postMessage({
         action,
         data,
+        key,
       });
     });
   }
@@ -74,5 +77,15 @@ export default class Transport implements TransportInterface {
       options,
       parseResponse,
     });
+  }
+
+  static getRequestKey (url: string, body?: BodyInit | null): string {
+    let key = url;
+
+    if (body !== null && body !== undefined) {
+      key += typeof body === 'string' ? `:${body}` : `:${JSON.stringify(body)}`;
+    }
+
+    return key;
   }
 }

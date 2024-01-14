@@ -1,9 +1,9 @@
 <template>
   <TitleBar
-    :is-stream-active="activeChannels.length > 0"
+    :is-stream-active="openedChannels.length > 0"
     :is-sidebar-active="isSidebarActive"
     :is-settings-active="isSettingsOpened"
-    @go-home="goHome()"
+    @go-home="closeAllChannels()"
     @toggle-settings="toggleSettingsState()"
     @toggle-left-sidebar="isSidebarActive = !isSidebarActive"
   />
@@ -29,10 +29,11 @@ import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
 import Settings from './Settings.vue';
 import Library from './Library.vue';
+import 'overlayscrollbars/overlayscrollbars.css';
 
 const { primaryAccount } = useAccount();
 const { state: isSettingsOpened, toggleState: toggleSettingsState } = useSettings();
-const { deactivateAllChannels: goHome, activeChannels } = useLibrary();
+const { closeAllChannels, openedChannels } = useLibrary();
 
 const isSidebarActive = ref(true);
 

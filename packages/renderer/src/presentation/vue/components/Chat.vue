@@ -1,5 +1,10 @@
 <template>
-  <div class="chat">
+  <div
+    :class="[
+      'chat',
+      isEnableTopOffset && 'chat--with-top-offset',
+    ]"
+  >
     <Scrollable>
       <div class="chat__main">
         <div
@@ -48,6 +53,7 @@ import { useEmotes } from '@/presentation/vue/services/useEmotes';
 const props = defineProps<{
   channelName: string;
   channelId: string;
+  isEnableTopOffset?: boolean;
 }>();
 
 const { join, leave, messagesByChannel } = useChat();
@@ -81,8 +87,11 @@ onBeforeUnmount(() => {
 
 <style lang="postcss">
 .chat {
-  padding-top: var(--layout-titlebar-height);
   display: grid;
+
+  &--with-top-offset {
+    padding-top: var(--layout-titlebar-height);
+  }
 
   &__welcome {
     margin: 0 auto;
@@ -103,7 +112,7 @@ onBeforeUnmount(() => {
   }
 
   &__horizon {
-    height: 12px;
+    height: 6px;
   }
 }
 </style>

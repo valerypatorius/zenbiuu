@@ -18,12 +18,8 @@ export default class Window implements WindowInterface {
 
     this.#instance = new BrowserWindow({
       icon: join(__dirname, '../../../build/512x512.png'),
-      // show: false,
       width,
       height,
-      // frame: false,
-      // titleBarStyle: 'hiddenInset',
-      // backgroundMaterial: 'none',
       titleBarStyle: 'hidden',
       titleBarOverlay: {
         color: 'rgba(0, 0, 0, 0)',
@@ -33,7 +29,7 @@ export default class Window implements WindowInterface {
       webPreferences: {
         preload: join(__dirname, '../../preload/dist/index.cjs'),
       },
-      // ...options,
+      ...options,
     });
 
     /**

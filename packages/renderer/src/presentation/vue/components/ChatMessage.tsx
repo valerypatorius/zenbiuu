@@ -31,6 +31,7 @@ const Message: FunctionalComponent<ChatMessage & { emotes?: Record<string, Emote
   text,
   color,
   emotes,
+  isEven,
 }) => {
   const emotifiedText = emotes !== undefined
     ? text.split(' ').map((word) => {
@@ -42,7 +43,10 @@ const Message: FunctionalComponent<ChatMessage & { emotes?: Record<string, Emote
     : text;
 
   return <div
-    class="chat-message"
+    class={[
+      'chat-message',
+      isEven === true && 'chat-message--with-background',
+    ]}
     style={{
       '--color': color,
     }}

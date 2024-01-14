@@ -11,6 +11,8 @@ export async function createChatStore (createState: ModuleStateFactoryFn<ModuleC
 
   const limit = 100;
 
+  let isLastAddedMessageEven = false;
+
   function getMessagesByChannelName (): Record<string, ChatMessage[]> {
     return state.messagesByChannelName;
   }
@@ -26,21 +28,25 @@ export async function createChatStore (createState: ModuleStateFactoryFn<ModuleC
       state.messagesByChannelName[channelName].shift();
     }
 
+    message.isEven = isLastAddedMessageEven;
+
+    isLastAddedMessageEven = !isLastAddedMessageEven;
+
     state.messagesByChannelName[channelName].push(message);
 
-    save();
+    // save();
   }
 
   function clearChannelMessages (channelName: string): void {
     deleteObjectProperty(state.messagesByChannelName, channelName);
 
-    save();
+    // save();
   }
 
   function clearAll (): void {
     clearObject(state.messagesByChannelName);
 
-    save();
+    // save();
   }
 
   return {

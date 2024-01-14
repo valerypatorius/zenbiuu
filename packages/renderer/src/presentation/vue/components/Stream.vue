@@ -8,6 +8,7 @@
     />
 
     <Chat
+      :is-enable-top-offset="isMain"
       :channel-name="channelName"
       :channel-id="channelId"
     />
@@ -22,6 +23,7 @@ defineProps<{
   channelName: string;
   channelId: string;
   cover?: string;
+  isMain?: boolean;
   playlist?: (channel: string) => Promise<string | undefined>;
 }>();
 

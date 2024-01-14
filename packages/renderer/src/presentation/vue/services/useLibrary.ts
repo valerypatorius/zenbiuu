@@ -3,6 +3,7 @@ import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
+import type ChannelEntity from '@/entities/ChannelEntity';
 
 export const useLibrary = createSharedComposable(() => {
   const library = inject(Injection.Module.Library);
@@ -13,15 +14,15 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  const liveStreamsByChannelName = computed(() => library.getLiveStreamsByChannelName());
+  const liveStreamsByChannelName = computed(() => library.store.liveStreamsByChannelName);
 
-  const liveStreams = computed(() => Object.values(liveStreamsByChannelName.value));
+  const liveStreams = computed(() => [...liveStreamsByChannelName.value.values()]);
 
   /**
    * @todo Find a better way of sorting?
    */
   const followedChannelsNames = computed(() => {
-    return [...library.getFollowedChannelsNames()].sort((a, b) => {
+    return [...library.store.followedChannelsNames.values()].sort((a, b) => {
       const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
       const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
 
@@ -29,48 +30,50 @@ export const useLibrary = createSharedComposable(() => {
     });
   });
 
-  const channelsByName = computed(() => library.getChannelsByNames());
+  const channelsByName = computed(() => library.store.channelsByName);
 
-  const activeChannels = computed(() => library.getActiveChannelsNames().map((name) => channelsByName.value[name]));
+  const openedChannels = computed(() => {
+    return [...library.store.selectedChannelsNames.values()]
+      .map((name) => channelsByName.value.get(name))
+      .filter((channel) => channel !== undefined) as ChannelEntity[];
+  });
 
   watchEffect(() => {
+    library.primaryAccount = primaryAccount.value;
+
     if (primaryAccount.value !== undefined) {
       /**
        * @todo Cache followed channels to reduce API calls
        */
-      library?.requestFollowedChannelsNames(primaryAccount.value);
-      library?.requestFollowedLiveStreams(primaryAccount.value);
+      library?.requestFollowedChannelsNames();
+      library?.requestFollowedLiveStreams();
     } else {
       library?.destroy();
     }
   });
 
-  function activateChannel (name: string, isParallel = false): void {
+  function openChannel (name: string, isParallel = false): void {
     if (!isParallel) {
-      deactivateAllChannels();
+      closeAllChannels();
     }
 
-    library?.activateChannel(name);
+    library?.store.addSelectedChannelName(name);
   }
 
-  function deactivateChannel (name: string): void {
-    library?.deactivateChannel(name);
+  function closeChannel (name: string): void {
+    library?.store.removeSelectedChannelName(name);
   }
 
-  function deactivateAllChannels (): void {
-    library?.deactivateAllChannels();
+  function closeAllChannels (): void {
+    library?.store.removeAllSelectedChannelsNames();
   }
 
   function requestChannelByName (name: string): void {
-    if (primaryAccount.value !== undefined) {
-      library?.requestChannelByName(primaryAccount.value, name);
-    }
+    library?.requestChannelByName(name);
   }
 
   async function getChannelPlaylistUrl (name: string): Promise<string | undefined> {
-    if (primaryAccount.value !== undefined) {
-      return library?.getChannelPlaylistUrl(primaryAccount.value, name);
-    }
+    return library?.getChannelPlaylistUrl(name);
   }
 
   return {
@@ -78,10 +81,10 @@ export const useLibrary = createSharedComposable(() => {
     liveStreamsByChannelName,
     channelsByName,
     followedChannelsNames,
-    activeChannels,
-    activateChannel,
-    deactivateChannel,
-    deactivateAllChannels,
+    openedChannels,
+    openChannel,
+    closeChannel,
+    closeAllChannels,
     requestChannelByName,
     getChannelPlaylistUrl,
   };

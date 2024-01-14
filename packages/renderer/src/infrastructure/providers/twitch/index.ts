@@ -48,9 +48,6 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
         return;
       }
 
-      /**
-       * @todo Move to Twitch provider dir
-       */
       const message = parseMessage(data);
 
       if (message === undefined || message.command !== 'PRIVMSG') {
@@ -152,6 +149,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     /**
      * If token is not validated, call validation, but do not wait for it
+     * @todo Call every hour or so
      */
     if (!this.isTokenValidated) {
       void this.validate(this.accessToken);
@@ -345,6 +343,10 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     /**
      * @todo Improve and handle 404
+     */
+
+    /**
+     * @todo Perform request again when status is 200, but nothing has been returned
      */
 
     this.emotesProviders.getApi('7tv').getChannelEmotes(id).then((emotes) => {

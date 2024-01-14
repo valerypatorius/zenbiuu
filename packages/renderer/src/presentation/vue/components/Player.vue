@@ -1,15 +1,10 @@
 <template>
   <div class="player">
-    <div
-      class="player__background"
-      :style="{
-        'background-image': `url(${cover})`,
-      }"
-    >
+    <div class="player__background">
       <canvas
         ref="canvas"
-        width="640"
-        height="360"
+        :width="CANVAS_WIDTH"
+        :height="CANVAS_HEIGHT"
       />
     </div>
 
@@ -22,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
 
@@ -35,6 +30,9 @@ const props = defineProps<{
 defineEmits<{
   close: [];
 }>();
+
+const CANVAS_WIDTH = 320;
+const CANVAS_HEIGHT = 180;
 
 const playlistUrl = ref<string>();
 
@@ -55,22 +53,22 @@ const hls = new Hls({
   liveMaxLatencyDurationCount: 3,
 });
 
-/**
- * @todo Think about performance
- */
+const canvasContext = computed(() => canvas.value?.getContext('2d') ?? null);
+
+let isCanDrawCanvas = false;
+
 function startCanvasPainting (): void {
-  if (video.value === null || canvas.value === null) {
+  if (video.value === null || canvas.value === null || canvasContext.value === null) {
     return;
   }
 
-  const { width, height } = canvas.value;
-  const ctx = canvas.value.getContext('2d');
+  isCanDrawCanvas = !isCanDrawCanvas;
 
-  if (ctx === null) {
-    return;
+  if (isCanDrawCanvas) {
+    const { width, height } = canvas.value;
+
+    canvasContext.value.drawImage(video.value, 0, 0, width, height);
   }
-
-  ctx.drawImage(video.value, 0, 0, width, height);
 
   /**
    * @todo Perform cleanup on unmount
@@ -78,7 +76,27 @@ function startCanvasPainting (): void {
   requestAnimationFrame(startCanvasPainting);
 }
 
+function drawInitialCanvasImage (): void {
+  if (canvasContext.value === null || props.cover === undefined) {
+    return;
+  }
+
+  const image = new Image(CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  image.onload = () => {
+    canvasContext.value?.drawImage(image, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  };
+
+  image.src = props.cover;
+}
+
 onMounted(async () => {
+  if (canvasContext.value !== null) {
+    canvasContext.value.filter = 'blur(20px)';
+  }
+
+  drawInitialCanvasImage();
+
   if (props.playlist === undefined) {
     return;
   }
@@ -110,7 +128,6 @@ onBeforeUnmount(() => {
   z-index: 1;
   overflow: hidden;
   /* -webkit-app-region: drag; */
-  /* border-radius: 12px 0 0 12px; */
 
   &__title {
     @extend %text-heading;
@@ -122,11 +139,7 @@ onBeforeUnmount(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: 50% 50%;
-    opacity: 0.25;
-    filter: blur(20px);
-    transform: scale(1.5);
+    opacity: 0.5;
     z-index: -1;
 
     canvas {
@@ -140,7 +153,6 @@ onBeforeUnmount(() => {
   video {
     width: 100%;
     height: 100%;
-    /* object-fit: contain; */
   }
 
   &__overlay {

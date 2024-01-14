@@ -2,28 +2,30 @@ import { type TransportPayload } from '../types';
 import type TransportResponse from '@/entities/TransportResponse';
 import TransportStatus from '@/entities/TransportStatus';
 
-const controllersByUrl = new Map<string, AbortController>();
+const controllersByKey = new Map<string, AbortController>();
 
 /**
  * Handle request to a specified url
  * @param method - method for request
  * @param payload - payload for request
+ * @param key - request key, based on url and body
  */
-async function handle (method: string, payload: TransportPayload): Promise<void> {
-  const pendingRequest = controllersByUrl.get(payload.url);
+async function handle (method: string, payload: TransportPayload, key: string): Promise<void> {
+  const pendingRequest = controllersByKey.get(key);
 
   if (pendingRequest !== undefined) {
     pendingRequest.abort();
   }
 
   const message: TransportResponse = {
+    key,
     url: payload.url,
   };
 
   try {
     const controller = new AbortController();
 
-    controllersByUrl.set(payload.url, controller);
+    controllersByKey.set(key, controller);
 
     const response = await fetch(payload.url, {
       method,
@@ -31,7 +33,7 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
       ...payload.options,
     });
 
-    controllersByUrl.delete(payload.url);
+    controllersByKey.delete(key);
 
     /**
      * If response is not found, do not proceed
@@ -111,13 +113,13 @@ async function handle (method: string, payload: TransportPayload): Promise<void>
   }
 }
 
-self.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload }>) => {
+self.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload; key: string }>) => {
   switch (messageData.action) {
     case 'get':
-      void handle('GET', messageData.data);
+      void handle('GET', messageData.data, messageData.key);
       break;
     case 'post':
-      void handle('POST', messageData.data);
+      void handle('POST', messageData.data, messageData.key);
       break;
   }
 };

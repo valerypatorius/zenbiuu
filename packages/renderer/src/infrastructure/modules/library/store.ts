@@ -1,93 +1,76 @@
-import { type ModuleLibraryStoreSchema } from './types';
+import { type ModuleLibraryStore, type ModuleLibraryStoreSchema } from './types';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 import type ChannelEntity from '@/entities/ChannelEntity';
 import type LiveStream from '@/entities/LiveStream';
-import { clearArray, removeFromArray } from '@/utils/array';
-import { clearObject } from '@/utils/object';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function createLibraryStore (createState: ModuleStateFactoryFn<ModuleLibraryStoreSchema>) {
+export async function createLibraryStore (createState: ModuleStateFactoryFn<ModuleLibraryStoreSchema>): Promise<ModuleLibraryStore> {
   const { state, save } = await createState('store:library', {
-    followedChannelsNames: [],
-    activeChannelsNames: [],
-    liveStreamsByChannelName: {},
-    channelsByName: {},
+    followedChannelsNames: new Set(),
+    selectedChannelsNames: new Set(),
+    liveStreamsByChannelName: new Map(),
+    channelsByName: new Map(),
   });
 
-  function getFollowedChannelsNames (): string[] {
-    return state.followedChannelsNames;
-  }
-
-  function setFollowedChannelsNames (value: string[]): void {
-    state.followedChannelsNames = value;
+  function saveChannelByName (name: string, channel: ChannelEntity): void {
+    state.channelsByName.set(name, channel);
 
     save();
   }
 
-  function setLiveStreamsByChannelName (value: Record<string, LiveStream>): void {
-    state.liveStreamsByChannelName = value;
+  function addSelectedChannelName (name: string): void {
+    state.selectedChannelsNames.add(name);
 
     save();
   }
 
-  function getChannelsByName (): Record<string, ChannelEntity> {
-    return state.channelsByName;
-  }
-
-  function getLiveStreamsByChannelName (): Record<string, LiveStream> {
-    return state.liveStreamsByChannelName;
-  }
-
-  function addChannelByName (name: string, channel: ChannelEntity): void {
-    state.channelsByName[name] = channel;
+  function removeSelectedChannelName (name: string): void {
+    state.selectedChannelsNames.delete(name);
 
     save();
   }
 
-  function getActiveChannelsNames (): string[] {
-    return state.activeChannelsNames;
-  }
-
-  function addActiveChannelName (name: string): void {
-    removeFromArray(state.activeChannelsNames, name);
-    state.activeChannelsNames.push(name);
-
-    save();
-  }
-
-  function removeActiveChannelName (name: string): void {
-    removeFromArray(state.activeChannelsNames, name);
-
-    save();
-  }
-
-  function clearActiveChannelNames (): void {
-    clearArray(state.activeChannelsNames);
+  function removeAllSelectedChannelsNames (): void {
+    state.selectedChannelsNames.clear();
 
     save();
   }
 
   function clear (): void {
-    clearArray(state.followedChannelsNames);
-    clearArray(state.activeChannelsNames);
-
-    clearObject(state.liveStreamsByChannelName);
-    clearObject(state.channelsByName);
+    state.followedChannelsNames.clear();
+    state.selectedChannelsNames.clear();
+    state.liveStreamsByChannelName.clear();
+    state.channelsByName.clear();
 
     save();
   }
 
   return {
-    getFollowedChannelsNames,
-    setFollowedChannelsNames,
-    setLiveStreamsByChannelName,
-    getChannelsByName,
-    getLiveStreamsByChannelName,
-    addChannelByName,
-    getActiveChannelsNames,
-    addActiveChannelName,
-    removeActiveChannelName,
-    clearActiveChannelNames,
+    get followedChannelsNames (): Set<string> {
+      return state.followedChannelsNames;
+    },
+    set followedChannelsNames (value: string[]) {
+      state.followedChannelsNames = new Set(value);
+
+      save();
+    },
+    get selectedChannelsNames () {
+      return state.selectedChannelsNames;
+    },
+    get channelsByName () {
+      return state.channelsByName;
+    },
+    get liveStreamsByChannelName (): Map<string, LiveStream> {
+      return state.liveStreamsByChannelName;
+    },
+    set liveStreamsByChannelName (value: Record<string, LiveStream>) {
+      state.liveStreamsByChannelName = new Map(Object.entries(value));
+
+      save();
+    },
+    saveChannelByName,
+    addSelectedChannelName,
+    removeSelectedChannelName,
+    removeAllSelectedChannelsNames,
     clear,
   };
 }

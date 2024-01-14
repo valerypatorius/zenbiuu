@@ -60,6 +60,8 @@ const config = createConfig({
     server: {
       host: SERVER_HOST,
       port: SERVER_PORT,
+      strictPort: true,
+      open: false,
     },
   },
 });

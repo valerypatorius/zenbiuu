@@ -3,4 +3,5 @@ export default interface ChatMessage {
   author: string;
   text: string;
   color?: string;
+  isEven?: boolean;
 }

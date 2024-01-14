@@ -71,6 +71,13 @@ const { t } = useI18n();
 const { accounts, login, logout, isPrimaryAccount, setPrimaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
 const { toggleState: toggleSettingsState } = useSettings();
+
+/**
+ * @todo Settings
+ * - compact/default mode;
+ * - performance mode with fancy stuff disabled (blur, etc.);
+ * - smooth scroll in chat;
+ */
 </script>
 
 <style lang="postcss">

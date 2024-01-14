@@ -34,7 +34,7 @@ const emit = defineEmits<{
 .icon-button {
   background-color: transparent;
   color: var(--theme-color-text-secondary);
-  padding: 8px;
+  padding: 4px;
   border-radius: 50%;
   /* transition: all 0.1s; */
 

@@ -16,31 +16,38 @@
             :key="name"
             :class="[
               'library__channel',
-              activeChannels.find((channel) => channel.name === name) && 'library__channel--active',
+              openedChannels.find((channel) => channel.name === name) && 'library__channel--active',
             ]"
             :name="name"
-            :category="liveStreamsByChannelName[name]?.category"
-            :avatar="channelsByName[name]?.avatar"
+            :category="liveStreamsByChannelName.get(name)?.category"
+            :avatar="channelsByName.get(name)?.avatar"
             :is-live="name in liveStreamsByChannelName"
-            @click="activateChannel(name)"
+            @click="openChannel(name)"
             @visible="requestChannelByName(name)"
-          />
+          >
+            <IconButton
+              icon="plus"
+              :size="16"
+              @click="openChannel(name, true)"
+            />
+          </ChannelCard>
         </div>
       </Scrollable>
     </aside>
 
     <div
-      v-if="activeChannels.length > 0"
+      v-if="openedChannels.length > 0"
       class="library__playing"
     >
       <Stream
-        v-for="{ name, id, offlineCover } in activeChannels"
+        v-for="({ name, id, offlineCover }, index) in openedChannels"
         :key="name"
         :channel-name="name"
         :channel-id="id"
-        :playlist="name in liveStreamsByChannelName ? getChannelPlaylistUrl : undefined"
-        :cover="liveStreamsByChannelName[name]?.cover ?? offlineCover"
-        @close="deactivateChannel(name)"
+        :is-main="index === 0"
+        :playlist="liveStreamsByChannelName.get(name) !== undefined ? getChannelPlaylistUrl : undefined"
+        :cover="liveStreamsByChannelName.get(name)?.cover ?? offlineCover"
+        @close="closeChannel(name)"
       />
     </div>
 
@@ -54,8 +61,8 @@
             v-for="stream in liveStreams"
             :key="stream.id"
             v-bind="stream"
-            :channel="channelsByName[stream.channelName]"
-            @click="activateChannel(stream.channelName)"
+            :channel="channelsByName.get(stream.channelName)"
+            @click="openChannel(stream.channelName)"
             @channel-visible="requestChannelByName(stream.channelName)"
           />
         </div>
@@ -79,6 +86,7 @@ import LibraryItem from './LibraryItem.vue';
 import Stream from './Stream.vue';
 import ChannelCard from './ChannelCard.vue';
 import Scrollable from './ui/Scrollable.vue';
+import IconButton from './ui/IconButton.vue';
 import appIconPath from '@/assets/icon.svg';
 
 defineProps<{
@@ -90,9 +98,9 @@ const {
   liveStreamsByChannelName,
   channelsByName,
   followedChannelsNames,
-  activeChannels,
-  activateChannel,
-  deactivateChannel,
+  openedChannels,
+  openChannel,
+  closeChannel,
   requestChannelByName,
   getChannelPlaylistUrl,
 } = useLibrary();
@@ -117,7 +125,7 @@ const {
   }
 
   &__channels {
-    padding: 6px 0 12px 6px;
+    padding: 6px 6px 12px 6px;
   }
 
   &__channel {
@@ -129,6 +137,10 @@ const {
 
     &:hover {
       background-color: var(--theme-color-background);
+
+      .icon-button {
+        display: block;
+      }
     }
 
     &--active {
@@ -138,6 +150,10 @@ const {
       top: 0;
       bottom: 0;
       z-index: 2;
+    }
+
+    .icon-button {
+      display: none;
     }
   }
 
@@ -156,6 +172,7 @@ const {
 
   &__playing {
     display: grid;
+    gap: 2px;
     grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
   }
 
