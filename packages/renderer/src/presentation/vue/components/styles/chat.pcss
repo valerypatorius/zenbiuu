@@ -21,3 +21,31 @@
     vertical-align: middle;
   }
 }
+
+.chat-message-badges {
+  display: inline-flex;
+  vertical-align: middle;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+.chat-message-badge {
+  --size: 7px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background-color: var(--theme-color-text);
+  margin-top: -2px;
+
+  &--streamer {
+    background-color: #971923;
+  }
+
+  &--moderator {
+    background-color: #37974b;
+  }
+
+  &--subscriber {
+    background-color: #b37711;
+  }
+}

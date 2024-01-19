@@ -26,12 +26,15 @@ function getEmoteImage (name: string, emote: EmoteEntity): HTMLImageElement {
   return img;
 }
 
-const Message: FunctionalComponent<ChatMessage & { emotes?: Record<string, EmoteEntity> }> = ({
+const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean; emotes?: Record<string, EmoteEntity> }> = ({
   author,
   text,
   color,
   emotes,
   isEven,
+  isModerator,
+  isSubscriber,
+  isByStreamer,
 }) => {
   const emotifiedText = emotes !== undefined
     ? text.split(' ').map((word) => {
@@ -42,6 +45,20 @@ const Message: FunctionalComponent<ChatMessage & { emotes?: Record<string, Emote
     }).join(' ')
     : text;
 
+  const badges = [];
+
+  if (isByStreamer === true) {
+    badges.push('streamer');
+  }
+
+  if (isModerator === true) {
+    badges.push('moderator');
+  }
+
+  if (isSubscriber === true) {
+    badges.push('subscriber');
+  }
+
   return <div
     class={[
       'chat-message',
@@ -51,6 +68,13 @@ const Message: FunctionalComponent<ChatMessage & { emotes?: Record<string, Emote
       '--color': color,
     }}
   >
+    {
+      badges.length > 0 &&
+      <span class="chat-message-badges">
+        {badges.map((name) => <span class={`chat-message-badge chat-message-badge--${name}`}></span>)}
+      </span>
+    }
+
     <span class="chat-message__author">
       {author}
     </span>

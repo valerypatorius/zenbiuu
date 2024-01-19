@@ -60,12 +60,14 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       if (message.channel?.toLowerCase() !== undefined) {
         const handler = this.chatMessageHandlers.get(message.channel.toLowerCase());
 
-        if (handler !== undefined && message.text !== undefined && message.tags !== undefined) {
+        if (handler !== undefined && message.text !== undefined && message.tags?.id !== undefined && message.tags['display-name'] !== undefined) {
           handler({
+            text: message.text,
             id: message.tags.id,
             author: message.tags['display-name'],
-            text: message.text,
             color: message.tags.color,
+            isModerator: message.tags.mod === '1',
+            isSubscriber: message.tags.subscriber === '1',
           });
         }
       }

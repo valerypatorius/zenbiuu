@@ -27,6 +27,7 @@
             v-for="message in messages"
             :key="message.id"
             v-bind="message"
+            :is-by-streamer="channelName.toLowerCase() === message.author.toLowerCase()"
             :emotes="emotesByChannelId[channelId]"
           />
 

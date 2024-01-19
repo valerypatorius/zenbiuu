@@ -3,5 +3,7 @@ export default interface ChatMessage {
   author: string;
   text: string;
   color?: string;
+  isModerator?: boolean;
+  isSubscriber?: boolean;
   isEven?: boolean;
 }
