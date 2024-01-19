@@ -32,6 +32,10 @@ const isScrollbarReady = ref(false);
 
 const isScrolled = ref(false);
 
+/**
+ * @todo Deal with scrollbar blinking on fast chat updates
+ */
+
 const [initialize] = useOverlayScrollbars({
   defer: true,
   options: {

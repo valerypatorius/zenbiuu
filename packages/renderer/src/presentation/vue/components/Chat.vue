@@ -73,7 +73,8 @@ const lastMessage = computed(() => messages.value[messages.value.length - 1]);
 
 watch(lastMessage, () => {
   requestAnimationFrame(() => {
-    horizon.value?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    // horizon.value?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    horizon.value?.scrollIntoView({ block: 'end' });
   });
 }, {
   flush: 'post',
