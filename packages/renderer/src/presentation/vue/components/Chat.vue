@@ -28,7 +28,10 @@
             :key="message.id"
             v-bind="message"
             :is-by-streamer="channelName.toLowerCase() === message.author.toLowerCase()"
-            :emotes="emotesByChannelId[channelId]"
+            :emotes="{
+              ...emotesByChannelId[channelId],
+              ...message.emotes,
+            }"
           />
 
           <div

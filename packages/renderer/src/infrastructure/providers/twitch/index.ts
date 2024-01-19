@@ -16,6 +16,7 @@ import ProviderEvent from '@/entities/ProviderEvent';
 import { deleteObjectProperty } from '@/utils/object';
 import { uid } from '@/utils/string';
 import { createInterval } from '@/interval/index';
+import { type EmoteEntity } from '@/entities/EmoteEntity';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   protected readonly config = config;
@@ -59,10 +60,26 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
       if (message.channel?.toLowerCase() !== undefined) {
         const handler = this.chatMessageHandlers.get(message.channel.toLowerCase());
+        const text = message.text;
 
-        if (handler !== undefined && message.text !== undefined && message.tags?.id !== undefined && message.tags['display-name'] !== undefined) {
+        if (handler !== undefined && text !== undefined && message.tags?.id !== undefined && message.tags['display-name'] !== undefined) {
+          const emotes = message.tags.emotes !== undefined
+            ? Object.entries(message.tags.emotes).reduce<Record<string, EmoteEntity>>((result, [id, position]) => {
+              const name = text.substring(position[0].start, position[0].end + 1);
+
+              result[name] = {
+                '1.0x': `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/1.0`,
+                '2.0x': `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/2.0`,
+                '3.0x': `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/3.0`,
+              };
+
+              return result;
+            }, {})
+            : {};
+
           handler({
-            text: message.text,
+            text,
+            emotes,
             id: message.tags.id,
             author: message.tags['display-name'],
             color: message.tags.color,

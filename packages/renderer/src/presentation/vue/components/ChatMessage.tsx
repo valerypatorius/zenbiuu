@@ -22,11 +22,12 @@ function getEmoteImage (name: string, emote: EmoteEntity): HTMLImageElement {
   img.alt = name;
   img.loading = 'lazy';
   img.srcset = getEmoteSrcSet(emote);
+  img.title = name;
 
   return img;
 }
 
-const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean; emotes?: Record<string, EmoteEntity> }> = ({
+const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean }> = ({
   author,
   text,
   color,

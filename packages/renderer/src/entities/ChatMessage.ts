@@ -1,3 +1,5 @@
+import { type EmoteEntity } from './EmoteEntity';
+
 export default interface ChatMessage {
   id: string;
   author: string;
@@ -6,4 +8,5 @@ export default interface ChatMessage {
   isModerator?: boolean;
   isSubscriber?: boolean;
   isEven?: boolean;
+  emotes?: Record<string, EmoteEntity>;
 }
