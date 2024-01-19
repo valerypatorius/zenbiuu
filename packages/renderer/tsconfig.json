@@ -24,6 +24,9 @@
       "@/transport/*": [
         "./src/infrastructure/transport/*"
       ],
+      "@/interval/*": [
+        "./src/infrastructure/interval/*"
+      ],
       "@/sockets/*": [
         "./src/infrastructure/sockets/*"
       ],

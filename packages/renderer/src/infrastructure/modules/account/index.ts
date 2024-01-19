@@ -20,7 +20,7 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
   function connectAccountToProvider (account: AccountEntity): void {
     providers
       .getApi(account.provider)
-      .connect(account.token, account.name);
+      .connect(account);
   }
 
   function setPrimaryAccount (account: AccountEntity, isNeedConnect = true): void {

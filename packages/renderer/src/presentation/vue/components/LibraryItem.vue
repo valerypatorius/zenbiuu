@@ -8,7 +8,7 @@
       class="library-item__cover"
     >
       <img
-        :src="cover"
+        :src="coverImageUrl"
         loading="lazy"
       >
     </div>
@@ -25,22 +25,37 @@
         @visible="emit('channelVisible')"
       />
 
-      <div class="library-item__counter">
-        <Icon
-          name="users"
-          :size="16"
-        />
-        <PrettyNumber :value="viewersCount" />
+      <div class="library-item__counters">
+        <div class="library-item__counter">
+          <Icon
+            name="users"
+            :size="16"
+          />
+
+          <PrettyNumber :value="viewersCount" />
+        </div>
+
+        <div class="library-item__counter">
+          <Icon
+            name="clock"
+            :size="16"
+          />
+
+          <Duration
+            :date-start="dateStarted"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ChannelCard from './ChannelCard.vue';
 import Icon from './ui/Icon';
 import PrettyNumber from './ui/PrettyNumber';
+import Duration from './Duration.vue';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
 
@@ -48,7 +63,7 @@ type Props = LiveStream & {
   channel?: ChannelEntity;
 };
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   click: [];
@@ -56,6 +71,21 @@ const emit = defineEmits<{
 }>();
 
 const coverElement = ref<HTMLElement | null>(null);
+
+const coverImageUrl = ref(props.cover);
+
+/**
+ * Avoid flickering by waiting for new cover image to load before changing source
+ */
+watch(() => props.cover, (value) => {
+  const image = new Image();
+
+  image.onload = () => {
+    coverImageUrl.value = value;
+  };
+
+  image.src = value;
+});
 </script>
 
 <style lang="postcss">
@@ -86,6 +116,12 @@ const coverElement = ref<HTMLElement | null>(null);
     }
   }
 
+  &__duration {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+  }
+
   &__info {
     padding: 12px 0;
     display: grid;
@@ -98,6 +134,11 @@ const coverElement = ref<HTMLElement | null>(null);
     @extend %text-overflow;
     grid-column: span 2;
     font-weight: 500;
+  }
+
+  &__counters {
+    display: flex;
+    gap: 16px;
   }
 
   &__counter {

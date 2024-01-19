@@ -10,11 +10,12 @@ import type ChatMessage from '@/entities/ChatMessage';
 import Sockets from '@/sockets/Sockets';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
-import { getExpirationDateFromNow } from '@/utils/date';
+import date, { getExpirationDateFromNow, unixtime } from '@/utils/date';
 import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
 import { deleteObjectProperty } from '@/utils/object';
 import { uid } from '@/utils/string';
+import { createInterval } from '@/interval/index';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
   protected readonly config = config;
@@ -23,7 +24,9 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
   protected readonly deviceId = uid();
 
-  protected username: string | undefined;
+  protected username?: string;
+
+  protected userId?: string;
 
   protected readonly oauth = new OAuth({
     name: this.config.name,
@@ -70,6 +73,10 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   });
 
   private readonly chatMessageHandlers = new Map<string, (message: ChatMessage) => void>();
+
+  private readonly streamViewIntervals = new Map<string, () => void>();
+
+  private readonly settingsUrlsByChannelName = new Map<string, string>();
 
   private isTokenValidated = false;
 
@@ -126,7 +133,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     return result;
   }
 
-  public connect (token: string, username: string): void {
+  public connect (account: Pick<AccountEntity, 'id' | 'name' | 'token'>): void {
     /**
      * When connecting provider to token, reset its validation state
      */
@@ -134,8 +141,9 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       this.isTokenValidated = false;
     }
 
-    this.accessToken = token;
-    this.username = username;
+    this.accessToken = account.token;
+    this.username = account.name;
+    this.userId = account.id;
 
     this.transportHeaders.Authorization = `Bearer ${this.accessToken}`;
     this.transportHeaders['Client-Id'] = this.clientId;
@@ -159,6 +167,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   public disconnect (): void {
     this.accessToken = undefined;
     this.username = undefined;
+    this.userId = undefined;
     this.isTokenValidated = false;
 
     deleteObjectProperty(this.transportHeaders, 'Authorization');
@@ -168,8 +177,8 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
    */
-  private async validate (token: string): Promise<{ username: string; expiresIn: string }> {
-    const { expires_in: expiresIn, login: username } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
+  private async validate (token: string): Promise<{ username: string; expiresIn: string; userId: string }> {
+    const { expires_in: expiresIn, login: username, user_id: userId } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -179,6 +188,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     return {
       username,
+      userId,
       expiresIn: getExpirationDateFromNow(expiresIn),
     };
   }
@@ -200,12 +210,16 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     /**
      * Validate received token and receive token expiration date
      */
-    const { expiresIn, username } = await this.validate(token);
+    const { expiresIn, username, userId } = await this.validate(token);
 
     /**
      * Connect provider with new token
      */
-    this.connect(token, username);
+    this.connect({
+      token,
+      name: username,
+      id: userId,
+    });
 
     /**
      * Receive user data
@@ -259,8 +273,9 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     return data.map((item) => ({
       id: item.id,
+      channelId: item.user_id,
       title: item.title,
-      cover: item.thumbnail_url.replace('{width}x{height}', '640x360'),
+      cover: `${item.thumbnail_url.replace('{width}x{height}', '640x360')}?t=${unixtime()}`,
       category: item.game_name,
       channelName: item.user_name,
       viewersCount: item.viewer_count,
@@ -295,7 +310,66 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     }));
   }
 
-  public async getChannelPlaylistUrl (name: string): Promise<string | undefined> {
+  private async getChannelSettingsUrl (name: string): Promise<string> {
+    const cached = this.settingsUrlsByChannelName.get(name);
+
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const url = `https://www.twitch.tv/${name}`;
+
+    const page = await this.transport.get<string>(url, { headers: undefined }, 'text');
+
+    const channelSettingsUrl = page.match(/https:\/\/static.twitchcdn.net\/config\/settings.*?js/)?.[0];
+
+    if (channelSettingsUrl === undefined) {
+      throw new Error('Failed to locate channel settings');
+    }
+
+    const settingsContent = await this.transport.get<string>(channelSettingsUrl, { headers: undefined }, 'text');
+
+    const statsUrl = settingsContent.match(/"spade_url":"(.*?)"/)?.[1];
+
+    if (statsUrl === undefined) {
+      throw new Error('Failed to locate channel stats url');
+    }
+
+    this.settingsUrlsByChannelName.set(name, statsUrl);
+
+    return statsUrl;
+  }
+
+  private async sendStreamWatchStats (stream: LiveStream, url: string): Promise<void> {
+    const data = [
+      {
+        event: 'minute-watched',
+        properties: {
+          broadcast_id: stream.id,
+          channel_id: stream.channelId,
+          user_id: parseInt(this.userId ?? '0', 10),
+          player: 'site',
+        },
+      },
+    ];
+
+    try {
+      const dataEncoded = btoa(JSON.stringify(data));
+
+      await this.transport.post(url, {
+        body: `data=${dataEncoded}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        },
+      });
+
+      console.log(`Sent watch stats for ${stream.channelName}`, data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  public async playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
     const { data } = await this.catchable<TwitchPlaylistAccessTokenResponse>('post', 'https://gql.twitch.tv/gql', {
       body: JSON.stringify({
         operationName: 'PlaybackAccessToken_Template',
@@ -330,7 +404,22 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
 
     const query = Object.entries(params).map((param) => param.join('=')).join('&');
 
+    if (stream !== undefined) {
+      void this.getChannelSettingsUrl(name).then((url) => {
+        const stopStreamViewInterval = createInterval(() => {
+          void this.sendStreamWatchStats(stream, url);
+        }, date.Minute);
+
+        this.streamViewIntervals.set(name, stopStreamViewInterval);
+      });
+    }
+
     return `https://usher.ttvnw.net/api/channel/hls/${name.toLowerCase()}.m3u8?${query}`;
+  }
+
+  public async stopStream (name: string): Promise<void> {
+    this.streamViewIntervals.get(name)?.();
+    this.streamViewIntervals.delete(name);
   }
 
   public requestEmotesForChannelId (id: string): void {

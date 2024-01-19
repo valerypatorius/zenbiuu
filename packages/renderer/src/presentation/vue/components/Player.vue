@@ -10,7 +10,7 @@
 
     <video
       ref="video"
-      :poster="cover"
+      :poster="stream?.cover"
       @loadeddata="startCanvasPainting"
     />
   </div>
@@ -20,11 +20,11 @@
 import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
+import type LiveStream from '@/entities/LiveStream';
 
 const props = defineProps<{
-  channelName: string;
-  cover?: string;
-  playlist?: (channel: string) => Promise<string | undefined>;
+  stream?: LiveStream;
+  playlist?: (name: string, stream?: LiveStream) => Promise<string | undefined>;
 }>();
 
 defineEmits<{
@@ -77,7 +77,7 @@ function startCanvasPainting (): void {
 }
 
 function drawInitialCanvasImage (): void {
-  if (canvasContext.value === null || props.cover === undefined) {
+  if (canvasContext.value === null || props.stream?.cover === undefined) {
     return;
   }
 
@@ -87,7 +87,7 @@ function drawInitialCanvasImage (): void {
     canvasContext.value?.drawImage(image, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   };
 
-  image.src = props.cover;
+  image.src = props.stream.cover;
 }
 
 onMounted(async () => {
@@ -97,11 +97,11 @@ onMounted(async () => {
 
   drawInitialCanvasImage();
 
-  if (props.playlist === undefined) {
+  if (props.playlist === undefined || props.stream === undefined) {
     return;
   }
 
-  playlistUrl.value = await props.playlist(props.channelName);
+  playlistUrl.value = await props.playlist(props.stream.channelName, props.stream);
 
   if (playlistUrl.value === undefined || video.value === null) {
     return;

@@ -29,6 +29,7 @@ export interface ModuleLibrary {
   requestFollowedChannelsNames: () => Promise<void>;
   requestFollowedLiveStreams: () => Promise<void>;
   requestChannelByName: (name: string) => Promise<void>;
-  getChannelPlaylistUrl: (name: string) => Promise<string | undefined>;
+  playStream: (name: string, stream?: LiveStream) => Promise<string | undefined>;
+  stopStream: (name: string) => Promise<void>;
   destroy: () => void;
 }

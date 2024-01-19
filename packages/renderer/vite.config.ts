@@ -17,6 +17,7 @@ export default defineConfig({
       '@/hub': join(root, 'src/infrastructure/hub'),
       '@/oauth': join(root, 'src/infrastructure/oauth'),
       '@/transport': join(root, 'src/infrastructure/transport'),
+      '@/interval': join(root, 'src/infrastructure/interval'),
       '@/sockets': join(root, 'src/infrastructure/sockets'),
       '@/providers': join(root, 'src/infrastructure/providers'),
       '@/emotes-providers': join(root, 'src/infrastructure/emotes-providers'),

@@ -40,13 +40,13 @@
       class="library__playing"
     >
       <Stream
-        v-for="({ name, id, offlineCover }, index) in openedChannels"
+        v-for="({ name, id }, index) in openedChannels"
         :key="name"
         :channel-name="name"
         :channel-id="id"
         :is-main="index === 0"
-        :playlist="liveStreamsByChannelName.get(name) !== undefined ? getChannelPlaylistUrl : undefined"
-        :cover="liveStreamsByChannelName.get(name)?.cover ?? offlineCover"
+        :stream="liveStreamsByChannelName.get(name)"
+        :playlist="liveStreamsByChannelName.get(name) !== undefined ? playStream : undefined"
         @close="closeChannel(name)"
       />
     </div>
@@ -102,7 +102,7 @@ const {
   openChannel,
   closeChannel,
   requestChannelByName,
-  getChannelPlaylistUrl,
+  playStream,
 } = useLibrary();
 </script>
 

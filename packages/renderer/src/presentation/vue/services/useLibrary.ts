@@ -4,6 +4,9 @@ import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
 import type ChannelEntity from '@/entities/ChannelEntity';
+import type LiveStream from '@/entities/LiveStream';
+import { createInterval } from '@/interval/index';
+import date from '@/utils/date';
 
 export const useLibrary = createSharedComposable(() => {
   const library = inject(Injection.Module.Library);
@@ -38,6 +41,8 @@ export const useLibrary = createSharedComposable(() => {
       .filter((channel) => channel !== undefined) as ChannelEntity[];
   });
 
+  let stopLibraryUpdates: (() => void) | undefined;
+
   watchEffect(() => {
     library.primaryAccount = primaryAccount.value;
 
@@ -45,10 +50,15 @@ export const useLibrary = createSharedComposable(() => {
       /**
        * @todo Cache followed channels to reduce API calls
        */
-      library?.requestFollowedChannelsNames();
-      library?.requestFollowedLiveStreams();
+      library.requestFollowedChannelsNames();
+      library.requestFollowedLiveStreams();
+
+      stopLibraryUpdates?.();
+      stopLibraryUpdates = createInterval(library.requestFollowedLiveStreams, date.Minute * 2);
     } else {
-      library?.destroy();
+      stopLibraryUpdates?.();
+
+      library.destroy();
     }
   });
 
@@ -61,10 +71,16 @@ export const useLibrary = createSharedComposable(() => {
   }
 
   function closeChannel (name: string): void {
+    void stopStream(name);
+
     library?.store.removeSelectedChannelName(name);
   }
 
   function closeAllChannels (): void {
+    library?.store.selectedChannelsNames.forEach((name) => {
+      void stopStream(name);
+    });
+
     library?.store.removeAllSelectedChannelsNames();
   }
 
@@ -72,8 +88,12 @@ export const useLibrary = createSharedComposable(() => {
     library?.requestChannelByName(name);
   }
 
-  async function getChannelPlaylistUrl (name: string): Promise<string | undefined> {
-    return library?.getChannelPlaylistUrl(name);
+  async function playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
+    return library?.playStream(name, stream);
+  }
+
+  async function stopStream (name: string): Promise<void> {
+    await library?.stopStream(name);
   }
 
   return {
@@ -86,6 +106,7 @@ export const useLibrary = createSharedComposable(() => {
     closeChannel,
     closeAllChannels,
     requestChannelByName,
-    getChannelPlaylistUrl,
+    playStream,
+    stopStream,
   };
 });

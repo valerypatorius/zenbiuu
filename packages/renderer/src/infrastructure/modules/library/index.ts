@@ -72,12 +72,20 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     }, 300);
   }
 
-  async function getChannelPlaylistUrl (name: string): Promise<string | undefined> {
+  async function playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
     if (primaryAccount === undefined) {
       return;
     }
 
-    return providers.getApi(primaryAccount.provider).getChannelPlaylistUrl(name);
+    return providers.getApi(primaryAccount.provider).playStream(name, stream);
+  }
+
+  async function stopStream (name: string): Promise<void> {
+    if (primaryAccount === undefined) {
+      return;
+    }
+
+    await providers.getApi(primaryAccount.provider).stopStream(name);
   }
 
   function destroy (): void {
@@ -101,7 +109,8 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     requestFollowedChannelsNames,
     requestFollowedLiveStreams,
     requestChannelByName,
-    getChannelPlaylistUrl,
+    playStream,
+    stopStream,
     destroy,
   };
 }
