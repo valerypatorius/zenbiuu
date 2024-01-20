@@ -17,7 +17,7 @@
           />
 
           {{ t('chat.joinedAs', {
-            channel: channelName,
+            channel: channel.name,
             name: primaryAccount?.name,
           }) }}
         </div>
@@ -27,11 +27,6 @@
             v-for="message in messages"
             :key="message.id"
             v-bind="message"
-            :is-by-streamer="channelName.toLowerCase() === message.author.toLowerCase()"
-            :emotes="{
-              ...emotesByChannelId[channelId],
-              ...message.emotes,
-            }"
           />
 
           <div
@@ -48,15 +43,15 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAccount } from '../services/useAccount';
+import { useEmotes } from '../services/useEmotes';
 import ChatMessage from './ChatMessage';
 import Scrollable from './ui/Scrollable.vue';
 import Icon from './ui/Icon';
+import type ChannelEntity from '@/entities/ChannelEntity';
 import { useChat } from '@/presentation/vue/services/useChat';
-import { useEmotes } from '@/presentation/vue/services/useEmotes';
 
 const props = defineProps<{
-  channelName: string;
-  channelId: string;
+  channel: ChannelEntity;
   isEnableTopOffset?: boolean;
 }>();
 
@@ -67,13 +62,31 @@ const { t } = useI18n();
 
 const horizon = ref<HTMLDivElement>();
 
-const messages = computed(() => messagesByChannel.value[props.channelName] ?? []);
+const messages = computed(() => {
+  const list = messagesByChannel.get(props.channel.name);
+
+  if (list === undefined) {
+    return [];
+  }
+
+  /**
+   * @todo Improve
+   */
+  return list.map((message) => {
+    return {
+      ...message,
+      emotes: {
+        ...emotesByChannelId.get(props.channel.id),
+        ...message.emotes,
+      },
+    };
+  });
+});
 
 const lastMessage = computed(() => messages.value[messages.value.length - 1]);
 
 watch(lastMessage, () => {
   requestAnimationFrame(() => {
-    // horizon.value?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     horizon.value?.scrollIntoView({ block: 'end' });
   });
 }, {
@@ -81,12 +94,12 @@ watch(lastMessage, () => {
 });
 
 onMounted(() => {
-  join(props.channelName);
-  requestEmotes(props.channelId);
+  requestEmotes(props.channel.id);
+  join(props.channel);
 });
 
 onBeforeUnmount(() => {
-  leave(props.channelName);
+  leave(props.channel);
 });
 </script>
 

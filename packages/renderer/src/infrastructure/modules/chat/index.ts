@@ -11,14 +11,24 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
 }): Promise<ModuleChat> {
   const store = await createChatStore(state);
 
-  function join (account: AccountEntity, channelName: string): void {
-    providers.getApi(account.provider).joinChat(channelName, (message) => {
-      store.addChatMessage(channelName, message);
+  let primaryAccount: AccountEntity | undefined;
+
+  function join (channelName: string): void {
+    if (primaryAccount === undefined) {
+      return;
+    }
+
+    providers.getApi(primaryAccount.provider).joinChat(channelName, (message) => {
+      store.addChannelMessage(channelName, message);
     });
   }
 
-  function leave (account: AccountEntity, channelName: string): void {
-    providers.getApi(account.provider).leaveChat(channelName);
+  function leave (channelName: string): void {
+    if (primaryAccount === undefined) {
+      return;
+    }
+
+    providers.getApi(primaryAccount.provider).leaveChat(channelName);
 
     store.clearChannelMessages(channelName);
   }
@@ -28,9 +38,15 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
   }
 
   return {
+    store,
+    get primaryAccount () {
+      return primaryAccount;
+    },
+    set primaryAccount (value: AccountEntity | undefined) {
+      primaryAccount = value;
+    },
     join,
     leave,
     destroy,
-    getMessagesByChannelName: store.getMessagesByChannelName,
   };
 }

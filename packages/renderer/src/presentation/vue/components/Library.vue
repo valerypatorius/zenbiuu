@@ -40,14 +40,13 @@
       class="library__playing"
     >
       <Stream
-        v-for="({ name, id }, index) in openedChannels"
-        :key="name"
-        :channel-name="name"
-        :channel-id="id"
+        v-for="(channel, index) in openedChannels"
+        :key="channel.name"
+        :channel="channel"
+        :stream="liveStreamsByChannelName.get(channel.name)"
+        :playlist="liveStreamsByChannelName.get(channel.name) !== undefined ? playStream : undefined"
         :is-main="index === 0"
-        :stream="liveStreamsByChannelName.get(name)"
-        :playlist="liveStreamsByChannelName.get(name) !== undefined ? playStream : undefined"
-        @close="closeChannel(name)"
+        @close="closeChannel(channel.name)"
       />
     </div>
 

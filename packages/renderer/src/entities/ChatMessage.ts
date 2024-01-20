@@ -5,8 +5,9 @@ export default interface ChatMessage {
   author: string;
   text: string;
   color?: string;
+  isEven?: boolean;
   isModerator?: boolean;
   isSubscriber?: boolean;
-  isEven?: boolean;
+  isStreamer?: boolean;
   emotes?: Record<string, EmoteEntity>;
 }

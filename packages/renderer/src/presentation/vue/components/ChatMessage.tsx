@@ -27,7 +27,7 @@ function getEmoteImage (name: string, emote: EmoteEntity): HTMLImageElement {
   return img;
 }
 
-const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean }> = ({
+const Message: FunctionalComponent<ChatMessage> = ({
   author,
   text,
   color,
@@ -35,7 +35,7 @@ const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean }> = (
   isEven,
   isModerator,
   isSubscriber,
-  isByStreamer,
+  isStreamer,
 }) => {
   const emotifiedText = emotes !== undefined
     ? text.split(' ').map((word) => {
@@ -48,7 +48,7 @@ const Message: FunctionalComponent<ChatMessage & { isByStreamer?: boolean }> = (
 
   const badges = [];
 
-  if (isByStreamer === true) {
+  if (isStreamer === true) {
     badges.push('streamer');
   }
 

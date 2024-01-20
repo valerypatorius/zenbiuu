@@ -1,4 +1,4 @@
-import { computed, inject } from 'vue';
+import { inject, watchEffect } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
@@ -13,16 +13,16 @@ export const useEmotes = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  const emotesByChannelId = computed(() => emotes.getEmotesByChannelId());
+  watchEffect(() => {
+    emotes.primaryAccount = primaryAccount.value;
+  });
 
   function requestEmotes (channelId: string): void {
-    if (primaryAccount.value !== undefined) {
-      emotes?.requestEmotes(primaryAccount.value, channelId);
-    }
+    emotes?.requestEmotes(channelId);
   }
 
   return {
     requestEmotes,
-    emotesByChannelId,
+    emotesByChannelId: emotes.store.emotesByChannelId,
   };
 });

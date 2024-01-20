@@ -8,8 +8,7 @@
 
     <Chat
       :is-enable-top-offset="isMain"
-      :channel-name="channelName"
-      :channel-id="channelId"
+      :channel="channel"
     />
   </div>
 </template>
@@ -18,10 +17,10 @@
 import Player from './Player.vue';
 import Chat from './Chat.vue';
 import type LiveStream from '@/entities/LiveStream';
+import type ChannelEntity from '@/entities/ChannelEntity';
 
 defineProps<{
-  channelName: string;
-  channelId: string;
+  channel: ChannelEntity;
   stream?: LiveStream;
   isMain?: boolean;
   playlist?: (name: string, stream?: LiveStream) => Promise<string | undefined>;

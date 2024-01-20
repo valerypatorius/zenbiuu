@@ -13,18 +13,30 @@ export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStor
 }): Promise<ModuleEmotes> {
   const store = await createEmotesStore(state);
 
+  let primaryAccount: AccountEntity | undefined;
+
   window.addEventListener(ProviderEvent.EmotesReceived, handleEmotesReceivedEvent as EventListener);
 
   function handleEmotesReceivedEvent ({ detail }: EmotesReceivedEvent): void {
     store.addChannelEmotes(detail.id, detail.emotes);
   }
 
-  function requestEmotes (account: AccountEntity, channelId: string): void {
-    providers.getApi(account.provider).requestEmotesForChannelId(channelId);
+  function requestEmotes (channelId: string): void {
+    if (primaryAccount === undefined) {
+      return;
+    }
+
+    providers.getApi(primaryAccount.provider).requestEmotesForChannelId(channelId);
   }
 
   return {
-    getEmotesByChannelId: store.getEmotesByChannelId,
+    store,
+    get primaryAccount () {
+      return primaryAccount;
+    },
+    set primaryAccount (value: AccountEntity | undefined) {
+      primaryAccount = value;
+    },
     requestEmotes,
   };
 }

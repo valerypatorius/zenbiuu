@@ -1,57 +1,48 @@
-import { type ModuleChatStoreSchema } from './types';
+import { type ModuleChatStore, type ModuleChatStoreSchema } from './types';
 import type ChatMessage from '@/entities/ChatMessage';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
-import { clearObject, deleteObjectProperty } from '@/utils/object';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function createChatStore (createState: ModuleStateFactoryFn<ModuleChatStoreSchema>) {
-  const { state, save } = await createState('store:chat', {
-    messagesByChannelName: {},
+export async function createChatStore (createState: ModuleStateFactoryFn<ModuleChatStoreSchema>): Promise<ModuleChatStore> {
+  const { state } = await createState('store:chat', {
+    messagesByChannelName: new Map(),
   });
 
   const limit = 100;
 
   let isLastAddedMessageEven = false;
 
-  function getMessagesByChannelName (): Record<string, ChatMessage[]> {
-    return state.messagesByChannelName;
-  }
-
-  function addChatMessage (channelName: string, message: ChatMessage): void {
-    const messages = state.messagesByChannelName[channelName];
+  function addChannelMessage (channelName: string, message: ChatMessage): void {
+    let messages = state.messagesByChannelName.get(channelName);
 
     if (messages === undefined) {
-      state.messagesByChannelName[channelName] = [];
+      messages = [];
+      state.messagesByChannelName.set(channelName, messages);
     }
 
-    if (messages !== undefined && messages.length >= limit) {
-      state.messagesByChannelName[channelName].shift();
+    if (messages.length >= limit) {
+      messages.shift();
     }
 
     message.isEven = isLastAddedMessageEven;
 
+    messages.push(message);
+
     isLastAddedMessageEven = !isLastAddedMessageEven;
-
-    state.messagesByChannelName[channelName].push(message);
-
-    // save();
   }
 
   function clearChannelMessages (channelName: string): void {
-    deleteObjectProperty(state.messagesByChannelName, channelName);
-
-    // save();
+    state.messagesByChannelName.delete(channelName);
   }
 
   function clearAll (): void {
-    clearObject(state.messagesByChannelName);
-
-    // save();
+    state.messagesByChannelName.clear();
   }
 
   return {
-    getMessagesByChannelName,
-    addChatMessage,
+    get messagesByChannelName () {
+      return state.messagesByChannelName;
+    },
+    addChannelMessage,
     clearChannelMessages,
     clearAll,
   };

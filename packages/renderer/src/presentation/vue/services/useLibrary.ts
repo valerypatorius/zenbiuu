@@ -17,9 +17,7 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  const liveStreamsByChannelName = computed(() => library.store.liveStreamsByChannelName);
-
-  const liveStreams = computed(() => [...liveStreamsByChannelName.value.values()]);
+  const liveStreams = computed(() => [...library.store.liveStreamsByChannelName.values()]);
 
   /**
    * @todo Find a better way of sorting?
@@ -33,11 +31,9 @@ export const useLibrary = createSharedComposable(() => {
     });
   });
 
-  const channelsByName = computed(() => library.store.channelsByName);
-
   const openedChannels = computed(() => {
     return [...library.store.selectedChannelsNames.values()]
-      .map((name) => channelsByName.value.get(name))
+      .map((name) => library.store.channelsByName.get(name))
       .filter((channel) => channel !== undefined) as ChannelEntity[];
   });
 
@@ -98,8 +94,8 @@ export const useLibrary = createSharedComposable(() => {
 
   return {
     liveStreams,
-    liveStreamsByChannelName,
-    channelsByName,
+    liveStreamsByChannelName: library.store.liveStreamsByChannelName,
+    channelsByName: library.store.channelsByName,
     followedChannelsNames,
     openedChannels,
     openChannel,

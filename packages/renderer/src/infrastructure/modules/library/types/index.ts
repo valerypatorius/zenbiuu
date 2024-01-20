@@ -25,7 +25,7 @@ export interface ModuleLibraryStore {
 
 export interface ModuleLibrary {
   readonly store: ModuleLibraryStore;
-  primaryAccount: AccountEntity | undefined;
+  primaryAccount?: AccountEntity;
   requestFollowedChannelsNames: () => Promise<void>;
   requestFollowedLiveStreams: () => Promise<void>;
   requestChannelByName: (name: string) => Promise<void>;

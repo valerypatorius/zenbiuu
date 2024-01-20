@@ -2,12 +2,20 @@ import type ChatMessage from '@/entities/ChatMessage';
 import type AccountEntity from '@/entities/AccountEntity';
 
 export interface ModuleChatStoreSchema {
-  messagesByChannelName: Record<string, ChatMessage[]>;
+  messagesByChannelName: Map<string, ChatMessage[]>;
+}
+
+export interface ModuleChatStore {
+  readonly messagesByChannelName: Map<string, ChatMessage[]>;
+  addChannelMessage: (channelName: string, message: ChatMessage) => void;
+  clearChannelMessages: (channelName: string) => void;
+  clearAll: () => void;
 }
 
 export interface ModuleChat {
-  join: (account: AccountEntity, channelName: string) => void;
-  leave: (account: AccountEntity, channelName: string) => void;
+  readonly store: ModuleChatStore;
+  primaryAccount?: AccountEntity;
+  join: (channelName: string) => void;
+  leave: (channelName: string) => void;
   destroy: () => void;
-  getMessagesByChannelName: () => Record<string, ChatMessage[]>;
 }

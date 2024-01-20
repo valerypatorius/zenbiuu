@@ -1,39 +1,4 @@
-export enum TwitchIrcCommand {
-  Connect = '001',
-  Disconnect = '-1',
-  Clear = 'CLEARCHAT',
-  Notice = 'NOTICE',
-  HostTarget = 'HOSTTARGET',
-  Join = 'JOIN',
-  Leave = 'PART',
-  Message = 'PRIVMSG',
-  GlobalUserState = 'GLOBALUSERSTATE',
-  UserState = 'USERSTATE',
-  RoomState = 'ROOMSTATE',
-}
-
-export interface TwitchIrcMessage {
-  command: TwitchIrcCommand;
-  channel?: string;
-  text?: string;
-  tags?: Partial<{
-    'badge-info': Array<'moderator' | 'subscriber'>;
-    badges: Array<'moderator' | 'subscriber'>;
-    'client-nonce': string;
-    color: string;
-    'display-name': string;
-    id: string;
-    mod: '0' | '1';
-    subscriber: '0' | '1';
-    turbo: '0' | '1';
-    'first-msg': '0' | '1';
-    'emote-only': '0' | '1';
-    'user-id': string;
-    'tmi-sent-ts': string;
-    'room-id': string;
-    emotes: Record<string, Array<{ start: number; end: number }>>;
-  }>;
-}
+import { TwitchIrcCommand, type TwitchIrcMessage } from '../types';
 
 /**
  * Supported message author badges
@@ -197,7 +162,7 @@ function parseText (source: string): string | undefined {
  * Parse incoming IRC message
  * @see https://dev.twitch.tv/docs/irc/example-parser/
  */
-export function parseMessage (message: string): TwitchIrcMessage | undefined {
+export function parseChatMessage (message: string): TwitchIrcMessage | undefined {
   const DIVIDER = ' ';
 
   /**
