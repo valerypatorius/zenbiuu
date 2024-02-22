@@ -12,16 +12,16 @@
       <Scrollable>
         <div class="library__channels">
           <ChannelCard
-            v-for="name in followedChannelsNames"
+            v-for="{ name, data, stream, isLive, isOpened } in channels"
             :key="name"
             :class="[
               'library__channel',
-              openedChannels.find((channel) => channel.name === name) && 'library__channel--active',
+              isOpened && 'library__channel--active',
             ]"
             :name="name"
-            :category="liveStreamsByChannelName.get(name)?.category"
-            :avatar="channelsByName.get(name)?.avatar"
-            :is-live="name in liveStreamsByChannelName"
+            :category="stream?.category"
+            :avatar="data?.avatar"
+            :is-live="isLive"
             @click="openChannel(name)"
             @visible="requestChannelByName(name)"
           >
@@ -42,27 +42,28 @@
       <Stream
         v-for="(channel, index) in openedChannels"
         :key="channel.name"
-        :channel="channel"
-        :stream="liveStreamsByChannelName.get(channel.name)"
-        :playlist="liveStreamsByChannelName.get(channel.name) !== undefined ? playStream : undefined"
+        :channel="channel.data"
+        :stream="channel.stream"
+        :playlist="channel.isLive ? playStream : undefined"
         :is-main="index === 0"
         @close="closeChannel(channel.name)"
       />
     </div>
 
     <div
-      v-else-if="liveStreams.length > 0"
+      v-else-if="liveChannels.length > 0"
       class="library__main"
     >
       <Scrollable>
         <div class="library__grid">
           <LibraryItem
-            v-for="stream in liveStreams"
-            :key="stream.id"
-            v-bind="stream"
-            :channel="channelsByName.get(stream.channelName)"
-            @click="openChannel(stream.channelName)"
-            @channel-visible="requestChannelByName(stream.channelName)"
+            v-for="channel in liveChannels"
+            :key="channel.name"
+            :stream="channel.stream"
+            :name="channel.name"
+            :avatar="channel.data?.avatar"
+            @click="openChannel(channel.name)"
+            @channel-visible="requestChannelByName(channel.name)"
           />
         </div>
       </Scrollable>
@@ -93,10 +94,8 @@ defineProps<{
 }>();
 
 const {
-  liveStreams,
-  liveStreamsByChannelName,
-  channelsByName,
-  followedChannelsNames,
+  channels,
+  liveChannels,
   openedChannels,
   openChannel,
   closeChannel,

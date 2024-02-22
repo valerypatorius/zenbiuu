@@ -3,10 +3,18 @@ import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
-import type ChannelEntity from '@/entities/ChannelEntity';
 import type LiveStream from '@/entities/LiveStream';
+import type ChannelEntity from '@/entities/ChannelEntity';
 import { createInterval } from '@/interval/index';
 import date from '@/utils/date';
+
+interface LibraryChannel {
+  name: string;
+  data?: ChannelEntity;
+  stream?: LiveStream;
+  isLive: boolean;
+  isOpened: boolean;
+}
 
 export const useLibrary = createSharedComposable(() => {
   const library = inject(Injection.Module.Library);
@@ -17,24 +25,36 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  const liveStreams = computed(() => [...library.store.liveStreamsByChannelName.values()]);
-
   /**
    * @todo Find a better way of sorting?
    */
-  const followedChannelsNames = computed(() => {
-    return [...library.store.followedChannelsNames.values()].sort((a, b) => {
-      const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
-      const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
+  // const followedChannelsNames = computed(() => {
+  //   return [...library.store.followedChannelsNames.values()].sort((a, b) => {
+  //     const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
+  //     const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
 
-      return (indexA >= 0 ? indexA : Infinity) - (indexB >= 0 ? indexB : Infinity);
+  //     return (indexA >= 0 ? indexA : Infinity) - (indexB >= 0 ? indexB : Infinity);
+  //   });
+  // });
+
+  const channels = computed<LibraryChannel[]>(() => {
+    return [...library.store.followedChannelsNames.values()].map((name) => {
+      return {
+        name,
+        data: library.store.channelsByName.get(name),
+        stream: library.store.liveStreamsByChannelName.get(name),
+        isLive: library.store.liveStreamsByChannelName.has(name),
+        isOpened: library.store.selectedChannelsNames.has(name),
+      };
     });
   });
 
+  const liveChannels = computed(() => {
+    return channels.value.filter((channel) => channel.isLive) as Array<LibraryChannel & { isLive: true; stream: LiveStream }>;
+  });
+
   const openedChannels = computed(() => {
-    return [...library.store.selectedChannelsNames.values()]
-      .map((name) => library.store.channelsByName.get(name))
-      .filter((channel) => channel !== undefined) as ChannelEntity[];
+    return channels.value.filter((channel) => channel.isOpened) as Array<LibraryChannel & { isOpened: true }>;
   });
 
   let stopLibraryUpdates: (() => void) | undefined;
@@ -42,7 +62,7 @@ export const useLibrary = createSharedComposable(() => {
   watchEffect(() => {
     library.primaryAccount = primaryAccount.value;
 
-    if (primaryAccount.value !== undefined) {
+    if (library.primaryAccount !== null) {
       /**
        * @todo Cache followed channels to reduce API calls
        */
@@ -93,10 +113,8 @@ export const useLibrary = createSharedComposable(() => {
   }
 
   return {
-    liveStreams,
-    liveStreamsByChannelName: library.store.liveStreamsByChannelName,
-    channelsByName: library.store.channelsByName,
-    followedChannelsNames,
+    channels,
+    liveChannels,
     openedChannels,
     openChannel,
     closeChannel,

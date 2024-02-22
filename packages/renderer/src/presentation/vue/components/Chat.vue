@@ -8,7 +8,7 @@
     <Scrollable>
       <div class="chat__main">
         <div
-          v-if="messages.length === 0"
+          v-if="messages.length === 0 && channel !== undefined"
           class="chat__welcome"
         >
           <Icon
@@ -51,7 +51,7 @@ import type ChannelEntity from '@/entities/ChannelEntity';
 import { useChat } from '@/presentation/vue/services/useChat';
 
 const props = defineProps<{
-  channel: ChannelEntity;
+  channel?: ChannelEntity;
   isEnableTopOffset?: boolean;
 }>();
 
@@ -63,6 +63,10 @@ const { t } = useI18n();
 const horizon = ref<HTMLDivElement>();
 
 const messages = computed(() => {
+  if (props.channel === undefined) {
+    return [];
+  }
+
   const list = messagesByChannel.get(props.channel.name);
 
   if (list === undefined) {
@@ -76,7 +80,7 @@ const messages = computed(() => {
     return {
       ...message,
       emotes: {
-        ...emotesByChannelId.get(props.channel.id),
+        ...emotesByChannelId.get(props.channel?.id ?? ''),
         ...message.emotes,
       },
     };
@@ -94,11 +98,19 @@ watch(lastMessage, () => {
 });
 
 onMounted(() => {
+  if (props.channel === undefined) {
+    return;
+  }
+
   requestEmotes(props.channel.id);
   join(props.channel);
 });
 
 onBeforeUnmount(() => {
+  if (props.channel === undefined) {
+    return;
+  }
+
   leave(props.channel);
 });
 </script>

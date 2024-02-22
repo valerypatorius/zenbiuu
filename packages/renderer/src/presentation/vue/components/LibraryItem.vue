@@ -15,13 +15,13 @@
 
     <div class="library-item__info">
       <div class="library-item__title">
-        {{ title }}
+        {{ stream.title }}
       </div>
 
       <ChannelCard
-        :name="channelName"
-        :avatar="channel?.avatar"
-        :category="category"
+        :name="name"
+        :avatar="avatar"
+        :category="stream.category"
         @visible="emit('channelVisible')"
       />
 
@@ -32,7 +32,7 @@
             :size="16"
           />
 
-          <PrettyNumber :value="viewersCount" />
+          <PrettyNumber :value="stream.viewersCount" />
         </div>
 
         <div class="library-item__counter">
@@ -42,7 +42,7 @@
           />
 
           <Duration
-            :date-start="dateStarted"
+            :date-start="stream.dateStarted"
           />
         </div>
       </div>
@@ -57,13 +57,12 @@ import Icon from './ui/Icon';
 import PrettyNumber from './ui/PrettyNumber';
 import Duration from './Duration.vue';
 import type LiveStream from '@/entities/LiveStream';
-import type ChannelEntity from '@/entities/ChannelEntity';
 
-type Props = LiveStream & {
-  channel?: ChannelEntity;
-};
-
-const props = defineProps<Props>();
+const props = defineProps<{
+  name: string;
+  stream: LiveStream;
+  avatar?: string;
+}>();
 
 const emit = defineEmits<{
   click: [];
@@ -72,12 +71,12 @@ const emit = defineEmits<{
 
 const coverElement = ref<HTMLElement | null>(null);
 
-const coverImageUrl = ref(props.cover);
+const coverImageUrl = ref(props.stream.cover);
 
 /**
  * Avoid flickering by waiting for new cover image to load before changing source
  */
-watch(() => props.cover, (value) => {
+watch(() => props.stream.cover, (value) => {
   const image = new Image();
 
   image.onload = () => {
