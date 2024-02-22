@@ -6,14 +6,14 @@ import type StoreInterface from '@/interfaces/Store.interface';
 export default class Window implements WindowInterface {
   #instance?: BrowserWindow;
 
-  readonly #url = import.meta.env.MODE === 'development' ? import.meta.env.VITE_DEV_SERVER_URL : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
+  readonly #url =
+    import.meta.env.MODE === 'development'
+      ? import.meta.env.VITE_DEV_SERVER_URL
+      : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
 
-  constructor (
-    private readonly store: StoreInterface,
-  ) {
-  }
+  constructor(private readonly store: StoreInterface) {}
 
-  public open (options: Electron.BrowserWindowConstructorOptions = {}): void {
+  public open(options: Electron.BrowserWindowConstructorOptions = {}): void {
     const { width, height } = this.store.get('windowBounds');
 
     this.#instance = new BrowserWindow({
@@ -52,7 +52,7 @@ export default class Window implements WindowInterface {
     void this.#instance.loadURL(this.#url);
   }
 
-  private show (): void {
+  private show(): void {
     // this.#instance?.show();
 
     if (import.meta.env.MODE === 'development') {
@@ -60,26 +60,26 @@ export default class Window implements WindowInterface {
     }
   }
 
-  public get isMinimized (): boolean {
+  public get isMinimized(): boolean {
     return this.#instance?.isMinimized() ?? false;
   }
 
-  public restore (): void {
+  public restore(): void {
     this.#instance?.restore();
   }
 
-  public focus (): void {
+  public focus(): void {
     this.#instance?.focus();
   }
 
   /**
    * @todo Emit event to clear external references
    */
-  private destroy (): void {
+  private destroy(): void {
     this.#instance = undefined;
   }
 
-  private handleResize (): void {
+  private handleResize(): void {
     if (this.#instance === undefined) {
       return;
     }
@@ -92,15 +92,18 @@ export default class Window implements WindowInterface {
     });
   }
 
-  public send (channel: string, ...args: any[]): void {
+  public send(channel: string, ...args: any[]): void {
     this.#instance?.webContents.send(channel, ...args);
   }
 
-  public setColor (value: string): void {
+  public setColor(value: string): void {
     this.#instance?.setBackgroundColor(value);
   }
 
-  private static interceptUrlLoad (event: Electron.Event<Electron.WebContentsWillNavigateEventParams>, url: string): void {
+  private static interceptUrlLoad(
+    event: Electron.Event<Electron.WebContentsWillNavigateEventParams>,
+    url: string,
+  ): void {
     event.preventDefault();
 
     void shell.openExternal(url);

@@ -8,26 +8,26 @@ import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
 
 export default abstract class AbstractProvider {
-  protected readonly abstract config: ProviderConfig;
+  protected abstract readonly config: ProviderConfig;
 
-  protected readonly abstract clientId: string;
+  protected abstract readonly clientId: string;
 
-  protected readonly abstract oauth: OAuthInterface;
+  protected abstract readonly oauth: OAuthInterface;
 
-  protected readonly abstract transport: TransportInterface;
+  protected abstract readonly transport: TransportInterface;
 
-  protected readonly abstract chat: SocketsInterface;
+  protected abstract readonly chat: SocketsInterface;
 
   protected readonly transportHeaders: Record<string, string> = {};
 
   protected accessToken: string | undefined = undefined;
 
-  constructor (
+  constructor(
     protected readonly hub: HubInterface,
     protected readonly emotesProviders: EmotesProvidersInterface,
   ) {}
 
-  protected async requestAuthorization (): Promise<{
+  protected async requestAuthorization(): Promise<{
     token: string;
     state: string;
     expiresIn?: number | null;
@@ -53,7 +53,12 @@ export default abstract class AbstractProvider {
         /**
          * If payload is not recognized, throw error and do not proceed
          */
-        if (typeof token !== 'string' || typeof state !== 'string' || typeof expiresIn === 'boolean' || typeof expiresIn === 'string') {
+        if (
+          typeof token !== 'string' ||
+          typeof state !== 'string' ||
+          typeof expiresIn === 'boolean' ||
+          typeof expiresIn === 'string'
+        ) {
           reject(new Error('Failed to process authorization response'));
 
           return;
@@ -71,29 +76,36 @@ export default abstract class AbstractProvider {
   /**
    * @todo If token is not validated at this moment, wait for it
    */
-  protected async catchable <T>(method: 'get' | 'post', url: string, options?: RequestInit, parser?: 'text'): Promise<T> {
+  protected async catchable<T>(
+    method: 'get' | 'post',
+    url: string,
+    options?: RequestInit,
+    parser?: 'text',
+  ): Promise<T> {
     return await new Promise((resolve, reject) => {
-      this.transport[method]<T>(url, options, parser).then((result) => {
-        resolve(result);
-      }).catch((error) => {
-        if (!(error instanceof Error) || error.cause === undefined) {
-          reject(error);
+      this.transport[method]<T>(url, options, parser)
+        .then((result) => {
+          resolve(result);
+        })
+        .catch((error) => {
+          if (!(error instanceof Error) || error.cause === undefined) {
+            reject(error);
 
-          return;
-        }
+            return;
+          }
 
-        if (error.cause === TransportStatus.NotAuthorized) {
-          const event = new CustomEvent(ProviderEvent.Disconnect, {
-            detail: {
-              api: this,
-              provider: this.config.name,
-              token: this.accessToken,
-            },
-          });
+          if (error.cause === TransportStatus.NotAuthorized) {
+            const event = new CustomEvent(ProviderEvent.Disconnect, {
+              detail: {
+                api: this,
+                provider: this.config.name,
+                token: this.accessToken,
+              },
+            });
 
-          window.dispatchEvent(event);
-        }
-      });
+            window.dispatchEvent(event);
+          }
+        });
     });
   }
 }

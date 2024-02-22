@@ -50,7 +50,9 @@ export const useLibrary = createSharedComposable(() => {
   });
 
   const liveChannels = computed(() => {
-    return channels.value.filter((channel) => channel.isLive) as Array<LibraryChannel & { isLive: true; stream: LiveStream }>;
+    return channels.value.filter((channel) => channel.isLive) as Array<
+      LibraryChannel & { isLive: true; stream: LiveStream }
+    >;
   });
 
   const openedChannels = computed(() => {
@@ -78,7 +80,7 @@ export const useLibrary = createSharedComposable(() => {
     }
   });
 
-  function openChannel (name: string, isParallel = false): void {
+  function openChannel(name: string, isParallel = false): void {
     if (!isParallel) {
       closeAllChannels();
     }
@@ -86,13 +88,13 @@ export const useLibrary = createSharedComposable(() => {
     library?.store.addSelectedChannelName(name);
   }
 
-  function closeChannel (name: string): void {
+  function closeChannel(name: string): void {
     void stopStream(name);
 
     library?.store.removeSelectedChannelName(name);
   }
 
-  function closeAllChannels (): void {
+  function closeAllChannels(): void {
     library?.store.selectedChannelsNames.forEach((name) => {
       void stopStream(name);
     });
@@ -100,15 +102,15 @@ export const useLibrary = createSharedComposable(() => {
     library?.store.removeAllSelectedChannelsNames();
   }
 
-  function requestChannelByName (name: string): void {
+  function requestChannelByName(name: string): void {
     library?.requestChannelByName(name);
   }
 
-  async function playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
+  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
     return library?.playStream(name, stream);
   }
 
-  async function stopStream (name: string): Promise<void> {
+  async function stopStream(name: string): Promise<void> {
     await library?.stopStream(name);
   }
 

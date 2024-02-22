@@ -3,7 +3,7 @@
  * @param arr - array to remove value from
  * @param value - value to remove
  */
-export function removeFromArray<T> (arr: T[], value: T): void {
+export function removeFromArray<T>(arr: T[], value: T): void {
   const index = arr.indexOf(value);
 
   if (index >= 0) {
@@ -15,11 +15,11 @@ export function removeFromArray<T> (arr: T[], value: T): void {
  * Clear an array
  * @param arr - array to clear
  */
-export function clearArray<T> (arr: T[]): void {
+export function clearArray<T>(arr: T[]): void {
   arr.length = 0;
 }
 
-export function statefulArray<T> (arr: T[]): {
+export function statefulArray<T>(arr: T[]): {
   state: T[];
   set: (value: T[]) => void;
   add: (value: T) => void;
@@ -28,18 +28,18 @@ export function statefulArray<T> (arr: T[]): {
 } {
   return {
     state: arr,
-    set (value) {
+    set(value) {
       this.clear();
       this.state.push(...value);
     },
-    add (value) {
+    add(value) {
       removeFromArray(this.state, value);
       this.state.push(value);
     },
-    remove (value) {
+    remove(value) {
       removeFromArray(this.state, value);
     },
-    clear () {
+    clear() {
       clearArray(this.state);
     },
   };
@@ -48,7 +48,7 @@ export function statefulArray<T> (arr: T[]): {
 /**
  * Returns an object, where array items frequency is recorded
  */
-export function getArrayItemsFrequencyMap (arr: string[]): Record<string, number> {
+export function getArrayItemsFrequencyMap(arr: string[]): Record<string, number> {
   return arr.reduce<Record<string, number>>((result, value) => {
     result[value] = result[value] !== undefined ? result[value] + 1 : 1;
 
@@ -59,15 +59,20 @@ export function getArrayItemsFrequencyMap (arr: string[]): Record<string, number
 /**
  * Returns an array of strings, sorted by these strings frequency
  */
-export function sortArrayByFrequency (arr: string[]): string[] {
+export function sortArrayByFrequency(arr: string[]): string[] {
   return Object.entries(getArrayItemsFrequencyMap(arr))
     .sort((a, b) => b[1] - a[1])
-    .map(([value, frequency]) => value);
+    .map(
+      ([
+        value,
+        frequency,
+      ]) => value,
+    );
 }
 
 /**
  * Chunks an array into smaller arrays of a specified size
  */
-export function splitArrayIntoChunks<T> (arr: T[], size: number): T[][] {
+export function splitArrayIntoChunks<T>(arr: T[], size: number): T[][] {
   return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
 }

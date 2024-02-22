@@ -1,6 +1,6 @@
 import { type TwitchPlaylistAccessTokenResponse } from '../types';
 
-export function composeStreamPlaylistUrl (channelName: string, { data }: TwitchPlaylistAccessTokenResponse): string {
+export function composeStreamPlaylistUrl(channelName: string, { data }: TwitchPlaylistAccessTokenResponse): string {
   const params = {
     sig: data.streamPlaybackAccessToken.signature,
     type: 'any',
@@ -15,7 +15,9 @@ export function composeStreamPlaylistUrl (channelName: string, { data }: TwitchP
     reassignments_supported: true,
   };
 
-  const query = Object.entries(params).map((param) => param.join('=')).join('&');
+  const query = Object.entries(params)
+    .map((param) => param.join('='))
+    .join('&');
 
   return `https://usher.ttvnw.net/api/channel/hls/${channelName.toLowerCase()}.m3u8?${query}`;
 }

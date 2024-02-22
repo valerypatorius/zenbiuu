@@ -94,7 +94,8 @@ export default {
   },
   version: 'Версия',
   legal: {
-    disclaimer: '{name} не связано, не обслуживается, не спонсируется и не одобрено Twitch Interactive, Inc. или любыми связанными с ней компаниями.',
+    disclaimer:
+      '{name} не связано, не обслуживается, не спонсируется и не одобрено Twitch Interactive, Inc. или любыми связанными с ней компаниями.',
   },
   enable: 'Включить',
   disable: 'Отключить',

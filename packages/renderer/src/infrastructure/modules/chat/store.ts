@@ -2,7 +2,9 @@ import { type ModuleChatStore, type ModuleChatStoreSchema } from './types';
 import type ChatMessage from '@/entities/ChatMessage';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export async function createChatStore (createState: ModuleStateFactoryFn<ModuleChatStoreSchema>): Promise<ModuleChatStore> {
+export async function createChatStore(
+  createState: ModuleStateFactoryFn<ModuleChatStoreSchema>,
+): Promise<ModuleChatStore> {
   const { state } = await createState('store:chat', {
     messagesByChannelName: new Map(),
   });
@@ -11,7 +13,7 @@ export async function createChatStore (createState: ModuleStateFactoryFn<ModuleC
 
   let isLastAddedMessageEven = false;
 
-  function addChannelMessage (channelName: string, message: ChatMessage): void {
+  function addChannelMessage(channelName: string, message: ChatMessage): void {
     let messages = state.messagesByChannelName.get(channelName);
 
     if (messages === undefined) {
@@ -30,16 +32,16 @@ export async function createChatStore (createState: ModuleStateFactoryFn<ModuleC
     isLastAddedMessageEven = !isLastAddedMessageEven;
   }
 
-  function clearChannelMessages (channelName: string): void {
+  function clearChannelMessages(channelName: string): void {
     state.messagesByChannelName.delete(channelName);
   }
 
-  function clearAll (): void {
+  function clearAll(): void {
     state.messagesByChannelName.clear();
   }
 
   return {
-    get messagesByChannelName () {
+    get messagesByChannelName() {
       return state.messagesByChannelName;
     },
     addChannelMessage,

@@ -10,7 +10,7 @@ const controllersByKey = new Map<string, AbortController>();
  * @param payload - payload for request
  * @param key - request key, based on url and body
  */
-async function handle (method: string, payload: TransportPayload, key: string): Promise<void> {
+async function handle(method: string, payload: TransportPayload, key: string): Promise<void> {
   const pendingRequest = controllersByKey.get(key);
 
   if (pendingRequest !== undefined) {
@@ -99,7 +99,10 @@ async function handle (method: string, payload: TransportPayload, key: string): 
       self.postMessage(message);
     }
 
-    const errormessage = typeof responseData.message === 'string' ? responseData.message : `Unknown error occured when requesting ${payload.url}`;
+    const errormessage =
+      typeof responseData.message === 'string'
+        ? responseData.message
+        : `Unknown error occured when requesting ${payload.url}`;
 
     throw new Error(errormessage);
   } catch (error) {
@@ -113,7 +116,9 @@ async function handle (method: string, payload: TransportPayload, key: string): 
   }
 }
 
-self.onmessage = ({ data: messageData }: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload; key: string }>) => {
+self.onmessage = ({
+  data: messageData,
+}: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload; key: string }>) => {
   switch (messageData.action) {
     case 'get':
       void handle('GET', messageData.data, messageData.key);

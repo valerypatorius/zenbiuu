@@ -5,7 +5,7 @@
         <img
           class="auth__logo"
           :src="appIconPath"
-        >
+        />
 
         <div class="auth__main">
           <div class="auth__title">

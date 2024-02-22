@@ -1,10 +1,5 @@
 <template>
-  <div
-    :class="[
-      'library',
-      isSidebarActive && 'library--with-sidebar',
-    ]"
-  >
+  <div :class="['library', isSidebarActive && 'library--with-sidebar']">
     <aside
       v-show="isSidebarActive"
       class="library__sidebar"
@@ -14,10 +9,7 @@
           <ChannelCard
             v-for="{ name, data, stream, isLive, isOpened } in channels"
             :key="name"
-            :class="[
-              'library__channel',
-              isOpened && 'library__channel--active',
-            ]"
+            :class="['library__channel', isOpened && 'library__channel--active']"
             :name="name"
             :category="stream?.category"
             :avatar="data?.avatar"
@@ -73,9 +65,7 @@
       v-else
       class="library__empty"
     >
-      <img
-        :src="appIconPath"
-      >
+      <img :src="appIconPath" />
     </div>
   </div>
 </template>
@@ -93,15 +83,8 @@ defineProps<{
   isSidebarActive?: boolean;
 }>();
 
-const {
-  channels,
-  liveChannels,
-  openedChannels,
-  openChannel,
-  closeChannel,
-  requestChannelByName,
-  playStream,
-} = useLibrary();
+const { channels, liveChannels, openedChannels, openChannel, closeChannel, requestChannelByName, playStream } =
+  useLibrary();
 </script>
 
 <style lang="postcss">

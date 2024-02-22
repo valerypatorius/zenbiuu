@@ -59,7 +59,7 @@ export default {
   },
   chat: {
     connectingTo: 'Connecting to {channel} chat room...',
-    joinedAs: 'Joined {channel}\'s chat room as {name}',
+    joinedAs: "Joined {channel}'s chat room as {name}",
     scrollToBottom: 'Scroll to bottom',
     message: 'Message',
     emotes: {
@@ -95,7 +95,8 @@ export default {
   },
   version: 'Version',
   legal: {
-    disclaimer: '{name} is not affiliated with, authorized, maintained, sponsored or endorsed by Twitch Interactive, Inc. or any of its affiliates or subsidiaries.',
+    disclaimer:
+      '{name} is not affiliated with, authorized, maintained, sponsored or endorsed by Twitch Interactive, Inc. or any of its affiliates or subsidiaries.',
   },
   enable: 'Enable',
   disable: 'Disable',

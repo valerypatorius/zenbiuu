@@ -2,7 +2,7 @@ import { type IntervalPayload } from '../types';
 
 const intervalsByKey = new Map<string, ReturnType<typeof setInterval>>();
 
-function start ({ key, delay = 0, immediate = false }: IntervalPayload): void {
+function start({ key, delay = 0, immediate = false }: IntervalPayload): void {
   if (immediate) {
     self.postMessage(key);
   }
@@ -14,7 +14,7 @@ function start ({ key, delay = 0, immediate = false }: IntervalPayload): void {
   intervalsByKey.set(key, interval);
 }
 
-function stop (key: string): void {
+function stop(key: string): void {
   const interval = intervalsByKey.get(key);
 
   if (interval === undefined) {

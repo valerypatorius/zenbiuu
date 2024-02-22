@@ -4,8 +4,10 @@ import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.inte
 import { type EmoteEntity } from '@/entities/EmoteEntity';
 
 export default class FFZ extends AbstractProvider implements EmotesProviderApiInterface {
-  public async getChannelEmotes (id: string): Promise<Record<string, EmoteEntity>> {
-    const response = await this.transport.get<BTTVChannelEmotesResponse>(`https://api.betterttv.net/3/cached/users/twitch/${id}`);
+  public async getChannelEmotes(id: string): Promise<Record<string, EmoteEntity>> {
+    const response = await this.transport.get<BTTVChannelEmotesResponse>(
+      `https://api.betterttv.net/3/cached/users/twitch/${id}`,
+    );
 
     return [
       ...response.channelEmotes,

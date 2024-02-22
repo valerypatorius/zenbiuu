@@ -7,15 +7,17 @@ const Icon: FunctionalComponent<{
   raw?: string;
   size?: number;
 }> = (props) => {
-  const svg = props.name !== undefined ? icons[props.name] : (props.raw ?? '');
+  const svg = props.name !== undefined ? icons[props.name] : props.raw ?? '';
 
-  return <div
-    class="icon"
-    style={{
-      '--size': `${props.size}px`,
-    }}
-    v-html={svg}
-  />;
+  return (
+    <div
+      class="icon"
+      style={{
+        '--size': `${props.size}px`,
+      }}
+      v-html={svg}
+    />
+  );
 };
 
 export default Icon;

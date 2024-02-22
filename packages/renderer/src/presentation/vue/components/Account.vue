@@ -1,9 +1,7 @@
 <template>
   <div class="account">
     <div class="account__avatar">
-      <Avatar
-        :src="avatar"
-      />
+      <Avatar :src="avatar" />
 
       <div
         class="account__provider"
@@ -24,17 +22,12 @@
         {{ name }}
       </div>
 
-      <div class="account__details">
-        Активен до {{ expirationDate }}
-      </div>
+      <div class="account__details">Активен до {{ expirationDate }}</div>
     </div>
 
     <div class="account__actions">
       <div
-        :class="[
-          'account__action',
-          isPrimary && 'account__action--active',
-        ]"
+        :class="['account__action', isPrimary && 'account__action--active']"
         @click="emit('select')"
       >
         <Icon
@@ -77,7 +70,9 @@ const emit = defineEmits<{
 
 const { available: availableProviders } = useProviders();
 
-const expirationDate = computed(() => props.tokenExpirationDate !== undefined ? new Date(props.tokenExpirationDate).toLocaleString() : '');
+const expirationDate = computed(() =>
+  props.tokenExpirationDate !== undefined ? new Date(props.tokenExpirationDate).toLocaleString() : '',
+);
 </script>
 
 <style lang="postcss">

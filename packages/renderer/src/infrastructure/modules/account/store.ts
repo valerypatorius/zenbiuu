@@ -2,20 +2,24 @@ import { type ModuleAccountStore, type ModuleAccountStoreSchema } from './types'
 import type AccountEntity from '@/entities/AccountEntity';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export async function createAccountStore (createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>): Promise<ModuleAccountStore> {
+export async function createAccountStore(
+  createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>,
+): Promise<ModuleAccountStore> {
   const { state, save } = await createState('store:account', {
     accounts: [],
     primary: null,
   });
 
-  function addAccount (account: AccountEntity): void {
+  function addAccount(account: AccountEntity): void {
     state.accounts.push(account);
 
     save();
   }
 
-  function removeAccount ({ provider, token }: AccountEntity): void {
-    const accountIndex = state.accounts.findIndex((storedAccount) => storedAccount.provider === provider && storedAccount.token === token);
+  function removeAccount({ provider, token }: AccountEntity): void {
+    const accountIndex = state.accounts.findIndex(
+      (storedAccount) => storedAccount.provider === provider && storedAccount.token === token,
+    );
 
     if (accountIndex >= 0) {
       state.accounts.splice(accountIndex, 1);
@@ -24,11 +28,18 @@ export async function createAccountStore (createState: ModuleStateFactoryFn<Modu
     save();
   }
 
-  function getAccountByProperties (properties: Partial<AccountEntity>): AccountEntity | undefined {
-    return state.accounts.find((storedAccount) => Object.entries(properties).every(([key, value]) => storedAccount[key as keyof AccountEntity] === value));
+  function getAccountByProperties(properties: Partial<AccountEntity>): AccountEntity | undefined {
+    return state.accounts.find((storedAccount) =>
+      Object.entries(properties).every(
+        ([
+          key,
+          value,
+        ]) => storedAccount[key as keyof AccountEntity] === value,
+      ),
+    );
   }
 
-  function resetPrimaryAccount (): void {
+  function resetPrimaryAccount(): void {
     const fallbackPrimaryAccount = state.accounts[0];
 
     if (fallbackPrimaryAccount !== undefined) {
@@ -40,7 +51,7 @@ export async function createAccountStore (createState: ModuleStateFactoryFn<Modu
     save();
   }
 
-  function isPrimaryAccount (account: AccountEntity): boolean {
+  function isPrimaryAccount(account: AccountEntity): boolean {
     if (state.primary === null) {
       return false;
     }
@@ -48,20 +59,20 @@ export async function createAccountStore (createState: ModuleStateFactoryFn<Modu
     return account.provider === state.primary.provider && account.token === state.primary.token;
   }
 
-  function refreshAccount (account: AccountEntity, properties: Partial<AccountEntity>): void {
+  function refreshAccount(account: AccountEntity, properties: Partial<AccountEntity>): void {
     Object.assign(account, properties);
 
     save();
   }
 
   return {
-    get primaryAccount () {
+    get primaryAccount() {
       return state.primary;
     },
-    set primaryAccount (value: AccountEntity | null) {
+    set primaryAccount(value: AccountEntity | null) {
       state.primary = value;
     },
-    get accounts () {
+    get accounts() {
       return state.accounts;
     },
     addAccount,

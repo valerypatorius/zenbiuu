@@ -4,16 +4,19 @@ import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSchema>, {
-  providers,
-}: {
-  providers: ProvidersInterface;
-}): Promise<ModuleChat> {
+export async function createChat(
+  state: ModuleStateFactoryFn<ModuleChatStoreSchema>,
+  {
+    providers,
+  }: {
+    providers: ProvidersInterface;
+  },
+): Promise<ModuleChat> {
   const store = await createChatStore(state);
 
   let primaryAccount: AccountEntity | null = null;
 
-  function join (channelName: string): void {
+  function join(channelName: string): void {
     if (primaryAccount === null) {
       return;
     }
@@ -23,7 +26,7 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
     });
   }
 
-  function leave (channelName: string): void {
+  function leave(channelName: string): void {
     if (primaryAccount === null) {
       return;
     }
@@ -33,16 +36,16 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
     store.clearChannelMessages(channelName);
   }
 
-  function destroy (): void {
+  function destroy(): void {
     store.clearAll();
   }
 
   return {
     store,
-    get primaryAccount () {
+    get primaryAccount() {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | null) {
+    set primaryAccount(value: AccountEntity | null) {
       primaryAccount = value;
     },
     join,

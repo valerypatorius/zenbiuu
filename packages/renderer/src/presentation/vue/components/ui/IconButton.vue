@@ -1,9 +1,6 @@
 <template>
   <button
-    :class="[
-      'icon-button',
-      active && 'icon-button--active',
-    ]"
+    :class="['icon-button', active && 'icon-button--active']"
     :disabled="disabled"
     @click="(event) => emit('click', event)"
   >

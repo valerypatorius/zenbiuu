@@ -7,13 +7,13 @@ export default class App implements AppInterface {
 
   public isAllowAppStart = app.requestSingleInstanceLock();
 
-  public async start (): Promise<void> {
+  public async start(): Promise<void> {
     this.beforeStart();
 
     await app.whenReady();
   }
 
-  private beforeStart (): void {
+  private beforeStart(): void {
     this.registerProtocol();
 
     app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
@@ -60,7 +60,7 @@ export default class App implements AppInterface {
     });
   }
 
-  private registerProtocol (): void {
+  private registerProtocol(): void {
     if (!process.defaultApp) {
       app.setAsDefaultProtocolClient(this.#protocol);
 
@@ -68,13 +68,11 @@ export default class App implements AppInterface {
     }
 
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient(this.#protocol, process.execPath, [
-        path.resolve(process.argv[1]),
-      ]);
+      app.setAsDefaultProtocolClient(this.#protocol, process.execPath, [path.resolve(process.argv[1])]);
     }
   }
 
-  public quit (): void {
+  public quit(): void {
     app.quit();
   }
 }

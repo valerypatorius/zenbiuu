@@ -2,9 +2,7 @@ import { type FunctionalComponent } from 'vue';
 
 const PrettyNumber: FunctionalComponent<{
   value: number;
-}> = ({
-  value,
-}) => {
+}> = ({ value }) => {
   /**
    * @todo Get app locale and update accordingly
    */

@@ -3,28 +3,16 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "$/*": [
-        "../../*"
-      ],
-      "@/interfaces/*": [
-        "src/interfaces/*"
-      ],
-      "@/entities/*": [
-        "src/entities/*"
-      ],
-      "@/modules/*": [
-        "./src/modules/*"
-      ],
-      "@/utils/*": [
-        "./src/utils/*"
-      ]
+      "$/*": ["../../*"],
+      "@/interfaces/*": ["src/interfaces/*"],
+      "@/entities/*": ["src/entities/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/utils/*": ["./src/utils/*"]
     },
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"]
   },
   "include": [
     "src/**/*.ts",
     "../../entities/*.ts"
-  ],
+  ]
 }

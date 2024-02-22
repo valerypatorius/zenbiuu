@@ -5,7 +5,7 @@ type PackagesConfigs = Record<'main' | 'preload' | 'renderer', InlineConfig>;
 /**
  * Provides Vite configs composition for each app package
  */
-export function createConfig (customConfigs?: Partial<PackagesConfigs>): PackagesConfigs {
+export function createConfig(customConfigs?: Partial<PackagesConfigs>): PackagesConfigs {
   /**
    * Base config used by every package
    */

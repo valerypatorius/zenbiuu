@@ -5,7 +5,7 @@ import { type PluginOption } from 'vite';
  * Returns simple Vite plugin for watchable packages.
  * Such packages are rebuilt on files changes and we need to perform some actions on each rebuild
  */
-export function createWatchablePlugin (onBuild?: () => void): PluginOption {
+export function createWatchablePlugin(onBuild?: () => void): PluginOption {
   return {
     /**
      * Plugin name does not matter, so simply generate short random string
@@ -15,7 +15,7 @@ export function createWatchablePlugin (onBuild?: () => void): PluginOption {
     /**
      * When build is completed, call external handler
      */
-    closeBundle () {
+    closeBundle() {
       onBuild?.();
     },
   };

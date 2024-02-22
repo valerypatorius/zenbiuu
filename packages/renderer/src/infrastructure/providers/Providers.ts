@@ -8,26 +8,37 @@ import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interfac
 export default class Providers implements ProvidersInterface {
   readonly #providersInstances = new Map<string, ProviderApiInterface>();
 
-  constructor (
+  constructor(
     private readonly hub: HubInterface,
     private readonly emotesProviders: EmotesProvidersInterface,
-  ) {
-  }
+  ) {}
 
-  public get available (): Record<string, ProviderConfig> {
+  public get available(): Record<string, ProviderConfig> {
     const imports = import.meta.glob<ProviderConfig>('./**/config.ts', { import: 'default', eager: true });
 
-    return Object.fromEntries(Object.entries(imports).map(([path, config]) => [config.name, config]));
+    return Object.fromEntries(
+      Object.entries(imports).map(
+        ([
+          path,
+          config,
+        ]) => [
+          config.name,
+          config,
+        ],
+      ),
+    );
   }
 
-  public getApi (provider: string): ProviderApiInterface {
+  public getApi(provider: string): ProviderApiInterface {
     const storedProviderInstance = this.#providersInstances.get(provider);
 
     if (storedProviderInstance !== undefined) {
       return storedProviderInstance;
     }
 
-    const imports = import.meta.glob<AbstractProvider & (new(hub: HubInterface, emotesProviders: EmotesProvidersInterface) => ProviderApiInterface)>('./+([0-9a-z])/index.ts', { import: 'default', eager: true });
+    const imports = import.meta.glob<
+      AbstractProvider & (new (hub: HubInterface, emotesProviders: EmotesProvidersInterface) => ProviderApiInterface)
+    >('./+([0-9a-z])/index.ts', { import: 'default', eager: true });
 
     for (const path in imports) {
       if (path.includes(provider)) {

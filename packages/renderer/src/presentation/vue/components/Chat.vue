@@ -1,10 +1,5 @@
 <template>
-  <div
-    :class="[
-      'chat',
-      isEnableTopOffset && 'chat--with-top-offset',
-    ]"
-  >
+  <div :class="['chat', isEnableTopOffset && 'chat--with-top-offset']">
     <Scrollable>
       <div class="chat__main">
         <div
@@ -16,10 +11,12 @@
             :size="24"
           />
 
-          {{ t('chat.joinedAs', {
-            channel: channel.name,
-            name: primaryAccount?.name,
-          }) }}
+          {{
+            t('chat.joinedAs', {
+              channel: channel.name,
+              name: primaryAccount?.name,
+            })
+          }}
         </div>
 
         <template v-else>
@@ -89,13 +86,17 @@ const messages = computed(() => {
 
 const lastMessage = computed(() => messages.value[messages.value.length - 1]);
 
-watch(lastMessage, () => {
-  requestAnimationFrame(() => {
-    horizon.value?.scrollIntoView({ block: 'end' });
-  });
-}, {
-  flush: 'post',
-});
+watch(
+  lastMessage,
+  () => {
+    requestAnimationFrame(() => {
+      horizon.value?.scrollIntoView({ block: 'end' });
+    });
+  },
+  {
+    flush: 'post',
+  },
+);
 
 onMounted(() => {
   if (props.channel === undefined) {

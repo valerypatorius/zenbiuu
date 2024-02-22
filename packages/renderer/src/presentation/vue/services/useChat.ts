@@ -18,11 +18,11 @@ export const useChat = createSharedComposable(() => {
     chat.primaryAccount = primaryAccount.value;
   });
 
-  function join (channel: ChannelEntity): void {
+  function join(channel: ChannelEntity): void {
     chat?.join(channel.name);
   }
 
-  function leave (channel: ChannelEntity): void {
+  function leave(channel: ChannelEntity): void {
     chat?.leave(channel.name);
   }
 

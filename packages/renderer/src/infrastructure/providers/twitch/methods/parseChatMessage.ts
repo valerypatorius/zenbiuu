@@ -14,14 +14,14 @@ const SUPPORTED_BADGES = [
  * Returns true, if array of enums includes specified string.
  * Helps to deal with types
  */
-function isEnumArrayIncludesString<T extends string> (str: string, arr: T[]): str is T {
+function isEnumArrayIncludesString<T extends string>(str: string, arr: T[]): str is T {
   return arr.includes(str as T);
 }
 
 /**
  * Parse IRC message command
  */
-function parseCommand (source: string): { name: TwitchIrcCommand; channel?: string } | undefined {
+function parseCommand(source: string): { name: TwitchIrcCommand; channel?: string } | undefined {
   const globalCommands = [
     TwitchIrcCommand.Connect,
     TwitchIrcCommand.Disconnect,
@@ -39,7 +39,10 @@ function parseCommand (source: string): { name: TwitchIrcCommand; channel?: stri
     TwitchIrcCommand.RoomState,
   ];
 
-  const [name, channel] = source.trim().split(' ');
+  const [
+    name,
+    channel,
+  ] = source.trim().split(' ');
 
   /**
    * Global commands do not contain channel information,
@@ -65,7 +68,7 @@ function parseCommand (source: string): { name: TwitchIrcCommand; channel?: stri
 /**
  * Parse IRC message's badges string and return list of badges names
  */
-function parseBadges (source: string): string[] {
+function parseBadges(source: string): string[] {
   const result: string[] = [];
   const badges = source.split(',');
 
@@ -84,12 +87,15 @@ function parseBadges (source: string): string[] {
  * Parse emotes positions in message text.
  * Not really necessary, because in the end all emotes names are simply replaced with String.replace() call
  */
-function parseEmotes (source: string): Record<string, Array<{ start: number; end: number }>> {
+function parseEmotes(source: string): Record<string, Array<{ start: number; end: number }>> {
   const result: Record<string, Array<{ start: number; end: number }>> = {};
   const emotes = source.split('/');
 
   emotes.forEach((emote) => {
-    const [emoteId, occurrences] = emote.split(':');
+    const [
+      emoteId,
+      occurrences,
+    ] = emote.split(':');
 
     /**
      * The list of position objects that identify
@@ -98,7 +104,10 @@ function parseEmotes (source: string): Record<string, Array<{ start: number; end
     const positions = occurrences.split(',');
 
     result[emoteId] = positions.reduce<Array<{ start: number; end: number }>>((res, position) => {
-      const [start, end] = position.split('-');
+      const [
+        start,
+        end,
+      ] = position.split('-');
 
       res.push({
         start: parseInt(start),
@@ -115,12 +124,15 @@ function parseEmotes (source: string): Record<string, Array<{ start: number; end
 /**
  * Entry point for message tags parsing
  */
-function parseTags (source: string): Record<string, any> {
+function parseTags(source: string): Record<string, any> {
   const result: Record<string, any> = {};
   const chunks = source.split(';');
 
   chunks.forEach((chunk) => {
-    const [key, value = ''] = chunk.split('=');
+    const [
+      key,
+      value = '',
+    ] = chunk.split('=');
 
     if (value.length === 0) {
       return result;
@@ -152,7 +164,7 @@ function parseTags (source: string): Record<string, any> {
  * Does not really parse text, because text displaying is chat's responsibility.
  * But we can mark it as undefined to distinguish chat messages from service messages
  */
-function parseText (source: string): string | undefined {
+function parseText(source: string): string | undefined {
   const result = source.trim();
 
   return result.length > 0 ? result : undefined;
@@ -162,7 +174,7 @@ function parseText (source: string): string | undefined {
  * Parse incoming IRC message
  * @see https://dev.twitch.tv/docs/irc/example-parser/
  */
-export function parseChatMessage (message: string): TwitchIrcMessage | undefined {
+export function parseChatMessage(message: string): TwitchIrcMessage | undefined {
   const DIVIDER = ' ';
 
   /**

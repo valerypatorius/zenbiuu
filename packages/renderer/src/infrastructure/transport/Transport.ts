@@ -13,13 +13,11 @@ export default class Transport implements TransportInterface {
 
   private readonly worker = new TransportWorker();
 
-  constructor (
-    private readonly headers: Record<string, string>,
-  ) {
+  constructor(private readonly headers: Record<string, string>) {
     this.worker.addEventListener('message', this.handleWorkerMessage.bind(this));
   }
 
-  private handleWorkerMessage (event: MessageEvent<TransportResponse>): void {
+  private handleWorkerMessage(event: MessageEvent<TransportResponse>): void {
     const message = event.data;
     const handlers = this.queue.get(message.key);
 
@@ -36,7 +34,7 @@ export default class Transport implements TransportInterface {
     this.queue.delete(message.url);
   }
 
-  private async handle<T> (action: 'get' | 'post', payload: TransportPayload): Promise<T> {
+  private async handle<T>(action: 'get' | 'post', payload: TransportPayload): Promise<T> {
     return await new Promise((resolve, reject) => {
       const data: TransportPayload = {
         url: payload.url,
@@ -63,7 +61,7 @@ export default class Transport implements TransportInterface {
     });
   }
 
-  public async get<T> (url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+  public async get<T>(url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
     return await this.handle<T>('get', {
       url,
       options,
@@ -71,7 +69,7 @@ export default class Transport implements TransportInterface {
     });
   }
 
-  public async post<T> (url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+  public async post<T>(url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
     return await this.handle<T>('post', {
       url,
       options,
@@ -79,7 +77,7 @@ export default class Transport implements TransportInterface {
     });
   }
 
-  static getRequestKey (url: string, body?: BodyInit | null): string {
+  static getRequestKey(url: string, body?: BodyInit | null): string {
     let key = url;
 
     if (body !== null && body !== undefined) {

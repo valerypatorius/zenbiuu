@@ -20,14 +20,14 @@ export default class Hub implements HubInterface {
    */
   readonly #interceptedEventsHooks = new Set<InterceptedLinkHook>();
 
-  constructor () {
+  constructor() {
     window.addEventListener(HubEvent.InterceptedLink, this.handleInterceptedLinkEvent.bind(this) as EventListener);
   }
 
   /**
    * Returns app properties
    */
-  public async getAppProperties (): Promise<AppProperties> {
+  public async getAppProperties(): Promise<AppProperties> {
     return this.#api?.getAppProperties() ?? { name: '', version: '', locale: 'en' };
   }
 
@@ -35,7 +35,7 @@ export default class Hub implements HubInterface {
    * Handle intercepted link event by parsing its payload
    * @param event - custom event, dispatched by main process
    */
-  private handleInterceptedLinkEvent ({ detail }: InterceptedLinkEvent): void {
+  private handleInterceptedLinkEvent({ detail }: InterceptedLinkEvent): void {
     const data = Hub.parseInterceptedLink(detail.link);
 
     this.#interceptedEventsHooks.forEach((hook) => {
@@ -47,14 +47,23 @@ export default class Hub implements HubInterface {
    * Parse intercepted link and return useful data object
    * @param source - intercepted link string
    */
-  private static parseInterceptedLink (source: string): InterceptedLink {
+  private static parseInterceptedLink(source: string): InterceptedLink {
     const url = new URL(source);
     const method = url.pathname.replace(/\W/g, '');
-    const payload = Array.from(url.searchParams.entries()).reduce<InterceptedLink['payload']>((result, [key, value]) => {
-      result[key] = parseString(value);
+    const payload = Array.from(url.searchParams.entries()).reduce<InterceptedLink['payload']>(
+      (
+        result,
+        [
+          key,
+          value,
+        ],
+      ) => {
+        result[key] = parseString(value);
 
-      return result;
-    }, {});
+        return result;
+      },
+      {},
+    );
 
     return {
       method,
@@ -66,7 +75,7 @@ export default class Hub implements HubInterface {
    * Open specified url in default user's browser
    * @param url - url to load
    */
-  public openUrlInBrowser (url: string): void {
+  public openUrlInBrowser(url: string): void {
     return this.#api?.openUrlInBrowser(url);
   }
 
@@ -74,7 +83,7 @@ export default class Hub implements HubInterface {
    * Add hook, which will be called when intercepted link is successfully parsed
    * @param fn - function to call
    */
-  public onInterceptedLink (fn: InterceptedLinkHook): InterceptedLinkHookReturnValue {
+  public onInterceptedLink(fn: InterceptedLinkHook): InterceptedLinkHookReturnValue {
     this.#interceptedEventsHooks.add(fn);
 
     return {
@@ -88,7 +97,7 @@ export default class Hub implements HubInterface {
    * Remove previously added hook
    * @param fn - function, which was called
    */
-  public offInterceptedLink (fn: InterceptedLinkHook): void {
+  public offInterceptedLink(fn: InterceptedLinkHook): void {
     this.#interceptedEventsHooks.delete(fn);
   }
 }

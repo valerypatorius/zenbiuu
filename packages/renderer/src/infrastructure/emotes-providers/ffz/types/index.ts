@@ -10,9 +10,12 @@ interface FFZEmote {
 }
 
 export interface FFZChannelEmotesResponse {
-  sets: Record<number, {
-    id: number;
-    title: string;
-    emoticons: FFZEmote[];
-  }>;
+  sets: Record<
+    number,
+    {
+      id: number;
+      title: string;
+      emoticons: FFZEmote[];
+    }
+  >;
 }

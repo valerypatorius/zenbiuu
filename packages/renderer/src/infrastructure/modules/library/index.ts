@@ -5,11 +5,14 @@ import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibraryStoreSchema>, {
-  providers,
-}: {
-  providers: ProvidersInterface;
-}): Promise<ModuleLibrary> {
+export async function createLibrary(
+  state: ModuleStateFactoryFn<ModuleLibraryStoreSchema>,
+  {
+    providers,
+  }: {
+    providers: ProvidersInterface;
+  },
+): Promise<ModuleLibrary> {
   const store = await createLibraryStore(state);
 
   const namesBuffer = new Set<string>();
@@ -18,7 +21,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
 
   let namesTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
-  async function requestFollowedChannelsNames (): Promise<void> {
+  async function requestFollowedChannelsNames(): Promise<void> {
     if (primaryAccount === null) {
       return;
     }
@@ -28,7 +31,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     store.followedChannelsNames = names;
   }
 
-  async function requestFollowedLiveStreams (): Promise<void> {
+  async function requestFollowedLiveStreams(): Promise<void> {
     if (primaryAccount === null) {
       return;
     }
@@ -44,7 +47,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     store.liveStreamsByChannelName = streamsByChannelName;
   }
 
-  async function requestChannelByName (name: string): Promise<void> {
+  async function requestChannelByName(name: string): Promise<void> {
     const channels = store.channelsByName;
 
     if (channels.get(name) !== undefined || namesBuffer.has(name)) {
@@ -62,17 +65,20 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
         return;
       }
 
-      providers.getApi(primaryAccount.provider).getChannelsByNames(Array.from(namesBuffer)).then((channels) => {
-        channels.forEach((channel) => {
-          store.saveChannelByName(channel.name, channel);
+      providers
+        .getApi(primaryAccount.provider)
+        .getChannelsByNames(Array.from(namesBuffer))
+        .then((channels) => {
+          channels.forEach((channel) => {
+            store.saveChannelByName(channel.name, channel);
+          });
         });
-      });
 
       namesBuffer.clear();
     }, 300);
   }
 
-  async function playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
+  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
     if (primaryAccount === null) {
       return;
     }
@@ -80,7 +86,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     return providers.getApi(primaryAccount.provider).playStream(name, stream);
   }
 
-  async function stopStream (name: string): Promise<void> {
+  async function stopStream(name: string): Promise<void> {
     if (primaryAccount === null) {
       return;
     }
@@ -88,7 +94,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     await providers.getApi(primaryAccount.provider).stopStream(name);
   }
 
-  function destroy (): void {
+  function destroy(): void {
     clearTimeout(namesTimeoutId);
     namesTimeoutId = undefined;
 
@@ -100,10 +106,10 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
 
   return {
     store,
-    get primaryAccount () {
+    get primaryAccount() {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | null) {
+    set primaryAccount(value: AccountEntity | null) {
       primaryAccount = value;
     },
     requestFollowedChannelsNames,

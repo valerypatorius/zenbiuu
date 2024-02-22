@@ -11,6 +11,7 @@ Zenbiuu (ゼンビウー, pronounced `/zenbjuː/`, like `zen view`) is a desktop
 </p>
 
 ### Current features
+
 - [x] Watch streams from your subscriptions
 - [x] Communicate in chat
 - [x] Earn channel points for watching streams
@@ -19,16 +20,20 @@ Zenbiuu (ゼンビウー, pronounced `/zenbjuː/`, like `zen view`) is a desktop
 - [x] No ads or tracking
 
 ### Upcoming features
+
 - [ ] Chat emotes selection and suggestion
 
 ### Planned features
+
 - Watch VODs
 - Polls and predictions support
 - Multiple accounts support
 
 ## Why
+
 Streaming web-sites are bloated with unnecessary functionality and ads, not to mention strange design decisions.
 Zenbiuu was made in attempt to make watching streams with less distractions as possible.
 
 ## License
+
 [GPL-3.0](https://opensource.org/licenses/GPL-3.0)

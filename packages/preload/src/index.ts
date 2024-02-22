@@ -10,7 +10,7 @@ import HubApiKey from '$/entities/HubApiKey';
 /**
  * Set app theme
  */
-async function setThemeSource (value: NativeTheme['themeSource']): Promise<void> {
+async function setThemeSource(value: NativeTheme['themeSource']): Promise<void> {
   return await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
 }
 
@@ -18,7 +18,7 @@ async function setThemeSource (value: NativeTheme['themeSource']): Promise<void>
  * Dispatch custom event on window,
  * when app link is intercepted
  */
-function dispatchInterceptedLink (link: string): void {
+function dispatchInterceptedLink(link: string): void {
   const event = new CustomEvent(HubEvent.InterceptedLink, {
     detail: {
       link,
@@ -31,18 +31,18 @@ function dispatchInterceptedLink (link: string): void {
 /**
  * CLear session storage data
  */
-function clearSessionStorage (): void {
+function clearSessionStorage(): void {
   ipcRenderer.send(HubChannel.ClearSessionStorage);
 }
 
 /**
  * Open URL in default browser
  */
-function openUrlInBrowser (url: string): void {
+function openUrlInBrowser(url: string): void {
   ipcRenderer.send(HubChannel.OpenUrlInBrowser, url);
 }
 
-async function getAppProperties (): Promise<AppProperties> {
+async function getAppProperties(): Promise<AppProperties> {
   return await ipcRenderer.invoke(HubChannel.GetAppProperties);
 }
 

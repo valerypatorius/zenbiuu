@@ -4,22 +4,25 @@ import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 
-export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountStoreSchema>, {
-  providers,
-}: {
-  providers: ProvidersInterface;
-}): Promise<ModuleAccount> {
+export async function createAccount(
+  state: ModuleStateFactoryFn<ModuleAccountStoreSchema>,
+  {
+    providers,
+  }: {
+    providers: ProvidersInterface;
+  },
+): Promise<ModuleAccount> {
   const store = await createAccountStore(state);
 
   if (store.primaryAccount !== null) {
     connectAccountToProvider(store.primaryAccount);
   }
 
-  function connectAccountToProvider (account: AccountEntity): void {
+  function connectAccountToProvider(account: AccountEntity): void {
     providers.getApi(account.provider).connect(account);
   }
 
-  async function login (provider: string): Promise<void> {
+  async function login(provider: string): Promise<void> {
     const account = await providers.getApi(provider).login();
 
     const storedAccount = store.getAccountByProperties({
@@ -36,7 +39,7 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
     store.primaryAccount = account;
   }
 
-  async function logout (entity: AccountEntity): Promise<void> {
+  async function logout(entity: AccountEntity): Promise<void> {
     await providers.getApi(entity.provider).logout(entity.token);
 
     store.removeAccount(entity);
@@ -54,10 +57,10 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
 
   return {
     store,
-    get primaryAccount () {
+    get primaryAccount() {
       return store.primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | null) {
+    set primaryAccount(value: AccountEntity | null) {
       store.primaryAccount = value;
 
       if (value !== null) {

@@ -3,53 +3,28 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "$/*": [
-        "../../*"
-      ],
-      "@/entities/*": [
-        "./src/entities/*"
-      ],
-      "@/interfaces/*": [
-        "./src/interfaces/*"
-      ],
-      "@/assets/*": [
-        "./assets/*"
-      ],
-      "@/hub/*": [
-        "./src/infrastructure/hub/*"
-      ],
-      "@/oauth/*": [
-        "./src/infrastructure/oauth/*"
-      ],
-      "@/transport/*": [
-        "./src/infrastructure/transport/*"
-      ],
-      "@/interval/*": [
-        "./src/infrastructure/interval/*"
-      ],
-      "@/sockets/*": [
-        "./src/infrastructure/sockets/*"
-      ],
-      "@/providers/*": [
-        "./src/infrastructure/providers/*"
-      ],
-      "@/emotes-providers/*": [
-        "./src/infrastructure/emotes-providers/*"
-      ],
-      "@/modules/*": [
-        "./src/infrastructure/modules/*"
-      ],
-      "@/utils/*": [
-        "./src/utils/*"
-      ],
-      "@/presentation/*": [
-        "./src/presentation/*"
-      ],
+      "$/*": ["../../*"],
+      "@/entities/*": ["./src/entities/*"],
+      "@/interfaces/*": ["./src/interfaces/*"],
+      "@/assets/*": ["./assets/*"],
+      "@/hub/*": ["./src/infrastructure/hub/*"],
+      "@/oauth/*": ["./src/infrastructure/oauth/*"],
+      "@/transport/*": ["./src/infrastructure/transport/*"],
+      "@/interval/*": ["./src/infrastructure/interval/*"],
+      "@/sockets/*": ["./src/infrastructure/sockets/*"],
+      "@/providers/*": ["./src/infrastructure/providers/*"],
+      "@/emotes-providers/*": ["./src/infrastructure/emotes-providers/*"],
+      "@/modules/*": ["./src/infrastructure/modules/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/presentation/*": ["./src/presentation/*"]
     },
-    "types": [
-      "vite/client"
+    "types": ["vite/client"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable",
+      "WebWorker"
     ],
-    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
     "jsx": "preserve",
     "jsxImportSource": "vue"
   },

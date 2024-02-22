@@ -1,10 +1,18 @@
 module.exports = {
-  extends: ['standard-with-typescript', 'plugin:vue/vue3-recommended', 'prettier'],
+  extends: [
+    'standard-with-typescript',
+    'plugin:vue/vue3-recommended',
+    'prettier',
+  ],
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
     tsconfigRootDir: __dirname,
-    project: ['./tsconfig.json', './tsconfig.eslint.json', './packages/*/tsconfig.json'],
+    project: [
+      './tsconfig.json',
+      './tsconfig.eslint.json',
+      './packages/*/tsconfig.json',
+    ],
     ecmaVersion: 2022,
     extraFileExtensions: ['.vue'],
   },
@@ -12,7 +20,10 @@ module.exports = {
   rules: {
     /** Prefer semicolons */
     semi: 'off',
-    '@typescript-eslint/semi': ['error', 'always'],
+    '@typescript-eslint/semi': [
+      'error',
+      'always',
+    ],
     '@typescript-eslint/member-delimiter-style': [
       'error',
       {
@@ -44,7 +55,10 @@ module.exports = {
 
     /** Require trailing comma for better git diffs */
     'comma-dangle': 'off',
-    '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
+    '@typescript-eslint/comma-dangle': [
+      'error',
+      'always-multiline',
+    ],
 
     /** Disable because of not doing well with TS call Signatures */
     // 'func-call-spacing': 'off',
@@ -59,7 +73,16 @@ module.exports = {
     'import/order': [
       'error',
       {
-        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+          'object',
+          'type',
+        ],
       },
     ],
 

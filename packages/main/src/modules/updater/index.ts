@@ -2,13 +2,13 @@ import { autoUpdater, type UpdateInfo } from 'electron-updater';
 import type UpdaterInterface from '$/interfaces/Updater.interface';
 
 export default class Updater implements UpdaterInterface {
-  constructor () {
+  constructor() {
     autoUpdater.autoDownload = false;
     autoUpdater.autoInstallOnAppQuit = false;
     autoUpdater.forceDevUpdateConfig = import.meta.env.MODE === 'development';
   }
 
-  async check (): Promise<UpdateInfo | undefined> {
+  async check(): Promise<UpdateInfo | undefined> {
     const result = await autoUpdater.checkForUpdates();
 
     if (result === null) {
@@ -20,11 +20,11 @@ export default class Updater implements UpdaterInterface {
     return isUpdateAvailable ? result.updateInfo : undefined;
   }
 
-  async download (): Promise<string[]> {
+  async download(): Promise<string[]> {
     return await autoUpdater.downloadUpdate();
   }
 
-  install (): void {
+  install(): void {
     autoUpdater.quitAndInstall();
   }
 }

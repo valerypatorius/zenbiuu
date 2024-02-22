@@ -8,7 +8,7 @@ import type AppProperties from '$/entities/AppProperties';
 import HubChannel from '$/entities/HubChannel';
 
 export default class Hub implements HubInterface {
-  constructor (
+  constructor(
     private readonly window: WindowInterface,
     private readonly theme: ThemeInterface,
   ) {
@@ -82,7 +82,7 @@ export default class Hub implements HubInterface {
     // });
   }
 
-  public destroy (): void {
+  public destroy(): void {
     ipcMain.removeAllListeners(HubChannel.GetAppProperties);
     ipcMain.removeAllListeners(HubChannel.OpenUrlInBrowser);
 

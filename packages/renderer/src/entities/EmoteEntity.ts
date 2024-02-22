@@ -3,4 +3,4 @@ export interface EmoteEntity {
   '2.0x': string;
   '3.0x'?: string;
   '4.0x'?: string;
-};
+}

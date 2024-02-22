@@ -57,7 +57,7 @@ const canvasContext = computed(() => canvas.value?.getContext('2d') ?? null);
 
 let isCanDrawCanvas = false;
 
-function startCanvasPainting (): void {
+function startCanvasPainting(): void {
   if (video.value === null || canvas.value === null || canvasContext.value === null) {
     return;
   }
@@ -76,7 +76,7 @@ function startCanvasPainting (): void {
   requestAnimationFrame(startCanvasPainting);
 }
 
-function drawInitialCanvasImage (): void {
+function drawInitialCanvasImage(): void {
   if (canvasContext.value === null || props.stream?.cover === undefined) {
     return;
   }

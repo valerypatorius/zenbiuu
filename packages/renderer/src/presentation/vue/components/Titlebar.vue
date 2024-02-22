@@ -1,16 +1,6 @@
 <template>
-  <div
-    :class="[
-      'titlebar',
-      isSettingsActive && 'titlebar--with-settings',
-    ]"
-  >
-    <div
-      :class="[
-        'titlebar__actions',
-        isSidebarActive && 'titlebar__actions--with-sidebar',
-      ]"
-    >
+  <div :class="['titlebar', isSettingsActive && 'titlebar--with-settings']">
+    <div :class="['titlebar__actions', isSidebarActive && 'titlebar__actions--with-sidebar']">
       <div
         class="titlebar__button titlebar__button--settings"
         @click="emit('toggleSettings')"

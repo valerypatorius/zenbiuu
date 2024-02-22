@@ -5,14 +5,17 @@ import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.inte
 export default class EmotesProviders implements EmotesProvidersInterface {
   readonly #providersInstances = new Map<string, EmotesProviderApiInterface>();
 
-  public getApi (provider: string): EmotesProviderApiInterface {
+  public getApi(provider: string): EmotesProviderApiInterface {
     const storedProviderInstance = this.#providersInstances.get(provider);
 
     if (storedProviderInstance !== undefined) {
       return storedProviderInstance;
     }
 
-    const imports = import.meta.glob<AbstractProvider & (new() => EmotesProviderApiInterface)>('./+([0-9a-z])/index.ts', { import: 'default', eager: true });
+    const imports = import.meta.glob<AbstractProvider & (new () => EmotesProviderApiInterface)>(
+      './+([0-9a-z])/index.ts',
+      { import: 'default', eager: true },
+    );
 
     for (const path in imports) {
       if (path.includes(provider)) {

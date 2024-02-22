@@ -20,7 +20,7 @@ const duration = computed(() => {
 
   const start = new Date(props.dateStart);
   const diff = dateNow.value.getTime() - start.getTime();
-  const hours = Math.floor((diff / date.Hour));
+  const hours = Math.floor(diff / date.Hour);
   const minutes = Math.floor((diff / date.Minute) % 60);
 
   const displayedHours = hours < 10 ? `0${hours}` : hours;
@@ -32,11 +32,15 @@ const duration = computed(() => {
 let stopInterval: (() => void) | undefined;
 
 onMounted(() => {
-  stopInterval = createInterval(() => {
-    dateNow.value = new Date();
-  }, date.Minute, {
-    immediate: true,
-  });
+  stopInterval = createInterval(
+    () => {
+      dateNow.value = new Date();
+    },
+    date.Minute,
+    {
+      immediate: true,
+    },
+  );
 });
 
 onBeforeUnmount(() => {

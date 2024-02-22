@@ -1,11 +1,5 @@
 <template>
-  <div
-    :class="[
-      'avatar',
-      isLoaded && 'avatar--loaded',
-      isOnline && 'avatar--online',
-    ]"
-  >
+  <div :class="['avatar', isLoaded && 'avatar--loaded', isOnline && 'avatar--online']">
     <Icon
       name="user"
       :size="size * 0.5"
@@ -16,7 +10,7 @@
       :src="src"
       loading="lazy"
       @load.once="onLoad"
-    >
+    />
   </div>
 </template>
 
@@ -24,18 +18,21 @@
 import { ref } from 'vue';
 import Icon from './Icon';
 
-withDefaults(defineProps<{
-  src?: string;
-  size?: number;
-  isOnline?: boolean;
-}>(), {
-  src: undefined,
-  size: 36,
-});
+withDefaults(
+  defineProps<{
+    src?: string;
+    size?: number;
+    isOnline?: boolean;
+  }>(),
+  {
+    src: undefined,
+    size: 36,
+  },
+);
 
 const isLoaded = ref(false);
 
-function onLoad (): void {
+function onLoad(): void {
   isLoaded.value = true;
 }
 </script>

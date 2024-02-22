@@ -10,7 +10,7 @@
       <img
         :src="coverImageUrl"
         loading="lazy"
-      >
+      />
     </div>
 
     <div class="library-item__info">
@@ -41,9 +41,7 @@
             :size="16"
           />
 
-          <Duration
-            :date-start="stream.dateStarted"
-          />
+          <Duration :date-start="stream.dateStarted" />
         </div>
       </div>
     </div>
@@ -76,15 +74,18 @@ const coverImageUrl = ref(props.stream.cover);
 /**
  * Avoid flickering by waiting for new cover image to load before changing source
  */
-watch(() => props.stream.cover, (value) => {
-  const image = new Image();
+watch(
+  () => props.stream.cover,
+  (value) => {
+    const image = new Image();
 
-  image.onload = () => {
-    coverImageUrl.value = value;
-  };
+    image.onload = () => {
+      coverImageUrl.value = value;
+    };
 
-  image.src = value;
-});
+    image.src = value;
+  },
+);
 </script>
 
 <style lang="postcss">

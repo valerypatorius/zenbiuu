@@ -11,15 +11,15 @@ export const useAccount = createSharedComposable(() => {
     throw new MissingModuleInjection(Injection.Module.Account);
   }
 
-  async function login (provider: string): Promise<void> {
+  async function login(provider: string): Promise<void> {
     await account?.login(provider);
   }
 
-  async function logout (entity: AccountEntity): Promise<void> {
+  async function logout(entity: AccountEntity): Promise<void> {
     await account?.logout(entity);
   }
 
-  function isPrimaryAccount (entity: AccountEntity): boolean {
+  function isPrimaryAccount(entity: AccountEntity): boolean {
     return account?.store.isPrimaryAccount(entity) ?? false;
   }
 

@@ -1,6 +1,6 @@
 import type LiveStream from '@/entities/LiveStream';
 
-export function composeWatchStatsData (userId: string, stream: LiveStream): string {
+export function composeWatchStatsData(userId: string, stream: LiveStream): string {
   const data = [
     {
       event: 'minute-watched',

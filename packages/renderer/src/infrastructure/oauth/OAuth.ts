@@ -16,19 +16,14 @@ export default class OAuth implements OAuthInterface {
   readonly #clientId: string;
   readonly #scopes: string[];
 
-  constructor ({
-    name,
-    path,
-    clientId,
-    scopes,
-  }: OAuthConstructorParams) {
+  constructor({ name, path, clientId, scopes }: OAuthConstructorParams) {
     this.#name = name;
     this.#path = path;
     this.#clientId = clientId;
     this.#scopes = scopes ?? [];
   }
 
-  private get query (): string {
+  private get query(): string {
     return convertObjectToLocationQuery({
       response_type: 'token',
       client_id: this.#clientId,
@@ -42,7 +37,7 @@ export default class OAuth implements OAuthInterface {
     });
   }
 
-  public get url (): string {
+  public get url(): string {
     return `${this.#path}?${this.query}`;
   }
 }

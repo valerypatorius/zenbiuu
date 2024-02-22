@@ -2,7 +2,9 @@ import { type ModuleEmotesStore, type ModuleEmotesStoreSchema } from './types';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 import { type EmoteEntity } from '@/entities/EmoteEntity';
 
-export async function createEmotesStore (createState: ModuleStateFactoryFn<ModuleEmotesStoreSchema>): Promise<ModuleEmotesStore> {
+export async function createEmotesStore(
+  createState: ModuleStateFactoryFn<ModuleEmotesStoreSchema>,
+): Promise<ModuleEmotesStore> {
   const { state, save } = await createState('store:emotes', {
     /**
      * @todo Do not keep in memory
@@ -10,7 +12,7 @@ export async function createEmotesStore (createState: ModuleStateFactoryFn<Modul
     emotesByChannelId: new Map(),
   });
 
-  function addChannelEmotes (channelId: string, emotes: Record<string, EmoteEntity>): void {
+  function addChannelEmotes(channelId: string, emotes: Record<string, EmoteEntity>): void {
     let storedEmotes = state.emotesByChannelId.get(channelId);
 
     if (storedEmotes === undefined) {
@@ -24,7 +26,7 @@ export async function createEmotesStore (createState: ModuleStateFactoryFn<Modul
   }
 
   return {
-    get emotesByChannelId () {
+    get emotesByChannelId() {
       return state.emotesByChannelId;
     },
     addChannelEmotes,

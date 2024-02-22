@@ -4,7 +4,7 @@ import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.inte
 import { type EmoteEntity } from '@/entities/EmoteEntity';
 
 export default class SevenTv extends AbstractProvider implements EmotesProviderApiInterface {
-  public async getChannelEmotes (id: string): Promise<Record<string, EmoteEntity>> {
+  public async getChannelEmotes(id: string): Promise<Record<string, EmoteEntity>> {
     const response = await this.transport.get<SevenTvChannelEmotesResponse>(`https://7tv.io/v3/users/twitch/${id}`);
 
     return response.emote_set.emotes.reduce<Record<string, EmoteEntity>>((result, rawEmote) => {

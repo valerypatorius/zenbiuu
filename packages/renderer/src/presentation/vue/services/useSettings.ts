@@ -4,7 +4,7 @@ import { ref } from 'vue';
 export const useSettings = createSharedComposable(() => {
   const state = ref(false);
 
-  function toggleState (): void {
+  function toggleState(): void {
     state.value = !state.value;
   }
 

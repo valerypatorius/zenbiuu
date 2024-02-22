@@ -5,10 +5,13 @@ export default class Sockets implements SocketsInterface {
 
   private readonly queue: string[] = [];
 
-  constructor (url: string, handlers: {
-    // onOpen: (event: Event) => void;
-    onMessage: (event: MessageEvent<string>) => void;
-  }) {
+  constructor(
+    url: string,
+    handlers: {
+      // onOpen: (event: Event) => void;
+      onMessage: (event: MessageEvent<string>) => void;
+    },
+  ) {
     this.socket = new WebSocket(url);
 
     this.socket.addEventListener('open', () => {
@@ -20,7 +23,7 @@ export default class Sockets implements SocketsInterface {
     this.socket.addEventListener('message', handlers.onMessage);
   }
 
-  public send (message: string): void {
+  public send(message: string): void {
     if (this.socket.readyState !== this.socket.OPEN) {
       this.queue.push(message);
     } else {

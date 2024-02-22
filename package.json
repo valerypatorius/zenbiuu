@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx scripts/development/index.ts",
     "build": "cross-env NODE_ENV=production tsx scripts/production/index.ts",
+    "format": "prettier . --write",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "icons": "electron-icon-builder --input=icon.png --output=build --flatten",
@@ -43,6 +44,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "prettier": "3.2.5",
+    "prettier-plugin-multiline-arrays": "^3.0.4",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "vite": "^5.1.4"

@@ -6,22 +6,25 @@ import type EmotesReceivedEvent from '@/entities/EmotesReceivedEvent';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
 import ProviderEvent from '@/entities/ProviderEvent';
 
-export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStoreSchema>, {
-  providers,
-}: {
-  providers: ProvidersInterface;
-}): Promise<ModuleEmotes> {
+export async function createEmotes(
+  state: ModuleStateFactoryFn<ModuleEmotesStoreSchema>,
+  {
+    providers,
+  }: {
+    providers: ProvidersInterface;
+  },
+): Promise<ModuleEmotes> {
   const store = await createEmotesStore(state);
 
   let primaryAccount: AccountEntity | null = null;
 
   window.addEventListener(ProviderEvent.EmotesReceived, handleEmotesReceivedEvent as EventListener);
 
-  function handleEmotesReceivedEvent ({ detail }: EmotesReceivedEvent): void {
+  function handleEmotesReceivedEvent({ detail }: EmotesReceivedEvent): void {
     store.addChannelEmotes(detail.id, detail.emotes);
   }
 
-  function requestEmotes (channelId: string): void {
+  function requestEmotes(channelId: string): void {
     if (primaryAccount === null) {
       return;
     }
@@ -31,10 +34,10 @@ export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStor
 
   return {
     store,
-    get primaryAccount () {
+    get primaryAccount() {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | null) {
+    set primaryAccount(value: AccountEntity | null) {
       primaryAccount = value;
     },
     requestEmotes,

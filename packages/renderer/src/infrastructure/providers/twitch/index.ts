@@ -7,7 +7,14 @@ import { getChatMessageEmotes } from './methods/getChatMessageEmotes';
 import { composeWatchStatsData } from './methods/composeWatchStatsData';
 import { getStreamPlaylistAccessTokenQuery } from './methods/getStreamPlaylistAccessTokenQuery';
 import { composeStreamPlaylistUrl } from './methods/composeStreamPlaylistUrl';
-import type { TwitchValidTokenProperties, TwitchUser, TwitchStream, TwitchFollowedChannel, TwitchResponse, TwitchPlaylistAccessTokenResponse } from './types';
+import type {
+  TwitchValidTokenProperties,
+  TwitchUser,
+  TwitchStream,
+  TwitchFollowedChannel,
+  TwitchResponse,
+  TwitchPlaylistAccessTokenResponse,
+} from './types';
 import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
 import type AccountEntity from '@/entities/AccountEntity';
 import type LiveStream from '@/entities/LiveStream';
@@ -92,7 +99,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     },
   });
 
-  async #callTwitchApi<T> (path: `/${string}`): Promise<TwitchResponse<T>['data']> {
+  async #callTwitchApi<T>(path: `/${string}`): Promise<TwitchResponse<T>['data']> {
     const endpoint = `https://api.twitch.tv/helix${path}`;
     const chunk = await this.catchable<TwitchResponse<T>>('get', endpoint);
     const result = chunk.data;
@@ -117,7 +124,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     return result;
   }
 
-  public connect (account: Pick<AccountEntity, 'id' | 'name' | 'token'>): void {
+  public connect(account: Pick<AccountEntity, 'id' | 'name' | 'token'>): void {
     /**
      * When connecting provider to token, reset its validation state
      */
@@ -148,7 +155,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     }
   }
 
-  public disconnect (): void {
+  public disconnect(): void {
     this.accessToken = undefined;
     this.username = undefined;
     this.userId = undefined;
@@ -161,8 +168,12 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
    */
-  async #validate (token: string): Promise<{ username: string; expiresIn: string; userId: string }> {
-    const { expires_in: expiresIn, login: username, user_id: userId } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
+  async #validate(token: string): Promise<{ username: string; expiresIn: string; userId: string }> {
+    const {
+      expires_in: expiresIn,
+      login: username,
+      user_id: userId,
+    } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -180,7 +191,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-users
    */
-  public async login (): Promise<AccountEntity> {
+  public async login(): Promise<AccountEntity> {
     /**
      * Receive access token
      */
@@ -224,26 +235,26 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/authentication/revoke-tokens/
    */
-  public async logout (token: string): Promise<void> {
+  public async logout(token: string): Promise<void> {
     this.disconnect();
 
     await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
   }
 
-  public joinChat (channel: string, onMessage: (message: ChatMessage) => void): void {
+  public joinChat(channel: string, onMessage: (message: ChatMessage) => void): void {
     this.#chatMessageHandlers.set(channel.toLowerCase(), onMessage);
 
     this.chat.send(`JOIN #${channel}`);
   }
 
-  public leaveChat (channel: string): void {
+  public leaveChat(channel: string): void {
     this.chat.send(`PART #${channel}`);
   }
 
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
    */
-  public async getFollowedChannelsNamesByUserId (id: string): Promise<string[]> {
+  public async getFollowedChannelsNamesByUserId(id: string): Promise<string[]> {
     const data = await this.#callTwitchApi<TwitchFollowedChannel>(`/channels/followed?user_id=${id}&first=100`);
 
     return data.map((item) => item.broadcaster_name);
@@ -252,7 +263,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-streams
    */
-  public async getFollowedStreamsByUserId (id: string): Promise<LiveStream[]> {
+  public async getFollowedStreamsByUserId(id: string): Promise<LiveStream[]> {
     const data = await this.#callTwitchApi<TwitchStream>(`/streams/followed?user_id=${id}&first=100`);
 
     return data.map((item) => ({
@@ -270,7 +281,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   /**
    * @link https://dev.twitch.tv/docs/api/reference/#get-users
    */
-  public async getChannelsByNames (names: string[]): Promise<ChannelEntity[]> {
+  public async getChannelsByNames(names: string[]): Promise<ChannelEntity[]> {
     if (names.length === 0) {
       throw new Error('Users names are not provided');
     }
@@ -294,7 +305,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     }));
   }
 
-  private async getChannelWatchStatsUrl (name: string): Promise<string> {
+  private async getChannelWatchStatsUrl(name: string): Promise<string> {
     const cached = this.#settingsUrlsByChannelName.get(name);
 
     if (cached !== undefined) {
@@ -312,7 +323,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     return statsUrl;
   }
 
-  private async sendStreamWatchStats (stream: LiveStream, url: string): Promise<void> {
+  private async sendStreamWatchStats(stream: LiveStream, url: string): Promise<void> {
     const data = composeWatchStatsData(this.userId ?? '0', stream);
 
     await this.transport.post(url, {
@@ -323,7 +334,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     });
   }
 
-  public async playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
+  public async playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
     const accessToken = await this.catchable<TwitchPlaylistAccessTokenResponse>('post', 'https://gql.twitch.tv/gql', {
       body: getStreamPlaylistAccessTokenQuery(name),
       headers: {
@@ -345,33 +356,41 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
     return composeStreamPlaylistUrl(name, accessToken);
   }
 
-  public async stopStream (name: string): Promise<void> {
+  public async stopStream(name: string): Promise<void> {
     this.#streamViewIntervals.get(name)?.();
     this.#streamViewIntervals.delete(name);
   }
 
-  public requestEmotesForChannelId (id: string): void {
-    const emoteProviders = ['7tv', 'ffz', 'bttv'];
+  public requestEmotesForChannelId(id: string): void {
+    const emoteProviders = [
+      '7tv',
+      'ffz',
+      'bttv',
+    ];
 
     emoteProviders.forEach((emoteProvider) => {
       /**
        * @todo Perform request again when status is 200, but nothing has been returned
        */
-      this.emotesProviders.getApi(emoteProvider).getChannelEmotes(id).then((emotes) => {
-        const event = new CustomEvent(ProviderEvent.EmotesReceived, {
-          detail: {
-            id,
-            emotes,
-          },
-        });
+      this.emotesProviders
+        .getApi(emoteProvider)
+        .getChannelEmotes(id)
+        .then((emotes) => {
+          const event = new CustomEvent(ProviderEvent.EmotesReceived, {
+            detail: {
+              id,
+              emotes,
+            },
+          });
 
-        window.dispatchEvent(event);
-      }).catch((error) => {
-        /**
-         * @todo Handle 404
-         */
-        console.error(error);
-      });
+          window.dispatchEvent(event);
+        })
+        .catch((error) => {
+          /**
+           * @todo Handle 404
+           */
+          console.error(error);
+        });
     });
   }
 }

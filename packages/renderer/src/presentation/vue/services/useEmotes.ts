@@ -17,7 +17,7 @@ export const useEmotes = createSharedComposable(() => {
     emotes.primaryAccount = primaryAccount.value;
   });
 
-  function requestEmotes (channelId: string): void {
+  function requestEmotes(channelId: string): void {
     emotes?.requestEmotes(channelId);
   }
 

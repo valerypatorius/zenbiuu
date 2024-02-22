@@ -25,7 +25,7 @@ const RESTART_SIGNAL = 'SIGKILL';
 /**
  * Provides control over electron.exe process
  */
-export function createElectronProcess (handlers?: ElectronProcessHandlers): ElectronProcessManager {
+export function createElectronProcess(handlers?: ElectronProcessHandlers): ElectronProcessManager {
   /**
    * Electron import in node returns path to electron.exe and we're fine with it
    */
@@ -36,7 +36,7 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
    */
   let electronProcess: ReturnType<typeof spawn> | undefined;
 
-  function handleCloseEvent (code: number | null, signal: NodeJS.Signals | null): void {
+  function handleCloseEvent(code: number | null, signal: NodeJS.Signals | null): void {
     /**
      * If electron process is being killed after package rebuild, do not stop script
      */
@@ -47,7 +47,7 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
     handlers?.onClose?.();
   }
 
-  function start (isInitial = true): void {
+  function start(isInitial = true): void {
     if (electronProcess !== undefined) {
       return;
     }
@@ -61,7 +61,7 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
     }
   }
 
-  function stop (signal?: NodeJS.Signals): void {
+  function stop(signal?: NodeJS.Signals): void {
     if (electronProcess === undefined) {
       return;
     }
@@ -75,7 +75,7 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
     electronProcess = undefined;
   }
 
-  function restart (): void {
+  function restart(): void {
     const isInitialStart = electronProcess === undefined;
 
     stop(RESTART_SIGNAL);
@@ -86,7 +86,7 @@ export function createElectronProcess (handlers?: ElectronProcessHandlers): Elec
     start,
     stop,
     restart,
-    get isRunning () {
+    get isRunning() {
       return electronProcess !== undefined;
     },
   };

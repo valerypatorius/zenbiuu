@@ -10,7 +10,7 @@ const worker = new IntervalWorker();
 
 worker.addEventListener('message', handleWorkerMessage);
 
-function handleWorkerMessage (event: MessageEvent<string>): void {
+function handleWorkerMessage(event: MessageEvent<string>): void {
   const key = event.data;
 
   const handler = handlers.get(key);
@@ -18,7 +18,7 @@ function handleWorkerMessage (event: MessageEvent<string>): void {
   handler?.();
 }
 
-export function createInterval (fn: CallbackFn, delay: number, options: { immediate?: boolean } = {}): StopFn {
+export function createInterval(fn: CallbackFn, delay: number, options: { immediate?: boolean } = {}): StopFn {
   const key = uid();
 
   const data: IntervalPayload = {
@@ -34,7 +34,7 @@ export function createInterval (fn: CallbackFn, delay: number, options: { immedi
     data,
   });
 
-  function stop (key: string): void {
+  function stop(key: string): void {
     handlers.delete(key);
 
     worker.postMessage({
