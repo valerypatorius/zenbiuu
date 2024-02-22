@@ -38,5 +38,6 @@ export default defineConfig({
     assetsDir: '.',
     minify: isDev ? false : 'esbuild',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1000,
   },
 });

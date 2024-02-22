@@ -10,9 +10,5 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src --ext .ts"
-  },
-  "devDependencies": {
-    "electron": "^28.1.1",
-    "electron-updater": "^6.1.7"
   }
 }
