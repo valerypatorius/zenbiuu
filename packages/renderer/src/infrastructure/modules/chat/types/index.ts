@@ -14,7 +14,7 @@ export interface ModuleChatStore {
 
 export interface ModuleChat {
   readonly store: ModuleChatStore;
-  primaryAccount?: AccountEntity;
+  primaryAccount: AccountEntity | null;
   join: (channelName: string) => void;
   leave: (channelName: string) => void;
   destroy: () => void;

@@ -13,7 +13,7 @@ export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStor
 }): Promise<ModuleEmotes> {
   const store = await createEmotesStore(state);
 
-  let primaryAccount: AccountEntity | undefined;
+  let primaryAccount: AccountEntity | null = null;
 
   window.addEventListener(ProviderEvent.EmotesReceived, handleEmotesReceivedEvent as EventListener);
 
@@ -22,7 +22,7 @@ export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStor
   }
 
   function requestEmotes (channelId: string): void {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -34,7 +34,7 @@ export async function createEmotes (state: ModuleStateFactoryFn<ModuleEmotesStor
     get primaryAccount () {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | undefined) {
+    set primaryAccount (value: AccountEntity | null) {
       primaryAccount = value;
     },
     requestEmotes,

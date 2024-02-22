@@ -11,30 +11,16 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
 }): Promise<ModuleAccount> {
   const store = await createAccountStore(state);
 
-  const primaryAccount = store.getPrimaryAccount();
-
-  if (primaryAccount !== undefined) {
-    connectAccountToProvider(primaryAccount);
+  if (store.primaryAccount !== null) {
+    connectAccountToProvider(store.primaryAccount);
   }
 
   function connectAccountToProvider (account: AccountEntity): void {
-    providers
-      .getApi(account.provider)
-      .connect(account);
-  }
-
-  function setPrimaryAccount (account: AccountEntity, isNeedConnect = true): void {
-    store.setPrimaryAccount(account);
-
-    if (isNeedConnect) {
-      connectAccountToProvider(account);
-    }
+    providers.getApi(account.provider).connect(account);
   }
 
   async function login (provider: string): Promise<void> {
-    const account = await providers
-      .getApi(provider)
-      .login();
+    const account = await providers.getApi(provider).login();
 
     const storedAccount = store.getAccountByProperties({
       id: account.id,
@@ -47,13 +33,11 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
       store.addAccount(account);
     }
 
-    setPrimaryAccount(account, false);
+    store.primaryAccount = account;
   }
 
   async function logout (entity: AccountEntity): Promise<void> {
-    await providers
-      .getApi(entity.provider)
-      .logout(entity.token);
+    await providers.getApi(entity.provider).logout(entity.token);
 
     store.removeAccount(entity);
 
@@ -61,19 +45,26 @@ export async function createAccount (state: ModuleStateFactoryFn<ModuleAccountSt
       return;
     }
 
-    const newPrimaryAccount = store.resetPrimaryAccount();
+    store.resetPrimaryAccount();
 
-    if (newPrimaryAccount !== undefined) {
-      connectAccountToProvider(newPrimaryAccount);
+    if (store.primaryAccount !== null) {
+      connectAccountToProvider(store.primaryAccount);
     }
   }
 
   return {
+    store,
+    get primaryAccount () {
+      return store.primaryAccount;
+    },
+    set primaryAccount (value: AccountEntity | null) {
+      store.primaryAccount = value;
+
+      if (value !== null) {
+        connectAccountToProvider(value);
+      }
+    },
     login,
     logout,
-    getAccounts: store.getAccounts,
-    setPrimaryAccount,
-    getPrimaryAccount: store.getPrimaryAccount,
-    isPrimaryAccount: store.isPrimaryAccount,
   };
 }

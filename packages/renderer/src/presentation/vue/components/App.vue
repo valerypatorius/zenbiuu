@@ -3,6 +3,7 @@
     :is-stream-active="openedChannels.length > 0"
     :is-sidebar-active="isSidebarActive"
     :is-settings-active="isSettingsOpened"
+    :is-can-toggle-sidebar="primaryAccount !== null"
     @go-home="closeAllChannels()"
     @toggle-settings="toggleSettingsState()"
     @toggle-left-sidebar="isSidebarActive = !isSidebarActive"
@@ -10,7 +11,7 @@
 
   <main>
     <Library
-      v-if="primaryAccount !== undefined"
+      v-if="primaryAccount !== null"
       :is-sidebar-active="isSidebarActive"
     />
 
@@ -36,21 +37,6 @@ const { state: isSettingsOpened, toggleState: toggleSettingsState } = useSetting
 const { closeAllChannels, openedChannels } = useLibrary();
 
 const isSidebarActive = ref(true);
-
-// const { isSettingsActive } = useInterface();
-// const { state: appState } = useApp();
-// const { state: userState } = useUser();
-// const { check: checkUpdates } = useUpdater();
-// const { onUserStateUpdated: onIrcUserStateUpdated } = useIrc();
-// const { getCommonEmotes } = useEmotes();
-
-// /** Check for app updates */
-// checkUpdates();
-
-// /** When IRC user state is updated, request common emotes */
-// onIrcUserStateUpdated((state) => {
-//   getCommonEmotes(state.emoteSets);
-// });
 </script>
 
 <style lang="postcss">
@@ -76,7 +62,6 @@ body {
 }
 
 main {
-  overflow: auto;
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 100%;

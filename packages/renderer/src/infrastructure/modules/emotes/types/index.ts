@@ -12,6 +12,6 @@ export interface ModuleEmotesStore {
 
 export interface ModuleEmotes {
   readonly store: ModuleEmotesStore;
-  primaryAccount?: AccountEntity;
+  primaryAccount: AccountEntity | null;
   requestEmotes: (channelId: string) => void;
 }

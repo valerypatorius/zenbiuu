@@ -1,12 +1,11 @@
-import { type ModuleAccountStoreSchema } from './types';
+import { type ModuleAccountStore, type ModuleAccountStoreSchema } from './types';
 import type AccountEntity from '@/entities/AccountEntity';
 import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
-import { deleteObjectProperty } from '@/utils/object';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function createAccountStore (createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>) {
+export async function createAccountStore (createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>): Promise<ModuleAccountStore> {
   const { state, save } = await createState('store:account', {
     accounts: [],
+    primary: null,
   });
 
   function addAccount (account: AccountEntity): void {
@@ -29,42 +28,20 @@ export async function createAccountStore (createState: ModuleStateFactoryFn<Modu
     return state.accounts.find((storedAccount) => Object.entries(properties).every(([key, value]) => storedAccount[key as keyof AccountEntity] === value));
   }
 
-  function getAccounts (): AccountEntity[] {
-    return state.accounts;
-  }
-
-  function getPrimaryAccount (): AccountEntity | undefined {
-    return state.primary;
-  }
-
-  function setPrimaryAccount (account: AccountEntity): void {
-    const storedAccount = getAccountByProperties(account);
-
-    if (storedAccount === undefined) {
-      throw new Error('Failed to set primary account', { cause: account });
-    }
-
-    state.primary = storedAccount;
-
-    save();
-  }
-
-  function resetPrimaryAccount (): AccountEntity | undefined {
+  function resetPrimaryAccount (): void {
     const fallbackPrimaryAccount = state.accounts[0];
 
     if (fallbackPrimaryAccount !== undefined) {
       state.primary = fallbackPrimaryAccount;
-
-      return state.primary;
     } else {
-      deleteObjectProperty(state, 'primary');
+      state.primary = null;
     }
 
     save();
   }
 
   function isPrimaryAccount (account: AccountEntity): boolean {
-    if (state.primary === undefined) {
+    if (state.primary === null) {
       return false;
     }
 
@@ -78,12 +55,18 @@ export async function createAccountStore (createState: ModuleStateFactoryFn<Modu
   }
 
   return {
+    get primaryAccount () {
+      return state.primary;
+    },
+    set primaryAccount (value: AccountEntity | null) {
+      state.primary = value;
+    },
+    get accounts () {
+      return state.accounts;
+    },
     addAccount,
     removeAccount,
     getAccountByProperties,
-    getAccounts,
-    getPrimaryAccount,
-    setPrimaryAccount,
     resetPrimaryAccount,
     isPrimaryAccount,
     refreshAccount,

@@ -22,6 +22,7 @@
       </div>
 
       <div
+        v-if="isCanToggleSidebar"
         class="titlebar__button"
         @click="emit('toggleLeftSidebar')"
       >
@@ -52,6 +53,7 @@ defineProps<{
   isStreamActive?: boolean;
   isSidebarActive?: boolean;
   isSettingsActive?: boolean;
+  isCanToggleSidebar?: boolean;
 }>();
 
 const emit = defineEmits<{

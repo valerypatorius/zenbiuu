@@ -30,7 +30,7 @@
                       :size="20"
                       :active="isPrimaryAccount(account)"
                       :disabled="isPrimaryAccount(account)"
-                      @click="setPrimaryAccount(account)"
+                      @click="primaryAccount = account"
                     />
 
                     <IconButton
@@ -68,7 +68,7 @@ import ChannelCard from './ChannelCard.vue';
 import IconButton from './ui/IconButton.vue';
 
 const { t } = useI18n();
-const { accounts, login, logout, isPrimaryAccount, setPrimaryAccount } = useAccount();
+const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
 const { toggleState: toggleSettingsState } = useSettings();
 

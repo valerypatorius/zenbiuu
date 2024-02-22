@@ -11,10 +11,6 @@ export const useAccount = createSharedComposable(() => {
     throw new MissingModuleInjection(Injection.Module.Account);
   }
 
-  const accounts = computed(() => account.getAccounts());
-
-  const primaryAccount = computed(() => account.getPrimaryAccount());
-
   async function login (provider: string): Promise<void> {
     await account?.login(provider);
   }
@@ -24,19 +20,14 @@ export const useAccount = createSharedComposable(() => {
   }
 
   function isPrimaryAccount (entity: AccountEntity): boolean {
-    return account?.isPrimaryAccount(entity) ?? false;
-  }
-
-  function setPrimaryAccount (entity: AccountEntity): void {
-    account?.setPrimaryAccount(entity);
+    return account?.store.isPrimaryAccount(entity) ?? false;
   }
 
   return {
-    accounts,
+    primaryAccount: computed(() => account.store.primaryAccount),
+    accounts: account.store.accounts,
+    isPrimaryAccount,
     login,
     logout,
-    isPrimaryAccount,
-    primaryAccount,
-    setPrimaryAccount,
   };
 });

@@ -14,12 +14,12 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
 
   const namesBuffer = new Set<string>();
 
-  let primaryAccount: AccountEntity | undefined;
+  let primaryAccount: AccountEntity | null = null;
 
   let namesTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
   async function requestFollowedChannelsNames (): Promise<void> {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -29,7 +29,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
   }
 
   async function requestFollowedLiveStreams (): Promise<void> {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -56,7 +56,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     clearTimeout(namesTimeoutId);
 
     namesTimeoutId = setTimeout(() => {
-      if (primaryAccount === undefined) {
+      if (primaryAccount === null) {
         namesBuffer.clear();
 
         return;
@@ -73,7 +73,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
   }
 
   async function playStream (name: string, stream?: LiveStream): Promise<string | undefined> {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -81,7 +81,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
   }
 
   async function stopStream (name: string): Promise<void> {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -95,7 +95,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     namesBuffer.clear();
     store.clear();
 
-    primaryAccount = undefined;
+    primaryAccount = null;
   }
 
   return {
@@ -103,7 +103,7 @@ export async function createLibrary (state: ModuleStateFactoryFn<ModuleLibrarySt
     get primaryAccount () {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | undefined) {
+    set primaryAccount (value: AccountEntity | null) {
       primaryAccount = value;
     },
     requestFollowedChannelsNames,

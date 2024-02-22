@@ -11,10 +11,10 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
 }): Promise<ModuleChat> {
   const store = await createChatStore(state);
 
-  let primaryAccount: AccountEntity | undefined;
+  let primaryAccount: AccountEntity | null = null;
 
   function join (channelName: string): void {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -24,7 +24,7 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
   }
 
   function leave (channelName: string): void {
-    if (primaryAccount === undefined) {
+    if (primaryAccount === null) {
       return;
     }
 
@@ -42,7 +42,7 @@ export async function createChat (state: ModuleStateFactoryFn<ModuleChatStoreSch
     get primaryAccount () {
       return primaryAccount;
     },
-    set primaryAccount (value: AccountEntity | undefined) {
+    set primaryAccount (value: AccountEntity | null) {
       primaryAccount = value;
     },
     join,
