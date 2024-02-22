@@ -76,9 +76,6 @@ onMounted(() => {
 
 <style lang="postcss">
 .scrollable {
-  position: relative;
-  min-height: 100%;
-
   &__shadow {
     position: sticky;
     left: 0;

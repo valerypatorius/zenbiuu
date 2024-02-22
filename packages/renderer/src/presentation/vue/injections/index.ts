@@ -2,6 +2,10 @@ import type { InjectionKey } from 'vue';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
 import type AppProperties from '$/entities/AppProperties';
 import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
+
+/**
+ * @todo Move modules interfaces to root renderer's entities
+ */
 import { type ModuleLibrary } from '@/modules/library/types';
 import { type ModuleAccount } from '@/modules/account/types';
 import { type ModuleChat } from '@/modules/chat/types';
