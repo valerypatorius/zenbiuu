@@ -1,5 +1,5 @@
 import { createApp, reactive } from 'vue';
-import * as localforage from 'localforage';
+import localforage from 'localforage';
 import { Injection } from './injections';
 import App from './components/App.vue';
 import { getI18n } from './i18n';
@@ -12,8 +12,8 @@ import { createLibrary } from '@/modules/library';
 import { createChat } from '@/modules/chat';
 import { createEmotes } from '@/modules/emotes';
 
-async function createReactiveState<S extends object> (name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
-  const originalState = await storage.getItem<S>(name) ?? defaultState;
+async function createReactiveState<S extends object>(name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
+  const originalState = (await storage.getItem<S>(name)) ?? defaultState;
   const reactiveState = reactive(originalState);
 
   return {
