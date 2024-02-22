@@ -36,6 +36,7 @@
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.8",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-boundaries": "^4.2.0",
     "eslint-plugin-import": "^2.29.1",

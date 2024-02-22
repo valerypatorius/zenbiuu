@@ -1,23 +1,14 @@
 module.exports = {
-  extends: [
-    'standard-with-typescript',
-    'plugin:vue/vue3-recommended',
-  ],
+  extends: ['standard-with-typescript', 'plugin:vue/vue3-recommended', 'prettier'],
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
     tsconfigRootDir: __dirname,
-    project: [
-      './tsconfig.json',
-      './tsconfig.eslint.json',
-      './packages/*/tsconfig.json',
-    ],
+    project: ['./tsconfig.json', './tsconfig.eslint.json', './packages/*/tsconfig.json'],
     ecmaVersion: 2022,
     extraFileExtensions: ['.vue'],
   },
-  ignorePatterns: [
-    '**/dist/*.js',
-  ],
+  ignorePatterns: ['**/dist/*.js'],
   rules: {
     /** Prefer semicolons */
     semi: 'off',
@@ -65,9 +56,12 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
 
     /** Define modules' imports order */
-    'import/order': ['error', {
-      groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
-    }],
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+      },
+    ],
 
     /**
      * Buggy rule
@@ -77,8 +71,11 @@ module.exports = {
     /**
      * Skip "this" binding for static class methods
      */
-    '@typescript-eslint/unbound-method': ['error', {
-      ignoreStatic: true,
-    }],
+    '@typescript-eslint/unbound-method': [
+      'error',
+      {
+        ignoreStatic: true,
+      },
+    ],
   },
 };
