@@ -6,22 +6,22 @@ const MS = 1000;
 /**
  * Ms in second
  */
-const Second = MS;
+export const Second = MS;
 
 /**
  * Ms in minute
  */
-const Minute = 60 * Second;
+export const Minute = 60 * Second;
 
 /**
  * Ms in hour
  */
-const Hour = 60 * Minute;
+export const Hour = 60 * Minute;
 
 /**
  * Ms in day
  */
-const Day = 24 * Hour;
+export const Day = 24 * Hour;
 
 /**
  * Converts date string to unix timestamp
@@ -34,11 +34,4 @@ export const unixtime = (dateString?: string): number => {
 
 export const getExpirationDateFromNow = (remainingTime: number): string => {
   return new Date(unixtime() + remainingTime * 1000).toISOString();
-};
-
-export default {
-  Second,
-  Minute,
-  Hour,
-  Day,
 };

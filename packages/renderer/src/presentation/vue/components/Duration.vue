@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
-import date from '@/utils/date';
+import { Hour, Minute } from '@zenbiuu/shared';
 import { createInterval } from '@/interval/index';
 
 const props = defineProps<{
@@ -20,8 +20,8 @@ const duration = computed(() => {
 
   const start = new Date(props.dateStart);
   const diff = dateNow.value.getTime() - start.getTime();
-  const hours = Math.floor(diff / date.Hour);
-  const minutes = Math.floor((diff / date.Minute) % 60);
+  const hours = Math.floor(diff / Hour);
+  const minutes = Math.floor((diff / Minute) % 60);
 
   const displayedHours = hours < 10 ? `0${hours}` : hours;
   const displayedMinutes = minutes < 10 ? `0${minutes}` : minutes;
@@ -36,7 +36,7 @@ onMounted(() => {
     () => {
       dateNow.value = new Date();
     },
-    date.Minute,
+    Minute,
     {
       immediate: true,
     },

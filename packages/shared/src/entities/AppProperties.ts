@@ -1,4 +1,4 @@
-export default interface AppProperties {
+export interface AppProperties {
   name: string;
   version: string;
   locale: string;

@@ -1,7 +1,6 @@
+import { uid, type CallbackFn } from '@zenbiuu/shared';
 import IntervalWorker from './workers/IntervalWorker?worker';
 import { type IntervalPayload } from './types';
-import type CallbackFn from '$/entities/CallbackFn';
-import { uid } from '@/utils/string';
 
 type StopFn = () => void;
 

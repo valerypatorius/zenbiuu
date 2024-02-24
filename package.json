@@ -15,8 +15,6 @@
     "dev": "cross-env NODE_ENV=development tsx scripts/development/index.ts",
     "build": "cross-env NODE_ENV=production tsx scripts/production/index.ts",
     "format": "prettier . --write",
-    "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint",
     "icons": "electron-icon-builder --input=icon.png --output=build --flatten",
     "compile:debug": "electron-builder build --config electron-builder.config.js --dir --config.asar=false",
     "compile:release:preview": "electron-builder build --config electron-builder.config.js --win --publish=never",

@@ -1,3 +1,4 @@
+import { Minute, getExpirationDateFromNow, unixtime, uid, deleteObjectProperty } from '@zenbiuu/shared';
 import AbstractProvider from '../AbstractProvider';
 import config from './config';
 import { parseChatMessage } from './methods/parseChatMessage';
@@ -23,10 +24,7 @@ import type ChatMessage from '@/entities/ChatMessage';
 import Sockets from '@/sockets/Sockets';
 import OAuth from '@/oauth/OAuth';
 import Transport from '@/transport/Transport';
-import date, { getExpirationDateFromNow, unixtime } from '@/utils/date';
 import ProviderEvent from '@/entities/ProviderEvent';
-import { deleteObjectProperty } from '@/utils/object';
-import { uid } from '@/utils/string';
 import { createInterval } from '@/interval/index';
 
 export default class Twitch extends AbstractProvider implements ProviderApiInterface {
@@ -347,7 +345,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       void this.getChannelWatchStatsUrl(name).then((url) => {
         const stopStreamViewInterval = createInterval(() => {
           void this.sendStreamWatchStats(stream, url);
-        }, date.Minute);
+        }, Minute);
 
         this.#streamViewIntervals.set(name, stopStreamViewInterval);
       });

@@ -1,4 +1,4 @@
-import type MainProcessApi from '$/interfaces/MainProcessApi.interface';
+import { type MainProcessApi } from '@zenbiuu/shared';
 
 declare global {
   interface Window {

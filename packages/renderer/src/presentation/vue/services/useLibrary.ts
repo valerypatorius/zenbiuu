@@ -1,12 +1,12 @@
 import { computed, inject, watchEffect } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
+import { Minute } from '@zenbiuu/shared';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
 import type LiveStream from '@/entities/LiveStream';
 import type ChannelEntity from '@/entities/ChannelEntity';
 import { createInterval } from '@/interval/index';
-import date from '@/utils/date';
 
 interface LibraryChannel {
   name: string;
@@ -26,27 +26,22 @@ export const useLibrary = createSharedComposable(() => {
   const { primaryAccount } = useAccount();
 
   /**
-   * @todo Find a better way of sorting?
+   * @todo Include sorting here
    */
-  // const followedChannelsNames = computed(() => {
-  //   return [...library.store.followedChannelsNames.values()].sort((a, b) => {
-  //     const indexA = liveStreams.value.findIndex((stream) => stream.channelName === a);
-  //     const indexB = liveStreams.value.findIndex((stream) => stream.channelName === b);
-
-  //     return (indexA >= 0 ? indexA : Infinity) - (indexB >= 0 ? indexB : Infinity);
-  //   });
-  // });
-
   const channels = computed<LibraryChannel[]>(() => {
-    return [...library.store.followedChannelsNames.values()].map((name) => {
-      return {
-        name,
-        data: library.store.channelsByName.get(name),
-        stream: library.store.liveStreamsByChannelName.get(name),
-        isLive: library.store.liveStreamsByChannelName.has(name),
-        isOpened: library.store.selectedChannelsNames.has(name),
-      };
-    });
+    return [...library.store.followedChannelsNames.values()]
+      .map((name) => {
+        return {
+          name,
+          data: library.store.channelsByName.get(name),
+          stream: library.store.liveStreamsByChannelName.get(name),
+          isLive: library.store.liveStreamsByChannelName.has(name),
+          isOpened: library.store.selectedChannelsNames.has(name),
+        };
+      })
+      .sort((channelA, channelB) => {
+        return (channelB.isLive === true ? 1 : 0) - (channelA.isLive === true ? 1 : 0);
+      });
   });
 
   const liveChannels = computed(() => {
@@ -72,7 +67,7 @@ export const useLibrary = createSharedComposable(() => {
       library.requestFollowedLiveStreams();
 
       stopLibraryUpdates?.();
-      stopLibraryUpdates = createInterval(library.requestFollowedLiveStreams, date.Minute * 2);
+      stopLibraryUpdates = createInterval(library.requestFollowedLiveStreams, Minute * 2);
     } else {
       stopLibraryUpdates?.();
 

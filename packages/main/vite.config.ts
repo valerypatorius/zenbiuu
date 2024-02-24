@@ -12,10 +12,7 @@ export default defineConfig({
   root,
   resolve: {
     alias: {
-      $: join(root, '../../'),
-      '@/main/types': join(root, 'src/types'),
-      '@/modules': join(root, 'src/modules'),
-      '@/utils': join(root, 'src/utils'),
+      '@zenbiuu/shared': join(root, '../../packages/shared/src'),
     },
   },
   appType: 'custom',
@@ -35,7 +32,6 @@ export default defineConfig({
       ],
       output: {
         entryFileNames: '[name].cjs',
-        // manualChunks: {},
       },
     },
     emptyOutDir: true,

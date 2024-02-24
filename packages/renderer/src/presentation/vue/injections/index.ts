@@ -1,6 +1,6 @@
+import { type AppProperties } from '@zenbiuu/shared';
 import type { InjectionKey } from 'vue';
 import type ProvidersInterface from '@/interfaces/Providers.interface';
-import type AppProperties from '$/entities/AppProperties';
 import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
 
 /**

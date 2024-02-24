@@ -1,8 +1,8 @@
 import { type NativeTheme } from 'electron';
-import type AppProperties from '../entities/AppProperties';
-import type UpdaterInterface from './Updater.interface';
+import { type AppProperties } from '../entities/AppProperties';
+import { type UpdaterInterface } from './Updater';
 
-export default interface MainProcessApi {
+export interface MainProcessApiInterface {
   updater: UpdaterInterface;
   getAppProperties: () => Promise<AppProperties>;
   setThemeSource: (value: NativeTheme['themeSource']) => Promise<void>;

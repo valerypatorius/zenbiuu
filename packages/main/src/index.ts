@@ -1,39 +1,30 @@
 import { session } from 'electron';
-import Store from './modules/store';
-import App from '@/modules/app';
-import Window from '@/modules/window';
-import Theme from '@/modules/theme';
-import Hub from '@/modules/hub';
-import { objectKeysToLowercase } from '@/utils/index';
-// import Updater from './modules/updater';
+import { objectKeysToLowercase } from '@zenbiuu/shared';
+import { createApp } from './app';
+import { createStore } from './store';
+import { createTheme } from './theme';
+import { createWindow } from './window';
+import { createHub } from './hub';
+// import { createUpdater } from './updater';
 
-const app = new App();
+const app = createApp();
 
 /**
  * Do not allow creating multiple app instances
  */
-if (app.isAllowAppStart === false) {
+if (!app.isAllowAppStart) {
   app.quit();
 }
 
-const store = new Store({
-  name: 'v2.store',
-  defaults: {
-    windowBounds: {
-      width: 1280,
-      height: 720,
-    },
-    theme: 'system',
-  },
-});
+const store = createStore();
 
-const window = new Window(store);
+const window = createWindow(store);
 
-const theme = new Theme(store, window);
+const theme = createTheme(store);
 
-// const updater = new Updater();
+// // const updater = createUpdater();
 
-const hub = new Hub(window, theme);
+const hub = createHub(window, theme);
 
 /**
  * @todo Make pretty
@@ -59,7 +50,10 @@ const filter = {
 
 void (async () => {
   try {
+    console.log(3);
     await app.start();
+
+    console.log(4);
 
     /**
      * Deal with CORS
@@ -79,6 +73,8 @@ void (async () => {
       // backgroundColor: theme.windowColor,
     });
   } catch (error) {
+    console.error(error);
+
     hub.destroy();
   }
 })();

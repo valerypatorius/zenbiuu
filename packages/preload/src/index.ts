@@ -1,11 +1,13 @@
 import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
 import { type UpdateInfo } from 'electron-updater';
-import type AppProperties from '$/entities/AppProperties';
-import type MainProcessApiInterface from '$/interfaces/MainProcessApi.interface';
-import type UpdaterInterface from '$/interfaces/Updater.interface';
-import HubChannel from '$/entities/HubChannel';
-import HubEvent from '$/entities/HubEvent';
-import HubApiKey from '$/entities/HubApiKey';
+import {
+  HubApiKey,
+  HubChannel,
+  HubEvent,
+  type AppProperties,
+  type MainProcessApiInterface,
+  type UpdaterInterface,
+} from '@zenbiuu/shared';
 
 /**
  * Set app theme

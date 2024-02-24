@@ -1,20 +1,24 @@
 import path from 'path';
-import { app, Menu } from 'electron';
-import type AppInterface from '@/interfaces/App.interface';
+import { app } from 'electron';
 
-export default class App implements AppInterface {
-  readonly #protocol = app.getName();
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function createApp() {
+  const protocol = app.getName();
 
-  public isAllowAppStart = app.requestSingleInstanceLock();
+  const isAllowAppStart = app.requestSingleInstanceLock();
 
-  public async start(): Promise<void> {
-    this.beforeStart();
+  async function start(): Promise<void> {
+    beforeStart();
 
     await app.whenReady();
   }
 
-  private beforeStart(): void {
-    this.registerProtocol();
+  function quit(): void {
+    app.quit();
+  }
+
+  function beforeStart(): void {
+    registerProtocol();
 
     app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
@@ -60,19 +64,21 @@ export default class App implements AppInterface {
     });
   }
 
-  private registerProtocol(): void {
+  function registerProtocol(): void {
     if (!process.defaultApp) {
-      app.setAsDefaultProtocolClient(this.#protocol);
+      app.setAsDefaultProtocolClient(protocol);
 
       return;
     }
 
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient(this.#protocol, process.execPath, [path.resolve(process.argv[1])]);
+      app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])]);
     }
   }
 
-  public quit(): void {
-    app.quit();
-  }
+  return {
+    start,
+    quit,
+    isAllowAppStart,
+  };
 }

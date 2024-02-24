@@ -1,19 +1,15 @@
-import type AppProperties from '$/entities/AppProperties';
+import { type AppProperties, HubApiKey, HubEvent, type MainProcessApiInterface, parseString } from '@zenbiuu/shared';
 import type HubInterface from '@/interfaces/Hub.interface';
 import type InterceptedLink from '@/entities/InterceptedLink';
 import type InterceptedLinkHookReturnValue from '@/entities/InterceptedLinkHookReturnValue';
 import type InterceptedLinkHook from '@/entities/InterceptedLinkHook';
 import type InterceptedLinkEvent from '@/entities/InterceptedLinkEvent';
-import type MainProcessApi from '$/interfaces/MainProcessApi.interface';
-import { parseString } from '@/utils/string';
-import HubApiKey from '$/entities/HubApiKey';
-import HubEvent from '$/entities/HubEvent';
 
 export default class Hub implements HubInterface {
   /**
    * API, provided by main process
    */
-  readonly #api: MainProcessApi | undefined = window[HubApiKey];
+  readonly #api: MainProcessApiInterface | undefined = window[HubApiKey];
 
   /**
    * Hooks to call when app link is intercepted
@@ -28,7 +24,7 @@ export default class Hub implements HubInterface {
    * Returns app properties
    */
   public async getAppProperties(): Promise<AppProperties> {
-    return this.#api?.getAppProperties() ?? { name: '', version: '', locale: 'en' };
+    return await (this.#api?.getAppProperties() ?? { name: '', version: '', locale: 'en' });
   }
 
   /**

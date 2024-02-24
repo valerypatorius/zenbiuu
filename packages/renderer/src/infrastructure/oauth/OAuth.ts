@@ -1,5 +1,5 @@
+import { convertObjectToLocationQuery, uid } from '@zenbiuu/shared';
 import type OAuthInterface from '@/interfaces/OAuth.interface';
-import { convertObjectToLocationQuery, uid } from '@/utils/string';
 
 interface OAuthConstructorParams {
   name: string;

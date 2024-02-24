@@ -52,7 +52,10 @@ export function createElectronProcess(handlers?: ElectronProcessHandlers): Elect
       return;
     }
 
-    electronProcess = spawn(electronPath, ['.']);
+    electronProcess = spawn(electronPath, [
+      '.',
+      '--inspect',
+    ]);
 
     electronProcess.on('close', handleCloseEvent);
 

@@ -1,7 +1,7 @@
 /**
  * Available channels for communication between main and renderer processes
  */
-enum HubChannel {
+export enum HubChannel {
   GetAppProperties = 'getAppProperties',
   SetThemeSource = 'setThemeSource',
   ClearSessionStorage = 'clearSessionStorage',
@@ -11,5 +11,3 @@ enum HubChannel {
   InterceptedLink = 'interceptedLink',
   OpenUrlInBrowser = 'openUrlInBrowser',
 }
-
-export default HubChannel;

@@ -1,23 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "$/*": ["../../*"],
-      "@/entities/*": ["./src/entities/*"],
-      "@/interfaces/*": ["./src/interfaces/*"],
-      "@/assets/*": ["./assets/*"],
-      "@/hub/*": ["./src/infrastructure/hub/*"],
-      "@/oauth/*": ["./src/infrastructure/oauth/*"],
-      "@/transport/*": ["./src/infrastructure/transport/*"],
-      "@/interval/*": ["./src/infrastructure/interval/*"],
-      "@/sockets/*": ["./src/infrastructure/sockets/*"],
-      "@/providers/*": ["./src/infrastructure/providers/*"],
-      "@/emotes-providers/*": ["./src/infrastructure/emotes-providers/*"],
-      "@/modules/*": ["./src/infrastructure/modules/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/presentation/*": ["./src/presentation/*"]
-    },
     "types": ["vite/client"],
     "lib": [
       "ESNext",
@@ -27,12 +10,5 @@
     ],
     "jsx": "preserve",
     "jsxImportSource": "vue"
-  },
-  "include": [
-    "../../entities/**/*.ts",
-    "../../interfaces/**/*.ts",
-    "src/**/*.vue",
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ]
+  }
 }

@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       $: join(root, '../../'),
+      '@zenbiuu/shared': join(root, '../../packages/shared/src'),
     },
   },
   build: {

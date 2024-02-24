@@ -1,4 +1,4 @@
-import type AppProperties from '$/entities/AppProperties';
+import { type AppProperties } from '@zenbiuu/shared';
 import type InterceptedLinkHookReturnValue from '@/entities/InterceptedLinkHookReturnValue';
 import type InterceptedLinkHook from '@/entities/InterceptedLinkHook';
 
