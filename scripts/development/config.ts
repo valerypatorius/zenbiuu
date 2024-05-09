@@ -24,21 +24,21 @@ export function createConfig(customConfigs?: Partial<PackagesConfigs>): Packages
   };
 
   const main: InlineConfig = {
-    configFile: 'packages/main/vite.config.ts',
+    configFile: 'packages/@electron/main/vite.config.ts',
     ...baseConfig,
     ...watchableConfig,
     ...customConfigs?.main,
   };
 
   const preload: InlineConfig = {
-    configFile: 'packages/preload/vite.config.ts',
+    configFile: 'packages/@electron/preload/vite.config.ts',
     ...baseConfig,
     ...watchableConfig,
     ...customConfigs?.preload,
   };
 
   const renderer: InlineConfig = {
-    configFile: 'packages/renderer/vite.config.ts',
+    configFile: 'packages/@client/vue/vite.config.ts',
     ...baseConfig,
     ...customConfigs?.renderer,
   };

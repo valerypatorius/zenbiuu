@@ -1,4 +1,15 @@
 {
   "name": "@client/core",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@client/shared": "workspace:*",
+    "@integrations/7tv": "workspace:*",
+    "@integrations/bttv": "workspace:*",
+    "@integrations/ffz": "workspace:*",
+    "@integrations/twitch": "workspace:*",
+    "@zenbiuu/shared": "workspace:*"
+  }
 }

@@ -1,3 +1,3 @@
-export default interface InterceptedLinkHookReturnValue {
+export interface InterceptedLinkHookReturnValue {
   off: () => void;
 }

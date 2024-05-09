@@ -3,14 +3,9 @@ import localforage from 'localforage';
 import { Injection } from './injections';
 import App from './components/App.vue';
 import { getI18n } from './i18n';
-import type ModuleStateInterface from '@/interfaces/ModuleState.interface';
-import Hub from '@/hub/Hub';
-import Providers from '@/providers/Providers';
-import EmotesProviders from '@/emotes-providers/Providers';
-import { createAccount } from '@/modules/account';
-import { createLibrary } from '@/modules/library';
-import { createChat } from '@/modules/chat';
-import { createEmotes } from '@/modules/emotes';
+import type { ModuleStateInterface } from '@client/shared';
+import { Hub } from '@client/hub';
+import { createAccount, createChat, createEmotes, createLibrary, PlatformsManager, EmotesManager } from '@client/core';
 
 async function createReactiveState<S extends object>(name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
   const originalState = (await storage.getItem<S>(name)) ?? defaultState;
@@ -31,8 +26,8 @@ const storage = localforage.createInstance({
 });
 
 const hub = new Hub();
-const emotesProviders = new EmotesProviders();
-const providers = new Providers(hub, emotesProviders);
+const emotesProviders = new EmotesManager();
+const providers = new PlatformsManager(hub, emotesProviders);
 
 const appProperties = await hub.getAppProperties();
 

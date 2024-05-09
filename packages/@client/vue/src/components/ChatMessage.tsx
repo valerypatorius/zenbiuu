@@ -1,8 +1,6 @@
 import { type FunctionalComponent } from 'vue';
-import type ChatMessage from '@/entities/ChatMessage';
+import type { ChatMessage, EmoteEntity } from '@client/shared';
 import './styles/chat.pcss';
-import { type EmoteEntity } from '@/entities/EmoteEntity';
-
 /**
  * Returns emote urls string to use as srcset value
  */

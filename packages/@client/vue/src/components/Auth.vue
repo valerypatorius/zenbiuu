@@ -37,9 +37,9 @@
 import { useI18n } from 'vue-i18n';
 import { useProviders } from '../services/useProviders';
 import Scrollable from './ui/Scrollable.vue';
-import Button from '@/presentation/vue/components/ui/Button';
-import appIconPath from '@/assets/icon.svg';
-import { useAccount } from '@/presentation/vue/services/useAccount';
+import Button from '~/components/ui/Button';
+import appIconPath from '~/assets/art.svg';
+import { useAccount } from '~/services/useAccount';
 
 const { t } = useI18n();
 const { login } = useAccount();
@@ -47,7 +47,7 @@ const { available: availableProviders } = useProviders();
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .auth {
   display: grid;
@@ -57,10 +57,10 @@ const { available: availableProviders } = useProviders();
     margin: auto;
     min-height: 100%;
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 360px 1fr;
     align-items: center;
     gap: 30px;
-    max-width: 680px;
+    max-width: 760px;
   }
 
   &__logo {
@@ -87,4 +87,3 @@ const { available: availableProviders } = useProviders();
   }
 }
 </style>
-@/providers/types/types

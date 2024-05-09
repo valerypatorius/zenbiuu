@@ -3,7 +3,7 @@ import { createSharedComposable } from '@vueuse/core';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
-import type ChannelEntity from '@/entities/ChannelEntity';
+import type { ChannelEntity } from '@client/shared';
 
 export const useChat = createSharedComposable(() => {
   const chat = inject(Injection.Module.Chat);

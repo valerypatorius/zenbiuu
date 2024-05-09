@@ -44,8 +44,8 @@ import { useEmotes } from '../services/useEmotes';
 import ChatMessage from './ChatMessage';
 import Scrollable from './ui/Scrollable.vue';
 import Icon from './ui/Icon';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import { useChat } from '@/presentation/vue/services/useChat';
+import type { ChannelEntity } from '@client/shared';
+import { useChat } from '~/services/useChat';
 
 const props = defineProps<{
   channel?: ChannelEntity;

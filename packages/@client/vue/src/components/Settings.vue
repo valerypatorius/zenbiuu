@@ -60,9 +60,9 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useAccount } from '../services/useAccount';
-import { useProviders } from '../services/useProviders';
-import { useSettings } from '../services/useSettings';
+import { useAccount } from '~/services/useAccount';
+import { useProviders } from '~/services/useProviders';
+import { useSettings } from '~/services/useSettings';
 import Scrollable from './ui/Scrollable.vue';
 import ChannelCard from './ChannelCard.vue';
 import IconButton from './ui/IconButton.vue';
@@ -81,7 +81,7 @@ const { toggleState: toggleSettingsState } = useSettings();
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .settings-overlay {
   /* background-color: rgba(29, 29, 34, 0.8); */

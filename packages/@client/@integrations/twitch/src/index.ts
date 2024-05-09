@@ -1,5 +1,4 @@
 import { Minute, getExpirationDateFromNow, unixtime, uid, deleteObjectProperty } from '@zenbiuu/shared';
-import AbstractProvider from '../AbstractProvider';
 import config from './config';
 import { parseChatMessage } from './methods/parseChatMessage';
 import { getChannelSettingsScriptUrl } from './methods/getChannelSettingsScriptUrl';
@@ -16,19 +15,24 @@ import type {
   TwitchResponse,
   TwitchPlaylistAccessTokenResponse,
 } from './types';
-import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
-import type AccountEntity from '@/entities/AccountEntity';
-import type LiveStream from '@/entities/LiveStream';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import type ChatMessage from '@/entities/ChatMessage';
-import Sockets from '@/sockets/Sockets';
-import OAuth from '@/oauth/OAuth';
-import Transport from '@/transport/Transport';
-import ProviderEvent from '@/entities/ProviderEvent';
-import { createInterval } from '@/interval/index';
+import {
+  type ProviderApiInterface,
+  type AccountEntity,
+  type LiveStream,
+  type ChannelEntity,
+  type ChatMessage,
+  ProviderEvent,
+} from '@client/shared';
+import { Sockets } from '@client/sockets';
+import { OAuth } from '@client/oauth';
+import { Transport } from '@client/transport';
+import { createInterval } from '@client/interval';
+import { AbstractPlatformProvider } from '@client/shared';
 
-export default class Twitch extends AbstractProvider implements ProviderApiInterface {
-  protected readonly config = config;
+export default class Twitch extends AbstractPlatformProvider implements ProviderApiInterface {
+  public static readonly config = config;
+
+  public readonly name = Twitch.config.name;
 
   protected readonly clientId = import.meta.env.VITE_TWITCH_APP_CLIENT_ID;
 
@@ -47,8 +51,8 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
   #isTokenValidated = false;
 
   protected readonly oauth = new OAuth({
-    name: this.config.name,
-    path: this.config.oauthPath,
+    name: Twitch.config.name,
+    path: Twitch.config.oauthPath,
     clientId: this.clientId,
     scopes: [
       'chat:read',
@@ -225,7 +229,7 @@ export default class Twitch extends AbstractProvider implements ProviderApiInter
       name: user.display_name,
       avatar: user.profile_image_url,
       token,
-      provider: this.config.name,
+      provider: Twitch.config.name,
       tokenExpirationDate: expiresIn,
     };
   }

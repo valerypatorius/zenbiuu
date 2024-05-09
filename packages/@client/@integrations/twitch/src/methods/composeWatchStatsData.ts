@@ -1,4 +1,4 @@
-import type LiveStream from '@/entities/LiveStream';
+import type { LiveStream } from '@client/shared';
 
 export function composeWatchStatsData(userId: string, stream: LiveStream): string {
   const data = [

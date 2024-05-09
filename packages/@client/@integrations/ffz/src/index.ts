@@ -1,9 +1,12 @@
-import AbstractProvider from '../AbstractProvider';
 import { type FFZChannelEmotesResponse } from './types';
-import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.interface';
-import { type EmoteEntity } from '@/entities/EmoteEntity';
+import { EmotesProviderApiInterface, type EmoteEntity, AbstractEmotesProvider } from '@client/shared';
+import { Transport } from '@client/transport';
 
-export default class FFZ extends AbstractProvider implements EmotesProviderApiInterface {
+export default class FFZ extends AbstractEmotesProvider implements EmotesProviderApiInterface {
+  public static readonly name = 'ffz';
+
+  protected readonly transport = new Transport({});
+
   public async getChannelEmotes(id: string): Promise<Record<string, EmoteEntity>> {
     const response = await this.transport.get<FFZChannelEmotesResponse>(
       `https://api.frankerfacez.com/v1/room/id/${id}`,

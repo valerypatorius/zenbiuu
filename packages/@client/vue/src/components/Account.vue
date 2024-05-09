@@ -52,10 +52,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useProviders } from '../services/useProviders';
+import { useProviders } from '~/services/useProviders';
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon';
-import type AccountEntity from '@/entities/AccountEntity';
+import type { AccountEntity } from '@client/shared';
 
 type Props = AccountEntity & {
   isPrimary?: boolean;
@@ -76,7 +76,7 @@ const expirationDate = computed(() =>
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .account {
   display: grid;

@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "module": "esnext",
     "target": "esnext",
     "sourceMap": true,
@@ -13,14 +12,11 @@
       "node"
     ],
     "lib": ["ESNext"],
-    "esModuleInterop": true,
-    "paths": {
-      "@zenbiuu/*": ["packages/*/src"]
-    }
+    "esModuleInterop": true
   },
   "include": [
-    "packages/**/src",
-    "scripts",
-    "packages/**/vite.config.ts"
+    "./packages/**/src",
+    "./packages/**/vite.config.ts",
+    "./scripts"
   ]
 }

@@ -7,11 +7,11 @@ const isDev = process.env.MODE === 'development';
 
 export default defineConfig({
   root,
-  resolve: {
-    alias: {
-      '@zenbiuu/shared': join(root, '../../packages/shared/src'),
-    },
-  },
+  // resolve: {
+  //   alias: {
+  //     '@zenbiuu/shared': join(root, '../../packages/shared'),
+  //   },
+  // },
   build: {
     sourcemap: isDev ? 'inline' : false,
     target: 'chrome100',

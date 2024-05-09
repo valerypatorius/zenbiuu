@@ -1,7 +1,5 @@
 import { type ModuleLibraryStore, type ModuleLibraryStoreSchema } from './types';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import type LiveStream from '@/entities/LiveStream';
+import type { ChannelEntity, LiveStream, ModuleStateFactoryFn } from '@client/shared';
 
 export async function createLibraryStore(
   createState: ModuleStateFactoryFn<ModuleLibraryStoreSchema>,

@@ -1,3 +1,3 @@
-export default interface SocketsInterface {
+export interface SocketsInterface {
   send: (message: string) => void;
 }

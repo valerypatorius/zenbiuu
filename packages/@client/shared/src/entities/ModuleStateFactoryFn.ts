@@ -1,5 +1,6 @@
-import type ModuleStateInterface from '@/interfaces/ModuleState.interface';
+import { type ModuleStateInterface } from '../interfaces';
 
-type ModuleStateFactoryFn<S extends object> = (name: string, defaultState: S) => Promise<ModuleStateInterface<S>>;
-
-export default ModuleStateFactoryFn;
+export type ModuleStateFactoryFn<S extends object> = (
+  name: string,
+  defaultState: S,
+) => Promise<ModuleStateInterface<S>>;

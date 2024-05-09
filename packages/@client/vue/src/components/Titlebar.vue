@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import Icon from '@/presentation/vue/components/ui/Icon';
+import Icon from '~/components/ui/Icon';
 
 defineProps<{
   isStreamActive?: boolean;
@@ -54,7 +54,7 @@ const emit = defineEmits<{
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .titlebar {
   -webkit-app-region: drag;

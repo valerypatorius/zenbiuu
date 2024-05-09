@@ -1,9 +1,6 @@
 import { createLibraryStore } from './store';
 import { type ModuleLibraryStoreSchema, type ModuleLibrary } from './types';
-import type ProvidersInterface from '@/interfaces/Providers.interface';
-import type AccountEntity from '@/entities/AccountEntity';
-import type LiveStream from '@/entities/LiveStream';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
+import type { ProvidersInterface, AccountEntity, ModuleStateFactoryFn, LiveStream } from '@client/shared';
 
 export async function createLibrary(
   state: ModuleStateFactoryFn<ModuleLibraryStoreSchema>,

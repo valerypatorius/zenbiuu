@@ -1,6 +1,9 @@
 {
   "name": "@electron/main",
   "type": "module",
+  "dependencies": {
+    "@zenbiuu/shared": "workspace:*"
+  },
   "devDependencies": {
     "electron-store": "^8.1.0"
   }

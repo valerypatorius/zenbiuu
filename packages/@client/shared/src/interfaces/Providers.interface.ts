@@ -1,10 +1,10 @@
-import type ProviderApi from './ProviderApi.interface';
-import type ProviderConfig from '@/entities/ProviderConfig';
+import type { ProviderApiInterface } from '.';
+import type { ProviderConfig } from '../entities';
 
 /**
  * Describes public properties and methods of providers instance
  */
-export default interface ProvidersInterface {
+export interface ProvidersInterface {
   /**
    * List of available providers' configurations
    */
@@ -14,5 +14,5 @@ export default interface ProvidersInterface {
    * Returns api to work with specified provider
    * @param provider - provider name
    */
-  getApi: (provider: string) => ProviderApi;
+  getApi: (provider: string) => ProviderApiInterface;
 }

@@ -1,4 +1,4 @@
-export default interface OAuthInterface {
+export interface OAuthInterface {
   /**
    * Authorization url to redirect user to
    */

@@ -1,4 +1,10 @@
 {
   "name": "@client/interval",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@zenbiuu/shared": "workspace:*"
+  }
 }

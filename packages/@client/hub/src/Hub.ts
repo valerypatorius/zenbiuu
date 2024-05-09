@@ -1,11 +1,19 @@
 import { type AppProperties, HubApiKey, HubEvent, type MainProcessApiInterface, parseString } from '@zenbiuu/shared';
-import type HubInterface from '@/interfaces/Hub.interface';
-import type InterceptedLink from '@/entities/InterceptedLink';
-import type InterceptedLinkHookReturnValue from '@/entities/InterceptedLinkHookReturnValue';
-import type InterceptedLinkHook from '@/entities/InterceptedLinkHook';
-import type InterceptedLinkEvent from '@/entities/InterceptedLinkEvent';
+import type {
+  HubInterface,
+  InterceptedLink,
+  InterceptedLinkHookReturnValue,
+  InterceptedLinkEvent,
+  InterceptedLinkHook,
+} from '@client/shared';
 
-export default class Hub implements HubInterface {
+declare global {
+  interface Window {
+    hub: MainProcessApiInterface;
+  }
+}
+
+export class Hub implements HubInterface {
   /**
    * API, provided by main process
    */

@@ -1,5 +1,5 @@
 import { convertObjectToLocationQuery, uid } from '@zenbiuu/shared';
-import type OAuthInterface from '@/interfaces/OAuth.interface';
+import type { OAuthInterface } from '@client/shared';
 
 interface OAuthConstructorParams {
   name: string;
@@ -8,7 +8,7 @@ interface OAuthConstructorParams {
   scopes?: string[];
 }
 
-export default class OAuth implements OAuthInterface {
+export class OAuth implements OAuthInterface {
   protected readonly redirectUrl = import.meta.env.VITE_APP_REDIRECT_URL;
 
   readonly #name: string;

@@ -10,7 +10,7 @@
   "productName": "Zenbiuu",
   "description": "Desktop app for comfortable streams watching",
   "author": "valerypatorius",
-  "main": "packages/main/dist/index.cjs",
+  "main": "packages/@electron/main/dist/index.cjs",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx scripts/development/index.ts",
     "build": "cross-env NODE_ENV=production tsx scripts/production/index.ts",

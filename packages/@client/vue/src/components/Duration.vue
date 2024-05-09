@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import { Hour, Minute } from '@zenbiuu/shared';
-import { createInterval } from '@/interval/index';
+import { createInterval } from '@client/interval';
 
 const props = defineProps<{
   dateStart: string | number;
@@ -50,7 +50,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .duration {
   @extend %text-small;

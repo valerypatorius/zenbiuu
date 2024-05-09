@@ -1,5 +1,4 @@
-import type AccountEntity from '@/entities/AccountEntity';
-import { type EmoteEntity } from '@/entities/EmoteEntity';
+import type { AccountEntity, EmoteEntity } from '@client/shared';
 
 export interface ModuleEmotesStoreSchema {
   emotesByChannelId: Map<string, Record<string, EmoteEntity>>;

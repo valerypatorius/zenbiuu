@@ -1,4 +1,4 @@
-export default interface ModuleState<S extends object> {
+export interface ModuleStateInterface<S extends object> {
   state: S;
   save: () => void;
 }

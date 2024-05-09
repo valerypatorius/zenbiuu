@@ -80,7 +80,7 @@ watchOnce(isRootElementVisible, () => {
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .channel-card {
   &--with-slot {

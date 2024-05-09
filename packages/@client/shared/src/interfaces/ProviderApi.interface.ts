@@ -1,12 +1,9 @@
-import type AccountEntity from '@/entities/AccountEntity';
-import type LiveStream from '@/entities/LiveStream';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import type ChatMessage from '@/entities/ChatMessage';
+import type { AccountEntity, LiveStream, ChannelEntity, ChatMessage } from '../entities';
 
 /**
  * Describes public properties and methods of a single provider
  */
-export default interface ProviderApiInterface {
+export interface ProviderApiInterface {
   connect: (account: AccountEntity) => void;
   disconnect: () => void;
 

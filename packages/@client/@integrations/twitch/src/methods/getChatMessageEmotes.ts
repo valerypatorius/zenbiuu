@@ -1,5 +1,5 @@
 import { type TwitchIrcMessage } from '../types';
-import { type EmoteEntity } from '@/entities/EmoteEntity';
+import { type EmoteEntity } from '@client/shared';
 
 export function getChatMessageEmotes(message: TwitchIrcMessage): Record<string, EmoteEntity> {
   const text = message.text;

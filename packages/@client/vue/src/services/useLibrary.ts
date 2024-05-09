@@ -4,9 +4,8 @@ import { Minute } from '@zenbiuu/shared';
 import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { useAccount } from './useAccount';
-import type LiveStream from '@/entities/LiveStream';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import { createInterval } from '@/interval/index';
+import type { LiveStream, ChannelEntity } from '@client/shared';
+import { createInterval } from '@client/interval';
 
 interface LibraryChannel {
   name: string;

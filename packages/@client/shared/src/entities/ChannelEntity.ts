@@ -1,4 +1,4 @@
-export default interface ChannelEntity {
+export interface ChannelEntity {
   id: string;
   name: string;
   avatar: string;

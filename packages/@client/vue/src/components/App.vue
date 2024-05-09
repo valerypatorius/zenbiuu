@@ -23,9 +23,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useAccount } from '../services/useAccount';
-import { useSettings } from '../services/useSettings';
-import { useLibrary } from '../services/useLibrary';
+import { useAccount } from '~/services/useAccount';
+import { useSettings } from '~/services/useSettings';
+import { useLibrary } from '~/services/useLibrary';
 import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
 import Settings from './Settings.vue';
@@ -40,10 +40,10 @@ const isSidebarActive = ref(true);
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/reset.pcss';
-@import '@/presentation/styles/themes.pcss';
-@import '@/presentation/styles/typography.pcss';
-@import '@/presentation/styles/layout.pcss';
+@import '~/styles/reset.pcss';
+@import '~/styles/themes.pcss';
+@import '~/styles/typography.pcss';
+@import '~/styles/layout.pcss';
 
 ::selection {
   color: var(--theme-color-button-text);

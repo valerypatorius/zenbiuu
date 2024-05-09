@@ -1,3 +1,1 @@
-type InterceptedLinkEvent = CustomEvent<{ link: string }>;
-
-export default InterceptedLinkEvent;
+export type InterceptedLinkEvent = CustomEvent<{ link: string }>;

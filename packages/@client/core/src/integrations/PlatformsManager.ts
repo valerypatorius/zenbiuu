@@ -1,11 +1,13 @@
-import type AbstractProvider from './AbstractProvider';
-import type ProvidersInterface from '@/interfaces/Providers.interface';
-import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
-import type HubInterface from '@/interfaces/Hub.interface';
-import type ProviderConfig from '@/entities/ProviderConfig';
-import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
+import type {
+  ProvidersInterface,
+  ProviderApiInterface,
+  HubInterface,
+  ProviderConfig,
+  EmotesProvidersInterface,
+} from '@client/shared';
+import { PlatformProvider } from './config';
 
-export default class PlatformsManager implements ProvidersInterface {
+export class PlatformsManager implements ProvidersInterface {
   readonly #providersInstances = new Map<string, ProviderApiInterface>();
 
   constructor(
@@ -14,42 +16,36 @@ export default class PlatformsManager implements ProvidersInterface {
   ) {}
 
   public get available(): Record<string, ProviderConfig> {
-    const imports = import.meta.glob<ProviderConfig>('./**/config.ts', { import: 'default', eager: true });
-
     return Object.fromEntries(
-      Object.entries(imports).map(
+      Object.entries(PlatformProvider).map(
         ([
-          path,
-          config,
+          name,
+          fn,
         ]) => [
-          config.name,
-          config,
+          name,
+          fn.config,
         ],
       ),
     );
   }
 
-  public getApi(provider: string): ProviderApiInterface {
-    const storedProviderInstance = this.#providersInstances.get(provider);
+  public getApi(providerName: string): ProviderApiInterface {
+    const storedProviderInstance = this.#providersInstances.get(providerName);
 
     if (storedProviderInstance !== undefined) {
       return storedProviderInstance;
     }
 
-    const imports = import.meta.glob<
-      AbstractProvider & (new (hub: HubInterface, emotesProviders: EmotesProvidersInterface) => ProviderApiInterface)
-    >('./+([0-9a-z])/index.ts', { import: 'default', eager: true });
-
-    for (const path in imports) {
-      if (path.includes(provider)) {
-        const providerInstance = new imports[path](this.hub, this.emotesProviders);
-
-        this.#providersInstances.set(provider, providerInstance);
-
-        return providerInstance;
-      }
+    if (!(providerName in PlatformProvider)) {
+      throw new Error('Platform provider not found', { cause: providerName });
     }
 
-    throw new Error('Provider not found', { cause: provider });
+    const fn = PlatformProvider[providerName as keyof typeof PlatformProvider];
+
+    const providerInstance = new fn(this.hub, this.emotesProviders);
+
+    this.#providersInstances.set(providerName, providerInstance);
+
+    return providerInstance;
   }
 }

@@ -1,14 +1,13 @@
 import TransportWorker from './workers/TransportWorker?worker';
 import type { TransportPayload } from './types';
-import type TransportInterface from '@/interfaces/Transport.interface';
-import type TransportResponse from '@/entities/TransportResponse';
+import type { TransportInterface, TransportResponse } from '@client/shared';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason: Error) => void;
 }
 
-export default class Transport implements TransportInterface {
+export class Transport implements TransportInterface {
   private readonly queue = new Map<string, QueueHandlers>();
 
   private readonly worker = new TransportWorker();

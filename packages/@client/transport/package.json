@@ -1,4 +1,10 @@
 {
   "name": "@client/transport",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@client/shared": "workspace:*"
+  }
 }

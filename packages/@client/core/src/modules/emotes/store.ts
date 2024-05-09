@@ -1,6 +1,5 @@
 import { type ModuleEmotesStore, type ModuleEmotesStoreSchema } from './types';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
-import { type EmoteEntity } from '@/entities/EmoteEntity';
+import type { EmoteEntity, ModuleStateFactoryFn } from '@client/shared';
 
 export async function createEmotesStore(
   createState: ModuleStateFactoryFn<ModuleEmotesStoreSchema>,

@@ -1,8 +1,12 @@
 import { createAccountStore } from './store';
 import { type ModuleAccountStoreSchema, type ModuleAccount } from './types';
-import type ProvidersInterface from '@/interfaces/Providers.interface';
-import type AccountEntity from '@/entities/AccountEntity';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
+import {
+  type ProvidersInterface,
+  type AccountEntity,
+  type ModuleStateFactoryFn,
+  ProviderEvent,
+  type ProviderDisconnectedEvent,
+} from '@client/shared';
 
 export async function createAccount(
   state: ModuleStateFactoryFn<ModuleAccountStoreSchema>,
@@ -18,8 +22,23 @@ export async function createAccount(
     connectAccountToProvider(store.primaryAccount);
   }
 
+  window.addEventListener(ProviderEvent.Disconnect, handleDisconnect as EventListener);
+
   function connectAccountToProvider(account: AccountEntity): void {
     providers.getApi(account.provider).connect(account);
+  }
+
+  function handleDisconnect({ detail }: ProviderDisconnectedEvent): void {
+    const disconnectedAccount = store.getAccountByProperties({
+      token: detail.token,
+      provider: detail.provider,
+    });
+
+    if (disconnectedAccount === undefined) {
+      return;
+    }
+
+    logout(disconnectedAccount, true);
   }
 
   async function login(provider: string): Promise<void> {
@@ -39,8 +58,12 @@ export async function createAccount(
     store.primaryAccount = account;
   }
 
-  async function logout(entity: AccountEntity): Promise<void> {
-    await providers.getApi(entity.provider).logout(entity.token);
+  async function logout(entity: AccountEntity, isSkipTokenRevoke = false): Promise<void> {
+    if (isSkipTokenRevoke) {
+      providers.getApi(entity.provider).disconnect();
+    } else {
+      await providers.getApi(entity.provider).logout(entity.token);
+    }
 
     store.removeAccount(entity);
 

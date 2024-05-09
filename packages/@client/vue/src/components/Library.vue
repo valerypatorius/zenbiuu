@@ -71,13 +71,13 @@
 </template>
 
 <script setup lang="ts">
-import { useLibrary } from '../services/useLibrary';
+import { useLibrary } from '~/services/useLibrary';
 import LibraryItem from './LibraryItem.vue';
 import Stream from './Stream.vue';
 import ChannelCard from './ChannelCard.vue';
 import Scrollable from './ui/Scrollable.vue';
 import IconButton from './ui/IconButton.vue';
-import appIconPath from '@/assets/icon.svg';
+import appIconPath from '~/assets/art.svg';
 
 defineProps<{
   isSidebarActive?: boolean;
@@ -88,7 +88,7 @@ const { channels, liveChannels, openedChannels, openChannel, closeChannel, reque
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .library {
   display: grid;

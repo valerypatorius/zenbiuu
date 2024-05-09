@@ -45,6 +45,7 @@ const filter = {
 
     /** CDN with channels config files */
     'https://static.twitchcdn.net/*',
+    'https://assets.twitch.tv/*',
   ],
 };
 

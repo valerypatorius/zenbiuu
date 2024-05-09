@@ -13,7 +13,7 @@
 
 <script lang="ts" setup>
 import Icon from './Icon';
-import type icons from '@/assets/icons';
+import type icons from '~/assets/icons';
 
 defineProps<{
   icon: keyof typeof icons;

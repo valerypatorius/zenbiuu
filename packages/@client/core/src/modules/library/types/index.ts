@@ -1,6 +1,4 @@
-import type AccountEntity from '@/entities/AccountEntity';
-import type ChannelEntity from '@/entities/ChannelEntity';
-import type LiveStream from '@/entities/LiveStream';
+import type { AccountEntity, ChannelEntity, LiveStream } from '@client/shared';
 
 export interface ModuleLibraryStoreSchema {
   followedChannelsNames: Set<string>;

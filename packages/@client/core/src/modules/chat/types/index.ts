@@ -1,5 +1,4 @@
-import type ChatMessage from '@/entities/ChatMessage';
-import type AccountEntity from '@/entities/AccountEntity';
+import type { ChatMessage, AccountEntity } from '@client/shared';
 
 export interface ModuleChatStoreSchema {
   messagesByChannelName: Map<string, ChatMessage[]>;

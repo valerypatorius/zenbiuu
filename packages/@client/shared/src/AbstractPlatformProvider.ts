@@ -1,14 +1,16 @@
-import type HubInterface from '@/interfaces/Hub.interface';
-import type OAuthInterface from '@/interfaces/OAuth.interface';
-import type ProviderConfig from '@/entities/ProviderConfig';
-import type TransportInterface from '@/interfaces/Transport.interface';
-import type SocketsInterface from '@/interfaces/Sockets.interface';
-import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
-import TransportStatus from '@/entities/TransportStatus';
-import ProviderEvent from '@/entities/ProviderEvent';
+import { type ProviderConfig, TransportStatus, ProviderEvent } from './entities';
+import type {
+  HubInterface,
+  OAuthInterface,
+  TransportInterface,
+  SocketsInterface,
+  EmotesProvidersInterface,
+} from './interfaces';
 
-export default abstract class AbstractPlatformProvider {
-  protected abstract readonly config: ProviderConfig;
+export abstract class AbstractPlatformProvider {
+  public static readonly config: ProviderConfig;
+
+  public abstract readonly name: string;
 
   protected abstract readonly clientId: string;
 
@@ -98,7 +100,7 @@ export default abstract class AbstractPlatformProvider {
             const event = new CustomEvent(ProviderEvent.Disconnect, {
               detail: {
                 api: this,
-                provider: this.config.name,
+                provider: this.name,
                 token: this.accessToken,
               },
             });

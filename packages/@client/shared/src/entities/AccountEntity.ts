@@ -1,4 +1,4 @@
-export default interface AccountEntity {
+export interface AccountEntity {
   id: string;
   name: string;
   avatar: string;

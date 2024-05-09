@@ -1,4 +1,7 @@
 {
   "name": "@electron/preload",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@zenbiuu/shared": "workspace:*"
+  }
 }

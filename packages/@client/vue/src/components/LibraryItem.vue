@@ -54,7 +54,7 @@ import ChannelCard from './ChannelCard.vue';
 import Icon from './ui/Icon';
 import PrettyNumber from './ui/PrettyNumber';
 import Duration from './Duration.vue';
-import type LiveStream from '@/entities/LiveStream';
+import type { LiveStream } from '@client/shared';
 
 const props = defineProps<{
   name: string;
@@ -89,7 +89,7 @@ watch(
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .library-item {
   display: flex;

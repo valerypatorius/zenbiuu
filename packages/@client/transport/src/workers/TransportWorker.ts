@@ -1,6 +1,5 @@
 import { type TransportPayload } from '../types';
-import type TransportResponse from '@/entities/TransportResponse';
-import TransportStatus from '@/entities/TransportStatus';
+import { TransportStatus, type TransportResponse } from '@client/shared';
 
 const controllersByKey = new Map<string, AbortController>();
 

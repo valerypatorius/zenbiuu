@@ -1,4 +1,11 @@
 {
   "name": "@integrations/7tv",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@client/shared": "workspace:*",
+    "@client/transport": "workspace:*"
+  }
 }

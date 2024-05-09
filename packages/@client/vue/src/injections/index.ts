@@ -1,24 +1,20 @@
 import { type AppProperties } from '@zenbiuu/shared';
 import type { InjectionKey } from 'vue';
-import type ProvidersInterface from '@/interfaces/Providers.interface';
-import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
+import type { ProvidersInterface, EmotesProvidersInterface } from '@client/shared';
 
 /**
- * @todo Move modules interfaces to root renderer's entities
+ * @todo Use public interfaces instead
  */
-import { type ModuleLibrary } from '@/modules/library/types';
-import { type ModuleAccount } from '@/modules/account/types';
-import { type ModuleChat } from '@/modules/chat/types';
-import { type ModuleEmotes } from '@/modules/emotes/types';
+import { createAccount, createChat, createEmotes, createLibrary } from '@client/core';
 
 export const Injection = {
   AppProperties: Symbol('app properties') as InjectionKey<AppProperties>,
   Providers: Symbol('providers') as InjectionKey<ProvidersInterface>,
   EmotesProviders: Symbol('emotes providers') as InjectionKey<EmotesProvidersInterface>,
   Module: {
-    Account: Symbol('account module') as InjectionKey<ModuleAccount>,
-    Library: Symbol('library module') as InjectionKey<ModuleLibrary>,
-    Chat: Symbol('chat module') as InjectionKey<ModuleChat>,
-    Emotes: Symbol('emotes module') as InjectionKey<ModuleEmotes>,
+    Account: Symbol('account module') as InjectionKey<Awaited<ReturnType<typeof createAccount>>>,
+    Library: Symbol('library module') as InjectionKey<Awaited<ReturnType<typeof createLibrary>>>,
+    Chat: Symbol('chat module') as InjectionKey<Awaited<ReturnType<typeof createChat>>>,
+    Emotes: Symbol('emotes module') as InjectionKey<Awaited<ReturnType<typeof createEmotes>>>,
   },
 } as const;

@@ -20,7 +20,7 @@
 import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
-import type LiveStream from '@/entities/LiveStream';
+import type { LiveStream } from '@client/shared';
 
 const props = defineProps<{
   stream?: LiveStream;
@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .player {
   background-color: #000;

@@ -1,32 +1,27 @@
-import type AbstractProvider from './AbstractProvider';
-import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
-import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.interface';
+import type { AbstractPlatformProvider } from '@client/shared';
+import type { EmotesProvidersInterface, EmotesProviderApiInterface } from '@client/shared';
+import { EmotesProvider } from './config';
 
-export default class EmotesManager implements EmotesProvidersInterface {
+export class EmotesManager implements EmotesProvidersInterface {
   readonly #providersInstances = new Map<string, EmotesProviderApiInterface>();
 
-  public getApi(provider: string): EmotesProviderApiInterface {
-    const storedProviderInstance = this.#providersInstances.get(provider);
+  public getApi(providerName: string): EmotesProviderApiInterface {
+    const storedProviderInstance = this.#providersInstances.get(providerName);
 
     if (storedProviderInstance !== undefined) {
       return storedProviderInstance;
     }
 
-    const imports = import.meta.glob<AbstractProvider & (new () => EmotesProviderApiInterface)>(
-      './+([0-9a-z])/index.ts',
-      { import: 'default', eager: true },
-    );
-
-    for (const path in imports) {
-      if (path.includes(provider)) {
-        const providerInstance = new imports[path]();
-
-        this.#providersInstances.set(provider, providerInstance);
-
-        return providerInstance;
-      }
+    if (!(providerName in EmotesProvider)) {
+      throw new Error('Emotes provider not found', { cause: providerName });
     }
 
-    throw new Error('Emotes provider not found', { cause: provider });
+    const fn = EmotesProvider[providerName as keyof typeof EmotesProvider];
+
+    const providerInstance = new fn();
+
+    this.#providersInstances.set(providerName, providerInstance);
+
+    return providerInstance;
   }
 }

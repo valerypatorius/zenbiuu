@@ -1,4 +1,11 @@
 {
   "name": "@client/oauth",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@client/shared": "workspace:*",
+    "@zenbiuu/shared": "workspace:*"
+  }
 }

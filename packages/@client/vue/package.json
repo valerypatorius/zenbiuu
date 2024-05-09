@@ -2,7 +2,12 @@
   "name": "@client/vue",
   "type": "module",
   "dependencies": {
+    "@client/core": "workspace:*",
+    "@client/hub": "workspace:*",
+    "@client/interval": "workspace:*",
+    "@client/shared": "workspace:*",
     "@vueuse/core": "^10.8.0",
+    "@zenbiuu/shared": "workspace:*",
     "hls.js": "^1.5.6",
     "linkify-html": "^4.1.3",
     "linkifyjs": "^4.1.3",

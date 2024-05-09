@@ -1,4 +1,15 @@
 {
   "name": "@integrations/twitch",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@client/interval": "workspace:*",
+    "@client/oauth": "workspace:*",
+    "@client/shared": "workspace:*",
+    "@client/sockets": "workspace:*",
+    "@client/transport": "workspace:*",
+    "@zenbiuu/shared": "workspace:*"
+  }
 }

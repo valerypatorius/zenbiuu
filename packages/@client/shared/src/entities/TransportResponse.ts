@@ -1,4 +1,4 @@
-export default interface TransportResponse<T = unknown> {
+export interface TransportResponse<T = unknown> {
   url: string;
   key: string;
   data?: T;

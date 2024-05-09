@@ -1,6 +1,5 @@
 import { type ModuleChatStore, type ModuleChatStoreSchema } from './types';
-import type ChatMessage from '@/entities/ChatMessage';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
+import type { ChatMessage, ModuleStateFactoryFn } from '@client/shared';
 
 export async function createChatStore(
   createState: ModuleStateFactoryFn<ModuleChatStoreSchema>,

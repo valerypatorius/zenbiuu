@@ -1,6 +1,6 @@
 import { type EmoteEntity } from './EmoteEntity';
 
-export default interface ChatMessage {
+export interface ChatMessage {
   id: string;
   author: string;
   text: string;

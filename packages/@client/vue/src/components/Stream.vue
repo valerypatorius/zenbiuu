@@ -16,8 +16,7 @@
 <script setup lang="ts">
 import Player from './Player.vue';
 import Chat from './Chat.vue';
-import type LiveStream from '@/entities/LiveStream';
-import type ChannelEntity from '@/entities/ChannelEntity';
+import type { LiveStream, ChannelEntity } from '@client/shared';
 
 defineProps<{
   channel?: ChannelEntity;
@@ -32,7 +31,7 @@ const emit = defineEmits<{
 </script>
 
 <style lang="postcss">
-@import '@/presentation/styles/typography.pcss';
+@import '~/styles/typography.pcss';
 
 .stream {
   display: grid;

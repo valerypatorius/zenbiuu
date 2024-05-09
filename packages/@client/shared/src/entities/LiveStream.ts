@@ -1,4 +1,4 @@
-export default interface LiveStream {
+export interface LiveStream {
   id: string;
   channelId: string;
   title: string;

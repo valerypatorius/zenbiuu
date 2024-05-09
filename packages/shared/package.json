@@ -1,4 +1,7 @@
 {
-  "name": "shared",
-  "type": "module"
+  "name": "@zenbiuu/shared",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
 }

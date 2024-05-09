@@ -1,12 +1,12 @@
-import type EmotesProviderApi from './EmotesProviderApi.interface';
+import { type EmotesProviderApiInterface } from '.';
 
 /**
  * Describes public properties and methods of emotes providers instance
  */
-export default interface EmotesProvidersInterface {
+export interface EmotesProvidersInterface {
   /**
    * Returns api to work with specified emotes provider
    * @param provider - emotes provider name
    */
-  getApi: (provider: string) => EmotesProviderApi;
+  getApi: (provider: string) => EmotesProviderApiInterface;
 }

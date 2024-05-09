@@ -1,6 +1,6 @@
-import type SocketsInterface from '@/interfaces/Sockets.interface';
+import type { SocketsInterface } from '@client/shared';
 
-export default class Sockets implements SocketsInterface {
+export class Sockets implements SocketsInterface {
   private readonly socket: WebSocket;
 
   private readonly queue: string[] = [];

@@ -1,6 +1,5 @@
 import { type ModuleAccountStore, type ModuleAccountStoreSchema } from './types';
-import type AccountEntity from '@/entities/AccountEntity';
-import type ModuleStateFactoryFn from '@/entities/ModuleStateFactoryFn';
+import type { AccountEntity, ModuleStateFactoryFn } from '@client/shared';
 
 export async function createAccountStore(
   createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>,

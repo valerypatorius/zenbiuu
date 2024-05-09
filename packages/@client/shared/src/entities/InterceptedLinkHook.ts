@@ -1,5 +1,3 @@
-import type InterceptedLink from './InterceptedLink';
+import { type InterceptedLink } from './InterceptedLink';
 
-type InterceptedLinkHook = (data: InterceptedLink) => void;
-
-export default InterceptedLinkHook;
+export type InterceptedLinkHook = (data: InterceptedLink) => void;

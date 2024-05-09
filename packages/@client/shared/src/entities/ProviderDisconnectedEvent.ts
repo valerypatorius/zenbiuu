@@ -1,9 +1,7 @@
-import type ProviderApiInterface from '@/interfaces/ProviderApi.interface';
+import { type ProviderApiInterface } from '../interfaces';
 
-type ProviderDisconnectedEvent = CustomEvent<{
+export type ProviderDisconnectedEvent = CustomEvent<{
   provider: string;
   token: string;
   api: ProviderApiInterface;
 }>;
-
-export default ProviderDisconnectedEvent;

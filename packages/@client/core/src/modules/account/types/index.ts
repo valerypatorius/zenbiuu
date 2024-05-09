@@ -1,4 +1,4 @@
-import type AccountEntity from '@/entities/AccountEntity';
+import type { AccountEntity } from '@client/shared';
 
 export interface ModuleAccountStoreSchema {
   accounts: AccountEntity[];

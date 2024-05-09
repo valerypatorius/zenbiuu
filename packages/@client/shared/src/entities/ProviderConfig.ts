@@ -1,4 +1,4 @@
-export default interface ProviderConfig {
+export interface ProviderConfig {
   name: string;
   displayName: string;
   color: string;

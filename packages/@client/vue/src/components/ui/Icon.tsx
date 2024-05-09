@@ -1,5 +1,5 @@
 import { type FunctionalComponent } from 'vue';
-import icons from '@/assets/icons';
+import icons from '~/assets/icons';
 import '../styles/icon.pcss';
 
 const Icon: FunctionalComponent<{
