@@ -1,10 +1,4 @@
 {
-  "name": "@zenbiuu/shared",
-  "version": "2.0.0",
-  "private": "true",
-  "license": "GPL-3.0",
-  "type": "module",
-  "engines": {
-    "node": ">=21.5.0"
-  }
+  "name": "shared",
+  "type": "module"
 }

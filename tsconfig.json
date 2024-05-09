@@ -19,8 +19,8 @@
     }
   },
   "include": [
-    "packages/*/src",
+    "packages/**/src",
     "scripts",
-    "packages/*/vite.config.ts"
+    "packages/**/vite.config.ts"
   ]
 }

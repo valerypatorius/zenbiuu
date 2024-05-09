@@ -1,0 +1,7 @@
+{
+  "name": "@electron/main",
+  "type": "module",
+  "devDependencies": {
+    "electron-store": "^8.1.0"
+  }
+}

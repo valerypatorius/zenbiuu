@@ -2,7 +2,7 @@ import type AbstractProvider from './AbstractProvider';
 import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
 import type EmotesProviderApiInterface from '@/interfaces/EmotesProviderApi.interface';
 
-export default class EmotesProviders implements EmotesProvidersInterface {
+export default class EmotesManager implements EmotesProvidersInterface {
   readonly #providersInstances = new Map<string, EmotesProviderApiInterface>();
 
   public getApi(provider: string): EmotesProviderApiInterface {

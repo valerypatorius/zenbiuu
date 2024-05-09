@@ -1,16 +1,6 @@
 {
-  "name": "@zenbiuu/renderer",
-  "version": "2.0.0",
-  "private": "true",
-  "license": "GPL-3.0",
+  "name": "@client/vue",
   "type": "module",
-  "engines": {
-    "node": ">=21.5.0"
-  },
-  "scripts": {
-    "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint ./src --ext .ts,.vue"
-  },
   "dependencies": {
     "@vueuse/core": "^10.8.0",
     "hls.js": "^1.5.6",

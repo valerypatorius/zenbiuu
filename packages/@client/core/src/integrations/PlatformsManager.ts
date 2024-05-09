@@ -5,7 +5,7 @@ import type HubInterface from '@/interfaces/Hub.interface';
 import type ProviderConfig from '@/entities/ProviderConfig';
 import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interface';
 
-export default class Providers implements ProvidersInterface {
+export default class PlatformsManager implements ProvidersInterface {
   readonly #providersInstances = new Map<string, ProviderApiInterface>();
 
   constructor(

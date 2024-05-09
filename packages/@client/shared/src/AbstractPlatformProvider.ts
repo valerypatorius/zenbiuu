@@ -7,7 +7,7 @@ import type EmotesProvidersInterface from '@/interfaces/EmotesProviders.interfac
 import TransportStatus from '@/entities/TransportStatus';
 import ProviderEvent from '@/entities/ProviderEvent';
 
-export default abstract class AbstractProvider {
+export default abstract class AbstractPlatformProvider {
   protected abstract readonly config: ProviderConfig;
 
   protected abstract readonly clientId: string;
