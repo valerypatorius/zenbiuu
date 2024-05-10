@@ -1,6 +1,5 @@
 import { autoUpdater, type UpdateInfo } from 'electron-updater';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createUpdater() {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;

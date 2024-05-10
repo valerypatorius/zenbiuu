@@ -15,7 +15,7 @@ export interface ProviderApiInterface {
   getChannelsByNames: (names: string[]) => Promise<ChannelEntity[]>;
 
   playStream: (channelName: string, stream?: LiveStream) => Promise<string | undefined>;
-  stopStream: (channelName: string) => Promise<void>;
+  stopStream: (channelName: string) => void;
 
   joinChat: (channel: string, onMessage: (message: ChatMessage) => void) => void;
   leaveChat: (channel: string) => void;

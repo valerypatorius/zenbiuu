@@ -1,7 +1,6 @@
 import path from 'path';
 import { app } from 'electron';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createApp() {
   const protocol = app.getName();
 

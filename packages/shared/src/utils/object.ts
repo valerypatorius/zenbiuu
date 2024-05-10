@@ -5,7 +5,6 @@
  */
 export function deleteObjectProperty<T extends object>(obj: T, property: keyof T): void {
   if (Object.hasOwn(obj, property)) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete obj[property];
   }
 }

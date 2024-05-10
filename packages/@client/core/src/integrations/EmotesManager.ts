@@ -1,4 +1,3 @@
-import type { AbstractPlatformProvider } from '@client/shared';
 import type { EmotesProvidersInterface, EmotesProviderApiInterface } from '@client/shared';
 import { EmotesProvider } from './config';
 

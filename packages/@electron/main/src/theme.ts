@@ -1,7 +1,6 @@
 import { nativeTheme, type NativeTheme } from 'electron';
 import { type createStore } from './store';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createTheme(store: ReturnType<typeof createStore>) {
   setSource(store.get('theme'));
 

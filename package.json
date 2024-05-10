@@ -25,26 +25,20 @@
     "release:mac": "npm run lint && npm run typecheck && npm run build && npm run compile:release:mac"
   },
   "devDependencies": {
+    "@eslint/js": "^9.2.0",
     "@types/node": "^20.11.19",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
     "consola": "^3.2.3",
     "cross-env": "^7.0.3",
     "electron": "^29.0.1",
     "electron-builder": "^24.12.0",
     "electron-icon-builder": "^2.0.1",
     "electron-updater": "^6.1.8",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
-    "eslint-plugin-boundaries": "^4.2.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.1",
+    "eslint": "^9.2.0",
     "prettier": "3.2.5",
     "prettier-plugin-multiline-arrays": "^3.0.4",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^7.8.0",
     "vite": "^5.1.4"
   }
 }

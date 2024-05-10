@@ -1,5 +1,4 @@
 import { builtinModules } from 'module';
-import { join } from 'path';
 import { defineConfig } from 'vite';
 
 const root = __dirname;
@@ -10,11 +9,6 @@ const isDev = process.env.MODE === 'development';
  */
 export default defineConfig({
   root,
-  // resolve: {
-  //   alias: {
-  //     '@zenbiuu/shared': join(root, '../../packages/shared'),
-  //   },
-  // },
   appType: 'custom',
   build: {
     sourcemap: isDev ? 'inline' : false,

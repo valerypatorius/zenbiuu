@@ -1,7 +1,6 @@
 /**
  * Do not use imports or exports, as augmentation will not work due to Vite's implementation
  */
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

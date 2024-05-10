@@ -38,7 +38,7 @@ export async function createAccount(
       return;
     }
 
-    logout(disconnectedAccount, true);
+    void logout(disconnectedAccount, true);
   }
 
   async function login(provider: string): Promise<void> {

@@ -1,7 +1,6 @@
 import { type StoreSchema } from '@zenbiuu/shared';
 import ElectronStore from 'electron-store';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createStore(): {
   get: <K extends keyof StoreSchema>(key: K) => StoreSchema[K];
   set: <K extends keyof StoreSchema>(key: K, value?: StoreSchema[K]) => void;

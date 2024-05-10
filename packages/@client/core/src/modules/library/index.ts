@@ -44,7 +44,7 @@ export async function createLibrary(
     store.liveStreamsByChannelName = streamsByChannelName;
   }
 
-  async function requestChannelByName(name: string): Promise<void> {
+  function requestChannelByName(name: string): void {
     const channels = store.channelsByName;
 
     if (channels.get(name) !== undefined || namesBuffer.has(name)) {
@@ -62,7 +62,7 @@ export async function createLibrary(
         return;
       }
 
-      providers
+      void providers
         .getApi(primaryAccount.provider)
         .getChannelsByNames(Array.from(namesBuffer))
         .then((channels) => {
@@ -83,12 +83,12 @@ export async function createLibrary(
     return providers.getApi(primaryAccount.provider).playStream(name, stream);
   }
 
-  async function stopStream(name: string): Promise<void> {
+  function stopStream(name: string): void {
     if (primaryAccount === null) {
       return;
     }
 
-    await providers.getApi(primaryAccount.provider).stopStream(name);
+    providers.getApi(primaryAccount.provider).stopStream(name);
   }
 
   function destroy(): void {

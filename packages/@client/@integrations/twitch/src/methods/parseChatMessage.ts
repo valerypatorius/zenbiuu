@@ -87,8 +87,8 @@ function parseBadges(source: string): string[] {
  * Parse emotes positions in message text.
  * Not really necessary, because in the end all emotes names are simply replaced with String.replace() call
  */
-function parseEmotes(source: string): Record<string, Array<{ start: number; end: number }>> {
-  const result: Record<string, Array<{ start: number; end: number }>> = {};
+function parseEmotes(source: string): Record<string, { start: number; end: number }[]> {
+  const result: Record<string, { start: number; end: number }[]> = {};
   const emotes = source.split('/');
 
   emotes.forEach((emote) => {
@@ -103,7 +103,7 @@ function parseEmotes(source: string): Record<string, Array<{ start: number; end:
      */
     const positions = occurrences.split(',');
 
-    result[emoteId] = positions.reduce<Array<{ start: number; end: number }>>((res, position) => {
+    result[emoteId] = positions.reduce<{ start: number; end: number }[]>((res, position) => {
       const [
         start,
         end,

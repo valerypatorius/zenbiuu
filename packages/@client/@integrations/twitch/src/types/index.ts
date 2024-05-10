@@ -97,8 +97,8 @@ export interface TwitchIrcMessage {
   channel?: string;
   text?: string;
   tags?: Partial<{
-    'badge-info': Array<'moderator' | 'subscriber'>;
-    badges: Array<'moderator' | 'subscriber'>;
+    'badge-info': ('moderator' | 'subscriber')[];
+    badges: ('moderator' | 'subscriber')[];
     'client-nonce': string;
     color: string;
     'display-name': string;
@@ -111,6 +111,6 @@ export interface TwitchIrcMessage {
     'user-id': string;
     'tmi-sent-ts': string;
     'room-id': string;
-    emotes: Record<string, Array<{ start: number; end: number }>>;
+    emotes: Record<string, { start: number; end: number }[]>;
   }>;
 }

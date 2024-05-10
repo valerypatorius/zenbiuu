@@ -44,13 +44,14 @@ export const useLibrary = createSharedComposable(() => {
   });
 
   const liveChannels = computed(() => {
-    return channels.value.filter((channel) => channel.isLive) as Array<
-      LibraryChannel & { isLive: true; stream: LiveStream }
-    >;
+    return channels.value.filter((channel) => channel.isLive) as (LibraryChannel & {
+      isLive: true;
+      stream: LiveStream;
+    })[];
   });
 
   const openedChannels = computed(() => {
-    return channels.value.filter((channel) => channel.isOpened) as Array<LibraryChannel & { isOpened: true }>;
+    return channels.value.filter((channel) => channel.isOpened) as (LibraryChannel & { isOpened: true })[];
   });
 
   let stopLibraryUpdates: (() => void) | undefined;
@@ -62,11 +63,13 @@ export const useLibrary = createSharedComposable(() => {
       /**
        * @todo Cache followed channels to reduce API calls
        */
-      library.requestFollowedChannelsNames();
-      library.requestFollowedLiveStreams();
+      void library.requestFollowedChannelsNames();
+      void library.requestFollowedLiveStreams();
 
       stopLibraryUpdates?.();
-      stopLibraryUpdates = createInterval(library.requestFollowedLiveStreams, Minute * 2);
+      stopLibraryUpdates = createInterval(() => {
+        void library.requestFollowedLiveStreams();
+      }, Minute * 2);
     } else {
       stopLibraryUpdates?.();
 
@@ -83,14 +86,14 @@ export const useLibrary = createSharedComposable(() => {
   }
 
   function closeChannel(name: string): void {
-    void stopStream(name);
+    stopStream(name);
 
     library?.store.removeSelectedChannelName(name);
   }
 
   function closeAllChannels(): void {
     library?.store.selectedChannelsNames.forEach((name) => {
-      void stopStream(name);
+      stopStream(name);
     });
 
     library?.store.removeAllSelectedChannelsNames();
@@ -104,8 +107,8 @@ export const useLibrary = createSharedComposable(() => {
     return library?.playStream(name, stream);
   }
 
-  async function stopStream(name: string): Promise<void> {
-    await library?.stopStream(name);
+  function stopStream(name: string): void {
+    library?.stopStream(name);
   }
 
   return {

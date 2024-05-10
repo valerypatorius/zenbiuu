@@ -3,9 +3,8 @@ import { type AppProperties, HubChannel } from '@zenbiuu/shared';
 import { type createWindow } from './window';
 import { type createTheme } from './theme';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createHub(window: ReturnType<typeof createWindow>, theme?: ReturnType<typeof createTheme>) {
-  ipcMain.handle(HubChannel.GetAppProperties, async (): Promise<AppProperties> => {
+  ipcMain.handle(HubChannel.GetAppProperties, (): AppProperties => {
     return {
       name: app.getName(),
       version: app.getVersion(),

@@ -358,7 +358,7 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
     return composeStreamPlaylistUrl(name, accessToken);
   }
 
-  public async stopStream(name: string): Promise<void> {
+  public stopStream(name: string): void {
     this.#streamViewIntervals.get(name)?.();
     this.#streamViewIntervals.delete(name);
   }

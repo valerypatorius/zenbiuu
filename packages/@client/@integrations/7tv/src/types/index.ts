@@ -8,7 +8,7 @@ interface SevenTvEmote {
     animated: boolean;
     host: {
       url: string;
-      files: Array<{
+      files: {
         format: 'WEBP' | 'AVIF';
         width: number;
         height: number;
@@ -16,7 +16,7 @@ interface SevenTvEmote {
         name: `${1 | 2 | 3 | 4}x.${'webp' | 'avif'}`;
         static_name: `${1 | 2 | 3 | 4}x_static.${'webp' | 'avif'}`;
         framt_count: number;
-      }>;
+      }[];
     };
   };
 }

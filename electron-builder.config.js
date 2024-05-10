@@ -3,7 +3,7 @@
  * @type {import('electron-builder').Configuration}
  * @link https://www.electron.build/configuration/configuration
  */
-const config = {
+export default {
   directories: {
     output: 'dist',
     buildResources: 'build',
@@ -16,5 +16,3 @@ const config = {
     private: false,
   },
 };
-
-module.exports = config;

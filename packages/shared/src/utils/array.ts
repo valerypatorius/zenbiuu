@@ -65,7 +65,6 @@ export function sortArrayByFrequency(arr: string[]): string[] {
     .map(
       ([
         value,
-        frequency,
       ]) => value,
     );
 }

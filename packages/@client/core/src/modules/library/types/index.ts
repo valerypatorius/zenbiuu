@@ -26,8 +26,8 @@ export interface ModuleLibrary {
   primaryAccount: AccountEntity | null;
   requestFollowedChannelsNames: () => Promise<void>;
   requestFollowedLiveStreams: () => Promise<void>;
-  requestChannelByName: (name: string) => Promise<void>;
+  requestChannelByName: (name: string) => void;
   playStream: (name: string, stream?: LiveStream) => Promise<string | undefined>;
-  stopStream: (name: string) => Promise<void>;
+  stopStream: (name: string) => void;
   destroy: () => void;
 }

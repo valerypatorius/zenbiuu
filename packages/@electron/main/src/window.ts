@@ -2,7 +2,6 @@ import { join } from 'path';
 import { shell, BrowserWindow } from 'electron';
 import { type createStore } from './store';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createWindow(store: ReturnType<typeof createStore>) {
   const url =
     import.meta.env.MODE === 'development'
