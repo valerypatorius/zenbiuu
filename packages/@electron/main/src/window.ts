@@ -18,7 +18,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     const { width, height } = store.get('windowBounds');
 
     instance = new BrowserWindow({
-      icon: join(__dirname, '../build/512x512.png'),
+      icon: join(__dirname, '../public/icon.png'),
       width,
       height,
       titleBarStyle: 'hidden',

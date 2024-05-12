@@ -6,6 +6,3 @@ dist
 
 # npm packages
 node_modules
-
-# Auto updater development
-dev-app-update.yml
