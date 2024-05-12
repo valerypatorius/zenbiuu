@@ -1,44 +1,27 @@
 {
-  "name": "zenbiuu",
-  "version": "2.0.0",
   "private": "true",
-  "license": "GPL-3.0",
   "type": "module",
   "engines": {
     "node": ">=21.5.0"
   },
-  "productName": "Zenbiuu",
-  "description": "Desktop app for comfortable streams watching",
-  "author": "valerypatorius",
-  "main": "packages/@electron/main/dist/index.cjs",
+  "main": "./dist/main.cjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development tsx scripts/development/index.ts",
-    "build": "cross-env NODE_ENV=production tsx scripts/production/index.ts",
-    "format": "prettier . --write",
-    "icons": "electron-icon-builder --input=icon.png --output=build --flatten",
-    "compile:debug": "electron-builder build --config electron-builder.config.js --dir --config.asar=false",
-    "compile:release:preview": "electron-builder build --config electron-builder.config.js --win --publish=never",
-    "compile:release:win": "electron-builder build --config electron-builder.config.js --win --publish=always",
-    "compile:release:mac": "electron-builder build --config electron-builder.config.js --mac --publish=always",
-    "release:preview": "npm run build && npm run compile:release:preview",
-    "release:win": "npm run lint && npm run typecheck && npm run build && npm run compile:release:win",
-    "release:mac": "npm run lint && npm run typecheck && npm run build && npm run compile:release:mac"
+    "dev": "cross-env NODE_ENV=development zenbiuu-cli dev ./dist",
+    "build": "cross-env NODE_ENV=production zenbiuu-cli build",
+    "format": "prettier . --write"
   },
   "devDependencies": {
     "@eslint/js": "^9.2.0",
     "@types/node": "^20.11.19",
     "consola": "^3.2.3",
     "cross-env": "^7.0.3",
-    "electron": "^29.0.1",
-    "electron-builder": "^24.12.0",
-    "electron-icon-builder": "^2.0.1",
-    "electron-updater": "^6.1.8",
     "eslint": "^9.2.0",
     "prettier": "3.2.5",
     "prettier-plugin-multiline-arrays": "^3.0.4",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "typescript-eslint": "^7.8.0",
-    "vite": "^5.1.4"
+    "vite": "^5.1.4",
+    "zenbiuu": "workspace:*"
   }
 }

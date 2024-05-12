@@ -2,6 +2,10 @@ import { join } from 'path';
 import { shell, BrowserWindow } from 'electron';
 import { type createStore } from './store';
 
+/**
+ * @todo Deal with paths, as they are relative to compiled main.cjs file
+ */
+
 export function createWindow(store: ReturnType<typeof createStore>) {
   const url =
     import.meta.env.MODE === 'development'
@@ -14,7 +18,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     const { width, height } = store.get('windowBounds');
 
     instance = new BrowserWindow({
-      icon: join(__dirname, '../../../../build/512x512.png'),
+      icon: join(__dirname, '../build/512x512.png'),
       width,
       height,
       titleBarStyle: 'hidden',
@@ -24,7 +28,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
         height: 40,
       },
       webPreferences: {
-        preload: join(__dirname, '../../preload/dist/index.cjs'),
+        preload: join(__dirname, 'preload.cjs'),
       },
       ...options,
     });

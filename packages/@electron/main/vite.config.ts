@@ -1,16 +1,18 @@
 import { builtinModules } from 'module';
 import { defineConfig } from 'vite';
 
-const root = __dirname;
-const isDev = process.env.MODE === 'development';
+const root = import.meta.dirname;
+const isDev = process.env.NODE_ENV === 'development';
 
 /**
  * @todo Try to move from cjs lib build
  */
 export default defineConfig({
   root,
+  base: './',
   appType: 'custom',
   build: {
+    watch: {},
     sourcemap: isDev ? 'inline' : false,
     target: 'node21',
     outDir: 'dist',
@@ -28,6 +30,6 @@ export default defineConfig({
         entryFileNames: '[name].cjs',
       },
     },
-    emptyOutDir: true,
+    emptyOutDir: false,
   },
 });

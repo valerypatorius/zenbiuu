@@ -1,10 +1,18 @@
-import { createInterface } from 'readline';
-import { createServer, loadEnv, build } from 'vite';
 import { consola } from 'consola';
-import { productName, version } from '../../package.json';
-import { createElectronProcess } from './electron';
+import { createServer, build } from 'vite';
+import { createElectronProcess } from '@electron/main/spawner';
+import { productName, version } from '../package.json';
 import { createConfig } from './config';
 import { createWatchablePlugin } from './plugins';
+import { createInterface } from 'readline';
+import { resolve } from 'path';
+
+const [
+  ,
+  ,
+  ,
+  outDir,
+] = process.argv;
 
 consola.box(`🐒 ${productName}@${version}`);
 consola.start('Starting development...');
@@ -42,6 +50,14 @@ const config = createConfig({
         electron.restart();
       }),
     ],
+    build: {
+      outDir: resolve(outDir),
+      rollupOptions: {
+        output: {
+          entryFileNames: 'main.cjs',
+        },
+      },
+    },
   },
   preload: {
     plugins: [
@@ -55,6 +71,14 @@ const config = createConfig({
         }
       }),
     ],
+    build: {
+      outDir: resolve(outDir),
+      rollupOptions: {
+        output: {
+          entryFileNames: 'preload.cjs',
+        },
+      },
+    },
   },
   renderer: {
     server: {
@@ -87,11 +111,6 @@ if (process.platform === 'win32') {
 process.on('SIGINT', () => {
   process.exit();
 });
-
-/**
- * Include variables from .env file in process.env
- */
-Object.assign(process.env, loadEnv(process.env.NODE_ENV, process.cwd()));
 
 /**
  * Save server url to env variable.

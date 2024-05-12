@@ -1,10 +1,17 @@
 {
   "name": "@electron/main",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./vite.config.ts",
+    "./spawner": "./scripts/spawner.ts"
+  },
   "dependencies": {
     "@zenbiuu/shared": "workspace:*"
   },
   "devDependencies": {
-    "electron-store": "^8.1.0"
+    "electron": "^29.0.1",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.8"
   }
 }

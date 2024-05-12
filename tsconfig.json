@@ -16,7 +16,9 @@
   },
   "include": [
     "./packages/**/src",
+    "./packages/**/bin",
+    "./packages/**/scripts",
     "./packages/**/vite.config.ts",
-    "./scripts"
+    "env.d.ts"
   ]
 }

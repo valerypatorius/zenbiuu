@@ -1,0 +1,24 @@
+{
+  "name": "zenbiuu",
+  "version": "2.0.0",
+  "private": "true",
+  "license": "GPL-3.0",
+  "type": "module",
+  "engines": {
+    "node": ">=21.5.0"
+  },
+  "productName": "Zenbiuu",
+  "description": "Desktop app for comfortable streams watching",
+  "author": "valerypatorius",
+  "bin": {
+    "zenbiuu-cli": "scripts/index.ts"
+  },
+  "scripts": {
+    "dev": "client-dev dev"
+  },
+  "devDependencies": {
+    "@client/vue": "workspace:*",
+    "@electron/main": "workspace:*",
+    "@electron/preload": "workspace:*"
+  }
+}

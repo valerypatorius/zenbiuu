@@ -1,6 +1,10 @@
 {
   "name": "@client/vue",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./vite.config.ts"
+  },
   "dependencies": {
     "@client/core": "workspace:*",
     "@client/hub": "workspace:*",
