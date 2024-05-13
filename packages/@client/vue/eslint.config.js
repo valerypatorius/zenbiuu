@@ -4,9 +4,12 @@ import pluginVue from 'eslint-plugin-vue';
 import vueParser from 'vue-eslint-parser';
 
 export default tseslint.config({
-  files: ['**/*.vue'],
+  files: [
+    '**/*.ts',
+    '**/*.tsx',
+    '**/*.vue',
+  ],
   extends: [
-    // eslint.configs.recommended,
     ...tseslint.configs.recommendedTypeChecked,
     ...tseslint.configs.stylistic,
     ...pluginVue.configs['flat/recommended'],

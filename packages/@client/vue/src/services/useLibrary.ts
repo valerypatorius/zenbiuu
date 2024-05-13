@@ -24,9 +24,6 @@ export const useLibrary = createSharedComposable(() => {
 
   const { primaryAccount } = useAccount();
 
-  /**
-   * @todo Include sorting here
-   */
   const channels = computed<LibraryChannel[]>(() => {
     return [...library.store.followedChannelsNames.values()]
       .map((name) => {
@@ -39,7 +36,10 @@ export const useLibrary = createSharedComposable(() => {
         };
       })
       .sort((channelA, channelB) => {
-        return (channelB.isLive === true ? 1 : 0) - (channelA.isLive === true ? 1 : 0);
+        return (
+          (channelB.stream?.viewersCount ?? 0) * (channelB.isLive === true ? 1 : 0) -
+          (channelA.stream?.viewersCount ?? 0) * (channelA.isLive === true ? 1 : 0)
+        );
       });
   });
 
