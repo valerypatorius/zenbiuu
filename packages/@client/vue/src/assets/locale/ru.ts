@@ -101,4 +101,5 @@ export default {
   disable: 'Отключить',
   openInBrowser: 'Открыть в браузере',
   search: 'Поиск',
+  validUntilDate: 'Действует до {date}',
 };

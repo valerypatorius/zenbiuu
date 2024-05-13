@@ -21,7 +21,14 @@
                   v-for="account in accounts"
                   :key="`${account.provider}:${account.token}`"
                   :name="account.name"
-                  :details="account.tokenExpirationDate"
+                  :details="
+                    t('validUntilDate', {
+                      date: new Intl.DateTimeFormat(locale, {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      }).format(new Date(account.tokenExpirationDate ?? '')),
+                    })
+                  "
                   :avatar="account.avatar"
                 >
                   <div class="settings__account-actions">
@@ -67,7 +74,7 @@ import Scrollable from './ui/Scrollable.vue';
 import ChannelCard from './ChannelCard.vue';
 import IconButton from './ui/IconButton.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
 const { toggleState: toggleSettingsState } = useSettings();

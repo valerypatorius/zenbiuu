@@ -18,7 +18,7 @@
     <Auth v-else />
   </main>
 
-  <Settings v-if="isSettingsOpened" />
+  <SettingsOverlay v-if="isSettingsOpened" />
 </template>
 
 <script setup lang="ts">
@@ -28,7 +28,7 @@ import { useSettings } from '~/services/useSettings';
 import { useLibrary } from '~/services/useLibrary';
 import TitleBar from './Titlebar.vue';
 import Auth from './Auth.vue';
-import Settings from './Settings.vue';
+import SettingsOverlay from './SettingsOverlay.vue';
 import Library from './Library.vue';
 import 'overlayscrollbars/overlayscrollbars.css';
 

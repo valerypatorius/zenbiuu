@@ -1,5 +1,3 @@
-#!/usr/bin/env tsx
-
 import { spawn } from 'child_process';
 import consola from 'consola';
 import electron from 'electron';

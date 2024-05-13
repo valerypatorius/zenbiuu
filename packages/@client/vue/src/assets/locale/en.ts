@@ -102,4 +102,5 @@ export default {
   disable: 'Disable',
   openInBrowser: 'Open in browser',
   search: 'Search',
+  validUntilDate: 'Valid until {date}',
 };
