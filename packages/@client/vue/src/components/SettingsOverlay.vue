@@ -54,11 +54,56 @@
                   v-for="provider in availableProviders"
                   :key="provider.name"
                   icon="plus"
+                  :size="22"
                   @click="login(provider.name)"
                 />
               </div>
             </div>
           </div>
+
+          <!-- Locale management -->
+          <!-- <div class="settings__section">
+            <div class="settings__section-title">
+              {{ t('settings.locale.title') }}
+            </div>
+
+            <DropdownSelect
+              :options="
+                availableLocales.map((value) => ({
+                  value,
+                  label: capitalize(new Intl.DisplayNames([value], { type: 'language' }).of(value) ?? value),
+                }))
+              "
+              :modelValue="locale"
+              @update:modelValue="
+                (value) => {
+                  locale = value;
+                }
+              "
+            />
+          </div> -->
+
+          <!-- Color scheme management -->
+          <!-- <div class="settings__section">
+            <div class="settings__section-title">
+              {{ t('settings.colorScheme.title') }}
+            </div>
+
+            <DropdownSelect
+              :options="
+                availableLocales.map((value) => ({
+                  value,
+                  label: capitalize(new Intl.DisplayNames([value], { type: 'language' }).of(value) ?? value),
+                }))
+              "
+              :modelValue="locale"
+              @update:modelValue="
+                (value) => {
+                  locale = value;
+                }
+              "
+            />
+          </div> -->
         </div>
       </Scrollable>
     </div>
@@ -73,8 +118,10 @@ import { useSettings } from '~/services/useSettings';
 import Scrollable from './ui/Scrollable.vue';
 import ChannelCard from './ChannelCard.vue';
 import IconButton from './ui/IconButton.vue';
+import DropdownSelect from './ui/DropdownSelect';
+import { capitalize } from '@zenbiuu/shared';
 
-const { t, locale } = useI18n();
+const { t, locale, availableLocales } = useI18n();
 const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
 const { toggleState: toggleSettingsState } = useSettings();
@@ -105,19 +152,21 @@ const { toggleState: toggleSettingsState } = useSettings();
   display: grid;
   width: 360px;
   height: 100%;
-  padding: 16px;
   padding-top: var(--layout-titlebar-height);
   background-color: color-mix(in srgb, #000 10%, var(--theme-color-background));
   box-shadow: 100px 0 120px -50px var(--theme-color-shadow);
+
+  &__main {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    padding-top: 0;
+  }
 
   &__section-title {
     @extend %text-small;
     color: var(--theme-color-text-secondary);
     margin: 12px 0;
-  }
-
-  &__about {
-    @extend %text-small;
   }
 
   &__account-actions {

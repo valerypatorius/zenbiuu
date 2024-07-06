@@ -1,6 +1,6 @@
 <template>
   <div class="stream">
-    <Player
+    <StreamPlayer
       :stream="stream"
       :playlist="playlist"
       @close="emit('close')"
@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import Player from './Player.vue';
+import StreamPlayer from './StreamPlayer.vue';
 import Chat from './Chat.vue';
 import type { LiveStream, ChannelEntity } from '@client/shared';
 

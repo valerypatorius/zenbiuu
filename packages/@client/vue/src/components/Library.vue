@@ -31,7 +31,7 @@
       v-if="openedChannels.length > 0"
       class="library__playing"
     >
-      <Stream
+      <StreamView
         v-for="(channel, index) in openedChannels"
         :key="channel.name"
         :channel="channel.data"
@@ -73,7 +73,7 @@
 <script setup lang="ts">
 import { useLibrary } from '~/services/useLibrary';
 import LibraryItem from './LibraryItem.vue';
-import Stream from './Stream.vue';
+import StreamView from './StreamView.vue';
 import ChannelCard from './ChannelCard.vue';
 import Scrollable from './ui/Scrollable.vue';
 import IconButton from './ui/IconButton.vue';
@@ -110,8 +110,9 @@ const { channels, liveChannels, openedChannels, openChannel, closeChannel, reque
   }
 
   &__channel {
+    height: 40px;
     border-radius: 12px;
-    padding: 8px 12px;
+    padding: 0 12px;
     color: var(--theme-color-text-secondary);
     cursor: pointer;
     background-image: var(--background-image);

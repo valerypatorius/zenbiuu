@@ -65,6 +65,10 @@ function onLoad(): void {
   }
 
   &--loaded {
+    .icon {
+      opacity: 0;
+    }
+
     img {
       opacity: 1;
       /* transform: scale(1); */

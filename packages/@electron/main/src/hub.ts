@@ -8,6 +8,9 @@ export function createHub(window: ReturnType<typeof createWindow>, theme?: Retur
     return {
       name: app.getName(),
       version: app.getVersion(),
+      /**
+       * @todo Do not perform replacement
+       */
       locale: app.getLocale().replace(/-\w+/, ''),
     };
   });

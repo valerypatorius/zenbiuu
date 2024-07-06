@@ -12,10 +12,11 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import Icon from './Icon';
 import type icons from '~/assets/icons';
 
-defineProps<{
+const props = defineProps<{
   icon: keyof typeof icons;
   size?: number;
   disabled?: boolean;
@@ -25,13 +26,15 @@ defineProps<{
 const emit = defineEmits<{
   click: [event: MouseEvent];
 }>();
+
+const cssSize = computed(() => (props.size === undefined ? 'auto' : `${props.size}px`));
 </script>
 
 <style lang="postcss">
 .icon-button {
   background-color: transparent;
   color: var(--theme-color-text-secondary);
-  padding: 4px;
+  padding: calc(v-bind(cssSize) / 3);
   border-radius: 50%;
   /* transition: all 0.1s; */
 

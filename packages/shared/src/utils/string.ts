@@ -48,3 +48,11 @@ export function uid(): string {
 
   return rand.toString(36).substring(2, 15) + now.toString(36).substring(2, 15);
 }
+
+/**
+ * Capitalize first letter of a string
+ * @param source - source string
+ */
+export function capitalize(source: string): string {
+  return source.charAt(0).toUpperCase() + source.slice(1);
+}

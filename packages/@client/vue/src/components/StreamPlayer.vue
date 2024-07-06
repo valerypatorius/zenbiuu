@@ -1,5 +1,8 @@
 <template>
-  <div class="player">
+  <div
+    ref="container"
+    class="player"
+  >
     <div class="player__background">
       <canvas
         ref="canvas"
@@ -13,6 +16,12 @@
       :poster="stream?.cover"
       @loadeddata="startCanvasPainting"
     />
+
+    <VideoControls
+      :stream="stream"
+      :container="container"
+      :video="video"
+    />
   </div>
 </template>
 
@@ -21,6 +30,7 @@ import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
 import type { LiveStream } from '@client/shared';
+import VideoControls from './ui/VideoControls.vue';
 
 const props = defineProps<{
   stream?: LiveStream;
@@ -33,6 +43,8 @@ defineEmits<{
 
 const CANVAS_WIDTH = 320;
 const CANVAS_HEIGHT = 180;
+
+const container = ref<HTMLDivElement | null>(null);
 
 const playlistUrl = ref<string>();
 
@@ -111,7 +123,7 @@ onMounted(async () => {
 
   hls.attachMedia(video.value);
 
-  video.value.play();
+  await video.value.play();
 });
 
 onBeforeUnmount(() => {
@@ -155,25 +167,15 @@ onBeforeUnmount(() => {
     height: 100%;
   }
 
-  &__overlay {
-    padding: 12px;
+  .video-overlay {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
     opacity: 0;
+  }
 
-    .player:hover & {
-      opacity: 1;
-    }
-
-    button {
-      -webkit-app-region: no-drag;
-    }
+  &:hover .video-overlay {
+    opacity: 1;
   }
 }
 </style>
