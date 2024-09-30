@@ -10,8 +10,8 @@
     "@zenbiuu/shared": "workspace:*"
   },
   "devDependencies": {
-    "electron": "^31.1.0",
+    "electron": "^32.1.2",
     "electron-store": "^8.2.0",
-    "electron-updater": "^6.2.1"
+    "electron-updater": "^6.3.4"
   }
 }
