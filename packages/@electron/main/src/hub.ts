@@ -60,15 +60,15 @@ export function createHub(window: ReturnType<typeof createWindow>, theme?: Retur
   /**
    * Intercept app links on Windows
    */
-  app.on('second-instance', (event, commandLine) => {
-    const link = commandLine.pop();
+  // app.on('second-instance', (event, commandLine) => {
+  //   const link = commandLine.pop();
 
-    if (link === undefined) {
-      return;
-    }
+  //   if (link === undefined) {
+  //     return;
+  //   }
 
-    window.send(HubChannel.InterceptedLink, link);
-  });
+  //   window.send(HubChannel.InterceptedLink, link);
+  // });
 
   /**
    * Intercept app links on Mac OS

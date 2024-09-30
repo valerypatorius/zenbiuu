@@ -2,12 +2,13 @@ import path from 'path';
 import { app } from 'electron';
 
 export function createApp() {
-  const protocol = app.getName();
+  const protocol = import.meta.env.VITE_APP_PROTOCOL;
 
   const isAllowAppStart = app.requestSingleInstanceLock();
 
-  async function start(): Promise<void> {
+  async function start(beforeStartExternal?: (instance: Electron.App) => void): Promise<void> {
     beforeStart();
+    beforeStartExternal?.(app);
 
     await app.whenReady();
   }
@@ -34,32 +35,12 @@ export function createApp() {
     // Menu.setApplicationMenu(null);
 
     /**
-     * Allow only one running instance of the app
-     */
-    // app.on('second-instance', () => {
-    //   if (window.isMinimized()) {
-    //     window.restore();
-    //   }
-
-    //   window.focus();
-    // });
-
-    /**
      * Quit when all windows are closed, but leave the app active on Mac
      */
     app.on('window-all-closed', () => {
       if (process.platform !== 'darwin') {
         app.quit();
       }
-    });
-
-    /**
-     * Activate window on Mac, if no other windows are opened
-     */
-    app.on('activate', () => {
-      // if (Window.Main === null) {
-      //   createAppWindow();
-      // }
     });
   }
 

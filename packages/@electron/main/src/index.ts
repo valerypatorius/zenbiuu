@@ -1,5 +1,5 @@
 import { session } from 'electron';
-import { objectKeysToLowercase } from '@zenbiuu/shared';
+import { HubChannel, objectKeysToLowercase } from '@zenbiuu/shared';
 import { createApp } from './app';
 import { createStore } from './store';
 import { createTheme } from './theme';
@@ -51,10 +51,36 @@ const filter = {
 
 void (async () => {
   try {
-    console.log(3);
-    await app.start();
+    await app.start((instance) => {
+      instance.on('second-instance', (event, commandLine) => {
+        if (window.isMinimized) {
+          window.restore();
+        }
 
-    console.log(4);
+        window.focus();
+
+        const link = commandLine.pop();
+
+        if (link === undefined) {
+          return;
+        }
+
+        window.send(HubChannel.InterceptedLink, link);
+      });
+
+      instance.on('open-url', (event, link) => {
+        window.send(HubChannel.InterceptedLink, link);
+      });
+
+      /**
+       * Activate window on Mac, if no other windows are opened
+       */
+      instance.on('activate', () => {
+        // if (Window.Main === null) {
+        //   createAppWindow();
+        // }
+      });
+    });
 
     /**
      * Deal with CORS

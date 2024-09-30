@@ -7,7 +7,7 @@
   },
   "main": "./dist/main.cjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development zenbiuu-cli dev ./dist",
+    "dev": "cross-env NODE_ENV=development zenbiuu-cli dev ./dist --inspect",
     "build": "cross-env NODE_ENV=production zenbiuu-cli build",
     "format": "prettier . --write"
   },

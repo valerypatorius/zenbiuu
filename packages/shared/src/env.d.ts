@@ -4,6 +4,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_APP_PROTOCOL: string;
   readonly VITE_TWITCH_APP_CLIENT_ID: string;
   readonly VITE_GOODGAME_APP_CLIENT_ID: string;
   readonly VITE_APP_REDIRECT_URL: string;
