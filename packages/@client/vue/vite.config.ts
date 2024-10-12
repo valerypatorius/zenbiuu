@@ -1,7 +1,7 @@
-import { join } from 'path';
-import { defineConfig } from 'vite';
+import { join } from 'node:path';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import { defineConfig } from 'vite';
 
 const root = import.meta.dirname;
 const isDev = process.env.NODE_ENV === 'development';
@@ -13,10 +13,7 @@ export default defineConfig({
       '~': join(root, 'src'),
     },
   },
-  plugins: [
-    vue(),
-    vueJsx(),
-  ],
+  plugins: [vue(), vueJsx()],
   build: {
     sourcemap: isDev,
     target: 'chrome100',

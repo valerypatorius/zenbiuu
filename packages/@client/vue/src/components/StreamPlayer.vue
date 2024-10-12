@@ -26,10 +26,10 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
+import type { LiveStream } from '@client/shared';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
-import type { LiveStream } from '@client/shared';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import VideoControls from './ui/VideoControls.vue';
 
 const props = defineProps<{
@@ -70,7 +70,11 @@ const canvasContext = computed(() => canvas.value?.getContext('2d') ?? null);
 let isCanDrawCanvas = false;
 
 function startCanvasPainting(): void {
-  if (video.value === null || canvas.value === null || canvasContext.value === null) {
+  if (
+    video.value === null ||
+    canvas.value === null ||
+    canvasContext.value === null
+  ) {
     return;
   }
 
@@ -113,7 +117,10 @@ onMounted(async () => {
     return;
   }
 
-  playlistUrl.value = await props.playlist(props.stream.channelName, props.stream);
+  playlistUrl.value = await props.playlist(
+    props.stream.channelName,
+    props.stream,
+  );
 
   if (playlistUrl.value === undefined || video.value === null) {
     return;
@@ -139,7 +146,6 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 1;
   overflow: hidden;
-  /* -webkit-app-region: drag; */
 
   &__title {
     @extend %text-heading;

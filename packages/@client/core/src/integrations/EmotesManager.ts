@@ -1,4 +1,7 @@
-import type { EmotesProvidersInterface, EmotesProviderApiInterface } from '@client/shared';
+import type {
+  EmotesProviderApiInterface,
+  EmotesProvidersInterface,
+} from '@client/shared';
 import { EmotesProvider } from './config';
 
 export class EmotesManager implements EmotesProvidersInterface {

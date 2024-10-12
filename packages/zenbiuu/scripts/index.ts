@@ -2,11 +2,7 @@
 
 import { loadEnv } from 'vite';
 
-const [
-  ,
-  ,
-  mode,
-] = process.argv;
+const [, , mode] = process.argv;
 
 /**
  * Include variables from .env file in process.env
@@ -20,5 +16,3 @@ switch (mode) {
   case 'build':
     await import('./build');
 }
-
-export {};

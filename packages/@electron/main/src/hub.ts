@@ -1,9 +1,12 @@
-import { app, ipcMain, shell } from 'electron';
 import { type AppProperties, HubChannel } from '@zenbiuu/shared';
-import { type createWindow } from './window';
-import { type createTheme } from './theme';
+import { app, ipcMain, shell } from 'electron';
+import type { createTheme } from './theme';
+import type { createWindow } from './window';
 
-export function createHub(window: ReturnType<typeof createWindow>, theme?: ReturnType<typeof createTheme>) {
+export function createHub(
+  window: ReturnType<typeof createWindow>,
+  theme?: ReturnType<typeof createTheme>,
+) {
   ipcMain.handle(HubChannel.GetAppProperties, (): AppProperties => {
     return {
       name: app.getName(),

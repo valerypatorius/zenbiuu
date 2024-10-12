@@ -1,10 +1,10 @@
-import { session } from 'electron';
 import { HubChannel, objectKeysToLowercase } from '@zenbiuu/shared';
+import { session } from 'electron';
 import { createApp } from './app';
+import { createHub } from './hub';
 import { createStore } from './store';
 import { createTheme } from './theme';
 import { createWindow } from './window';
-import { createHub } from './hub';
 // import { createUpdater } from './updater';
 
 const app = createApp();
@@ -85,16 +85,19 @@ void (async () => {
     /**
      * Deal with CORS
      */
-    session.defaultSession.webRequest.onHeadersReceived(filter, (details, handler) => {
-      const responseHeaders = {
-        ...objectKeysToLowercase(details?.responseHeaders ?? {}),
-        'access-control-allow-origin': '*',
-      };
+    session.defaultSession.webRequest.onHeadersReceived(
+      filter,
+      (details, handler) => {
+        const responseHeaders = {
+          ...objectKeysToLowercase(details?.responseHeaders ?? {}),
+          'access-control-allow-origin': '*',
+        };
 
-      handler({
-        responseHeaders,
-      });
-    });
+        handler({
+          responseHeaders,
+        });
+      },
+    );
 
     window.open({
       // backgroundColor: theme.windowColor,

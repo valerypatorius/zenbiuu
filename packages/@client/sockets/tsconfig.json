@@ -2,11 +2,6 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "types": ["vite/client"],
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker"
-    ]
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"]
   }
 }

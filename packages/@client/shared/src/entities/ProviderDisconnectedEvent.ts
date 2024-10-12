@@ -1,4 +1,4 @@
-import { type ProviderApiInterface } from '../interfaces';
+import type { ProviderApiInterface } from '../interfaces';
 
 export type ProviderDisconnectedEvent = CustomEvent<{
   provider: string;

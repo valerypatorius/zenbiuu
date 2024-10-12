@@ -1,4 +1,4 @@
-import { builtinModules } from 'module';
+import { builtinModules } from 'node:module';
 import { defineConfig } from 'vite';
 
 const root = import.meta.dirname;
@@ -19,10 +19,7 @@ export default defineConfig({
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: [
-        'electron',
-        ...builtinModules,
-      ],
+      external: ['electron', ...builtinModules],
       output: {
         entryFileNames: '[name].cjs',
       },

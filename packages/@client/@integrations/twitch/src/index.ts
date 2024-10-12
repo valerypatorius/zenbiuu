@@ -1,35 +1,44 @@
-import { Minute, getExpirationDateFromNow, unixtime, uid, deleteObjectProperty } from '@zenbiuu/shared';
+import { createInterval } from '@client/interval';
+import { OAuth } from '@client/oauth';
+import {
+  type AccountEntity,
+  type ChannelEntity,
+  type ChatMessage,
+  type LiveStream,
+  type ProviderApiInterface,
+  ProviderEvent,
+} from '@client/shared';
+import { AbstractPlatformProvider } from '@client/shared';
+import { Sockets } from '@client/sockets';
+import { Transport } from '@client/transport';
+import {
+  Minute,
+  deleteObjectProperty,
+  getExpirationDateFromNow,
+  uid,
+  unixtime,
+} from '@zenbiuu/shared';
 import config from './config';
-import { parseChatMessage } from './methods/parseChatMessage';
+import { composeStreamPlaylistUrl } from './methods/composeStreamPlaylistUrl';
+import { composeWatchStatsData } from './methods/composeWatchStatsData';
 import { getChannelSettingsScriptUrl } from './methods/getChannelSettingsScriptUrl';
 import { getChannelWatchStatsUrl } from './methods/getChannelWatchStatsUrl';
 import { getChatMessageEmotes } from './methods/getChatMessageEmotes';
-import { composeWatchStatsData } from './methods/composeWatchStatsData';
 import { getStreamPlaylistAccessTokenQuery } from './methods/getStreamPlaylistAccessTokenQuery';
-import { composeStreamPlaylistUrl } from './methods/composeStreamPlaylistUrl';
+import { parseChatMessage } from './methods/parseChatMessage';
 import type {
-  TwitchValidTokenProperties,
-  TwitchUser,
-  TwitchStream,
   TwitchFollowedChannel,
-  TwitchResponse,
   TwitchPlaylistAccessTokenResponse,
+  TwitchResponse,
+  TwitchStream,
+  TwitchUser,
+  TwitchValidTokenProperties,
 } from './types';
-import {
-  type ProviderApiInterface,
-  type AccountEntity,
-  type LiveStream,
-  type ChannelEntity,
-  type ChatMessage,
-  ProviderEvent,
-} from '@client/shared';
-import { Sockets } from '@client/sockets';
-import { OAuth } from '@client/oauth';
-import { Transport } from '@client/transport';
-import { createInterval } from '@client/interval';
-import { AbstractPlatformProvider } from '@client/shared';
 
-export default class Twitch extends AbstractPlatformProvider implements ProviderApiInterface {
+export default class Twitch
+  extends AbstractPlatformProvider
+  implements ProviderApiInterface
+{
   public static readonly config = config;
 
   public readonly name = Twitch.config.name;
@@ -42,7 +51,10 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
 
   protected userId?: string;
 
-  readonly #chatMessageHandlers = new Map<string, (message: ChatMessage) => void>();
+  readonly #chatMessageHandlers = new Map<
+    string,
+    (message: ChatMessage) => void
+  >();
 
   readonly #streamViewIntervals = new Map<string, () => void>();
 
@@ -76,7 +88,11 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
       const message = parseChatMessage(data);
       const messageChannel = message?.channel?.toLowerCase();
 
-      if (message === undefined || message.command !== 'PRIVMSG' || messageChannel === undefined) {
+      if (
+        message === undefined ||
+        message.command !== 'PRIVMSG' ||
+        messageChannel === undefined
+      ) {
         return;
       }
 
@@ -84,7 +100,12 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
       const text = message.text;
       const author = message.tags?.['display-name'];
 
-      if (handler !== undefined && text !== undefined && message.tags?.id !== undefined && author !== undefined) {
+      if (
+        handler !== undefined &&
+        text !== undefined &&
+        message.tags?.id !== undefined &&
+        author !== undefined
+      ) {
         const emotes = getChatMessageEmotes(message);
 
         handler({
@@ -101,7 +122,9 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
     },
   });
 
-  async #callTwitchApi<T>(path: `/${string}`): Promise<TwitchResponse<T>['data']> {
+  async #callTwitchApi<T>(
+    path: `/${string}`,
+  ): Promise<TwitchResponse<T>['data']> {
     const endpoint = `https://api.twitch.tv/helix${path}`;
     const chunk = await this.catchable<TwitchResponse<T>>('get', endpoint);
     const result = chunk.data;
@@ -170,16 +193,22 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
   /**
    * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
    */
-  async #validate(token: string): Promise<{ username: string; expiresIn: string; userId: string }> {
+  async #validate(
+    token: string,
+  ): Promise<{ username: string; expiresIn: string; userId: string }> {
     const {
       expires_in: expiresIn,
       login: username,
       user_id: userId,
-    } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    } = await this.catchable<TwitchValidTokenProperties>(
+      'get',
+      'https://id.twitch.tv/oauth2/validate',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     this.#isTokenValidated = true;
 
@@ -240,10 +269,16 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
   public async logout(token: string): Promise<void> {
     this.disconnect();
 
-    await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
+    await this.catchable<never>(
+      'post',
+      `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`,
+    );
   }
 
-  public joinChat(channel: string, onMessage: (message: ChatMessage) => void): void {
+  public joinChat(
+    channel: string,
+    onMessage: (message: ChatMessage) => void,
+  ): void {
     this.#chatMessageHandlers.set(channel.toLowerCase(), onMessage);
 
     this.chat.send(`JOIN #${channel}`);
@@ -257,7 +292,9 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
    */
   public async getFollowedChannelsNamesByUserId(id: string): Promise<string[]> {
-    const data = await this.#callTwitchApi<TwitchFollowedChannel>(`/channels/followed?user_id=${id}&first=100`);
+    const data = await this.#callTwitchApi<TwitchFollowedChannel>(
+      `/channels/followed?user_id=${id}&first=100`,
+    );
 
     return data.map((item) => item.broadcaster_name);
   }
@@ -266,7 +303,9 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-streams
    */
   public async getFollowedStreamsByUserId(id: string): Promise<LiveStream[]> {
-    const data = await this.#callTwitchApi<TwitchStream>(`/streams/followed?user_id=${id}&first=100`);
+    const data = await this.#callTwitchApi<TwitchStream>(
+      `/streams/followed?user_id=${id}&first=100`,
+    );
 
     return data.map((item) => ({
       id: item.id,
@@ -315,9 +354,17 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
     }
 
     const url = `https://www.twitch.tv/${name}`;
-    const page = await this.transport.get<string>(url, { headers: undefined }, 'text');
+    const page = await this.transport.get<string>(
+      url,
+      { headers: undefined },
+      'text',
+    );
     const channelSettingsScriptUrl = getChannelSettingsScriptUrl(page);
-    const settingsContent = await this.transport.get<string>(channelSettingsScriptUrl, { headers: undefined }, 'text');
+    const settingsContent = await this.transport.get<string>(
+      channelSettingsScriptUrl,
+      { headers: undefined },
+      'text',
+    );
     const statsUrl = getChannelWatchStatsUrl(settingsContent);
 
     this.#settingsUrlsByChannelName.set(name, statsUrl);
@@ -325,7 +372,10 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
     return statsUrl;
   }
 
-  private async sendStreamWatchStats(stream: LiveStream, url: string): Promise<void> {
+  private async sendStreamWatchStats(
+    stream: LiveStream,
+    url: string,
+  ): Promise<void> {
     const data = composeWatchStatsData(this.userId ?? '0', stream);
 
     await this.transport.post(url, {
@@ -336,14 +386,21 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
     });
   }
 
-  public async playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
-    const accessToken = await this.catchable<TwitchPlaylistAccessTokenResponse>('post', 'https://gql.twitch.tv/gql', {
-      body: getStreamPlaylistAccessTokenQuery(name),
-      headers: {
-        'Client-ID': import.meta.env.VITE_TWITCH_STREAM_CLIENT_ID,
-        'Device-ID': this.deviceId,
+  public async playStream(
+    name: string,
+    stream?: LiveStream,
+  ): Promise<string | undefined> {
+    const accessToken = await this.catchable<TwitchPlaylistAccessTokenResponse>(
+      'post',
+      'https://gql.twitch.tv/gql',
+      {
+        body: getStreamPlaylistAccessTokenQuery(name),
+        headers: {
+          'Client-ID': import.meta.env.VITE_TWITCH_STREAM_CLIENT_ID,
+          'Device-ID': this.deviceId,
+        },
       },
-    });
+    );
 
     if (stream !== undefined) {
       void this.getChannelWatchStatsUrl(name).then((url) => {
@@ -364,13 +421,9 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
   }
 
   public requestEmotesForChannelId(id: string): void {
-    const emoteProviders = [
-      '7tv',
-      'ffz',
-      'bttv',
-    ];
+    const emoteProviders = ['7tv', 'ffz', 'bttv'];
 
-    emoteProviders.forEach((emoteProvider) => {
+    for (const emoteProvider of emoteProviders) {
       /**
        * @todo Perform request again when status is 200, but nothing has been returned
        */
@@ -393,6 +446,6 @@ export default class Twitch extends AbstractPlatformProvider implements Provider
            */
           console.error(error);
         });
-    });
+    }
   }
 }

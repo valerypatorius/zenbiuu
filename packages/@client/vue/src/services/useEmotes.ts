@@ -1,7 +1,7 @@
-import { inject, watchEffect } from 'vue';
 import { createSharedComposable } from '@vueuse/core';
-import { Injection } from '../injections';
+import { inject, watchEffect } from 'vue';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
+import { Injection } from '../injections';
 import { useAccount } from './useAccount';
 
 export const useEmotes = createSharedComposable(() => {

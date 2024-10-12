@@ -1,13 +1,23 @@
-import { createApp, reactive } from 'vue';
+import {
+  EmotesManager,
+  PlatformsManager,
+  createAccount,
+  createChat,
+  createEmotes,
+  createLibrary,
+} from '@client/core';
+import { Hub } from '@client/hub';
+import type { ModuleStateInterface } from '@client/shared';
 import localforage from 'localforage';
-import { Injection } from './injections';
+import { createApp, reactive } from 'vue';
 import App from './components/App.vue';
 import { getI18n } from './i18n';
-import type { ModuleStateInterface } from '@client/shared';
-import { Hub } from '@client/hub';
-import { createAccount, createChat, createEmotes, createLibrary, PlatformsManager, EmotesManager } from '@client/core';
+import { Injection } from './injections';
 
-async function createReactiveState<S extends object>(name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
+async function createReactiveState<S extends object>(
+  name: string,
+  defaultState: S,
+): Promise<ModuleStateInterface<S>> {
   const originalState = (await storage.getItem<S>(name)) ?? defaultState;
   const reactiveState = reactive(originalState);
 

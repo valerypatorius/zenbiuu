@@ -1,4 +1,4 @@
-import { autoUpdater, type UpdateInfo } from 'electron-updater';
+import { type UpdateInfo, autoUpdater } from 'electron-updater';
 
 export function createUpdater() {
   autoUpdater.autoDownload = false;
@@ -12,7 +12,8 @@ export function createUpdater() {
       return undefined;
     }
 
-    const isUpdateAvailable = autoUpdater.currentVersion.compare(result.updateInfo.version) === -1;
+    const isUpdateAvailable =
+      autoUpdater.currentVersion.compare(result.updateInfo.version) === -1;
 
     return isUpdateAvailable ? result.updateInfo : undefined;
   }

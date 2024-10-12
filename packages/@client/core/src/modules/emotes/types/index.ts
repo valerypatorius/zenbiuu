@@ -6,7 +6,10 @@ export interface ModuleEmotesStoreSchema {
 
 export interface ModuleEmotesStore {
   readonly emotesByChannelId: Map<string, Record<string, EmoteEntity>>;
-  addChannelEmotes: (channelId: string, emotes: Record<string, EmoteEntity>) => void;
+  addChannelEmotes: (
+    channelId: string,
+    emotes: Record<string, EmoteEntity>,
+  ) => void;
 }
 
 export interface ModuleEmotes {

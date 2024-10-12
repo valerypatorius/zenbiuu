@@ -1,5 +1,5 @@
-import { nativeTheme, type NativeTheme } from 'electron';
-import { type createStore } from './store';
+import { type NativeTheme, nativeTheme } from 'electron';
+import type { createStore } from './store';
 
 export function createTheme(store: ReturnType<typeof createStore>) {
   setSource(store.get('theme'));

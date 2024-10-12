@@ -1,6 +1,6 @@
-import { uid, type CallbackFn } from '@zenbiuu/shared';
+import { type CallbackFn, uid } from '@zenbiuu/shared';
+import type { IntervalPayload } from './types';
 import IntervalWorker from './workers/IntervalWorker?worker';
-import { type IntervalPayload } from './types';
 
 type StopFn = () => void;
 
@@ -17,7 +17,11 @@ function handleWorkerMessage(event: MessageEvent<string>): void {
   handler?.();
 }
 
-export function createInterval(fn: CallbackFn, delay: number, options: { immediate?: boolean } = {}): StopFn {
+export function createInterval(
+  fn: CallbackFn,
+  delay: number,
+  options: { immediate?: boolean } = {},
+): StopFn {
   const key = uid();
 
   const data: IntervalPayload = {

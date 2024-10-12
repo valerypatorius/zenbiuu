@@ -1,4 +1,4 @@
-import { type FunctionalComponent } from 'vue';
+import type { FunctionalComponent } from 'vue';
 import '../styles/button.pcss';
 
 const Button: FunctionalComponent<{
@@ -6,10 +6,8 @@ const Button: FunctionalComponent<{
 }> = (props, { slots }) => {
   return (
     <button
-      class={[
-        'button',
-        props.type !== undefined && `button--${props.type}`,
-      ]}
+      class={['button', props.type !== undefined && `button--${props.type}`]}
+      type="button"
     >
       {slots.default?.()}
     </button>

@@ -1,7 +1,7 @@
 import { createSharedComposable } from '@vueuse/core';
 import { inject } from 'vue';
-import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
+import { Injection } from '../injections';
 
 export const useProviders = createSharedComposable(() => {
   const providers = inject(Injection.Providers);

@@ -1,6 +1,9 @@
-import { type TwitchPlaylistAccessTokenResponse } from '../types';
+import type { TwitchPlaylistAccessTokenResponse } from '../types';
 
-export function composeStreamPlaylistUrl(channelName: string, { data }: TwitchPlaylistAccessTokenResponse): string {
+export function composeStreamPlaylistUrl(
+  channelName: string,
+  { data }: TwitchPlaylistAccessTokenResponse,
+): string {
   const params = {
     sig: data.streamPlaybackAccessToken.signature,
     type: 'any',

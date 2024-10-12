@@ -6,7 +6,7 @@
       @close="emit('close')"
     />
 
-    <Chat
+    <StreamChat
       :is-enable-top-offset="isMain"
       :channel="channel"
     />
@@ -14,9 +14,9 @@
 </template>
 
 <script setup lang="ts">
+import type { ChannelEntity, LiveStream } from '@client/shared';
+import StreamChat from './StreamChat.vue';
 import StreamPlayer from './StreamPlayer.vue';
-import Chat from './Chat.vue';
-import type { LiveStream, ChannelEntity } from '@client/shared';
 
 defineProps<{
   channel?: ChannelEntity;

@@ -1,18 +1,13 @@
-import { consola } from 'consola';
-import { createServer, build } from 'vite';
+import { resolve } from 'node:path';
+import { createInterface } from 'node:readline';
 import { createElectronProcess } from '@electron/main/spawner';
+import { consola } from 'consola';
+import { build, createServer } from 'vite';
 import { productName, version } from '../package.json';
 import { createConfig } from './config';
 import { createWatchablePlugin } from './plugins';
-import { createInterface } from 'readline';
-import { resolve } from 'path';
 
-const [
-  ,
-  ,
-  ,
-  outDir,
-] = process.argv;
+const [, , , outDir] = process.argv;
 
 consola.box(`🐒 ${productName}@${version}`);
 consola.start('Starting development...');

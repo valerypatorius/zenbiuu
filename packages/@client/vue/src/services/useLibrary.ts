@@ -1,11 +1,11 @@
-import { computed, inject, watchEffect } from 'vue';
+import { createInterval } from '@client/interval';
+import type { ChannelEntity, LiveStream } from '@client/shared';
 import { createSharedComposable } from '@vueuse/core';
 import { Minute } from '@zenbiuu/shared';
-import { Injection } from '../injections';
+import { computed, inject, watchEffect } from 'vue';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
+import { Injection } from '../injections';
 import { useAccount } from './useAccount';
-import type { LiveStream, ChannelEntity } from '@client/shared';
-import { createInterval } from '@client/interval';
 
 interface LibraryChannel {
   name: string;
@@ -37,21 +37,27 @@ export const useLibrary = createSharedComposable(() => {
       })
       .sort((channelA, channelB) => {
         return (
-          (channelB.stream?.viewersCount ?? 0) * (channelB.isLive === true ? 1 : 0) -
-          (channelA.stream?.viewersCount ?? 0) * (channelA.isLive === true ? 1 : 0)
+          (channelB.stream?.viewersCount ?? 0) *
+            (channelB.isLive === true ? 1 : 0) -
+          (channelA.stream?.viewersCount ?? 0) *
+            (channelA.isLive === true ? 1 : 0)
         );
       });
   });
 
   const liveChannels = computed(() => {
-    return channels.value.filter((channel) => channel.isLive) as (LibraryChannel & {
+    return channels.value.filter(
+      (channel) => channel.isLive,
+    ) as (LibraryChannel & {
       isLive: true;
       stream: LiveStream;
     })[];
   });
 
   const openedChannels = computed(() => {
-    return channels.value.filter((channel) => channel.isOpened) as (LibraryChannel & { isOpened: true })[];
+    return channels.value.filter(
+      (channel) => channel.isOpened,
+    ) as (LibraryChannel & { isOpened: true })[];
   });
 
   let stopLibraryUpdates: (() => void) | undefined;
@@ -92,18 +98,25 @@ export const useLibrary = createSharedComposable(() => {
   }
 
   function closeAllChannels(): void {
-    library?.store.selectedChannelsNames.forEach((name) => {
-      stopStream(name);
-    });
+    if (library?.store === undefined) {
+      return;
+    }
 
-    library?.store.removeAllSelectedChannelsNames();
+    for (const name of library.store.selectedChannelsNames) {
+      stopStream(name);
+    }
+
+    library.store.removeAllSelectedChannelsNames();
   }
 
   function requestChannelByName(name: string): void {
     library?.requestChannelByName(name);
   }
 
-  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
+  async function playStream(
+    name: string,
+    stream?: LiveStream,
+  ): Promise<string | undefined> {
     return library?.playStream(name, stream);
   }
 

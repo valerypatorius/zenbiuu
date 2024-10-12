@@ -1,4 +1,4 @@
-import { type EmoteEntity } from './EmoteEntity';
+import type { EmoteEntity } from './EmoteEntity';
 
 export type EmotesReceivedEvent = CustomEvent<{
   id: string;

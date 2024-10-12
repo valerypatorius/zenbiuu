@@ -1,9 +1,9 @@
-import { inject, watchEffect } from 'vue';
-import { createSharedComposable } from '@vueuse/core';
-import { Injection } from '../injections';
-import MissingModuleInjection from '../errors/MissingModuleInjection';
-import { useAccount } from './useAccount';
 import type { ChannelEntity } from '@client/shared';
+import { createSharedComposable } from '@vueuse/core';
+import { inject, watchEffect } from 'vue';
+import MissingModuleInjection from '../errors/MissingModuleInjection';
+import { Injection } from '../injections';
+import { useAccount } from './useAccount';
 
 export const useChat = createSharedComposable(() => {
   const chat = inject(Injection.Module.Chat);

@@ -1,4 +1,4 @@
-import { type EmotesProviderApiInterface } from '.';
+import type { EmotesProviderApiInterface } from '.';
 
 /**
  * Describes public properties and methods of emotes providers instance

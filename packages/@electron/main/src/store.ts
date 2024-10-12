@@ -1,4 +1,4 @@
-import { type StoreSchema } from '@zenbiuu/shared';
+import type { StoreSchema } from '@zenbiuu/shared';
 import ElectronStore from 'electron-store';
 
 export function createStore(): {

@@ -1,10 +1,14 @@
-import { type ProviderConfig, TransportStatus, ProviderEvent } from './entities';
+import {
+  type ProviderConfig,
+  ProviderEvent,
+  TransportStatus,
+} from './entities';
 import type {
+  EmotesProvidersInterface,
   HubInterface,
   OAuthInterface,
-  TransportInterface,
   SocketsInterface,
-  EmotesProvidersInterface,
+  TransportInterface,
 } from './interfaces';
 
 export abstract class AbstractPlatformProvider {

@@ -8,9 +8,7 @@ export default {
     output: 'dist',
     buildResources: 'build',
   },
-  files: [
-    'packages/**/dist/**',
-  ],
+  files: ['packages/**/dist/**'],
   publish: {
     provider: 'github',
     private: false,

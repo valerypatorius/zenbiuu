@@ -51,11 +51,11 @@
 </template>
 
 <script setup lang="ts">
+import type { AccountEntity } from '@client/shared';
 import { computed } from 'vue';
 import { useProviders } from '~/services/useProviders';
 import Avatar from './ui/Avatar.vue';
 import Icon from './ui/Icon';
-import type { AccountEntity } from '@client/shared';
 
 type Props = AccountEntity & {
   isPrimary?: boolean;
@@ -71,7 +71,9 @@ const emit = defineEmits<{
 const { available: availableProviders } = useProviders();
 
 const expirationDate = computed(() =>
-  props.tokenExpirationDate !== undefined ? new Date(props.tokenExpirationDate).toLocaleString() : '',
+  props.tokenExpirationDate !== undefined
+    ? new Date(props.tokenExpirationDate).toLocaleString()
+    : '',
 );
 </script>
 

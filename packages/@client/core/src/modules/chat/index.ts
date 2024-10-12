@@ -1,6 +1,10 @@
+import type {
+  AccountEntity,
+  ModuleStateFactoryFn,
+  ProvidersInterface,
+} from '@client/shared';
 import { createChatStore } from './store';
-import { type ModuleChat, type ModuleChatStoreSchema } from './types';
-import type { ProvidersInterface, AccountEntity, ModuleStateFactoryFn } from '@client/shared';
+import type { ModuleChat, ModuleChatStoreSchema } from './types';
 
 export async function createChat(
   state: ModuleStateFactoryFn<ModuleChatStoreSchema>,
@@ -19,9 +23,11 @@ export async function createChat(
       return;
     }
 
-    providers.getApi(primaryAccount.provider).joinChat(channelName, (message) => {
-      store.addChannelMessage(channelName, message);
-    });
+    providers
+      .getApi(primaryAccount.provider)
+      .joinChat(channelName, (message) => {
+        store.addChannelMessage(channelName, message);
+      });
   }
 
   function leave(channelName: string): void {

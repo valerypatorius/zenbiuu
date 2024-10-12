@@ -1,9 +1,6 @@
 <template>
   <div class="video-overlay">
-    <div
-      v-if="stream"
-      class="video-overlay__header"
-    >
+    <div v-if="stream" class="video-overlay__info">
       <!-- <IconButton
         icon="chevronLeft"
         :size="24"
@@ -19,79 +16,53 @@
 
       <div class="video-overlay__stats">
         <div class="video-overlay__stat">
-          <Icon
-            name="users"
-            :size="16"
-          />
+          <Icon name="users" :size="16" />
 
           <PrettyNumber :value="stream.viewersCount" />
         </div>
 
         <div class="video-overlay__stat">
-          <Icon
-            name="clock"
-            :size="16"
-          />
+          <Icon name="clock" :size="16" />
 
-          <Duration
-            v-if="stream"
-            :date-start="stream.dateStarted"
-          />
+          <Duration v-if="stream" :date-start="stream.dateStarted" />
         </div>
       </div>
     </div>
 
     <div class="video-controls">
       <div class="video-controls__main">
-        <IconButton
-          icon="play"
-          :size="24"
-        />
+        <IconButton icon="pause" :size="24" />
 
-        <IconButton
-          :icon="volumeIcon"
-          :size="24"
-        />
+        <IconButton :icon="volumeIcon" :size="24" @click="() => {
+          volume = volume === 0 ? 1 : 0;
+        }
+          " />
 
-        <VolumeSlider
-          @move="
-            (value) => {
-              volume = value;
-            }
-          "
-        />
+        <VolumeSlider v-model="volume" />
+
+        <IconButton icon="barsDifferent" :size="24" :active="isCompressorEnabled" @click="toggleAudioCompressor()" />
       </div>
 
-      <IconButton
-        icon="settings"
-        :size="24"
-      />
+      <IconButton icon="settings" :size="24" />
 
-      <IconButton
-        icon="pip"
-        :size="24"
-        @click="togglePictureInPicture"
-      />
+      <IconButton icon="pip" :size="24" @click="togglePictureInPicture()" />
 
-      <IconButton
-        :icon="isFullscreen ? 'minimize' : 'maximize'"
-        :size="24"
-        @click="toggleFullscreen"
-      />
+      <IconButton :icon="isFullscreen ? 'minimize' : 'maximize'" :size="24" @click="toggleFullscreen()" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { LiveStream } from '@client/shared';
 import { useFullscreen, useMediaControls } from '@vueuse/core';
-import IconButton from './IconButton.vue';
-import Icon from './Icon';
 import { toRef } from 'vue';
-import { type LiveStream } from '@client/shared';
-import Duration from '../Duration.vue';
-import VolumeSlider from './VolumeSlider';
-import PrettyNumber from './PrettyNumber';
 import { computed } from 'vue';
+import { useAudioCompressor } from '~/services/useAudioCompressor';
+import Duration from '../Duration.vue';
+import Icon from './Icon';
+import IconButton from './IconButton.vue';
+import PrettyNumber from './PrettyNumber';
+import VolumeSlider from './VolumeSlider';
 
 const props = defineProps<{
   stream?: LiveStream;
@@ -99,8 +70,14 @@ const props = defineProps<{
   video: HTMLVideoElement | null;
 }>();
 
-const { volume, togglePictureInPicture } = useMediaControls(toRef(props, 'video'));
-const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(toRef(props, 'container'));
+const { volume, togglePictureInPicture } = useMediaControls(
+  toRef(props, 'video'),
+);
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(
+  toRef(props, 'container'),
+);
+const { isEnabled: isCompressorEnabled, toggle: toggleAudioCompressor } =
+  useAudioCompressor(toRef(props, 'video'));
 
 const volumeIcon = computed(() => {
   if (volume.value === 0) {
@@ -112,20 +89,22 @@ const volumeIcon = computed(() => {
 </script>
 
 <style lang="postcss">
-@import '~/styles/typography.pcss';
+@import "~/styles/typography.pcss";
 
 .video-overlay {
   width: 100%;
-  height: 100%;
+  height: 600px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: end;
   gap: 20px;
   padding-top: var(--layout-titlebar-height);
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.9) 75%);
+  background-image: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0) 25%,
+      rgba(0, 0, 0, 0.95) 75%);
 
-  &__header {
+  &__info {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;

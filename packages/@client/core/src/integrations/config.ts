@@ -1,7 +1,7 @@
-import Twitch from '@integrations/twitch';
 import SevenTv from '@integrations/7tv';
 import BTTV from '@integrations/bttv';
 import FFZ from '@integrations/ffz';
+import Twitch from '@integrations/twitch';
 
 export const PlatformProvider = {
   [Twitch.config.name]: Twitch,

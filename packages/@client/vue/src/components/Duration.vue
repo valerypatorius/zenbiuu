@@ -3,9 +3,9 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref, computed } from 'vue';
-import { Hour, Minute } from '@zenbiuu/shared';
 import { createInterval } from '@client/interval';
+import { Hour, Minute } from '@zenbiuu/shared';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps<{
   dateStart: string | number;

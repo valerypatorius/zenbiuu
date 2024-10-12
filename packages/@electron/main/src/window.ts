@@ -1,6 +1,6 @@
-import { join } from 'path';
-import { shell, BrowserWindow } from 'electron';
-import { type createStore } from './store';
+import { join } from 'node:path';
+import { BrowserWindow, shell } from 'electron';
+import type { createStore } from './store';
 
 /**
  * @todo Deal with paths, as they are relative to compiled main.cjs file
@@ -10,7 +10,10 @@ export function createWindow(store: ReturnType<typeof createStore>) {
   const url =
     import.meta.env.MODE === 'development'
       ? import.meta.env.VITE_DEV_SERVER_URL
-      : new URL('../renderer/dist/index.html', 'file://' + __dirname).toString();
+      : new URL(
+          '../renderer/dist/index.html',
+          `file://${__dirname}`,
+        ).toString();
 
   let instance: BrowserWindow | undefined;
 
@@ -97,7 +100,10 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     instance?.setBackgroundColor(value);
   }
 
-  function interceptUrlLoad(event: Electron.Event<Electron.WebContentsWillNavigateEventParams>, url: string): void {
+  function interceptUrlLoad(
+    event: Electron.Event<Electron.WebContentsWillNavigateEventParams>,
+    url: string,
+  ): void {
     event.preventDefault();
 
     void shell.openExternal(url);

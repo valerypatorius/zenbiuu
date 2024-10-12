@@ -1,5 +1,5 @@
-import { type TransportPayload } from '../types';
-import { TransportStatus, type TransportResponse } from '@client/shared';
+import { type TransportResponse, TransportStatus } from '@client/shared';
+import type { TransportPayload } from '../types';
 
 const controllersByKey = new Map<string, AbortController>();
 
@@ -9,7 +9,11 @@ const controllersByKey = new Map<string, AbortController>();
  * @param payload - payload for request
  * @param key - request key, based on url and body
  */
-async function handle(method: string, payload: TransportPayload, key: string): Promise<void> {
+async function handle(
+  method: string,
+  payload: TransportPayload,
+  key: string,
+): Promise<void> {
   const pendingRequest = controllersByKey.get(key);
 
   if (pendingRequest !== undefined) {
@@ -38,14 +42,18 @@ async function handle(method: string, payload: TransportPayload, key: string): P
      * If response is not found, do not proceed
      */
     if (response.status === TransportStatus.NotFound) {
-      throw new Error(`Resource ${payload.url} was not found`, { cause: TransportStatus.NotFound });
+      throw new Error(`Resource ${payload.url} was not found`, {
+        cause: TransportStatus.NotFound,
+      });
     }
 
     /**
      * If authorization is required, do not proceed
      */
     if (response.status === TransportStatus.NotAuthorized) {
-      throw new Error(`Authorization is required to access ${payload.url}`, { cause: TransportStatus.NotAuthorized });
+      throw new Error(`Authorization is required to access ${payload.url}`, {
+        cause: TransportStatus.NotAuthorized,
+      });
     }
 
     /**
@@ -57,7 +65,8 @@ async function handle(method: string, payload: TransportPayload, key: string): P
      * If response should be parsed as text, return it right away
      */
     if (
-      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
+      (response.status === TransportStatus.Success ||
+        response.status === TransportStatus.NoContent) &&
       payload.parseResponse === 'text'
     ) {
       message.data = responseText;
@@ -71,7 +80,8 @@ async function handle(method: string, payload: TransportPayload, key: string): P
      * If response should be empty and it is, post message and do not proceed
      */
     if (
-      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
+      (response.status === TransportStatus.Success ||
+        response.status === TransportStatus.NoContent) &&
       responseText.length === 0
     ) {
       self.postMessage(message);
@@ -92,7 +102,10 @@ async function handle(method: string, payload: TransportPayload, key: string): P
      * If response is successfull and error field is not present in it,
      * add data to message and post it
      */
-    if (response.status === TransportStatus.Success && !('error' in responseData)) {
+    if (
+      response.status === TransportStatus.Success &&
+      !('error' in responseData)
+    ) {
       message.data = responseData;
 
       self.postMessage(message);
@@ -106,7 +119,9 @@ async function handle(method: string, payload: TransportPayload, key: string): P
     throw new Error(errormessage);
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      message.error = new Error(`User aborted request ${payload.url}`, { cause: TransportStatus.Canceled });
+      message.error = new Error(`User aborted request ${payload.url}`, {
+        cause: TransportStatus.Canceled,
+      });
     } else {
       message.error = error as Error;
     }
@@ -117,7 +132,11 @@ async function handle(method: string, payload: TransportPayload, key: string): P
 
 self.onmessage = ({
   data: messageData,
-}: MessageEvent<{ action: 'get' | 'post'; data: TransportPayload; key: string }>) => {
+}: MessageEvent<{
+  action: 'get' | 'post';
+  data: TransportPayload;
+  key: string;
+}>) => {
   switch (messageData.action) {
     case 'get':
       void handle('GET', messageData.data, messageData.key);

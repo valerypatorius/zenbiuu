@@ -24,16 +24,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAccount } from '~/services/useAccount';
-import { useSettings } from '~/services/useSettings';
 import { useLibrary } from '~/services/useLibrary';
-import TitleBar from './Titlebar.vue';
+import { useSettings } from '~/services/useSettings';
 import Auth from './Auth.vue';
-import SettingsOverlay from './SettingsOverlay.vue';
 import Library from './Library.vue';
+import SettingsOverlay from './SettingsOverlay.vue';
+import TitleBar from './Titlebar.vue';
 import 'overlayscrollbars/overlayscrollbars.css';
 
 const { primaryAccount } = useAccount();
-const { state: isSettingsOpened, toggleState: toggleSettingsState } = useSettings();
+const { state: isSettingsOpened, toggleState: toggleSettingsState } =
+  useSettings();
 const { closeAllChannels, openedChannels } = useLibrary();
 
 const isSidebarActive = ref(true);

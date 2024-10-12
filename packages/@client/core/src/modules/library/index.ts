@@ -1,6 +1,11 @@
+import type {
+  AccountEntity,
+  LiveStream,
+  ModuleStateFactoryFn,
+  ProvidersInterface,
+} from '@client/shared';
 import { createLibraryStore } from './store';
-import { type ModuleLibraryStoreSchema, type ModuleLibrary } from './types';
-import type { ProvidersInterface, AccountEntity, ModuleStateFactoryFn, LiveStream } from '@client/shared';
+import type { ModuleLibrary, ModuleLibraryStoreSchema } from './types';
 
 export async function createLibrary(
   state: ModuleStateFactoryFn<ModuleLibraryStoreSchema>,
@@ -23,7 +28,9 @@ export async function createLibrary(
       return;
     }
 
-    const names = await providers.getApi(primaryAccount.provider).getFollowedChannelsNamesByUserId(primaryAccount.id);
+    const names = await providers
+      .getApi(primaryAccount.provider)
+      .getFollowedChannelsNamesByUserId(primaryAccount.id);
 
     store.followedChannelsNames = names;
   }
@@ -33,13 +40,18 @@ export async function createLibrary(
       return;
     }
 
-    const streams = await providers.getApi(primaryAccount.provider).getFollowedStreamsByUserId(primaryAccount.id);
+    const streams = await providers
+      .getApi(primaryAccount.provider)
+      .getFollowedStreamsByUserId(primaryAccount.id);
 
-    const streamsByChannelName = streams.reduce<Record<string, LiveStream>>((result, item) => {
-      result[item.channelName] = item;
+    const streamsByChannelName = streams.reduce<Record<string, LiveStream>>(
+      (result, item) => {
+        result[item.channelName] = item;
 
-      return result;
-    }, {});
+        return result;
+      },
+      {},
+    );
 
     store.liveStreamsByChannelName = streamsByChannelName;
   }
@@ -66,16 +78,19 @@ export async function createLibrary(
         .getApi(primaryAccount.provider)
         .getChannelsByNames(Array.from(namesBuffer))
         .then((channels) => {
-          channels.forEach((channel) => {
+          for (const channel of channels) {
             store.saveChannelByName(channel.name, channel);
-          });
+          }
         });
 
       namesBuffer.clear();
     }, 300);
   }
 
-  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
+  async function playStream(
+    name: string,
+    stream?: LiveStream,
+  ): Promise<string | undefined> {
     if (primaryAccount === null) {
       return;
     }

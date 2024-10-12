@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import consola from 'consola';
 import electron from 'electron';
 
@@ -25,7 +25,9 @@ const RESTART_SIGNAL = 'SIGKILL';
 /**
  * Provides control over electron process process
  */
-export function createElectronProcess(handlers?: ElectronProcessHandlers): ElectronProcessManager {
+export function createElectronProcess(
+  handlers?: ElectronProcessHandlers,
+): ElectronProcessManager {
   /**
    * Electron import in node returns path to electron process and we're fine with it
    */
@@ -36,7 +38,10 @@ export function createElectronProcess(handlers?: ElectronProcessHandlers): Elect
    */
   let electronProcess: ReturnType<typeof spawn> | undefined;
 
-  function handleCloseEvent(code: number | null, signal: NodeJS.Signals | null): void {
+  function handleCloseEvent(
+    code: number | null,
+    signal: NodeJS.Signals | null,
+  ): void {
     /**
      * If electron process is being killed after package rebuild, do not stop script
      */
@@ -52,10 +57,7 @@ export function createElectronProcess(handlers?: ElectronProcessHandlers): Elect
       return;
     }
 
-    electronProcess = spawn(electronPath, [
-      '.',
-      '--inspect',
-    ]);
+    electronProcess = spawn(electronPath, ['.', '--inspect']);
 
     electronProcess.on('close', handleCloseEvent);
 

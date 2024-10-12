@@ -1,5 +1,5 @@
-import { type ModuleAccountStore, type ModuleAccountStoreSchema } from './types';
 import type { AccountEntity, ModuleStateFactoryFn } from '@client/shared';
+import type { ModuleAccountStore, ModuleAccountStoreSchema } from './types';
 
 export async function createAccountStore(
   createState: ModuleStateFactoryFn<ModuleAccountStoreSchema>,
@@ -17,7 +17,8 @@ export async function createAccountStore(
 
   function removeAccount({ provider, token }: AccountEntity): void {
     const accountIndex = state.accounts.findIndex(
-      (storedAccount) => storedAccount.provider === provider && storedAccount.token === token,
+      (storedAccount) =>
+        storedAccount.provider === provider && storedAccount.token === token,
     );
 
     if (accountIndex >= 0) {
@@ -27,13 +28,12 @@ export async function createAccountStore(
     save();
   }
 
-  function getAccountByProperties(properties: Partial<AccountEntity>): AccountEntity | undefined {
+  function getAccountByProperties(
+    properties: Partial<AccountEntity>,
+  ): AccountEntity | undefined {
     return state.accounts.find((storedAccount) =>
       Object.entries(properties).every(
-        ([
-          key,
-          value,
-        ]) => storedAccount[key as keyof AccountEntity] === value,
+        ([key, value]) => storedAccount[key as keyof AccountEntity] === value,
       ),
     );
   }
@@ -55,10 +55,16 @@ export async function createAccountStore(
       return false;
     }
 
-    return account.provider === state.primary.provider && account.token === state.primary.token;
+    return (
+      account.provider === state.primary.provider &&
+      account.token === state.primary.token
+    );
   }
 
-  function refreshAccount(account: AccountEntity, properties: Partial<AccountEntity>): void {
+  function refreshAccount(
+    account: AccountEntity,
+    properties: Partial<AccountEntity>,
+  ): void {
     Object.assign(account, properties);
 
     save();

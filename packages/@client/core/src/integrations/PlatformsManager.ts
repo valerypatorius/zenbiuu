@@ -1,9 +1,9 @@
 import type {
-  ProvidersInterface,
-  ProviderApiInterface,
-  HubInterface,
-  ProviderConfig,
   EmotesProvidersInterface,
+  HubInterface,
+  ProviderApiInterface,
+  ProviderConfig,
+  ProvidersInterface,
 } from '@client/shared';
 import { PlatformProvider } from './config';
 
@@ -17,15 +17,7 @@ export class PlatformsManager implements ProvidersInterface {
 
   public get available(): Record<string, ProviderConfig> {
     return Object.fromEntries(
-      Object.entries(PlatformProvider).map(
-        ([
-          name,
-          fn,
-        ]) => [
-          name,
-          fn.config,
-        ],
-      ),
+      Object.entries(PlatformProvider).map(([name, fn]) => [name, fn.config]),
     );
   }
 

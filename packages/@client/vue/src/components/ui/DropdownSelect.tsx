@@ -1,4 +1,4 @@
-import { type FunctionalComponent } from 'vue';
+import type { FunctionalComponent } from 'vue';
 import Icon from './Icon';
 import '../styles/select.pcss';
 
@@ -22,13 +22,18 @@ const DropdownSelect: FunctionalComponent<{
 
       <div class="select__options">
         {options
-          .sort((optionA, optionB) => (optionB.value === modelValue ? 1 : 0) - (optionA.value === modelValue ? 1 : 0))
+          .sort(
+            (optionA, optionB) =>
+              (optionB.value === modelValue ? 1 : 0) -
+              (optionA.value === modelValue ? 1 : 0),
+          )
           .map((option) => (
             <div
               class={[
                 'select__option',
                 option.value === modelValue && 'select__option--active',
               ]}
+              key={option.value}
               onMousedown={() => emit('update:modelValue', option.value)}
             >
               {option.label}

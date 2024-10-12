@@ -111,18 +111,19 @@
 </template>
 
 <script setup lang="ts">
+import { capitalize } from '@zenbiuu/shared';
 import { useI18n } from 'vue-i18n';
 import { useAccount } from '~/services/useAccount';
 import { useProviders } from '~/services/useProviders';
 import { useSettings } from '~/services/useSettings';
-import Scrollable from './ui/Scrollable.vue';
 import ChannelCard from './ChannelCard.vue';
-import IconButton from './ui/IconButton.vue';
 import DropdownSelect from './ui/DropdownSelect';
-import { capitalize } from '@zenbiuu/shared';
+import IconButton from './ui/IconButton.vue';
+import Scrollable from './ui/Scrollable.vue';
 
 const { t, locale, availableLocales } = useI18n();
-const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
+const { accounts, login, logout, isPrimaryAccount, primaryAccount } =
+  useAccount();
 const { available: availableProviders } = useProviders();
 const { toggleState: toggleSettingsState } = useSettings();
 

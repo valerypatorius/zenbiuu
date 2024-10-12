@@ -35,11 +35,11 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import appIconPath from '~/assets/art.svg';
+import Button from '~/components/ui/Button';
+import { useAccount } from '~/services/useAccount';
 import { useProviders } from '../services/useProviders';
 import Scrollable from './ui/Scrollable.vue';
-import Button from '~/components/ui/Button';
-import appIconPath from '~/assets/art.svg';
-import { useAccount } from '~/services/useAccount';
 
 const { t } = useI18n();
 const { login } = useAccount();

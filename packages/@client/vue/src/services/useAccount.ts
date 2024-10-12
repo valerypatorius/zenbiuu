@@ -1,8 +1,8 @@
+import type { AccountEntity } from '@client/shared';
 import { createSharedComposable } from '@vueuse/core';
 import { computed, inject } from 'vue';
-import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
-import type { AccountEntity } from '@client/shared';
+import { Injection } from '../injections';
 
 export const useAccount = createSharedComposable(() => {
   const account = inject(Injection.Module.Account);

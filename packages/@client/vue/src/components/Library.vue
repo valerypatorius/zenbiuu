@@ -71,20 +71,27 @@
 </template>
 
 <script setup lang="ts">
+import appIconPath from '~/assets/art.svg';
 import { useLibrary } from '~/services/useLibrary';
+import ChannelCard from './ChannelCard.vue';
 import LibraryItem from './LibraryItem.vue';
 import StreamView from './StreamView.vue';
-import ChannelCard from './ChannelCard.vue';
-import Scrollable from './ui/Scrollable.vue';
 import IconButton from './ui/IconButton.vue';
-import appIconPath from '~/assets/art.svg';
+import Scrollable from './ui/Scrollable.vue';
 
 defineProps<{
   isSidebarActive?: boolean;
 }>();
 
-const { channels, liveChannels, openedChannels, openChannel, closeChannel, requestChannelByName, playStream } =
-  useLibrary();
+const {
+  channels,
+  liveChannels,
+  openedChannels,
+  openChannel,
+  closeChannel,
+  requestChannelByName,
+  playStream,
+} = useLibrary();
 </script>
 
 <style lang="postcss">

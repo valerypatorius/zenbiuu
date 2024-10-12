@@ -49,12 +49,12 @@
 </template>
 
 <script setup lang="ts">
+import type { LiveStream } from '@client/shared';
 import { ref, watch } from 'vue';
 import ChannelCard from './ChannelCard.vue';
+import Duration from './Duration.vue';
 import Icon from './ui/Icon';
 import PrettyNumber from './ui/PrettyNumber';
-import Duration from './Duration.vue';
-import type { LiveStream } from '@client/shared';
 
 const props = defineProps<{
   name: string;

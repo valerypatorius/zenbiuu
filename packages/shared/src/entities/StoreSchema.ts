@@ -1,4 +1,4 @@
-import { type NativeTheme } from 'electron';
+import type { NativeTheme } from 'electron';
 
 export interface StoreSchema {
   windowBounds: {

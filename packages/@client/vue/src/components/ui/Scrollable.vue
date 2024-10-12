@@ -6,31 +6,41 @@
   >
     <div
       v-if="isScrollbarReady"
-      ref="horizon"
+      ref="horizonTop"
       class="scrollable__horizon scrollable__horizon--top"
     />
 
     <div
-      v-show="isScrolled"
+      v-show="!isTopReached"
       class="scrollable__shadow scrollable__shadow--top"
     />
 
-    <slot />
+    <slot
+      :is-top-reached="isTopReached"
+      :is-bottom-reached="isBottomReached"
+    />
+
+    <div
+      v-if="isScrollbarReady"
+      ref="horizonBottom"
+      class="scrollable__horizon scrollable__horizon--bottom"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useIntersectionObserver } from '@vueuse/core';
-import { onMounted, ref } from 'vue';
 import { useOverlayScrollbars } from 'overlayscrollbars-vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 
-const root = ref<HTMLElement | null>(null);
-
-const horizon = ref<HTMLElement | null>(null);
+const root = useTemplateRef('root');
+const horizonTop = useTemplateRef('horizonTop');
+const horizonBottom = useTemplateRef('horizonBottom');
 
 const isScrollbarReady = ref(false);
 
-const isScrolled = ref(false);
+const isTopReached = ref(false);
+const isBottomReached = ref(false);
 
 /**
  * @todo Deal with scrollbar blinking on fast chat updates
@@ -63,8 +73,12 @@ const [initialize] = useOverlayScrollbars({
   },
 });
 
-useIntersectionObserver(horizon, ([{ isIntersecting }]) => {
-  isScrolled.value = isIntersecting === false;
+useIntersectionObserver(horizonTop, ([{ isIntersecting }]) => {
+  isTopReached.value = isIntersecting;
+});
+
+useIntersectionObserver(horizonBottom, ([{ isIntersecting }]) => {
+  isBottomReached.value = isIntersecting;
 });
 
 onMounted(() => {
@@ -100,12 +114,6 @@ onMounted(() => {
       --offset-y: -12px;
       --shadow-offset-y: 4px;
       top: 0;
-    }
-
-    &--bottom {
-      --offset-y: 0;
-      --shadow-offset-y: -4px;
-      bottom: 0;
     }
   }
 

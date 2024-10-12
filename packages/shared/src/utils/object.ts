@@ -3,7 +3,10 @@
  * @param obj - object which property should be deleted
  * @param property - property name to delete
  */
-export function deleteObjectProperty<T extends object>(obj: T, property: keyof T): void {
+export function deleteObjectProperty<T extends object>(
+  obj: T,
+  property: keyof T,
+): void {
   if (Object.hasOwn(obj, property)) {
     delete obj[property];
   }
@@ -39,7 +42,7 @@ export function statefulObject<T extends Record<string, unknown>>(
 }
 
 export function clearObject<T extends Record<string, unknown>>(obj: T): void {
-  Object.keys(obj).forEach((key) => {
+  for (const key in Object.keys(obj)) {
     deleteObjectProperty(obj, key);
-  });
+  }
 }

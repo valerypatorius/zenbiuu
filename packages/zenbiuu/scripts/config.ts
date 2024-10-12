@@ -1,14 +1,16 @@
-import { type InlineConfig, mergeConfig } from 'vite';
+import rendererConfig from '@client/vue/config';
 import mainConfig from '@electron/main/config';
 import preloadConfig from '@electron/preload/config';
-import rendererConfig from '@client/vue/config';
+import { type InlineConfig, mergeConfig } from 'vite';
 
 type PackagesConfigs = Record<'main' | 'preload' | 'renderer', InlineConfig>;
 
 /**
  * Provides Vite configs composition for each app package
  */
-export function createConfig(customConfigs?: Partial<PackagesConfigs>): PackagesConfigs {
+export function createConfig(
+  customConfigs?: Partial<PackagesConfigs>,
+): PackagesConfigs {
   /**
    * Base config used by every package
    */

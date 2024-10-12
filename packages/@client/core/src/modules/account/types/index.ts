@@ -10,10 +10,15 @@ export interface ModuleAccountStore {
   readonly accounts: AccountEntity[];
   addAccount: (account: AccountEntity) => void;
   removeAccount: (account: AccountEntity) => void;
-  getAccountByProperties: (properties: Partial<AccountEntity>) => AccountEntity | undefined;
+  getAccountByProperties: (
+    properties: Partial<AccountEntity>,
+  ) => AccountEntity | undefined;
   resetPrimaryAccount: () => void;
   isPrimaryAccount: (account: AccountEntity) => boolean;
-  refreshAccount: (account: AccountEntity, properties: Partial<AccountEntity>) => void;
+  refreshAccount: (
+    account: AccountEntity,
+    properties: Partial<AccountEntity>,
+  ) => void;
 }
 
 export interface ModuleAccount {

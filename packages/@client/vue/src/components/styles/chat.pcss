@@ -1,11 +1,5 @@
 .chat-message {
   padding: 6px 12px;
-  /* border-radius: 12px; */
-  /* background-color: color-mix(in srgb, var(--color) 1.5%, var(--theme-color-background)); */
-
-  /* &:nth-child(2n) {
-    background-color: rgba(0, 0, 0, 0.1);
-  } */
 
   &--with-background {
     background-color: rgba(0, 0, 0, 0.1);
@@ -25,6 +19,7 @@
 .chat-message-badges {
   display: inline-flex;
   vertical-align: middle;
+  align-items: center;
   gap: 8px;
   margin-right: 8px;
 }
@@ -38,14 +33,14 @@
   margin-top: -2px;
 
   &--streamer {
-    background-color: #971923;
+    background-color: #d12c39;
   }
 
   &--moderator {
-    background-color: #37974b;
+    background-color: #63b33c;
   }
 
   &--subscriber {
-    background-color: #b37711;
+    background-color: #eba42b;
   }
 }

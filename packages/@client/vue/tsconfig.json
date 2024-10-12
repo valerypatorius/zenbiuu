@@ -2,21 +2,12 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "types": ["vite/client"],
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "WebWorker"],
     "jsx": "preserve",
     "jsxImportSource": "vue",
     "paths": {
       "~/*": ["./src/*"]
     }
   },
-  "include": [
-    "./src",
-    "./src/**/*.vue",
-    "vite.config.ts"
-  ]
+  "include": ["./src", "./src/**/*.vue", "vite.config.ts"]
 }

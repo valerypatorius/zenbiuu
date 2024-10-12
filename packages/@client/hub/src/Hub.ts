@@ -1,11 +1,17 @@
-import { type AppProperties, HubApiKey, HubEvent, type MainProcessApiInterface, parseString } from '@zenbiuu/shared';
 import type {
   HubInterface,
   InterceptedLink,
-  InterceptedLinkHookReturnValue,
   InterceptedLinkEvent,
   InterceptedLinkHook,
+  InterceptedLinkHookReturnValue,
 } from '@client/shared';
+import {
+  type AppProperties,
+  HubApiKey,
+  HubEvent,
+  type MainProcessApiInterface,
+  parseString,
+} from '@zenbiuu/shared';
 
 declare global {
   interface Window {
@@ -25,14 +31,21 @@ export class Hub implements HubInterface {
   readonly #interceptedEventsHooks = new Set<InterceptedLinkHook>();
 
   constructor() {
-    window.addEventListener(HubEvent.InterceptedLink, this.handleInterceptedLinkEvent.bind(this) as EventListener);
+    window.addEventListener(
+      HubEvent.InterceptedLink,
+      this.handleInterceptedLinkEvent.bind(this) as EventListener,
+    );
   }
 
   /**
    * Returns app properties
    */
   public async getAppProperties(): Promise<AppProperties> {
-    return await (this.#api?.getAppProperties() ?? { name: '', version: '', locale: 'en' });
+    return await (this.#api?.getAppProperties() ?? {
+      name: '',
+      version: '',
+      locale: 'en',
+    });
   }
 
   /**
@@ -42,9 +55,9 @@ export class Hub implements HubInterface {
   private handleInterceptedLinkEvent({ detail }: InterceptedLinkEvent): void {
     const data = Hub.parseInterceptedLink(detail.link);
 
-    this.#interceptedEventsHooks.forEach((hook) => {
+    for (const hook of this.#interceptedEventsHooks) {
       hook(data);
-    });
+    }
   }
 
   /**
@@ -54,20 +67,13 @@ export class Hub implements HubInterface {
   private static parseInterceptedLink(source: string): InterceptedLink {
     const url = new URL(source);
     const method = url.pathname.replace(/\W/g, '');
-    const payload = Array.from(url.searchParams.entries()).reduce<InterceptedLink['payload']>(
-      (
-        result,
-        [
-          key,
-          value,
-        ],
-      ) => {
-        result[key] = parseString(value);
+    const payload = Array.from(url.searchParams.entries()).reduce<
+      InterceptedLink['payload']
+    >((result, [key, value]) => {
+      result[key] = parseString(value);
 
-        return result;
-      },
-      {},
-    );
+      return result;
+    }, {});
 
     return {
       method,
@@ -80,14 +86,16 @@ export class Hub implements HubInterface {
    * @param url - url to load
    */
   public openUrlInBrowser(url: string): void {
-    return this.#api?.openUrlInBrowser(url);
+    this.#api?.openUrlInBrowser(url);
   }
 
   /**
    * Add hook, which will be called when intercepted link is successfully parsed
    * @param fn - function to call
    */
-  public onInterceptedLink(fn: InterceptedLinkHook): InterceptedLinkHookReturnValue {
+  public onInterceptedLink(
+    fn: InterceptedLinkHook,
+  ): InterceptedLinkHookReturnValue {
     this.#interceptedEventsHooks.add(fn);
 
     return {

@@ -1,4 +1,4 @@
-import { type EmoteEntity } from './EmoteEntity';
+import type { EmoteEntity } from './EmoteEntity';
 
 export interface ChatMessage {
   id: string;

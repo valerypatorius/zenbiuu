@@ -1,7 +1,7 @@
 import { createSharedComposable } from '@vueuse/core';
 import { inject } from 'vue';
-import { Injection } from '../injections';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
+import { Injection } from '../injections';
 
 export const useHub = createSharedComposable(() => {
   const app = inject(Injection.AppProperties);

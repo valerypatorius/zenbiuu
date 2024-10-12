@@ -6,8 +6,10 @@ export default {
   },
   auth: {
     title: 'Log in to',
-    description: 'To start watching streams in comfort simply connect your Twitch account.',
-    disclaimer: 'Authorization is needed in order to communicate with Twitch API. No personal data is stored.',
+    description:
+      'To start watching streams in comfort simply connect your Twitch account.',
+    disclaimer:
+      'Authorization is needed in order to communicate with Twitch API. No personal data is stored.',
     loginWithTwitch: 'Log in with Twitch account',
   },
   sidebar: {

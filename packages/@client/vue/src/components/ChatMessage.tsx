@@ -1,24 +1,16 @@
-import { type FunctionalComponent } from 'vue';
 import type { ChatMessage, EmoteEntity } from '@client/shared';
+import type { FunctionalComponent } from 'vue';
 import './styles/chat.pcss';
+
 /**
  * Returns emote urls string to use as srcset value
  */
 function getEmoteSrcSet(emote: EmoteEntity): string {
   return Object.entries(emote)
-    .reduce<string[]>(
-      (
-        result,
-        [
-          size,
-          url,
-        ],
-      ) => {
-        result.push(`${url as string} ${size}`);
-        return result;
-      },
-      [],
-    )
+    .reduce<string[]>((result, [size, url]) => {
+      result.push(`${url as string} ${size}`);
+      return result;
+    }, [])
     .join(',');
 }
 
@@ -54,12 +46,14 @@ const Message: FunctionalComponent<ChatMessage> = ({
             /**
              * @todo Set size from 1x image to reserve space
              */
-            return word in emotes ? getEmoteImage(word, emotes[word]).outerHTML : word;
+            return word in emotes
+              ? getEmoteImage(word, emotes[word]).outerHTML
+              : word;
           })
           .join(' ')
       : text;
 
-  const badges = [];
+  const badges: string[] = [];
 
   if (isStreamer === true) {
     badges.push('streamer');
@@ -86,7 +80,10 @@ const Message: FunctionalComponent<ChatMessage> = ({
       {badges.length > 0 && (
         <span class="chat-message-badges">
           {badges.map((name) => (
-            <span class={`chat-message-badge chat-message-badge--${name}`}></span>
+            <span
+              class={`chat-message-badge chat-message-badge--${name}`}
+              key={name}
+            />
           ))}
         </span>
       )}

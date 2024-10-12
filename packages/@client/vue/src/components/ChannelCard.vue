@@ -6,6 +6,7 @@
       details !== undefined && 'channel-card--with-details',
       slots.default !== undefined && 'channel-card--with-slot',
       isLive === true && 'channel-card--live',
+      isLive === false && 'channel-card--offline',
     ]"
   >
     <div
@@ -45,8 +46,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useElementVisibility, watchOnce } from '@vueuse/core';
+import { ref } from 'vue';
 import Avatar from './ui/Avatar.vue';
 
 const slots = defineSlots<{
@@ -88,6 +89,17 @@ watchOnce(isRootElementVisible, () => {
     grid-template-columns: 1fr auto;
     align-items: center;
   }
+
+  /* &--offline {
+    .channel-card__avatar {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .channel-card__name {
+      color: var(--theme-color-text-tertiary);
+    }
+  } */
 
   &__main {
     display: grid;

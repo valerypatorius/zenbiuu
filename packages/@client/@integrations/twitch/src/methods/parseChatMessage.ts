@@ -3,25 +3,25 @@ import { TwitchIrcCommand, type TwitchIrcMessage } from '../types';
 /**
  * Supported message author badges
  */
-const SUPPORTED_BADGES = [
-  'moderator',
-  'subscriber',
-  'partner',
-  'broadcaster',
-];
+const SUPPORTED_BADGES = ['moderator', 'subscriber', 'partner', 'broadcaster'];
 
 /**
  * Returns true, if array of enums includes specified string.
  * Helps to deal with types
  */
-function isEnumArrayIncludesString<T extends string>(str: string, arr: T[]): str is T {
+function isEnumArrayIncludesString<T extends string>(
+  str: string,
+  arr: T[],
+): str is T {
   return arr.includes(str as T);
 }
 
 /**
  * Parse IRC message command
  */
-function parseCommand(source: string): { name: TwitchIrcCommand; channel?: string } | undefined {
+function parseCommand(
+  source: string,
+): { name: TwitchIrcCommand; channel?: string } | undefined {
   const globalCommands = [
     TwitchIrcCommand.Connect,
     TwitchIrcCommand.Disconnect,
@@ -39,10 +39,7 @@ function parseCommand(source: string): { name: TwitchIrcCommand; channel?: strin
     TwitchIrcCommand.RoomState,
   ];
 
-  const [
-    name,
-    channel,
-  ] = source.trim().split(' ');
+  const [name, channel] = source.trim().split(' ');
 
   /**
    * Global commands do not contain channel information,
@@ -72,13 +69,13 @@ function parseBadges(source: string): string[] {
   const result: string[] = [];
   const badges = source.split(',');
 
-  badges.forEach((badge) => {
+  for (const badge of badges) {
     const [name] = badge.split('/');
 
     if (SUPPORTED_BADGES.includes(name)) {
       result.push(name);
     }
-  });
+  }
 
   return result;
 }
@@ -87,15 +84,14 @@ function parseBadges(source: string): string[] {
  * Parse emotes positions in message text.
  * Not really necessary, because in the end all emotes names are simply replaced with String.replace() call
  */
-function parseEmotes(source: string): Record<string, { start: number; end: number }[]> {
+function parseEmotes(
+  source: string,
+): Record<string, { start: number; end: number }[]> {
   const result: Record<string, { start: number; end: number }[]> = {};
   const emotes = source.split('/');
 
-  emotes.forEach((emote) => {
-    const [
-      emoteId,
-      occurrences,
-    ] = emote.split(':');
+  for (const emote of emotes) {
+    const [emoteId, occurrences] = emote.split(':');
 
     /**
      * The list of position objects that identify
@@ -103,20 +99,20 @@ function parseEmotes(source: string): Record<string, { start: number; end: numbe
      */
     const positions = occurrences.split(',');
 
-    result[emoteId] = positions.reduce<{ start: number; end: number }[]>((res, position) => {
-      const [
-        start,
-        end,
-      ] = position.split('-');
+    result[emoteId] = positions.reduce<{ start: number; end: number }[]>(
+      (res, position) => {
+        const [start, end] = position.split('-');
 
-      res.push({
-        start: parseInt(start),
-        end: parseInt(end),
-      });
+        res.push({
+          start: Number.parseInt(start),
+          end: Number.parseInt(end),
+        });
 
-      return res;
-    }, []);
-  });
+        return res;
+      },
+      [],
+    );
+  }
 
   return result;
 }
@@ -128,11 +124,8 @@ function parseTags(source: string): Record<string, any> {
   const result: Record<string, any> = {};
   const chunks = source.split(';');
 
-  chunks.forEach((chunk) => {
-    const [
-      key,
-      value = '',
-    ] = chunk.split('=');
+  for (const chunk of chunks) {
+    const [key, value = ''] = chunk.split('=');
 
     if (value.length === 0) {
       return result;
@@ -155,7 +148,7 @@ function parseTags(source: string): Record<string, any> {
       default:
         result[key] = value;
     }
-  });
+  }
 
   return result;
 }
@@ -174,7 +167,9 @@ function parseText(source: string): string | undefined {
  * Parse incoming IRC message
  * @see https://dev.twitch.tv/docs/irc/example-parser/
  */
-export function parseChatMessage(message: string): TwitchIrcMessage | undefined {
+export function parseChatMessage(
+  message: string,
+): TwitchIrcMessage | undefined {
   const DIVIDER = ' ';
 
   /**

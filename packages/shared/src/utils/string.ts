@@ -2,7 +2,9 @@
  * Parse a string and return a primitive value
  * @param value - string to parse
  */
-export function parseString(value: string): string | number | boolean | null | undefined {
+export function parseString(
+  value: string,
+): string | number | boolean | null | undefined {
   const numericValue = Number(value);
   const isValidNumber = !Number.isNaN(numericValue);
 
@@ -28,14 +30,11 @@ export function parseString(value: string): string | number | boolean | null | u
  * Converts object to string, which can be used as location query
  * @param obj - object to convert
  */
-export function convertObjectToLocationQuery(obj: Record<string, string | number | boolean>): string {
+export function convertObjectToLocationQuery(
+  obj: Record<string, string | number | boolean>,
+): string {
   return Object.entries(obj)
-    .map(
-      ([
-        key,
-        value,
-      ]) => `${key}=${value.toString()}`,
-    )
+    .map(([key, value]) => `${key}=${value.toString()}`)
     .join('&');
 }
 

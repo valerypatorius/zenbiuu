@@ -1,4 +1,4 @@
-import { type IntervalPayload } from '../types';
+import type { IntervalPayload } from '../types';
 
 const intervalsByKey = new Map<string, ReturnType<typeof setInterval>>();
 
@@ -26,7 +26,9 @@ function stop(key: string): void {
   intervalsByKey.delete(key);
 }
 
-self.onmessage = ({ data: messageData }: MessageEvent<{ action: 'start' | 'stop'; data: IntervalPayload }>) => {
+self.onmessage = ({
+  data: messageData,
+}: MessageEvent<{ action: 'start' | 'stop'; data: IntervalPayload }>) => {
   switch (messageData.action) {
     case 'start':
       start(messageData.data);

@@ -1,13 +1,16 @@
 import type { LiveStream } from '@client/shared';
 
-export function composeWatchStatsData(userId: string, stream: LiveStream): string {
+export function composeWatchStatsData(
+  userId: string,
+  stream: LiveStream,
+): string {
   const data = [
     {
       event: 'minute-watched',
       properties: {
         broadcast_id: stream.id,
         channel_id: stream.channelId,
-        user_id: parseInt(userId, 10),
+        user_id: Number.parseInt(userId, 10),
         player: 'site',
       },
     },

@@ -10,7 +10,7 @@
       :src="src"
       loading="lazy"
       @load.once="onLoad"
-    />
+    >
   </div>
 </template>
 

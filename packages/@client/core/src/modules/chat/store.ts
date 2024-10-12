@@ -1,5 +1,5 @@
-import { type ModuleChatStore, type ModuleChatStoreSchema } from './types';
 import type { ChatMessage, ModuleStateFactoryFn } from '@client/shared';
+import type { ModuleChatStore, ModuleChatStoreSchema } from './types';
 
 export async function createChatStore(
   createState: ModuleStateFactoryFn<ModuleChatStoreSchema>,

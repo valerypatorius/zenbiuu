@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { type PluginOption } from 'vite';
+import crypto from 'node:crypto';
+import type { PluginOption } from 'vite';
 
 /**
  * Returns simple Vite plugin for watchable packages.

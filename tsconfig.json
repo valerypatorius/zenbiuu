@@ -7,10 +7,7 @@
     "skipLibCheck": true,
     "strict": true,
     "isolatedModules": true,
-    "types": [
-      "vite/client",
-      "node"
-    ],
+    "types": ["vite/client", "node"],
     "lib": ["ESNext"],
     "esModuleInterop": true
   },

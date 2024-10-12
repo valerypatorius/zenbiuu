@@ -1,12 +1,12 @@
-import { createEmotesStore } from './store';
-import { type ModuleEmotes, type ModuleEmotesStoreSchema } from './types';
 import {
-  type ProvidersInterface,
   type AccountEntity,
-  type ModuleStateFactoryFn,
   type EmotesReceivedEvent,
+  type ModuleStateFactoryFn,
   ProviderEvent,
+  type ProvidersInterface,
 } from '@client/shared';
+import { createEmotesStore } from './store';
+import type { ModuleEmotes, ModuleEmotesStoreSchema } from './types';
 
 export async function createEmotes(
   state: ModuleStateFactoryFn<ModuleEmotesStoreSchema>,
@@ -20,7 +20,10 @@ export async function createEmotes(
 
   let primaryAccount: AccountEntity | null = null;
 
-  window.addEventListener(ProviderEvent.EmotesReceived, handleEmotesReceivedEvent as EventListener);
+  window.addEventListener(
+    ProviderEvent.EmotesReceived,
+    handleEmotesReceivedEvent as EventListener,
+  );
 
   function handleEmotesReceivedEvent({ detail }: EmotesReceivedEvent): void {
     store.addChannelEmotes(detail.id, detail.emotes);
@@ -31,7 +34,9 @@ export async function createEmotes(
       return;
     }
 
-    providers.getApi(primaryAccount.provider).requestEmotesForChannelId(channelId);
+    providers
+      .getApi(primaryAccount.provider)
+      .requestEmotesForChannelId(channelId);
   }
 
   return {

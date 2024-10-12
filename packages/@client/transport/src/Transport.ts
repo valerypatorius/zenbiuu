@@ -1,6 +1,6 @@
-import TransportWorker from './workers/TransportWorker?worker';
-import type { TransportPayload } from './types';
 import type { TransportInterface, TransportResponse } from '@client/shared';
+import type { TransportPayload } from './types';
+import TransportWorker from './workers/TransportWorker?worker';
 
 interface QueueHandlers<T = any> {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -13,7 +13,10 @@ export class Transport implements TransportInterface {
   private readonly worker = new TransportWorker();
 
   constructor(private readonly headers: Record<string, string>) {
-    this.worker.addEventListener('message', this.handleWorkerMessage.bind(this));
+    this.worker.addEventListener(
+      'message',
+      this.handleWorkerMessage.bind(this),
+    );
   }
 
   private handleWorkerMessage(event: MessageEvent<TransportResponse>): void {
@@ -33,7 +36,10 @@ export class Transport implements TransportInterface {
     this.queue.delete(message.url);
   }
 
-  private async handle<T>(action: 'get' | 'post', payload: TransportPayload): Promise<T> {
+  private async handle<T>(
+    action: 'get' | 'post',
+    payload: TransportPayload,
+  ): Promise<T> {
     return await new Promise((resolve, reject) => {
       const data: TransportPayload = {
         url: payload.url,
@@ -60,7 +66,11 @@ export class Transport implements TransportInterface {
     });
   }
 
-  public async get<T>(url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+  public async get<T>(
+    url: string,
+    options?: RequestInit,
+    parseResponse?: 'text',
+  ): Promise<T> {
     return await this.handle<T>('get', {
       url,
       options,
@@ -68,7 +78,11 @@ export class Transport implements TransportInterface {
     });
   }
 
-  public async post<T>(url: string, options?: RequestInit, parseResponse?: 'text'): Promise<T> {
+  public async post<T>(
+    url: string,
+    options?: RequestInit,
+    parseResponse?: 'text',
+  ): Promise<T> {
     return await this.handle<T>('post', {
       url,
       options,

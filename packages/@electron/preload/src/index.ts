@@ -1,18 +1,20 @@
-import { contextBridge, ipcRenderer, type NativeTheme } from 'electron';
-import { type UpdateInfo } from 'electron-updater';
 import {
+  type AppProperties,
   HubApiKey,
   HubChannel,
   HubEvent,
-  type AppProperties,
   type MainProcessApiInterface,
   type UpdaterInterface,
 } from '@zenbiuu/shared';
+import { type NativeTheme, contextBridge, ipcRenderer } from 'electron';
+import type { UpdateInfo } from 'electron-updater';
 
 /**
  * Set app theme
  */
-async function setThemeSource(value: NativeTheme['themeSource']): Promise<void> {
+async function setThemeSource(
+  value: NativeTheme['themeSource'],
+): Promise<void> {
   return await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
 }
 

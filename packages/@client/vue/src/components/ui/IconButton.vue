@@ -13,8 +13,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import Icon from './Icon';
 import type icons from '~/assets/icons';
+import Icon from './Icon';
 
 const props = defineProps<{
   icon: keyof typeof icons;
@@ -27,7 +27,9 @@ const emit = defineEmits<{
   click: [event: MouseEvent];
 }>();
 
-const cssSize = computed(() => (props.size === undefined ? 'auto' : `${props.size}px`));
+const cssSize = computed(() =>
+  props.size === undefined ? 'auto' : `${props.size}px`,
+);
 </script>
 
 <style lang="postcss">

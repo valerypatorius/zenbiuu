@@ -1,4 +1,4 @@
-import { type FunctionalComponent } from 'vue';
+import type { FunctionalComponent } from 'vue';
 import icons from '~/assets/icons';
 import '../styles/icon.pcss';
 
@@ -7,7 +7,7 @@ const Icon: FunctionalComponent<{
   raw?: string;
   size?: number;
 }> = (props) => {
-  const svg = props.name !== undefined ? icons[props.name] : props.raw ?? '';
+  const svg = props.name !== undefined ? icons[props.name] : (props.raw ?? '');
 
   return (
     <div

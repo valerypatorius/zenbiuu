@@ -15,9 +15,9 @@ export class Sockets implements SocketsInterface {
     this.socket = new WebSocket(url);
 
     this.socket.addEventListener('open', () => {
-      this.queue.forEach((message) => {
+      for (const message of this.queue) {
         this.send(message);
-      });
+      }
     });
 
     this.socket.addEventListener('message', handlers.onMessage);

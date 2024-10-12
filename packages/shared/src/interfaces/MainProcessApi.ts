@@ -1,6 +1,6 @@
-import { type NativeTheme } from 'electron';
-import { type AppProperties } from '../entities/AppProperties';
-import { type UpdaterInterface } from './Updater';
+import type { NativeTheme } from 'electron';
+import type { AppProperties } from '../entities/AppProperties';
+import type { UpdaterInterface } from './Updater';
 
 export interface MainProcessApiInterface {
   updater: UpdaterInterface;

@@ -1,12 +1,12 @@
-import { createAccountStore } from './store';
-import { type ModuleAccountStoreSchema, type ModuleAccount } from './types';
 import {
-  type ProvidersInterface,
   type AccountEntity,
   type ModuleStateFactoryFn,
-  ProviderEvent,
   type ProviderDisconnectedEvent,
+  ProviderEvent,
+  type ProvidersInterface,
 } from '@client/shared';
+import { createAccountStore } from './store';
+import type { ModuleAccount, ModuleAccountStoreSchema } from './types';
 
 export async function createAccount(
   state: ModuleStateFactoryFn<ModuleAccountStoreSchema>,
@@ -22,7 +22,10 @@ export async function createAccount(
     connectAccountToProvider(store.primaryAccount);
   }
 
-  window.addEventListener(ProviderEvent.Disconnect, handleDisconnect as EventListener);
+  window.addEventListener(
+    ProviderEvent.Disconnect,
+    handleDisconnect as EventListener,
+  );
 
   function connectAccountToProvider(account: AccountEntity): void {
     providers.getApi(account.provider).connect(account);
@@ -58,7 +61,10 @@ export async function createAccount(
     store.primaryAccount = account;
   }
 
-  async function logout(entity: AccountEntity, isSkipTokenRevoke = false): Promise<void> {
+  async function logout(
+    entity: AccountEntity,
+    isSkipTokenRevoke = false,
+  ): Promise<void> {
     if (isSkipTokenRevoke) {
       providers.getApi(entity.provider).disconnect();
     } else {
