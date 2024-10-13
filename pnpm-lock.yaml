@@ -216,13 +216,13 @@ importers:
       '@zenbiuu/shared':
         specifier: workspace:*
         version: link:../../shared
+      electron-store:
+        specifier: ^8.2.0
+        version: 8.2.0
     devDependencies:
       electron:
         specifier: ^32.1.2
         version: 32.1.2
-      electron-store:
-        specifier: ^8.2.0
-        version: 8.2.0
       electron-updater:
         specifier: ^6.3.4
         version: 6.3.4

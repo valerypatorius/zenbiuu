@@ -7,11 +7,11 @@
     "./spawner": "./scripts/spawner.ts"
   },
   "dependencies": {
-    "@zenbiuu/shared": "workspace:*"
+    "@zenbiuu/shared": "workspace:*",
+    "electron-store": "^8.2.0"
   },
   "devDependencies": {
     "electron": "^32.1.2",
-    "electron-store": "^8.2.0",
     "electron-updater": "^6.3.4"
   }
 }

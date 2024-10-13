@@ -22,7 +22,11 @@ export default defineConfig({
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: ['electron', ...builtinModules],
+      external: [
+        'electron',
+        ...builtinModules,
+        ...builtinModules.map((m) => `node:${m}`),
+      ],
       output: {
         entryFileNames: '[name].cjs',
       },
