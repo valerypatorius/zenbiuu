@@ -128,7 +128,7 @@ function parseTags(source: string): Record<string, any> {
     const [key, value = ''] = chunk.split('=');
 
     if (value.length === 0) {
-      return result;
+      continue;
     }
 
     switch (key) {
