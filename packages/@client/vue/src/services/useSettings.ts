@@ -1,5 +1,6 @@
 import { createSharedComposable, refWithControl } from '@vueuse/core';
-import { inject, ref } from 'vue';
+import { inject, ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import MissingModuleInjection from '~/errors/MissingModuleInjection';
 import { Injection } from '~/injections';
 
@@ -10,16 +11,15 @@ export const useSettings = createSharedComposable(() => {
     throw new MissingModuleInjection(Injection.Module.Settings);
   }
 
-  const state = ref(false);
+  const { locale } = useI18n();
 
-  const isAudioCompressorEnabled = refWithControl(
-    settings.store.isAudioCompressorEnabled,
-    {
-      onChanged(value) {
-        settings.store.isAudioCompressorEnabled = value;
-      },
+  const isSettingsOverlayActive = ref(false);
+
+  const isAudioCompressorEnabled = refWithControl(settings.store.isAudioCompressorEnabled, {
+    onChanged(value) {
+      settings.store.isAudioCompressorEnabled = value;
     },
-  );
+  });
 
   const isCompactLayout = refWithControl(settings.store.isCompactLayout, {
     onChanged: (value) => {
@@ -33,23 +33,24 @@ export const useSettings = createSharedComposable(() => {
     },
   });
 
-  const isSmoothScrollEnabled = refWithControl(
-    settings.store.isSmoothScrollEnabled,
-    {
-      onChanged: (value) => {
-        settings.store.isSmoothScrollEnabled = value;
-      },
+  const isSmoothScrollEnabled = refWithControl(settings.store.isSmoothScrollEnabled, {
+    onChanged: (value) => {
+      settings.store.isSmoothScrollEnabled = value;
     },
-  );
+  });
+
+  watchEffect(() => {
+    settings.store.locale = locale.value;
+  });
 
   return {
-    state,
-    toggleState() {
-      state.value = !state.value;
-    },
+    isSettingsOverlayActive,
     isAudioCompressorEnabled,
     isCompactLayout,
     isSidebarEnabled,
     isSmoothScrollEnabled,
+    toggleOverlay() {
+      isSettingsOverlayActive.value = !isSettingsOverlayActive.value;
+    },
   };
 });

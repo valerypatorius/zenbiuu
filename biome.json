@@ -13,7 +13,8 @@
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "attributePosition": "multiline"
+    "attributePosition": "multiline",
+    "lineWidth": 120
   },
   "organizeImports": {
     "enabled": true

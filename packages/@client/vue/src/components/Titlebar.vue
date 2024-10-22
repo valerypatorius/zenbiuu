@@ -2,7 +2,7 @@
   <div
     :class="[
       'titlebar',
-      isSettingsOpened && 'titlebar--with-settings',
+      isSettingsOverlayActive && 'titlebar--with-settings',
       app.isWindows && 'titlebar--windows',
       app.isMac && 'titlebar--mac',
     ]"
@@ -15,7 +15,7 @@
     >
       <div
         class="titlebar__button titlebar__button--settings"
-        @click="toggleSettingsState()"
+        @click="toggleOverlay()"
       >
         <Icon
           name="settings"
@@ -56,11 +56,7 @@ import { useLibrary } from '~/services/useLibrary';
 import { useSettings } from '~/services/useSettings';
 
 const { app } = useHub();
-const {
-  state: isSettingsOpened,
-  toggleState: toggleSettingsState,
-  isSidebarEnabled,
-} = useSettings();
+const { isSettingsOverlayActive, isSidebarEnabled, toggleOverlay } = useSettings();
 const { primaryAccount } = useAccount();
 const { closeAllChannels, openedChannels } = useLibrary();
 </script>

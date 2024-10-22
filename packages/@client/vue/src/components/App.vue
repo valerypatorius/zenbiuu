@@ -6,7 +6,7 @@
     <Auth v-else />
   </main>
 
-  <SettingsOverlay v-if="isSettingsOpened" />
+  <SettingsOverlay v-if="isSettingsOverlayActive" />
 </template>
 
 <script setup lang="ts">
@@ -19,7 +19,7 @@ import TitleBar from './Titlebar.vue';
 import 'overlayscrollbars/overlayscrollbars.css';
 
 const { primaryAccount } = useAccount();
-const { state: isSettingsOpened } = useSettings();
+const { isSettingsOverlayActive } = useSettings();
 </script>
 
 <style lang="postcss">

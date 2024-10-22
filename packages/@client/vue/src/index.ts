@@ -15,10 +15,7 @@ import App from './components/App.vue';
 import { getI18n } from './i18n';
 import { Injection } from './injections';
 
-async function createReactiveState<S extends object>(
-  name: string,
-  defaultState: S,
-): Promise<ModuleStateInterface<S>> {
+async function createReactiveState<S extends object>(name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
   /**
    * @todo Perform merge with default values
    */
@@ -53,7 +50,7 @@ const settings = await createSettings(createReactiveState);
 
 const app = createApp(App);
 
-app.use(getI18n(appProperties.locale));
+app.use(getI18n(settings.store.locale ?? appProperties.locale));
 
 app.provide(Injection.AppProperties, appProperties);
 app.provide(Injection.Providers, providers);

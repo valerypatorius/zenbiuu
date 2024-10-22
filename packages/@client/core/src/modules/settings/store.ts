@@ -1,6 +1,5 @@
 import type { ModuleStateFactoryFn } from '@client/shared';
 import type { ModuleSettingsStore, ModuleSettingsStoreSchema } from './types';
-import { get } from 'node:http';
 
 export async function createSettingsStore(
   createState: ModuleStateFactoryFn<ModuleSettingsStoreSchema>,
@@ -10,6 +9,7 @@ export async function createSettingsStore(
     isCompactLayout: true,
     isSidebarEnabled: true,
     isSmoothScrollEnabled: false,
+    locale: undefined,
   });
 
   return {
@@ -44,6 +44,17 @@ export async function createSettingsStore(
 
     set isSmoothScrollEnabled(value) {
       state.isSmoothScrollEnabled = value;
+
+      save();
+    },
+
+    get locale() {
+      return state.locale;
+    },
+    set locale(value) {
+      state.locale = value;
+
+      save();
     },
   };
 }

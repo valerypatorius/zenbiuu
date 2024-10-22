@@ -1,7 +1,7 @@
 <template>
   <div
     class="settings-overlay"
-    @click.self="toggleSettingsState()"
+    @click.self="toggleOverlay()"
   >
     <div class="settings">
       <Scrollable>
@@ -91,7 +91,7 @@
           </div>
 
           <!-- Locale management -->
-          <!-- <div class="settings__section">
+          <div class="settings__section">
             <div class="settings__section-title">
               {{ t('settings.locale.title') }}
             </div>
@@ -105,7 +105,7 @@
                 }))
               "
             />
-          </div> -->
+          </div>
 
           <!-- Color scheme management -->
           <!-- <div class="settings__section">
@@ -155,20 +155,13 @@ import { useHub } from '~/services/useHub';
 
 const { t, locale, availableLocales } = useI18n();
 const { app } = useHub();
-const { accounts, login, logout, isPrimaryAccount, primaryAccount } =
-  useAccount();
+const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
-const {
-  toggleState: toggleSettingsState,
-  isAudioCompressorEnabled,
-  isCompactLayout,
-  isSmoothScrollEnabled,
-} = useSettings();
+const { toggleOverlay, isAudioCompressorEnabled, isCompactLayout, isSmoothScrollEnabled } = useSettings();
 
 /**
  * @todo Settings
  * - performance mode with fancy stuff disabled (blur, etc.);
- * - smooth scroll in chat;
  */
 </script>
 
@@ -176,7 +169,7 @@ const {
 @import '~/styles/typography.pcss';
 
 .settings-overlay {
-  /* background-color: rgba(29, 29, 34, 0.8); */
+  background-color: var(--theme-color-overlay);
   position: fixed;
   width: 100%;
   height: 100%;
@@ -192,7 +185,7 @@ const {
   height: 100%;
   padding-top: var(--layout-titlebar-height);
   background-color: color-mix(in srgb, #000 10%, var(--theme-color-background));
-  box-shadow: 100px 0 120px -50px var(--theme-color-shadow);
+  box-shadow: 30px 0 40px -15px var(--theme-color-shadow);
 
   &__main {
     display: grid;

@@ -5,9 +5,13 @@ interface ModuleSettingsBool {
   isSmoothScrollEnabled: boolean;
 }
 
-export interface ModuleSettingsStoreSchema extends ModuleSettingsBool {}
+export interface ModuleSettingsStoreSchema extends ModuleSettingsBool {
+  locale?: string;
+}
 
-export interface ModuleSettingsStore extends ModuleSettingsBool {}
+export interface ModuleSettingsStore extends ModuleSettingsBool {
+  locale?: string;
+}
 
 export interface ModuleSettings {
   readonly store: ModuleSettingsStore;
