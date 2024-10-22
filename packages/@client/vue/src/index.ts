@@ -5,6 +5,7 @@ import {
   createChat,
   createEmotes,
   createLibrary,
+  createSettings,
 } from '@client/core';
 import { Hub } from '@client/hub';
 import type { ModuleStateInterface } from '@client/shared';
@@ -18,6 +19,9 @@ async function createReactiveState<S extends object>(
   name: string,
   defaultState: S,
 ): Promise<ModuleStateInterface<S>> {
+  /**
+   * @todo Perform merge with default values
+   */
   const originalState = (await storage.getItem<S>(name)) ?? defaultState;
   const reactiveState = reactive(originalState);
 
@@ -45,6 +49,7 @@ const account = await createAccount(createReactiveState, { providers });
 const library = await createLibrary(createReactiveState, { providers });
 const emotes = await createEmotes(createReactiveState, { providers });
 const chat = await createChat(createReactiveState, { providers });
+const settings = await createSettings(createReactiveState);
 
 const app = createApp(App);
 
@@ -57,5 +62,6 @@ app.provide(Injection.Module.Account, account);
 app.provide(Injection.Module.Library, library);
 app.provide(Injection.Module.Emotes, emotes);
 app.provide(Injection.Module.Chat, chat);
+app.provide(Injection.Module.Settings, settings);
 
 app.mount(document.body);

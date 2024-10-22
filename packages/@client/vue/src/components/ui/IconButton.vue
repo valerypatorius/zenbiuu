@@ -38,7 +38,6 @@ const cssSize = computed(() =>
   color: var(--theme-color-text-secondary);
   padding: calc(v-bind(cssSize) / 3);
   border-radius: 50%;
-  /* transition: all 0.1s; */
 
   &--active {
     color: #cdb432;

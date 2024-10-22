@@ -13,6 +13,7 @@ import type {
   createChat,
   createEmotes,
   createLibrary,
+  createSettings,
 } from '@client/core';
 
 export const Injection = {
@@ -33,6 +34,9 @@ export const Injection = {
     >,
     Emotes: Symbol('emotes module') as InjectionKey<
       Awaited<ReturnType<typeof createEmotes>>
+    >,
+    Settings: Symbol('settings module') as InjectionKey<
+      Awaited<ReturnType<typeof createSettings>>
     >,
   },
 } as const;

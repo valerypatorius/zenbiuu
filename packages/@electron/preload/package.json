@@ -9,7 +9,7 @@
     "@zenbiuu/shared": "workspace:*"
   },
   "devDependencies": {
-    "electron": "^32.1.2",
-    "electron-updater": "^6.3.4"
+    "electron": "^32.2.1",
+    "electron-updater": "^6.3.9"
   }
 }

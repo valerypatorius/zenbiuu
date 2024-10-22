@@ -28,6 +28,8 @@ export default {
       isAlwaysOnTop: 'App window always on top',
       isBlurEnabled: 'Enable blur effects',
       size: 'Interface size',
+      compactLayout: 'Compact layout',
+      smoothScroll: 'Smooth scrolling',
     },
     colorScheme: {
       title: 'Color scheme',
@@ -58,6 +60,13 @@ export default {
       updateManualDownload: 'Download manually',
     },
     logout: 'Logout',
+    player: {
+      title: 'Player',
+      compressor: {
+        enable: 'Enable audio compressor',
+        disable: 'Disable audio compressor',
+      },
+    },
   },
   chat: {
     connectingTo: 'Connecting to {channel} chat room...',

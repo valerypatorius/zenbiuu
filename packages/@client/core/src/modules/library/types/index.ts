@@ -5,6 +5,7 @@ export interface ModuleLibraryStoreSchema {
   selectedChannelsNames: Set<string>;
   channelsByName: Map<string, ChannelEntity>;
   liveStreamsByChannelName: Map<string, LiveStream>;
+  playerVolumeByChannelName: Map<string, number>;
 }
 
 export interface ModuleLibraryStore {
@@ -19,6 +20,8 @@ export interface ModuleLibraryStore {
   removeSelectedChannelName: (name: string) => void;
   removeAllSelectedChannelsNames: () => void;
   clear: () => void;
+  getChannelVolume: (channelId: string) => number;
+  setChannelVolume: (channelId: string, volume: number) => void;
 }
 
 export interface ModuleLibrary {

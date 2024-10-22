@@ -1,5 +1,10 @@
 <template>
-  <div :class="['avatar', isLoaded && 'avatar--loaded', isOnline && 'avatar--online']">
+  <div
+  :class="[
+    'avatar',
+    isLoaded && 'avatar--loaded',
+    isOnline && 'avatar--online',
+  ]">
     <Icon
       name="user"
       :size="size * 0.5"
@@ -25,7 +30,6 @@ withDefaults(
     isOnline?: boolean;
   }>(),
   {
-    src: undefined,
     size: 36,
   },
 );
@@ -39,7 +43,7 @@ function onLoad(): void {
 
 <style lang="postcss">
 .avatar {
-  --size: v-bind('size + "px"');
+  --size: v-bind(`${size}px`);
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
@@ -59,7 +63,6 @@ function onLoad(): void {
     display: block;
     width: 100%;
     opacity: 0;
-    /* transform: scale(1.15); */
     transition: all 0.1s ease-out;
     border-radius: inherit;
   }
@@ -71,7 +74,6 @@ function onLoad(): void {
 
     img {
       opacity: 1;
-      /* transform: scale(1); */
     }
   }
 
@@ -81,7 +83,7 @@ function onLoad(): void {
       content: '';
       width: var(--size);
       height: var(--size);
-      background-color: #00e640;
+      background-color: var(--theme-color-online);
       box-shadow: 0 0 0 2px var(--theme-color-background);
       border-radius: 50%;
       grid-column: 1;

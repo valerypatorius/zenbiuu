@@ -3,55 +3,40 @@
     ref="rootElement"
     :class="[
       'channel-card',
-      details !== undefined && 'channel-card--with-details',
-      slots.default !== undefined && 'channel-card--with-slot',
-      isLive === true && 'channel-card--live',
-      isLive === false && 'channel-card--offline',
+      (isCompactLayout && !isIgnoreCompact) && 'channel-card--compact',
     ]"
   >
-    <div
-      class="channel-card__main"
-      @click="(event) => emit('click', event)"
-    >
-      <Avatar
-        class="channel-card__avatar"
-        :src="avatar"
-        :size="details !== undefined ? 36 : 24"
-        :is-online="isLive"
-      />
+    <Avatar
+      class="channel-card__avatar"
+      :src="avatar"
+      :size="(isCompactLayout && !isIgnoreCompact) ? 24 : 32"
+      :is-online="isLive"
+    />
 
-      <div class="channel-card__info">
-        <div class="channel-card__name">
-          {{ name }}
+    <div class="channel-card__info">
+      <div class="channel-card__name">
+        {{ name }}
+      </div>
 
-          <span
-            v-if="category"
-            class="channel-card__category"
-          >
-            {{ category }}
-          </span>
-        </div>
-
-        <div
-          v-if="details"
-          class="channel-card__details"
-        >
-          {{ details }}
-        </div>
+      <div
+        v-if="details"
+        class="channel-card__details"
+        :title="details"
+      >
+        {{ details }}
       </div>
     </div>
-
-    <slot />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useElementVisibility, watchOnce } from '@vueuse/core';
-import { ref } from 'vue';
+import { useTemplateRef } from 'vue';
 import Avatar from './ui/Avatar.vue';
+import { useSettings } from '~/services/useSettings';
 
 const slots = defineSlots<{
-  default?: () => any;
+  default?: () => void;
 }>();
 
 const emit = defineEmits<{
@@ -62,18 +47,20 @@ const emit = defineEmits<{
 defineProps<{
   name: string;
   avatar?: string;
-  category?: string;
   details?: string;
   isLive?: boolean;
+  isIgnoreCompact?: boolean;
 }>();
 
-const rootElement = ref<HTMLDivElement>();
+const rootElement = useTemplateRef('rootElement');
 
 /**
  * @todo Improve by clearing observers after "visible" event is emitted
  * @todo Move to directive and convert component to .tsx
  */
 const isRootElementVisible = useElementVisibility(rootElement);
+
+const { isCompactLayout } = useSettings();
 
 watchOnce(isRootElementVisible, () => {
   emit('visible');
@@ -84,55 +71,30 @@ watchOnce(isRootElementVisible, () => {
 @import '~/styles/typography.pcss';
 
 .channel-card {
-  &--with-slot {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-
-  /* &--offline {
-    .channel-card__avatar {
-      filter: grayscale(1);
-      opacity: 0.5;
-    }
-
-    .channel-card__name {
-      color: var(--theme-color-text-tertiary);
-    }
-  } */
-
-  &__main {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto 1fr;
-    gap: 0 12px;
-  }
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
 
   &__info {
-    min-width: 0;
+    @extend %text-overflow;
   }
 
   &__name {
-    @extend %text-overflow;
     color: var(--theme-color-text-secondary);
   }
 
-  &__category,
   &__details {
     @extend %text-small;
-  }
-
-  &__category {
-    @extend %text-small;
     color: var(--theme-color-text-tertiary);
-    margin-left: 12px;
+  }
+}
+
+.channel-card--compact {
+  .channel-card__info {
     display: flex;
     align-items: baseline;
-  }
-
-  &__details {
-    @extend %text-overflow;
-    color: var(--theme-color-text-tertiary);
+    gap: 12px;
   }
 }
 </style>

@@ -134,5 +134,11 @@ export const useLibrary = createSharedComposable(() => {
     requestChannelByName,
     playStream,
     stopStream,
+    getChannelVolume(name: string) {
+      return library.store.getChannelVolume(name);
+    },
+    saveChannelVolume(name: string, value: number) {
+      library.store.setChannelVolume(name, value);
+    },
   };
 });

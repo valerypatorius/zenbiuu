@@ -1,6 +1,6 @@
 <template>
   <div
-    class="library-item"
+    :class="['library-item', isCompactLayout && 'library-item--compact']"
     @click="emit('click')"
   >
     <div
@@ -14,14 +14,17 @@
     </div>
 
     <div class="library-item__info">
-      <div class="library-item__title">
+      <div
+        class="library-item__title"
+        :title="isCompactLayout ? stream.title : undefined"
+      >
         {{ stream.title }}
       </div>
 
       <ChannelCard
         :name="name"
         :avatar="avatar"
-        :category="stream.category"
+        :details="stream.category"
         @visible="emit('channelVisible')"
       />
 
@@ -50,11 +53,12 @@
 
 <script setup lang="ts">
 import type { LiveStream } from '@client/shared';
-import { ref, watch } from 'vue';
+import { ref, useTemplateRef, watch } from 'vue';
 import ChannelCard from './ChannelCard.vue';
 import Duration from './Duration.vue';
 import Icon from './ui/Icon';
 import PrettyNumber from './ui/PrettyNumber';
+import { useSettings } from '~/services/useSettings';
 
 const props = defineProps<{
   name: string;
@@ -67,7 +71,9 @@ const emit = defineEmits<{
   channelVisible: [];
 }>();
 
-const coverElement = ref<HTMLElement | null>(null);
+const { isCompactLayout } = useSettings();
+
+const coverElement = useTemplateRef('coverElement');
 
 const coverImageUrl = ref(props.stream.cover);
 
@@ -123,22 +129,24 @@ watch(
   }
 
   &__info {
-    padding: 12px 0;
+    padding: 14px 0 12px;
     display: grid;
-    align-content: end;
+    align-items: center;
+    /* align-content: end; */
     grid-template-columns: 1fr auto;
-    gap: 6px;
+    gap: 12px;
   }
 
   &__title {
-    @extend %text-overflow;
+    /* @extend %text-overflow; */
     grid-column: span 2;
     font-weight: 500;
   }
 
   &__counters {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
+    align-items: flex-end;
   }
 
   &__counter {
@@ -147,6 +155,19 @@ watch(
     align-items: center;
     gap: 6px;
     color: var(--theme-color-text-secondary);
+  }
+}
+
+.library-item--compact {
+  .library-item {
+    &__title {
+      @extend %text-overflow;
+    }
+
+    &__counters {
+      flex-direction: row;
+      gap: 16px;
+    }
   }
 }
 </style>

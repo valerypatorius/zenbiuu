@@ -1,11 +1,14 @@
-import { type MaybeRef, computed, ref, toValue, watch } from 'vue';
+import { type MaybeRef, computed, toValue, watch } from 'vue';
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createDynamicsCompressor
  */
-export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
-  const isEnabled = ref(false);
+export function useAudioCompressor(
+  target: MaybeRef<HTMLMediaElement | null>,
+  isEnableRaw: MaybeRef<boolean>,
+) {
   const mediaElement = computed(() => toValue(target));
+  const isEnabled = computed(() => toValue(isEnableRaw));
 
   let audioCtx: AudioContext | null = null;
   let audioSource: MediaElementAudioSourceNode | null = null;
@@ -26,6 +29,10 @@ export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
           attack: 0,
           release: 0.25,
         });
+
+        if (isEnabled.value) {
+          enable();
+        }
       } else {
         void audioCtx?.close().then(() => {
           audioCtx = null;
@@ -33,8 +40,6 @@ export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
 
         audioSource = null;
         compressor = null;
-
-        isEnabled.value = false;
       }
     },
     {
@@ -43,9 +48,15 @@ export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
     },
   );
 
-  function enable(): void {
-    isEnabled.value = true;
+  watch(isEnabled, (value) => {
+    if (value) {
+      enable();
+    } else {
+      disable();
+    }
+  });
 
+  function enable(): void {
     if (audioCtx === null || audioSource === null || compressor === null) {
       return;
     }
@@ -56,8 +67,6 @@ export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
   }
 
   function disable(): void {
-    isEnabled.value = false;
-
     if (audioCtx === null || audioSource === null || compressor === null) {
       return;
     }
@@ -66,17 +75,4 @@ export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>) {
     compressor.disconnect(audioCtx.destination);
     audioSource.connect(audioCtx.destination);
   }
-
-  function toggle() {
-    if (isEnabled.value) {
-      disable();
-    } else {
-      enable();
-    }
-  }
-
-  return {
-    isEnabled,
-    toggle,
-  };
 }

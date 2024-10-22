@@ -1,20 +1,8 @@
 <template>
-  <TitleBar
-    :is-stream-active="openedChannels.length > 0"
-    :is-sidebar-active="isSidebarActive"
-    :is-settings-active="isSettingsOpened"
-    :is-can-toggle-sidebar="primaryAccount !== null"
-    @go-home="closeAllChannels()"
-    @toggle-settings="toggleSettingsState()"
-    @toggle-left-sidebar="isSidebarActive = !isSidebarActive"
-  />
+  <TitleBar />
 
   <main>
-    <Library
-      v-if="primaryAccount !== null"
-      :is-sidebar-active="isSidebarActive"
-    />
-
+    <Library v-if="primaryAccount !== null" />
     <Auth v-else />
   </main>
 
@@ -22,9 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useAccount } from '~/services/useAccount';
-import { useLibrary } from '~/services/useLibrary';
 import { useSettings } from '~/services/useSettings';
 import Auth from './Auth.vue';
 import Library from './Library.vue';
@@ -33,11 +19,7 @@ import TitleBar from './Titlebar.vue';
 import 'overlayscrollbars/overlayscrollbars.css';
 
 const { primaryAccount } = useAccount();
-const { state: isSettingsOpened, toggleState: toggleSettingsState } =
-  useSettings();
-const { closeAllChannels, openedChannels } = useLibrary();
-
-const isSidebarActive = ref(true);
+const { state: isSettingsOpened } = useSettings();
 </script>
 
 <style lang="postcss">

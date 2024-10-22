@@ -45,6 +45,8 @@ export class Hub implements HubInterface {
       name: '',
       version: '',
       locale: 'en',
+      isWindows: true,
+      isMac: false,
     });
   }
 

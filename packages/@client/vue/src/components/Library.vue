@@ -1,28 +1,31 @@
 <template>
-  <div :class="['library', isSidebarActive && 'library--with-sidebar']">
+  <div :class="['library', isSidebarEnabled && 'library--with-sidebar']">
     <aside
-      v-show="isSidebarActive"
+      v-show="isSidebarEnabled"
       class="library__sidebar"
     >
       <Scrollable>
         <div class="library__channels">
-          <ChannelCard
+          <div
             v-for="{ name, data, stream, isLive, isOpened } in channels"
             :key="name"
             :class="['library__channel', isOpened && 'library__channel--active']"
-            :name="name"
-            :category="stream?.category"
-            :avatar="data?.avatar"
-            :is-live="isLive"
             @click="openChannel(name)"
-            @visible="requestChannelByName(name)"
           >
-            <IconButton
+            <ChannelCard
+              :name="name"
+              :details="stream?.category ?? (!isCompactLayout ? data?.description : undefined)"
+              :avatar="data?.avatar"
+              :is-live="isLive"
+              @visible="requestChannelByName(name)"
+            />
+
+            <!-- <IconButton
               icon="plus"
               :size="16"
-              @click="openChannel(name, true)"
-            />
-          </ChannelCard>
+              @click.stop="openChannel(name, true)"
+            /> -->
+          </div>
         </div>
       </Scrollable>
     </aside>
@@ -78,10 +81,7 @@ import LibraryItem from './LibraryItem.vue';
 import StreamView from './StreamView.vue';
 import IconButton from './ui/IconButton.vue';
 import Scrollable from './ui/Scrollable.vue';
-
-defineProps<{
-  isSidebarActive?: boolean;
-}>();
+import { useSettings } from '~/services/useSettings';
 
 const {
   channels,
@@ -92,6 +92,8 @@ const {
   requestChannelByName,
   playStream,
 } = useLibrary();
+
+const { isCompactLayout, isSidebarEnabled } = useSettings();
 </script>
 
 <style lang="postcss">
@@ -117,19 +119,19 @@ const {
   }
 
   &__channel {
-    height: 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 8px 12px;
     border-radius: 12px;
-    padding: 0 12px;
-    color: var(--theme-color-text-secondary);
     cursor: pointer;
-    background-image: var(--background-image);
+
+    &:not(:last-child) {
+      margin-bottom: 1px;
+    }
 
     &:hover {
       background-color: var(--theme-color-background);
-
-      .icon-button {
-        display: block;
-      }
     }
 
     &--active {
@@ -142,7 +144,8 @@ const {
     }
 
     .icon-button {
-      display: none;
+      flex-shrink: 0;
+      margin-left: auto;
     }
   }
 

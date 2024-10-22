@@ -17,20 +17,25 @@
 
             <div class="accounts">
               <div class="accounts__list">
-                <ChannelCard
+                <div
                   v-for="account in accounts"
                   :key="`${account.provider}:${account.token}`"
-                  :name="account.name"
-                  :details="
-                    t('validUntilDate', {
-                      date: new Intl.DateTimeFormat(locale, {
-                        dateStyle: 'short',
-                        timeStyle: 'short',
-                      }).format(new Date(account.tokenExpirationDate ?? '')),
-                    })
-                  "
-                  :avatar="account.avatar"
+                  class="accounts__item"
                 >
+                  <ChannelCard
+                    :name="account.name"
+                    :details="
+                      t('validUntilDate', {
+                        date: new Intl.DateTimeFormat(locale, {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        }).format(new Date(account.tokenExpirationDate ?? '')),
+                      })
+                    "
+                    :avatar="account.avatar"
+                    :is-ignore-compact="true"
+                  />
+
                   <div class="settings__account-actions">
                     <IconButton
                       icon="crown"
@@ -46,7 +51,7 @@
                       @click="logout(account)"
                     />
                   </div>
-                </ChannelCard>
+                </div>
               </div>
 
               <div class="accounts__footer">
@@ -61,6 +66,30 @@
             </div>
           </div>
 
+          <div class="settings__section">
+            <div class="settings__section-title">
+              {{ t('settings.interface.title') }}
+            </div>
+
+            <Checkbox v-model:value="isCompactLayout">
+              {{ t('settings.interface.compactLayout') }}
+            </Checkbox>
+
+            <Checkbox v-model:value="isSmoothScrollEnabled">
+              {{ t('settings.interface.smoothScroll') }}
+            </Checkbox>
+          </div>
+
+          <div class="settings__section">
+            <div class="settings__section-title">
+              {{ t('settings.player.title') }}
+            </div>
+
+            <Checkbox v-model:value="isAudioCompressorEnabled">
+              {{ t('settings.player.compressor.enable') }}
+            </Checkbox>
+          </div>
+
           <!-- Locale management -->
           <!-- <div class="settings__section">
             <div class="settings__section-title">
@@ -68,17 +97,12 @@
             </div>
 
             <DropdownSelect
+              v-model="locale"
               :options="
                 availableLocales.map((value) => ({
                   value,
                   label: capitalize(new Intl.DisplayNames([value], { type: 'language' }).of(value) ?? value),
                 }))
-              "
-              :modelValue="locale"
-              @update:modelValue="
-                (value) => {
-                  locale = value;
-                }
               "
             />
           </div> -->
@@ -104,6 +128,12 @@
               "
             />
           </div> -->
+
+          <!-- <div class="settings__section">
+            <div class="settings__section-title">
+              {{ app.name }}@{{ app.version }}
+            </div>
+          </div> -->
         </div>
       </Scrollable>
     </div>
@@ -120,16 +150,23 @@ import ChannelCard from './ChannelCard.vue';
 import DropdownSelect from './ui/DropdownSelect';
 import IconButton from './ui/IconButton.vue';
 import Scrollable from './ui/Scrollable.vue';
+import Checkbox from './ui/Checkbox';
+import { useHub } from '~/services/useHub';
 
 const { t, locale, availableLocales } = useI18n();
+const { app } = useHub();
 const { accounts, login, logout, isPrimaryAccount, primaryAccount } =
   useAccount();
 const { available: availableProviders } = useProviders();
-const { toggleState: toggleSettingsState } = useSettings();
+const {
+  toggleState: toggleSettingsState,
+  isAudioCompressorEnabled,
+  isCompactLayout,
+  isSmoothScrollEnabled,
+} = useSettings();
 
 /**
  * @todo Settings
- * - compact/default mode;
  * - performance mode with fancy stuff disabled (blur, etc.);
  * - smooth scroll in chat;
  */
@@ -164,15 +201,26 @@ const { toggleState: toggleSettingsState } = useSettings();
     padding-top: 0;
   }
 
+  &__section {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
   &__section-title {
     @extend %text-small;
     color: var(--theme-color-text-secondary);
-    margin: 12px 0;
   }
 
   &__account-actions {
     display: flex;
     gap: 4px;
+  }
+
+  &__footer {
+    @extend %text-small;
+    color: var(--theme-color-text-secondary);
+    margin-top: auto;
   }
 }
 
@@ -183,6 +231,12 @@ const { toggleState: toggleSettingsState } = useSettings();
   &__list {
     display: grid;
     gap: 12px;
+  }
+
+  &__item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
   }
 }
 </style>

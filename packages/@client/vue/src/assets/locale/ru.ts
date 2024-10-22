@@ -27,6 +27,8 @@ export default {
       isAlwaysOnTop: 'Поверх остальных окон',
       isBlurEnabled: 'Включить эффекты размытия',
       size: 'Размер интерфейса',
+      compactLayout: 'Компактный вид',
+      smoothScroll: 'Плавный скролл',
     },
     colorScheme: {
       title: 'Цветовая схема',
@@ -57,6 +59,13 @@ export default {
       updateManualDownload: 'Скачать вручную',
     },
     logout: 'Выйти',
+    player: {
+      title: 'Плеер',
+      compressor: {
+        enable: 'Включить компрессор аудио',
+        disable: 'Выключить компрессор аудио',
+      },
+    },
   },
   chat: {
     connectingTo: 'Подключение к чату {channel}...',

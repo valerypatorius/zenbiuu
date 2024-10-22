@@ -13,6 +13,7 @@ export async function createLibraryStore(
     selectedChannelsNames: new Set(),
     liveStreamsByChannelName: new Map(),
     channelsByName: new Map(),
+    playerVolumeByChannelName: new Map(),
   });
 
   function saveChannelByName(name: string, channel: ChannelEntity): void {
@@ -76,5 +77,13 @@ export async function createLibraryStore(
     removeSelectedChannelName,
     removeAllSelectedChannelsNames,
     clear,
+    setChannelVolume(name, volume) {
+      state.playerVolumeByChannelName.set(name, volume);
+
+      save();
+    },
+    getChannelVolume(name) {
+      return state.playerVolumeByChannelName.get(name) ?? 0.1;
+    },
   };
 }

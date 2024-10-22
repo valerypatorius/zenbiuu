@@ -31,23 +31,32 @@
 
     <div class="video-controls">
       <div class="video-controls__main">
-        <IconButton icon="pause" :size="24" />
+        <!-- <IconButton icon="pause" :size="24" /> -->
 
-        <IconButton :icon="volumeIcon" :size="24" @click="() => {
-          volume = volume === 0 ? 1 : 0;
-        }
-          " />
+        <IconButton
+          :icon="volumeIcon"
+          :size="24"
+          @click="() => {
+            volume = volume === 0 ? 1 : 0;
+          }"
+        />
 
         <VolumeSlider v-model="volume" />
-
-        <IconButton icon="barsDifferent" :size="24" :active="isCompressorEnabled" @click="toggleAudioCompressor()" />
       </div>
 
-      <IconButton icon="settings" :size="24" />
+      <!-- <IconButton icon="settings" :size="24" /> -->
 
-      <IconButton icon="pip" :size="24" @click="togglePictureInPicture()" />
+      <IconButton
+        icon="pip"
+        :size="24"
+        @click="togglePictureInPicture()"
+      />
 
-      <IconButton :icon="isFullscreen ? 'minimize' : 'maximize'" :size="24" @click="toggleFullscreen()" />
+      <IconButton
+        :icon="isFullscreen ? 'minimize' : 'maximize'"
+        :size="24"
+        @click="toggleFullscreen()"
+      />
     </div>
   </div>
 </template>
@@ -55,7 +64,7 @@
 <script setup lang="ts">
 import type { LiveStream } from '@client/shared';
 import { useFullscreen, useMediaControls } from '@vueuse/core';
-import { toRef } from 'vue';
+import { onBeforeMount, toRef } from 'vue';
 import { computed } from 'vue';
 import { useAudioCompressor } from '~/services/useAudioCompressor';
 import Duration from '../Duration.vue';
@@ -68,16 +77,27 @@ const props = defineProps<{
   stream?: LiveStream;
   container: HTMLDivElement | null;
   video: HTMLVideoElement | null;
+  isNormalizeAudio?: boolean;
 }>();
 
-const { volume, togglePictureInPicture } = useMediaControls(
+const volume = defineModel('volume', {
+  type: Number,
+  default: 0,
+  set(v) {
+    mediaVolume.value = v;
+
+    return v;
+  },
+});
+
+const { volume: mediaVolume, togglePictureInPicture } = useMediaControls(
   toRef(props, 'video'),
 );
 const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(
   toRef(props, 'container'),
 );
-const { isEnabled: isCompressorEnabled, toggle: toggleAudioCompressor } =
-  useAudioCompressor(toRef(props, 'video'));
+
+useAudioCompressor(toRef(props, 'video'), toRef(props, 'isNormalizeAudio'));
 
 const volumeIcon = computed(() => {
   if (volume.value === 0) {
@@ -85,6 +105,10 @@ const volumeIcon = computed(() => {
   }
 
   return volume.value < 0.5 ? 'volumeLow' : 'volume';
+});
+
+onBeforeMount(() => {
+  mediaVolume.value = volume.value;
 });
 </script>
 

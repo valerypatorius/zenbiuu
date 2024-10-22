@@ -18,9 +18,12 @@
     />
 
     <VideoControls
+      v-if="stream"
+      v-model:volume="volume"
       :stream="stream"
       :container="container"
       :video="video"
+      :is-normalize-audio="isNormalizeAudio"
     />
   </div>
 </template>
@@ -29,8 +32,9 @@
 import type { LiveStream } from '@client/shared';
 import Hls from 'hls.js';
 import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import VideoControls from './ui/VideoControls.vue';
+import { useStreamPlayer } from '~/services/useStreamPlayer';
 
 const props = defineProps<{
   stream?: LiveStream;
@@ -41,16 +45,16 @@ defineEmits<{
   close: [];
 }>();
 
+const { volume, isNormalizeAudio } = useStreamPlayer(() => props.stream);
+
 const CANVAS_WIDTH = 320;
 const CANVAS_HEIGHT = 180;
 
-const container = ref<HTMLDivElement | null>(null);
+const container = useTemplateRef('container');
+const video = useTemplateRef('video');
+const canvas = useTemplateRef('canvas');
 
 const playlistUrl = ref<string>();
-
-const video = ref<HTMLVideoElement | null>(null);
-
-const canvas = ref<HTMLCanvasElement | null>(null);
 
 const hls = new Hls({
   // debug: true,

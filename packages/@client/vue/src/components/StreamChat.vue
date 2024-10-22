@@ -67,6 +67,7 @@ import ChatMessage from './ChatMessage';
 import Button from './ui/Button';
 import Icon from './ui/Icon';
 import Scrollable from './ui/Scrollable.vue';
+import { useSettings } from '~/services/useSettings';
 
 const props = defineProps<{
   channel?: ChannelEntity;
@@ -78,6 +79,7 @@ const container = useTemplateRef('container');
 const { join, leave, messagesByChannel } = useChat();
 const { requestEmotes, emotesByChannelId } = useEmotes();
 const { primaryAccount } = useAccount();
+const { isSmoothScrollEnabled } = useSettings();
 const { t } = useI18n();
 const isContainerHovered = useElementHover(container);
 
@@ -111,7 +113,10 @@ const messages = computed(() => {
 const lastMessage = computed(() => messages.value[messages.value.length - 1]);
 
 function scrollToBottom(): void {
-  horizon.value?.scrollIntoView({ block: 'end' });
+  horizon.value?.scrollIntoView({
+    block: 'end',
+    behavior: isSmoothScrollEnabled.value ? 'smooth' : 'auto',
+  });
 }
 
 watch(

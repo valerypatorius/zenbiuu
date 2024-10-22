@@ -2,6 +2,7 @@ import { type AppProperties, HubChannel } from '@zenbiuu/shared';
 import { app, ipcMain, shell } from 'electron';
 import type { createTheme } from './theme';
 import type { createWindow } from './window';
+import os from 'node:os';
 
 export function createHub(
   window: ReturnType<typeof createWindow>,
@@ -15,6 +16,8 @@ export function createHub(
        * @todo Do not perform replacement
        */
       locale: app.getLocale().replace(/-\w+/, ''),
+      isWindows: os.platform() === 'win32',
+      isMac: os.platform() === 'darwin',
     };
   });
 
