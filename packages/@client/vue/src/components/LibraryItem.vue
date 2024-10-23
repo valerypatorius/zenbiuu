@@ -3,10 +3,7 @@
     :class="['library-item', isCompactLayout && 'library-item--compact']"
     @click="emit('click')"
   >
-    <div
-      ref="coverElement"
-      class="library-item__cover"
-    >
+    <div class="library-item__cover">
       <img
         :src="coverImageUrl"
         loading="lazy"
@@ -25,7 +22,6 @@
         :name="name"
         :avatar="avatar"
         :details="stream.category"
-        @visible="emit('channelVisible')"
       />
 
       <div class="library-item__counters">
@@ -53,7 +49,7 @@
 
 <script setup lang="ts">
 import type { LiveStream } from '@client/shared';
-import { ref, useTemplateRef, watch } from 'vue';
+import { ref, watch } from 'vue';
 import ChannelCard from './ChannelCard.vue';
 import Duration from './Duration.vue';
 import Icon from './ui/Icon';
@@ -68,12 +64,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   click: [];
-  channelVisible: [];
 }>();
 
 const { isCompactLayout } = useSettings();
-
-const coverElement = useTemplateRef('coverElement');
 
 const coverImageUrl = ref(props.stream.cover);
 

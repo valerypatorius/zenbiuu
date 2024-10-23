@@ -1,6 +1,7 @@
 <template>
   <div class="stream">
     <StreamPlayer
+      :channel-name="channelName"
       :stream="stream"
       :playlist="playlist"
       @close="emit('close')"
@@ -19,6 +20,7 @@ import StreamChat from './StreamChat.vue';
 import StreamPlayer from './StreamPlayer.vue';
 
 defineProps<{
+  channelName: string;
   channel?: ChannelEntity;
   stream?: LiveStream;
   isMain?: boolean;

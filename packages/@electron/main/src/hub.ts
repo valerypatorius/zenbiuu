@@ -4,10 +4,7 @@ import type { createTheme } from './theme';
 import type { createWindow } from './window';
 import os from 'node:os';
 
-export function createHub(
-  window: ReturnType<typeof createWindow>,
-  theme?: ReturnType<typeof createTheme>,
-) {
+export function createHub(window: ReturnType<typeof createWindow>, theme?: ReturnType<typeof createTheme>) {
   ipcMain.handle(HubChannel.GetAppProperties, (): AppProperties => {
     return {
       name: app.getName(),

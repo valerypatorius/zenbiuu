@@ -34,17 +34,9 @@ import { useElementVisibility, watchOnce } from '@vueuse/core';
 import { useTemplateRef } from 'vue';
 import Avatar from './ui/Avatar.vue';
 import { useSettings } from '~/services/useSettings';
+import { useLibrary } from '~/services/useLibrary';
 
-const slots = defineSlots<{
-  default?: () => void;
-}>();
-
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-  visible: [];
-}>();
-
-defineProps<{
+const props = defineProps<{
   name: string;
   avatar?: string;
   details?: string;
@@ -52,18 +44,13 @@ defineProps<{
   isIgnoreCompact?: boolean;
 }>();
 
+const { isCompactLayout } = useSettings();
+const { requestChannelByName } = useLibrary();
 const rootElement = useTemplateRef('rootElement');
-
-/**
- * @todo Improve by clearing observers after "visible" event is emitted
- * @todo Move to directive and convert component to .tsx
- */
 const isRootElementVisible = useElementVisibility(rootElement);
 
-const { isCompactLayout } = useSettings();
-
 watchOnce(isRootElementVisible, () => {
-  emit('visible');
+  requestChannelByName(props.name);
 });
 </script>
 

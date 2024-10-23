@@ -51,14 +51,7 @@
 <script setup lang="ts">
 import type { ChannelEntity } from '@client/shared';
 import { useElementHover } from '@vueuse/core';
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useTemplateRef,
-  watch,
-} from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useChat } from '~/services/useChat';
 import { useAccount } from '../services/useAccount';

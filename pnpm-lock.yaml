@@ -221,8 +221,8 @@ importers:
         version: 8.2.0
     devDependencies:
       electron:
-        specifier: ^32.2.1
-        version: 32.2.1
+        specifier: ^33.0.2
+        version: 33.0.2
       electron-updater:
         specifier: ^6.3.9
         version: 6.3.9
@@ -1111,6 +1111,11 @@ packages:
 
   electron@32.2.1:
     resolution: {integrity: sha512-GCPI/5hU34pPcNltNpz+uylhhuTm9BM0N8RmrbVgaWBodLSmmcCkvpgN0BseKhO6IwQOPzWaovrcZ/nPIpfGaQ==}
+    engines: {node: '>= 12.20.55'}
+    hasBin: true
+
+  electron@33.0.2:
+    resolution: {integrity: sha512-C2WksfP0COsMHbYXSJG68j6S3TjuGDrw/YT42B526yXalIlNQZ2GeAYKryg6AEMkIp3p8TUfDRD0+HyiyCt/nw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2493,6 +2498,14 @@ snapshots:
       - supports-color
 
   electron@32.2.1:
+    dependencies:
+      '@electron/get': 2.0.3
+      '@types/node': 20.16.14
+      extract-zip: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  electron@33.0.2:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 20.16.14

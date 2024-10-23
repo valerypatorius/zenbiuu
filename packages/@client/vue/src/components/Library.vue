@@ -17,7 +17,6 @@
               :details="stream?.category ?? (!isCompactLayout ? data?.description : undefined)"
               :avatar="data?.avatar"
               :is-live="isLive"
-              @visible="requestChannelByName(name)"
             />
 
             <!-- <IconButton
@@ -37,6 +36,7 @@
       <StreamView
         v-for="(channel, index) in openedChannels"
         :key="channel.name"
+        :channel-name="channel.name"
         :channel="channel.data"
         :stream="channel.stream"
         :playlist="channel.isLive ? playStream : undefined"
@@ -58,7 +58,6 @@
             :name="channel.name"
             :avatar="channel.data?.avatar"
             @click="openChannel(channel.name)"
-            @channel-visible="requestChannelByName(channel.name)"
           />
         </div>
       </Scrollable>
@@ -83,15 +82,7 @@ import IconButton from './ui/IconButton.vue';
 import Scrollable from './ui/Scrollable.vue';
 import { useSettings } from '~/services/useSettings';
 
-const {
-  channels,
-  liveChannels,
-  openedChannels,
-  openChannel,
-  closeChannel,
-  requestChannelByName,
-  playStream,
-} = useLibrary();
+const { channels, liveChannels, openedChannels, openChannel, closeChannel, playStream } = useLibrary();
 
 const { isCompactLayout, isSidebarEnabled } = useSettings();
 </script>

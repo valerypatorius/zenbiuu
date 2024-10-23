@@ -6,15 +6,14 @@
     <div class="player__background">
       <canvas
         ref="canvas"
-        :width="CANVAS_WIDTH"
-        :height="CANVAS_HEIGHT"
+        :width="320"
+        :height="180"
       />
     </div>
 
     <video
       ref="video"
       :poster="stream?.cover"
-      @loadeddata="startCanvasPainting"
     />
 
     <VideoControls
@@ -30,13 +29,14 @@
 
 <script setup lang="ts">
 import type { LiveStream } from '@client/shared';
-import Hls from 'hls.js';
-import HlsWorkerUrl from 'hls.js/dist/hls.worker?url';
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
+import { useTemplateRef } from 'vue';
 import VideoControls from './ui/VideoControls.vue';
 import { useStreamPlayer } from '~/services/useStreamPlayer';
+import { useVideoCanvas } from '~/services/useVideoCanvas';
+import { useHls } from '~/services/useHls';
 
 const props = defineProps<{
+  channelName: string;
   stream?: LiveStream;
   playlist?: (name: string, stream?: LiveStream) => Promise<string | undefined>;
 }>();
@@ -45,100 +45,15 @@ defineEmits<{
   close: [];
 }>();
 
-const { volume, isNormalizeAudio } = useStreamPlayer(() => props.stream);
-
-const CANVAS_WIDTH = 320;
-const CANVAS_HEIGHT = 180;
-
 const container = useTemplateRef('container');
 const video = useTemplateRef('video');
 const canvas = useTemplateRef('canvas');
+const { volume, isNormalizeAudio } = useStreamPlayer(() => props.stream);
 
-const playlistUrl = ref<string>();
+useHls(video, async () => await props.playlist?.(props.channelName, props.stream));
 
-const hls = new Hls({
-  // debug: true,
-  // progressive: true,
-  enableWorker: true,
-  workerPath: HlsWorkerUrl,
-  startLevel: -1,
-
-  capLevelOnFPSDrop: true,
-  liveDurationInfinity: true,
-  liveSyncDurationCount: 1,
-  liveMaxLatencyDurationCount: 3,
-});
-
-const canvasContext = computed(() => canvas.value?.getContext('2d') ?? null);
-
-let isCanDrawCanvas = false;
-
-function startCanvasPainting(): void {
-  if (
-    video.value === null ||
-    canvas.value === null ||
-    canvasContext.value === null
-  ) {
-    return;
-  }
-
-  isCanDrawCanvas = !isCanDrawCanvas;
-
-  if (isCanDrawCanvas) {
-    const { width, height } = canvas.value;
-
-    canvasContext.value.drawImage(video.value, 0, 0, width, height);
-  }
-
-  /**
-   * @todo Perform cleanup on unmount
-   */
-  requestAnimationFrame(startCanvasPainting);
-}
-
-function drawInitialCanvasImage(): void {
-  if (canvasContext.value === null || props.stream?.cover === undefined) {
-    return;
-  }
-
-  const image = new Image(CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  image.onload = () => {
-    canvasContext.value?.drawImage(image, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  };
-
-  image.src = props.stream.cover;
-}
-
-onMounted(async () => {
-  if (canvasContext.value !== null) {
-    canvasContext.value.filter = 'blur(20px)';
-  }
-
-  drawInitialCanvasImage();
-
-  if (props.playlist === undefined || props.stream === undefined) {
-    return;
-  }
-
-  playlistUrl.value = await props.playlist(
-    props.stream.channelName,
-    props.stream,
-  );
-
-  if (playlistUrl.value === undefined || video.value === null) {
-    return;
-  }
-
-  hls.loadSource(playlistUrl.value);
-
-  hls.attachMedia(video.value);
-
-  await video.value.play();
-});
-
-onBeforeUnmount(() => {
-  hls.destroy();
+useVideoCanvas(video, canvas, {
+  fallbackImageUrl: props.stream?.cover,
 });
 </script>
 
