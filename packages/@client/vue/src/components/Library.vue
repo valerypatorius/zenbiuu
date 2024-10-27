@@ -9,21 +9,40 @@
           <div
             v-for="{ name, data, stream, isLive, isOpened } in channels"
             :key="name"
-            :class="['library__channel', isOpened && 'library__channel--active']"
+            :class="[
+              'library-channel',
+              isOpened && 'library-channel--active',
+              isCompactLayout && 'library-channel--compact'
+            ]"
+            :style="{
+              '--opened-channel-index': openedChannels.findIndex((channel) => channel.name === name),
+            }"
             @click="openChannel(name)"
           >
-            <ChannelCard
-              :name="name"
-              :details="stream?.category ?? (!isCompactLayout ? data?.description : undefined)"
-              :avatar="data?.avatar"
-              :is-live="isLive"
-            />
+            <div class="library-channel__main">
+              <ChannelCard
+                :name="name"
+                :details="stream?.category ?? (!isCompactLayout ? 'Offline' : undefined)"
+                :avatar="data?.avatar"
+                :is-live="isLive"
+              />
+            </div>
 
-            <!-- <IconButton
-              icon="plus"
-              :size="16"
+            <div
+              v-if="isOpened"
+              class="library-channel__action"
+              @click.stop="closeChannel(name)"
+            >
+              <Icon name="close" :size="15" />
+            </div>
+
+            <div
+              v-else
+              class="library-channel__action"
               @click.stop="openChannel(name, true)"
-            /> -->
+            >
+              <Icon name="plus" :size="16" />
+            </div>
           </div>
         </div>
       </Scrollable>
@@ -41,7 +60,6 @@
         :stream="channel.stream"
         :playlist="channel.isLive ? playStream : undefined"
         :is-main="index === 0"
-        @close="closeChannel(channel.name)"
       />
     </div>
 
@@ -78,9 +96,9 @@ import { useLibrary } from '~/services/useLibrary';
 import ChannelCard from './ChannelCard.vue';
 import LibraryItem from './LibraryItem.vue';
 import StreamView from './StreamView.vue';
-import IconButton from './ui/IconButton.vue';
 import Scrollable from './ui/Scrollable.vue';
 import { useSettings } from '~/services/useSettings';
+import Icon from './ui/Icon';
 
 const { channels, liveChannels, openedChannels, openChannel, closeChannel, playStream } = useLibrary();
 
@@ -109,13 +127,12 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
     padding: 6px 6px 12px 6px;
   }
 
-  &__channel {
+  &-channel {
     display: grid;
     grid-template-columns: 1fr auto;
-    align-items: center;
-    padding: 8px 12px;
     border-radius: 12px;
     cursor: pointer;
+    overflow: hidden;
 
     &:not(:last-child) {
       margin-bottom: 1px;
@@ -123,20 +140,51 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
 
     &:hover {
       background-color: var(--theme-color-background);
+
+      .library-channel__action {
+        display: flex;
+      }
     }
 
     &--active {
       pointer-events: none;
       background-color: var(--theme-color-background);
       position: sticky;
-      top: 0;
+      top: calc(var(--opened-channel-index, 0) * 41px);
       bottom: 0;
       z-index: 2;
+
+      .library-channel__action {
+        display: flex;
+      }
     }
 
-    .icon-button {
-      flex-shrink: 0;
-      margin-left: auto;
+    &--compact {
+      .library-channel__main {
+        padding: 8px 12px;
+      }
+
+      .library-channel__action {
+        padding: 0 12px;
+      }
+    }
+
+    &__main {
+      padding: 4px 12px;
+    }
+
+    &__action {
+      color: var(--theme-color-text-tertiary);
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      display: none;
+      pointer-events: auto;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+        color: var(--theme-color-text-secondary);
+      }
     }
   }
 

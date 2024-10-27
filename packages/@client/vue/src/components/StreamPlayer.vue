@@ -1,7 +1,13 @@
 <template>
   <div
     ref="container"
-    class="player"
+    :class="[
+      'player',
+      isInactive && 'player--inactive',
+    ]"
+    @mouseenter="onMouseEnter()"
+    @mousemove="onMouseMove()"
+    @mouseleave="onMouseLeave()"
   >
     <div class="player__background">
       <canvas
@@ -16,20 +22,22 @@
       :poster="stream?.cover"
     />
 
-    <VideoControls
-      v-if="stream"
-      v-model:volume="volume"
-      :stream="stream"
-      :container="container"
-      :video="video"
-      :is-normalize-audio="isNormalizeAudio"
-    />
+    <div class="player__overlay">
+      <VideoControls
+        v-if="stream"
+        v-model:volume="volume"
+        :stream="stream"
+        :container="container"
+        :video="video"
+        :is-normalize-audio="isNormalizeAudio"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { LiveStream } from '@client/shared';
-import { useTemplateRef } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import VideoControls from './ui/VideoControls.vue';
 import { useStreamPlayer } from '~/services/useStreamPlayer';
 import { useVideoCanvas } from '~/services/useVideoCanvas';
@@ -39,10 +47,6 @@ const props = defineProps<{
   channelName: string;
   stream?: LiveStream;
   playlist?: (name: string, stream?: LiveStream) => Promise<string | undefined>;
-}>();
-
-defineEmits<{
-  close: [];
 }>();
 
 const container = useTemplateRef('container');
@@ -55,6 +59,41 @@ useHls(video, async () => await props.playlist?.(props.channelName, props.stream
 useVideoCanvas(video, canvas, {
   fallbackImageUrl: props.stream?.cover,
 });
+
+const isInactive = ref(true);
+const isControlHovered = ref(false);
+
+let inactivityTimeout: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * @todo Move mousemove logic to composable
+ */
+
+function disableInactivityWatcher(): void {
+  isInactive.value = false;
+
+  clearTimeout(inactivityTimeout);
+}
+
+function onMouseEnter(): void {
+  onMouseMove();
+}
+
+function onMouseMove(): void {
+  if (isControlHovered.value) {
+    return;
+  }
+
+  disableInactivityWatcher();
+
+  inactivityTimeout = setTimeout(() => {
+    isInactive.value = true;
+  }, 1500);
+}
+
+function onMouseLeave(): void {
+  disableInactivityWatcher();
+}
 </script>
 
 <style lang="postcss">
@@ -65,6 +104,14 @@ useVideoCanvas(video, canvas, {
   position: relative;
   z-index: 1;
   overflow: hidden;
+
+  &--inactive {
+    cursor: none;
+
+    .player__overlay {
+      display: none;
+    }
+  }
 
   &__title {
     @extend %text-heading;
@@ -92,14 +139,28 @@ useVideoCanvas(video, canvas, {
     height: 100%;
   }
 
-  .video-overlay {
+  &__overlay {
+    width: 100%;
+    height: 100%;
+    padding-top: var(--layout-titlebar-height);
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
+    display: flex;
+    flex-direction: column;
     opacity: 0;
+
+    .video-controls {
+      margin-top: auto;
+    }
   }
 
-  &:hover .video-overlay {
+  &__close {
+    margin-left: auto;
+    margin-right: 20px;
+  }
+
+  &:hover .player__overlay {
     opacity: 1;
   }
 }

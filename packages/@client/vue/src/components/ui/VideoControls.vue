@@ -1,48 +1,43 @@
 <template>
-  <div class="video-overlay">
-    <div v-if="stream" class="video-overlay__info">
-      <!-- <IconButton
-        icon="chevronLeft"
-        :size="24"
-      /> -->
-
-      <div class="video-overlay__category">
+  <div class="video-controls">
+    <div class="video-controls__info">
+      <div class="video-controls__category">
         {{ stream.category }}
       </div>
 
-      <div class="video-overlay__title">
+      <div class="video-controls__title">
         {{ stream.title }}
       </div>
 
-      <div class="video-overlay__stats">
-        <div class="video-overlay__stat">
+      <div class="video-controls__stats">
+        <div class="video-controls__stat">
           <Icon name="users" :size="16" />
 
           <PrettyNumber :value="stream.viewersCount" />
         </div>
 
-        <div class="video-overlay__stat">
+        <div class="video-controls__stat">
           <Icon name="clock" :size="16" />
 
-          <Duration v-if="stream" :date-start="stream.dateStarted" />
+          <Duration :date-start="stream.dateStarted" />
         </div>
       </div>
     </div>
 
-    <div class="video-controls">
-      <div class="video-controls__main">
-        <!-- <IconButton icon="pause" :size="24" /> -->
+    <div class="video-controls__main">
+      <!-- <IconButton icon="pause" :size="24" /> -->
 
-        <IconButton
-          :icon="volumeIcon"
-          :size="24"
-          @click="() => {
-            volume = volume === 0 ? 1 : 0;
-          }"
-        />
+      <IconButton
+        :icon="volumeIcon"
+        :size="24"
+        @click="() => {
+          volume = volume === 0 ? 1 : 0;
+        }"
+      />
 
-        <VolumeSlider v-model="volume" />
-      </div>
+      <VolumeSlider v-model="volume" />
+
+      <div class="video-controls__spacer" />
 
       <!-- <IconButton icon="settings" :size="24" /> -->
 
@@ -74,7 +69,7 @@ import PrettyNumber from './PrettyNumber';
 import VolumeSlider from './VolumeSlider';
 
 const props = defineProps<{
-  stream?: LiveStream;
+  stream: LiveStream;
   container: HTMLDivElement | null;
   video: HTMLVideoElement | null;
   isNormalizeAudio?: boolean;
@@ -90,12 +85,8 @@ const volume = defineModel('volume', {
   },
 });
 
-const { volume: mediaVolume, togglePictureInPicture } = useMediaControls(
-  toRef(props, 'video'),
-);
-const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(
-  toRef(props, 'container'),
-);
+const { volume: mediaVolume, togglePictureInPicture } = useMediaControls(toRef(props, 'video'));
+const { isFullscreen, toggle: toggleFullscreen } = useFullscreen(toRef(props, 'container'));
 
 useAudioCompressor(toRef(props, 'video'), toRef(props, 'isNormalizeAudio'));
 
@@ -115,7 +106,7 @@ onBeforeMount(() => {
 <style lang="postcss">
 @import "~/styles/typography.pcss";
 
-.video-overlay {
+.video-controls {
   width: 100%;
   height: 600px;
   padding: 20px;
@@ -123,7 +114,6 @@ onBeforeMount(() => {
   flex-direction: column;
   justify-content: end;
   gap: 20px;
-  padding-top: var(--layout-titlebar-height);
   background-image: linear-gradient(to bottom,
       rgba(0, 0, 0, 0) 25%,
       rgba(0, 0, 0, 0.95) 75%);
@@ -158,20 +148,15 @@ onBeforeMount(() => {
     align-items: center;
     gap: 4px;
   }
-}
-
-.video-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--theme-color-text-secondary);
-  white-space: nowrap;
 
   &__main {
-    margin-right: auto;
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  &__spacer {
+    flex: 1;
   }
 }
 </style>

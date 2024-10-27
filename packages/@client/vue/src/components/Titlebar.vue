@@ -24,6 +24,17 @@
       </div>
 
       <div
+        v-show="openedChannels.length > 0"
+        class="titlebar__button"
+        @click="closeAllChannels()"
+      >
+        <Icon
+          name="home"
+          :size="20"
+        />
+      </div>
+
+      <div
         v-if="primaryAccount !== null"
         class="titlebar__button"
         @click="() => isSidebarEnabled = !isSidebarEnabled"
@@ -35,16 +46,16 @@
       </div>
     </div>
 
-    <div
+    <!-- <div
       v-show="openedChannels.length > 0"
       class="titlebar__button"
       @click="closeAllChannels()"
     >
       <Icon
-        name="home"
+        name="chevronLeft"
         :size="20"
       />
-    </div>
+    </div> -->
   </div>
 </template>
 
