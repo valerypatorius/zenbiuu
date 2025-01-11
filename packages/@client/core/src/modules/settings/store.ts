@@ -5,7 +5,7 @@ export async function createSettingsStore(
   createState: ModuleStateFactoryFn<ModuleSettingsStoreSchema>,
 ): Promise<ModuleSettingsStore> {
   const { state, save } = await createState('store:settings', {
-    isAudioCompressorEnabled: false,
+    isAudioCompressorEnabled: true,
     isCompactLayout: true,
     isSidebarEnabled: true,
     isSmoothScrollEnabled: false,

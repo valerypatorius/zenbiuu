@@ -16,10 +16,11 @@ import { getI18n } from './i18n';
 import { Injection } from './injections';
 
 async function createReactiveState<S extends object>(name: string, defaultState: S): Promise<ModuleStateInterface<S>> {
-  /**
-   * @todo Perform merge with default values
-   */
-  const originalState = (await storage.getItem<S>(name)) ?? defaultState;
+  const savedState = (await storage.getItem<S>(name)) ?? {};
+  const originalState = {
+    ...defaultState,
+    ...savedState,
+  };
   const reactiveState = reactive(originalState);
 
   return {
