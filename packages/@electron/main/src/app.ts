@@ -6,9 +6,7 @@ export function createApp() {
 
   const isAllowAppStart = app.requestSingleInstanceLock();
 
-  async function start(
-    beforeStartExternal?: (instance: Electron.App) => void,
-  ): Promise<void> {
+  async function start(beforeStartExternal?: (instance: Electron.App) => void): Promise<void> {
     beforeStart();
     beforeStartExternal?.(app);
 
@@ -22,18 +20,15 @@ export function createApp() {
   function beforeStart(): void {
     registerProtocol();
 
-    app.commandLine.appendSwitch(
-      'disable-features',
-      'HardwareMediaKeyHandling,MediaSessionService',
-    );
+    app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
 
     /**
      * Experimental flags to decrease GPU load aka "it works on my machine"
      */
-    app.commandLine.appendSwitch('use-gl', 'angle');
-    app.commandLine.appendSwitch('use-angle', 'gl');
+    // app.commandLine.appendSwitch('use-gl', 'angle');
+    // app.commandLine.appendSwitch('use-angle', 'gl');
 
-    app.commandLine.appendArgument('--force_high_performance_gpu');
+    // app.commandLine.appendArgument('--force_high_performance_gpu');
 
     /**
      * @todo Research if window shortcuts can work with this setting
@@ -59,9 +54,7 @@ export function createApp() {
     }
 
     if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient(protocol, process.execPath, [
-        path.resolve(process.argv[1]),
-      ]);
+      app.setAsDefaultProtocolClient(protocol, process.execPath, [path.resolve(process.argv[1])]);
     }
   }
 
