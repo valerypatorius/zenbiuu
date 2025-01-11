@@ -1,8 +1,4 @@
-import {
-  type ProviderConfig,
-  ProviderEvent,
-  TransportStatus,
-} from './entities';
+import { type ProviderConfig, ProviderEvent, TransportStatus } from './entities';
 import type {
   EmotesProvidersInterface,
   HubInterface,

@@ -85,19 +85,16 @@ void (async () => {
     /**
      * Deal with CORS
      */
-    session.defaultSession.webRequest.onHeadersReceived(
-      filter,
-      (details, handler) => {
-        const responseHeaders = {
-          ...objectKeysToLowercase(details?.responseHeaders ?? {}),
-          'access-control-allow-origin': '*',
-        };
+    session.defaultSession.webRequest.onHeadersReceived(filter, (details, handler) => {
+      const responseHeaders = {
+        ...objectKeysToLowercase(details?.responseHeaders ?? {}),
+        'access-control-allow-origin': '*',
+      };
 
-        handler({
-          responseHeaders,
-        });
-      },
-    );
+      handler({
+        responseHeaders,
+      });
+    });
 
     window.open({
       // backgroundColor: theme.windowColor,

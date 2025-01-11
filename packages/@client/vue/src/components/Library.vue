@@ -4,10 +4,20 @@
       v-show="isSidebarEnabled"
       class="library__sidebar"
     >
+      <div class="library__search">
+        <TextInput
+          icon="search"
+          :placeholder="t('search')"
+          @update:value="(value) => {
+            searchQuery = value;
+          }"
+        />
+      </div>
+
       <Scrollable>
         <div class="library__channels">
           <div
-            v-for="{ name, data, stream, isLive, isOpened } in channels"
+            v-for="{ name, data, stream, isLive, isOpened } in channels.filter((channel) => channel.name.toLowerCase().includes(searchQuery.toLowerCase()))"
             :key="name"
             :class="[
               'library-channel',
@@ -37,11 +47,11 @@
             </div>
 
             <div
-              v-else
+              v-else-if="openedChannels.length > 0"
               class="library-channel__action"
               @click.stop="openChannel(name, true)"
             >
-              <Icon name="plus" :size="16" />
+              <Icon name="playlistAdd" :size="20" />
             </div>
           </div>
         </div>
@@ -97,12 +107,14 @@ import ChannelCard from './ChannelCard.vue';
 import LibraryItem from './LibraryItem.vue';
 import StreamView from './StreamView.vue';
 import Scrollable from './ui/Scrollable.vue';
+import TextInput from './ui/TextInput';
 import { useSettings } from '~/services/useSettings';
 import Icon from './ui/Icon';
+import { useI18n } from 'vue-i18n';
 
-const { channels, liveChannels, openedChannels, openChannel, closeChannel, playStream } = useLibrary();
-
+const { channels, liveChannels, openedChannels, searchQuery, openChannel, closeChannel, playStream } = useLibrary();
 const { isCompactLayout, isSidebarEnabled } = useSettings();
+const { t } = useI18n();
 </script>
 
 <style lang="postcss">
@@ -119,12 +131,13 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
 
   &__sidebar {
     display: grid;
-    background-color: rgba(0, 0, 0, 0.1);
-    padding-top: var(--layout-titlebar-height);
+    grid-template-rows: auto 1fr;
+    background-color: var(--theme-color-background-sidebar);
+    padding-top: calc(var(--layout-titlebar-height) + 6px);
   }
 
   &__channels {
-    padding: 6px 6px 12px 6px;
+    padding: 0 6px 6px 6px;
   }
 
   &-channel {
@@ -133,10 +146,7 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
     border-radius: 12px;
     cursor: pointer;
     overflow: hidden;
-
-    &:not(:last-child) {
-      margin-bottom: 1px;
-    }
+    margin-bottom: 1px;
 
     &:hover {
       background-color: var(--theme-color-background);
@@ -153,6 +163,7 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
       top: calc(var(--opened-channel-index, 0) * 41px);
       bottom: 0;
       z-index: 2;
+      box-shadow: 0 1px 0 0 var(--theme-color-background-sidebar);
 
       .library-channel__action {
         display: flex;
@@ -177,7 +188,8 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
       color: var(--theme-color-text-tertiary);
       align-items: center;
       justify-content: center;
-      padding: 0 16px;
+      width: 42px;
+      /* padding: 0 16px; */
       display: none;
       pointer-events: auto;
 
@@ -217,6 +229,17 @@ const { isCompactLayout, isSidebarEnabled } = useSettings();
       width: 100%;
       filter: grayscale(1);
       opacity: 0.1;
+    }
+  }
+
+  &__search {
+    height: 46px;
+    padding: 0 6px 6px;
+    background-color: var(--theme-color-background-sidebar);
+    display: flex;
+
+    .text-input {
+      border-radius: 12px;
     }
   }
 }

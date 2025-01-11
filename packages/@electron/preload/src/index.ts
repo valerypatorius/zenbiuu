@@ -12,9 +12,7 @@ import type { UpdateInfo } from 'electron-updater';
 /**
  * Set app theme
  */
-async function setThemeSource(
-  value: NativeTheme['themeSource'],
-): Promise<void> {
+async function setThemeSource(value: NativeTheme['themeSource']): Promise<void> {
   return await ipcRenderer.invoke(HubChannel.SetThemeSource, value);
 }
 

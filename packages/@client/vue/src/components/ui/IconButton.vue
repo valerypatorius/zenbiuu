@@ -27,9 +27,7 @@ const emit = defineEmits<{
   click: [event: MouseEvent];
 }>();
 
-const cssSize = computed(() =>
-  props.size === undefined ? 'auto' : `${props.size}px`,
-);
+const cssSize = computed(() => (props.size === undefined ? 'auto' : `${props.size}px`));
 </script>
 
 <style lang="postcss">
@@ -40,8 +38,10 @@ const cssSize = computed(() =>
   border-radius: 50%;
 
   &--active {
-    color: #cdb432;
-    background-color: rgba(205, 180, 50, 0.1);
+    color: var(--theme-color-button-background);
+    background-color: rgba(26, 91, 255, 0.089);
+    /* color: #cdb432;
+    background-color: rgba(205, 180, 50, 0.1); */
   }
 
   &[disabled] {

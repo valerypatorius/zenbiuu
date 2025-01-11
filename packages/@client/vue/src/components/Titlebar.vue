@@ -29,7 +29,7 @@
         @click="closeAllChannels()"
       >
         <Icon
-          name="home"
+          name="grid"
           :size="20"
         />
       </div>

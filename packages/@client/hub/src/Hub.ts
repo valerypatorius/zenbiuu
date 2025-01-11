@@ -59,7 +59,7 @@ export class Hub implements HubInterface {
    */
   private static parseInterceptedLink(source: string): InterceptedLink {
     const url = new URL(source);
-    const method = url.pathname.replace(/\W/g, '');
+    const method = url.hostname.replace(/\W/g, '');
     const payload = Array.from(url.searchParams.entries()).reduce<InterceptedLink['payload']>(
       (result, [key, value]) => {
         result[key] = parseString(value);

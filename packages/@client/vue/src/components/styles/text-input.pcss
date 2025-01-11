@@ -1,0 +1,36 @@
+.text-input {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--theme-color-button-background);
+
+    input::placeholder {
+      color: rgba(0, 0, 0, 0);
+    }
+  }
+
+  &__icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12px;
+    color: var(--theme-color-text-secondary);
+  }
+
+  input {
+    flex: 1;
+    height: 100%;
+    padding: 0 12px;
+    background-color: transparent;
+
+    &::placeholder {
+      color: var(--theme-color-text-secondary);
+    }
+  }
+}

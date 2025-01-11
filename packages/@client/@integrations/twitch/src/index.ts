@@ -11,13 +11,7 @@ import {
 import { AbstractPlatformProvider } from '@client/shared';
 import { Sockets } from '@client/sockets';
 import { Transport } from '@client/transport';
-import {
-  Minute,
-  deleteObjectProperty,
-  getExpirationDateFromNow,
-  uid,
-  unixtime,
-} from '@zenbiuu/shared';
+import { Minute, deleteObjectProperty, getExpirationDateFromNow, uid, unixtime } from '@zenbiuu/shared';
 import config from './config';
 import { composeStreamPlaylistUrl } from './methods/composeStreamPlaylistUrl';
 import { composeWatchStatsData } from './methods/composeWatchStatsData';
@@ -35,10 +29,7 @@ import type {
   TwitchValidTokenProperties,
 } from './types';
 
-export default class Twitch
-  extends AbstractPlatformProvider
-  implements ProviderApiInterface
-{
+export default class Twitch extends AbstractPlatformProvider implements ProviderApiInterface {
   public static readonly config = config;
 
   public readonly name = Twitch.config.name;
@@ -51,10 +42,7 @@ export default class Twitch
 
   protected userId?: string;
 
-  readonly #chatMessageHandlers = new Map<
-    string,
-    (message: ChatMessage) => void
-  >();
+  readonly #chatMessageHandlers = new Map<string, (message: ChatMessage) => void>();
 
   readonly #streamViewIntervals = new Map<string, () => void>();
 
@@ -66,13 +54,7 @@ export default class Twitch
     name: Twitch.config.name,
     path: Twitch.config.oauthPath,
     clientId: this.clientId,
-    scopes: [
-      'chat:read',
-      'chat:edit',
-      'channel:moderate',
-      'user:read:follows',
-      'channel:read:subscriptions',
-    ],
+    scopes: ['chat:read', 'chat:edit', 'channel:moderate', 'user:read:follows', 'channel:read:subscriptions'],
   });
 
   protected readonly transport = new Transport(this.transportHeaders);
@@ -88,11 +70,7 @@ export default class Twitch
       const message = parseChatMessage(data);
       const messageChannel = message?.channel?.toLowerCase();
 
-      if (
-        message === undefined ||
-        message.command !== 'PRIVMSG' ||
-        messageChannel === undefined
-      ) {
+      if (message === undefined || message.command !== 'PRIVMSG' || messageChannel === undefined) {
         return;
       }
 
@@ -100,12 +78,7 @@ export default class Twitch
       const text = message.text;
       const author = message.tags?.['display-name'];
 
-      if (
-        handler !== undefined &&
-        text !== undefined &&
-        message.tags?.id !== undefined &&
-        author !== undefined
-      ) {
+      if (handler !== undefined && text !== undefined && message.tags?.id !== undefined && author !== undefined) {
         const emotes = getChatMessageEmotes(message);
 
         handler({
@@ -122,9 +95,7 @@ export default class Twitch
     },
   });
 
-  async #callTwitchApi<T>(
-    path: `/${string}`,
-  ): Promise<TwitchResponse<T>['data']> {
+  async #callTwitchApi<T>(path: `/${string}`): Promise<TwitchResponse<T>['data']> {
     const endpoint = `https://api.twitch.tv/helix${path}`;
     const chunk = await this.catchable<TwitchResponse<T>>('get', endpoint);
     const result = chunk.data;
@@ -193,22 +164,16 @@ export default class Twitch
   /**
    * @link https://dev.twitch.tv/docs/authentication/validate-tokens/#how-to-validate-a-token
    */
-  async #validate(
-    token: string,
-  ): Promise<{ username: string; expiresIn: string; userId: string }> {
+  async #validate(token: string): Promise<{ username: string; expiresIn: string; userId: string }> {
     const {
       expires_in: expiresIn,
       login: username,
       user_id: userId,
-    } = await this.catchable<TwitchValidTokenProperties>(
-      'get',
-      'https://id.twitch.tv/oauth2/validate',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    } = await this.catchable<TwitchValidTokenProperties>('get', 'https://id.twitch.tv/oauth2/validate', {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     this.#isTokenValidated = true;
 
@@ -269,16 +234,10 @@ export default class Twitch
   public async logout(token: string): Promise<void> {
     this.disconnect();
 
-    await this.catchable<never>(
-      'post',
-      `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`,
-    );
+    await this.catchable<never>('post', `https://id.twitch.tv/oauth2/revoke?client_id=${this.clientId}&token=${token}`);
   }
 
-  public joinChat(
-    channel: string,
-    onMessage: (message: ChatMessage) => void,
-  ): void {
+  public joinChat(channel: string, onMessage: (message: ChatMessage) => void): void {
     this.#chatMessageHandlers.set(channel.toLowerCase(), onMessage);
 
     this.chat.send(`JOIN #${channel}`);
@@ -292,9 +251,7 @@ export default class Twitch
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-channels
    */
   public async getFollowedChannelsNamesByUserId(id: string): Promise<string[]> {
-    const data = await this.#callTwitchApi<TwitchFollowedChannel>(
-      `/channels/followed?user_id=${id}&first=100`,
-    );
+    const data = await this.#callTwitchApi<TwitchFollowedChannel>(`/channels/followed?user_id=${id}&first=100`);
 
     return data.map((item) => item.broadcaster_name);
   }
@@ -303,9 +260,7 @@ export default class Twitch
    * @link https://dev.twitch.tv/docs/api/reference/#get-followed-streams
    */
   public async getFollowedStreamsByUserId(id: string): Promise<LiveStream[]> {
-    const data = await this.#callTwitchApi<TwitchStream>(
-      `/streams/followed?user_id=${id}&first=100`,
-    );
+    const data = await this.#callTwitchApi<TwitchStream>(`/streams/followed?user_id=${id}&first=100`);
 
     return data.map((item) => ({
       id: item.id,
@@ -354,17 +309,9 @@ export default class Twitch
     }
 
     const url = `https://www.twitch.tv/${name}`;
-    const page = await this.transport.get<string>(
-      url,
-      { headers: undefined },
-      'text',
-    );
+    const page = await this.transport.get<string>(url, { headers: undefined }, 'text');
     const channelSettingsScriptUrl = getChannelSettingsScriptUrl(page);
-    const settingsContent = await this.transport.get<string>(
-      channelSettingsScriptUrl,
-      { headers: undefined },
-      'text',
-    );
+    const settingsContent = await this.transport.get<string>(channelSettingsScriptUrl, { headers: undefined }, 'text');
     const statsUrl = getChannelWatchStatsUrl(settingsContent);
 
     this.#settingsUrlsByChannelName.set(name, statsUrl);
@@ -372,10 +319,7 @@ export default class Twitch
     return statsUrl;
   }
 
-  private async sendStreamWatchStats(
-    stream: LiveStream,
-    url: string,
-  ): Promise<void> {
+  private async sendStreamWatchStats(stream: LiveStream, url: string): Promise<void> {
     const data = composeWatchStatsData(this.userId ?? '0', stream);
 
     await this.transport.post(url, {
@@ -386,21 +330,14 @@ export default class Twitch
     });
   }
 
-  public async playStream(
-    name: string,
-    stream?: LiveStream,
-  ): Promise<string | undefined> {
-    const accessToken = await this.catchable<TwitchPlaylistAccessTokenResponse>(
-      'post',
-      'https://gql.twitch.tv/gql',
-      {
-        body: getStreamPlaylistAccessTokenQuery(name),
-        headers: {
-          'Client-ID': import.meta.env.VITE_TWITCH_STREAM_CLIENT_ID,
-          'Device-ID': this.deviceId,
-        },
+  public async playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
+    const accessToken = await this.catchable<TwitchPlaylistAccessTokenResponse>('post', 'https://gql.twitch.tv/gql', {
+      body: getStreamPlaylistAccessTokenQuery(name),
+      headers: {
+        'Client-ID': import.meta.env.VITE_TWITCH_STREAM_CLIENT_ID,
+        'Device-ID': this.deviceId,
       },
-    );
+    });
 
     if (stream !== undefined) {
       void this.getChannelWatchStatsUrl(name).then((url) => {

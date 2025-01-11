@@ -2,7 +2,7 @@ import { createInterval } from '@client/interval';
 import type { ChannelEntity, LiveStream } from '@client/shared';
 import { createSharedComposable } from '@vueuse/core';
 import { Minute } from '@zenbiuu/shared';
-import { computed, inject, watchEffect } from 'vue';
+import { computed, inject, ref, watchEffect } from 'vue';
 import MissingModuleInjection from '../errors/MissingModuleInjection';
 import { Injection } from '../injections';
 import { useAccount } from './useAccount';
@@ -37,27 +37,21 @@ export const useLibrary = createSharedComposable(() => {
       })
       .sort((channelA, channelB) => {
         return (
-          (channelB.stream?.viewersCount ?? 0) *
-            (channelB.isLive === true ? 1 : 0) -
-          (channelA.stream?.viewersCount ?? 0) *
-            (channelA.isLive === true ? 1 : 0)
+          (channelB.stream?.viewersCount ?? 0) * (channelB.isLive === true ? 1 : 0) -
+          (channelA.stream?.viewersCount ?? 0) * (channelA.isLive === true ? 1 : 0)
         );
       });
   });
 
   const liveChannels = computed(() => {
-    return channels.value.filter(
-      (channel) => channel.isLive,
-    ) as (LibraryChannel & {
+    return channels.value.filter((channel) => channel.isLive) as (LibraryChannel & {
       isLive: true;
       stream: LiveStream;
     })[];
   });
 
   const openedChannels = computed(() => {
-    return channels.value.filter(
-      (channel) => channel.isOpened,
-    ) as (LibraryChannel & { isOpened: true })[];
+    return channels.value.filter((channel) => channel.isOpened) as (LibraryChannel & { isOpened: true })[];
   });
 
   let stopLibraryUpdates: (() => void) | undefined;
@@ -113,10 +107,7 @@ export const useLibrary = createSharedComposable(() => {
     library?.requestChannelByName(name);
   }
 
-  async function playStream(
-    name: string,
-    stream?: LiveStream,
-  ): Promise<string | undefined> {
+  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
     return library?.playStream(name, stream);
   }
 
@@ -124,10 +115,13 @@ export const useLibrary = createSharedComposable(() => {
     library?.stopStream(name);
   }
 
+  const searchQuery = ref('');
+
   return {
     channels,
     liveChannels,
     openedChannels,
+    searchQuery,
     openChannel,
     closeChannel,
     closeAllChannels,

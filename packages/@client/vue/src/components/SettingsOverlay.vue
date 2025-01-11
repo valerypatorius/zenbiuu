@@ -38,7 +38,7 @@
 
                   <div class="settings__account-actions">
                     <IconButton
-                      icon="crown"
+                      icon="check"
                       :size="20"
                       :active="isPrimaryAccount(account)"
                       :disabled="isPrimaryAccount(account)"
@@ -52,9 +52,24 @@
                     />
                   </div>
                 </div>
+
+                <!-- <div class="accounts__item">
+                  <ChannelCard
+                    name="Add"
+                    :details="Object.values(availableProviders).map((provider) => provider.displayName).join(', ')"
+                    :is-ignore-compact="true"
+                  />
+
+                  <div class="settings__account-actions">
+                    <IconButton
+                      icon="plus"
+                      :size="20"
+                    />
+                  </div>
+                </div> -->
               </div>
 
-              <div class="accounts__footer">
+              <!-- <div class="accounts__footer">
                 <IconButton
                   v-for="provider in availableProviders"
                   :key="provider.name"
@@ -62,7 +77,7 @@
                   :size="22"
                   @click="login(provider.name)"
                 />
-              </div>
+              </div> -->
             </div>
           </div>
 
