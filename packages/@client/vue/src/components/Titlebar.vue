@@ -45,17 +45,6 @@
         />
       </div>
     </div>
-
-    <!-- <div
-      v-show="openedChannels.length > 0"
-      class="titlebar__button"
-      @click="closeAllChannels()"
-    >
-      <Icon
-        name="chevronLeft"
-        :size="20"
-      />
-    </div> -->
   </div>
 </template>
 

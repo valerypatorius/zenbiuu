@@ -5,12 +5,9 @@ export default {
     library: 'Library',
   },
   auth: {
-    title: 'Log in to',
-    description:
-      'To start watching streams in comfort simply connect your Twitch account.',
-    disclaimer:
-      'Authorization is needed in order to communicate with Twitch API. No personal data is stored.',
-    loginWithTwitch: 'Log in with Twitch account',
+    title: 'Start',
+    description: 'To communicate with APIs, at least one service should be authorized',
+    disclaimer: 'Redirect to the browser will be performed. Personal data will be saved only on the current device',
   },
   sidebar: {
     settings: 'Settings',

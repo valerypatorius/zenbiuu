@@ -118,7 +118,7 @@ onMounted(() => {
   }
 
   .os-theme-custom {
-    --os-size: 12px;
+    --os-size: 10px;
     --os-padding-perpendicular: 1px;
     --os-padding-axis: 1px;
     --os-handle-border-radius: var(--os-size);

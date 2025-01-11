@@ -95,7 +95,6 @@ watch(
   flex-direction: column;
   cursor: pointer;
   border-radius: 12px;
-  overflow: hidden;
   position: relative;
   z-index: 1;
 
@@ -103,7 +102,7 @@ watch(
     aspect-ratio: 16 / 9;
     border-radius: inherit;
     overflow: hidden;
-    filter: contrast(90%);
+    /* filter: contrast(90%); */
     background-color: #000;
     box-shadow: 0 10px 20px -15px var(--theme-color-shadow);
     position: relative;

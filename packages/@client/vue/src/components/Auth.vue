@@ -65,6 +65,7 @@ const { available: availableProviders } = useProviders();
 
   &__logo {
     width: 100%;
+    opacity: 0.7;
   }
 
   &__main {
