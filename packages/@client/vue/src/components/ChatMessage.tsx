@@ -6,7 +6,7 @@ import './styles/chat.pcss';
  * Returns emote urls string to use as srcset value
  */
 function getEmoteSrcSet(emote: EmoteEntity): string {
-  return Object.entries(emote)
+  return Object.entries(emote.src)
     .reduce<string[]>((result, [size, url]) => {
       result.push(`${url as string} ${size}`);
       return result;
@@ -46,7 +46,9 @@ const Message: FunctionalComponent<ChatMessage> = ({
             /**
              * @todo Set size from 1x image to reserve space
              */
-            return word in emotes ? getEmoteImage(word, emotes[word]).outerHTML : word;
+            return word in emotes
+              ? `<span class="chat-message-emote ${emotes[word].isZeroWidth ? 'chat-message-emote--zero-width' : ''}">${getEmoteImage(word, emotes[word]).outerHTML}</span>`
+              : word;
           })
           .join(' ')
       : text;

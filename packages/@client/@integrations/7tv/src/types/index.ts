@@ -6,6 +6,7 @@ interface SevenTvEmote {
     id: string;
     name: string;
     animated: boolean;
+    flags: number;
     host: {
       url: string;
       files: {

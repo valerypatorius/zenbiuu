@@ -18,9 +18,11 @@ export default class BTTV extends AbstractEmotesProvider implements EmotesProvid
          * @todo Improve ofc
          */
         result[rawEmote.code] = {
-          '1.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/1x`,
-          '2.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/2x`,
-          '3.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/3x`,
+          src: {
+            '1.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/1x`,
+            '2.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/2x`,
+            '3.0x': `https://cdn.betterttv.net/emote/${rawEmote.id}/3x`,
+          },
         };
 
         return result;

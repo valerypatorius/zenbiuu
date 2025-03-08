@@ -19,9 +19,11 @@ export default class FFZ extends AbstractEmotesProvider implements EmotesProvide
          * @todo Improve ofc
          */
         result[rawEmote.name] = {
-          '1.0x': rawEmote.urls[1],
-          '2.0x': rawEmote.urls[2],
-          '4.0x': rawEmote.urls[4],
+          src: {
+            '1.0x': rawEmote.urls[1],
+            '2.0x': rawEmote.urls[2],
+            '4.0x': rawEmote.urls[4],
+          },
         };
 
         return result;

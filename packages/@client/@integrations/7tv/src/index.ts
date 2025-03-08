@@ -15,10 +15,13 @@ export default class SevenTv extends AbstractEmotesProvider implements EmotesPro
        * @todo Improve ofc
        */
       result[rawEmote.name] = {
-        '1.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '1x.avif')?.name}`,
-        '2.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '2x.avif')?.name}`,
-        '3.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '3x.avif')?.name}`,
-        '4.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '4x.avif')?.name}`,
+        src: {
+          '1.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '1x.avif')?.name}`,
+          '2.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '2x.avif')?.name}`,
+          '3.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '3x.avif')?.name}`,
+          '4.0x': `https:${rawEmote.data.host.url}/${rawEmote.data.host.files.find((file) => file.name === '4x.avif')?.name}`,
+        },
+        isZeroWidth: rawEmote.data.flags === 1 << 8,
       };
 
       return result;
