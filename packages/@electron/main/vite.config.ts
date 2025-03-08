@@ -9,28 +9,19 @@ const isDev = process.env.NODE_ENV === 'development';
  */
 export default defineConfig({
   root,
-  base: './',
   appType: 'custom',
   build: {
-    watch: {},
-    sourcemap: isDev ? 'inline' : false,
+    watch: isDev ? {} : undefined,
     target: 'node21',
-    outDir: 'dist',
-    minify: isDev ? false : 'esbuild',
     lib: {
       entry: 'src/index.ts',
       formats: ['cjs'],
     },
     rollupOptions: {
-      external: [
-        'electron',
-        ...builtinModules,
-        ...builtinModules.map((m) => `node:${m}`),
-      ],
+      external: ['electron', ...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
       output: {
-        entryFileNames: '[name].cjs',
+        entryFileNames: 'main.cjs',
       },
     },
-    emptyOutDir: false,
   },
 });

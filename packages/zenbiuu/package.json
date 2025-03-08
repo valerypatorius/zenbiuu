@@ -7,15 +7,15 @@
   "productName": "Zenbiuu",
   "description": "Desktop app for comfortable streams watching",
   "author": "valerypatorius",
+  "main": "./dist/main.cjs",
   "bin": {
     "zenbiuu-cli": "scripts/index.ts"
-  },
-  "scripts": {
-    "dev": "client-dev dev"
   },
   "devDependencies": {
     "@client/vue": "workspace:*",
     "@electron/main": "workspace:*",
-    "@electron/preload": "workspace:*"
+    "@electron/preload": "workspace:*",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
   }
 }

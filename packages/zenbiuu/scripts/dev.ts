@@ -1,4 +1,3 @@
-import { resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { createElectronProcess } from '@electron/main/spawner';
 import { consola } from 'consola';
@@ -6,8 +5,6 @@ import { build, createServer } from 'vite';
 import { productName, version } from '../package.json';
 import { createConfig } from './config';
 import { createWatchablePlugin } from './plugins';
-
-const [, , , outDir] = process.argv;
 
 consola.box(`🐒 ${productName}@${version}`);
 consola.start('Starting development...');
@@ -45,14 +42,6 @@ const config = createConfig({
         electron.restart();
       }),
     ],
-    build: {
-      outDir: resolve(outDir),
-      rollupOptions: {
-        output: {
-          entryFileNames: 'main.cjs',
-        },
-      },
-    },
   },
   preload: {
     plugins: [
@@ -66,14 +55,6 @@ const config = createConfig({
         }
       }),
     ],
-    build: {
-      outDir: resolve(outDir),
-      rollupOptions: {
-        output: {
-          entryFileNames: 'preload.cjs',
-        },
-      },
-    },
   },
   renderer: {
     server: {
@@ -84,6 +65,8 @@ const config = createConfig({
     },
   },
 });
+
+console.log(config);
 
 /**
  * Workaround for Windows, because it doesn't receive SIGINT event

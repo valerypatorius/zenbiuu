@@ -6,14 +6,10 @@ const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
   root,
-  base: './',
   appType: 'custom',
   build: {
-    watch: {},
-    sourcemap: isDev ? 'inline' : false,
+    watch: isDev ? {} : undefined,
     target: 'chrome100',
-    outDir: 'dist',
-    minify: isDev ? false : 'esbuild',
     lib: {
       entry: 'src/index.ts',
       formats: ['cjs'],
@@ -21,9 +17,8 @@ export default defineConfig({
     rollupOptions: {
       external: ['electron', ...builtinModules],
       output: {
-        entryFileNames: '[name].cjs',
+        entryFileNames: 'preload.cjs',
       },
     },
-    emptyOutDir: false,
   },
 });

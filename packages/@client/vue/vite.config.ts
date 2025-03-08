@@ -4,7 +4,6 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import { defineConfig } from 'vite';
 
 const root = import.meta.dirname;
-const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
   root,
@@ -15,12 +14,8 @@ export default defineConfig({
   },
   plugins: [vue(), vueJsx()],
   build: {
-    sourcemap: isDev,
     target: 'chrome100',
-    outDir: 'dist',
     assetsDir: '.',
-    minify: isDev ? false : 'esbuild',
-    emptyOutDir: false,
     chunkSizeWarningLimit: 1000,
   },
 });

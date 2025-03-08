@@ -2,18 +2,14 @@ import path from 'node:path';
 import { BrowserWindow, shell } from 'electron';
 import type { createStore } from './store';
 
+const isDev = import.meta.env.MODE === 'development';
+
 /**
  * @todo Deal with paths, as they are relative to compiled main.cjs file
  */
 
 export function createWindow(store: ReturnType<typeof createStore>) {
-  const url =
-    import.meta.env.MODE === 'development'
-      ? import.meta.env.VITE_DEV_SERVER_URL
-      : new URL(
-          '../renderer/dist/index.html',
-          `file://${__dirname}`,
-        ).toString();
+  const url = isDev ? import.meta.env.VITE_DEV_SERVER_URL : path.resolve(__dirname, 'index.html');
 
   let instance: BrowserWindow | undefined;
 
@@ -21,7 +17,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     const { width, height } = store.get('windowBounds');
 
     instance = new BrowserWindow({
-      icon: path.join(__dirname, '../public/icon.png'),
+      icon: isDev ? path.join(process.cwd(), './public/icon.ico') : undefined,
       width,
       height,
       titleBarStyle: 'hidden',
@@ -100,10 +96,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     instance?.setBackgroundColor(value);
   }
 
-  function interceptUrlLoad(
-    event: Electron.Event<Electron.WebContentsWillNavigateEventParams>,
-    url: string,
-  ): void {
+  function interceptUrlLoad(event: Electron.Event<Electron.WebContentsWillNavigateEventParams>, url: string): void {
     event.preventDefault();
 
     void shell.openExternal(url);

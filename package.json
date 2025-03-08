@@ -5,9 +5,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "main": "./dist/main.cjs",
+  "main": "./packages/zenbiuu/dist/main.cjs",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development zenbiuu-cli dev ./dist --inspect",
+    "dev": "cross-env NODE_ENV=development zenbiuu-cli dev --inspect",
     "build": "cross-env NODE_ENV=production zenbiuu-cli build",
     "lint": "biome lint --write",
     "format": "biome format --write"
