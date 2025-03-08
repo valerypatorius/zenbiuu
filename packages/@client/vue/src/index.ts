@@ -47,7 +47,7 @@ const account = await createAccount(createReactiveState, { providers });
 const library = await createLibrary(createReactiveState, { providers });
 const emotes = await createEmotes(createReactiveState, { providers });
 const chat = await createChat(createReactiveState, { providers });
-const settings = await createSettings(createReactiveState);
+const settings = await createSettings(createReactiveState, { hub });
 
 const app = createApp(App);
 

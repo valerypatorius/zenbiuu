@@ -20,7 +20,7 @@ const store = createStore();
 
 const window = createWindow(store);
 
-const theme = createTheme(store);
+const theme = createTheme(store, window);
 
 // // const updater = createUpdater();
 

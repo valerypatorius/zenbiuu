@@ -102,7 +102,7 @@ const { closeAllChannels, openedChannels } = useLibrary();
       --offset: 0;
       --border-radius: 0;
       content: '';
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: var(--theme-color-overlay-inverted);
       top: var(--offset);
       left: var(--offset);
       bottom: var(--offset);

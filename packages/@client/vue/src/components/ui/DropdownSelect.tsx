@@ -2,10 +2,15 @@ import type { FunctionalComponent } from 'vue';
 import Icon from './Icon';
 import '../styles/select.pcss';
 
-const DropdownSelect: FunctionalComponent<{
-  modelValue: string;
-  options: { value: string; label: string }[];
-}> = ({ modelValue, options }, { emit }) => {
+const DropdownSelect: FunctionalComponent<
+  {
+    modelValue: string;
+    options: { value: string; label: string }[];
+  },
+  {
+    'update:modelValue': [value: string];
+  }
+> = ({ modelValue, options }, { emit }) => {
   return (
     <div class="select">
       <div

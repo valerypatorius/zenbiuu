@@ -10,6 +10,7 @@ export async function createSettingsStore(
     isSidebarEnabled: true,
     isSmoothScrollEnabled: false,
     locale: undefined,
+    theme: 'system',
   });
 
   return {
@@ -53,6 +54,15 @@ export async function createSettingsStore(
     },
     set locale(value) {
       state.locale = value;
+
+      save();
+    },
+
+    get theme() {
+      return state.theme;
+    },
+    set theme(value) {
+      state.theme = value;
 
       save();
     },

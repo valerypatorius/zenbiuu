@@ -6,4 +6,5 @@ export interface HubInterface {
   openUrlInBrowser: (url: string) => void;
   onInterceptedLink: (fn: InterceptedLinkHook) => InterceptedLinkHookReturnValue;
   offInterceptedLink: (fn: InterceptedLinkHook) => void;
+  setThemeSource: (value: 'system' | 'dark' | 'light') => void;
 }

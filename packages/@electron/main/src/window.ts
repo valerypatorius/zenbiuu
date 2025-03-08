@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, shell, nativeTheme } from 'electron';
 import type { createStore } from './store';
 
 const isDev = import.meta.env.MODE === 'development';
@@ -23,7 +23,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
       titleBarStyle: 'hidden',
       titleBarOverlay: {
         color: 'rgba(0, 0, 0, 0)',
-        symbolColor: 'rgba(255, 255, 255, 0.4)',
+        symbolColor: nativeTheme.shouldUseDarkColors ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)',
         height: 40,
       },
       webPreferences: {
@@ -94,6 +94,16 @@ export function createWindow(store: ReturnType<typeof createStore>) {
 
   function setColor(value: string): void {
     instance?.setBackgroundColor(value);
+
+    /**
+     * @todo React to system theme changes
+     */
+
+    instance?.setTitleBarOverlay({
+      color: 'rgba(0, 0, 0, 0)',
+      symbolColor: nativeTheme.shouldUseDarkColors ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)',
+      height: 40,
+    });
   }
 
   function interceptUrlLoad(event: Electron.Event<Electron.WebContentsWillNavigateEventParams>, url: string): void {

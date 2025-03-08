@@ -123,26 +123,26 @@
           </div>
 
           <!-- Color scheme management -->
-          <!-- <div class="settings__section">
+          <div class="settings__section">
             <div class="settings__section-title">
               {{ t('settings.colorScheme.title') }}
             </div>
 
             <DropdownSelect
               :options="
-                availableLocales.map((value) => ({
+                ['system', 'dark', 'light'].map((value) => ({
                   value,
-                  label: capitalize(new Intl.DisplayNames([value], { type: 'language' }).of(value) ?? value),
+                  label: t(`settings.colorScheme.${value}`),
                 }))
               "
-              :modelValue="locale"
+              :modelValue="theme"
               @update:modelValue="
                 (value) => {
-                  locale = value;
+                  setTheme(value as 'system' | 'dark' | 'light' );
                 }
               "
             />
-          </div> -->
+          </div>
 
           <!-- <div class="settings__section">
             <div class="settings__section-title">
@@ -172,7 +172,8 @@ const { t, locale, availableLocales } = useI18n();
 const { app } = useHub();
 const { accounts, login, logout, isPrimaryAccount, primaryAccount } = useAccount();
 const { available: availableProviders } = useProviders();
-const { toggleOverlay, isAudioCompressorEnabled, isCompactLayout, isSmoothScrollEnabled } = useSettings();
+const { toggleOverlay, isAudioCompressorEnabled, isCompactLayout, isSmoothScrollEnabled, theme, setTheme } =
+  useSettings();
 
 /**
  * @todo Settings

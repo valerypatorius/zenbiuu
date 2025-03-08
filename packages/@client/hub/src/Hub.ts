@@ -104,4 +104,8 @@ export class Hub implements HubInterface {
   public offInterceptedLink(fn: InterceptedLinkHook): void {
     this.#interceptedEventsHooks.delete(fn);
   }
+
+  public setThemeSource(value: 'system' | 'dark' | 'light'): void {
+    this.#api?.setThemeSource(value);
+  }
 }

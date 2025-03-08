@@ -84,7 +84,7 @@ function onLoad(): void {
       width: var(--size);
       height: var(--size);
       background-color: var(--theme-color-online);
-      box-shadow: 0 0 0 2px var(--theme-color-background);
+      box-shadow: 0 0 0 2px var(--theme-color-background-sidebar);
       border-radius: 50%;
       grid-column: 1;
       grid-row: 1;

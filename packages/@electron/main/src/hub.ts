@@ -1,5 +1,5 @@
 import { type AppProperties, HubChannel } from '@zenbiuu/shared';
-import { app, ipcMain, shell } from 'electron';
+import { app, ipcMain, type NativeTheme, shell } from 'electron';
 import type { createTheme } from './theme';
 import type { createWindow } from './window';
 import os from 'node:os';
@@ -18,12 +18,12 @@ export function createHub(window: ReturnType<typeof createWindow>, theme?: Retur
     };
   });
 
-  // /**
-  //  * Set app theme and return its current state
-  //  */
-  // ipcMain.handle(HubChannel.SetThemeSource, async (event, value: NativeTheme['themeSource']) => {
-  //   this.theme.setSource(value);
-  // });
+  /**
+   * Set app theme and return its current state
+   */
+  ipcMain.handle(HubChannel.SetThemeSource, async (event, value: NativeTheme['themeSource']) => {
+    theme?.setSource(value);
+  });
 
   // /**
   //  * Clear session storage data

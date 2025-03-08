@@ -16,6 +16,8 @@ export function createStore(): {
     },
   });
 
+  console.log(store.path);
+
   return {
     get: (key) => {
       return store.get(key);

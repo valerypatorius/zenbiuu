@@ -1,5 +1,5 @@
 import { createSharedComposable, refWithControl } from '@vueuse/core';
-import { inject, ref, watchEffect } from 'vue';
+import { computed, inject, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import MissingModuleInjection from '~/errors/MissingModuleInjection';
 import { Injection } from '~/injections';
@@ -51,6 +51,10 @@ export const useSettings = createSharedComposable(() => {
     isSmoothScrollEnabled,
     toggleOverlay() {
       isSettingsOverlayActive.value = !isSettingsOverlayActive.value;
+    },
+    theme: computed(() => settings.store.theme),
+    setTheme(value: 'system' | 'dark' | 'light') {
+      settings.setTheme(value);
     },
   };
 });
