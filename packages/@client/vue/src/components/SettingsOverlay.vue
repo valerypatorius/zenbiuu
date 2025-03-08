@@ -52,32 +52,7 @@
                     />
                   </div>
                 </div>
-
-                <!-- <div class="accounts__item">
-                  <ChannelCard
-                    name="Add"
-                    :details="Object.values(availableProviders).map((provider) => provider.displayName).join(', ')"
-                    :is-ignore-compact="true"
-                  />
-
-                  <div class="settings__account-actions">
-                    <IconButton
-                      icon="plus"
-                      :size="20"
-                    />
-                  </div>
-                </div> -->
               </div>
-
-              <!-- <div class="accounts__footer">
-                <IconButton
-                  v-for="provider in availableProviders"
-                  :key="provider.name"
-                  icon="plus"
-                  :size="22"
-                  @click="login(provider.name)"
-                />
-              </div> -->
             </div>
           </div>
 
@@ -144,11 +119,11 @@
             />
           </div>
 
-          <!-- <div class="settings__section">
+          <div class="settings__section settings__section--bottom">
             <div class="settings__section-title">
               {{ app.name }}@{{ app.version }}
             </div>
-          </div> -->
+          </div>
         </div>
       </Scrollable>
     </div>
@@ -192,7 +167,7 @@ const { toggleOverlay, isAudioCompressorEnabled, isCompactLayout, isSmoothScroll
   top: 0;
   left: 0;
   z-index: 9;
-  /* backdrop-filter: blur(20px); */
+  backdrop-filter: blur(20px);
 }
 
 .settings {
@@ -204,16 +179,23 @@ const { toggleOverlay, isAudioCompressorEnabled, isCompactLayout, isSmoothScroll
   box-shadow: 30px 0 40px -15px var(--theme-color-shadow);
 
   &__main {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
     padding: 16px;
     padding-top: 0;
+    min-height: 100%;
   }
 
   &__section {
     display: grid;
     gap: 12px;
-    margin-top: 12px;
+    padding-top: 12px;
+
+    &--bottom {
+      margin-top: auto;
+      text-align: center;
+    }
   }
 
   &__section-title {
