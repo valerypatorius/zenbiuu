@@ -9,11 +9,7 @@ const controllersByKey = new Map<string, AbortController>();
  * @param payload - payload for request
  * @param key - request key, based on url and body
  */
-async function handle(
-  method: string,
-  payload: TransportPayload,
-  key: string,
-): Promise<void> {
+async function handle(method: string, payload: TransportPayload, key: string): Promise<void> {
   const pendingRequest = controllersByKey.get(key);
 
   if (pendingRequest !== undefined) {
@@ -65,8 +61,7 @@ async function handle(
      * If response should be parsed as text, return it right away
      */
     if (
-      (response.status === TransportStatus.Success ||
-        response.status === TransportStatus.NoContent) &&
+      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
       payload.parseResponse === 'text'
     ) {
       message.data = responseText;
@@ -80,8 +75,7 @@ async function handle(
      * If response should be empty and it is, post message and do not proceed
      */
     if (
-      (response.status === TransportStatus.Success ||
-        response.status === TransportStatus.NoContent) &&
+      (response.status === TransportStatus.Success || response.status === TransportStatus.NoContent) &&
       responseText.length === 0
     ) {
       self.postMessage(message);
@@ -102,10 +96,7 @@ async function handle(
      * If response is successfull and error field is not present in it,
      * add data to message and post it
      */
-    if (
-      response.status === TransportStatus.Success &&
-      !('error' in responseData)
-    ) {
+    if (response.status === TransportStatus.Success && !('error' in responseData)) {
       message.data = responseData;
 
       self.postMessage(message);

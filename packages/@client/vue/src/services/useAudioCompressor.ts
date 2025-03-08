@@ -3,10 +3,7 @@ import { type MaybeRef, computed, toValue, watch } from 'vue';
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createDynamicsCompressor
  */
-export function useAudioCompressor(
-  target: MaybeRef<HTMLMediaElement | null>,
-  isEnableRaw: MaybeRef<boolean>,
-) {
+export function useAudioCompressor(target: MaybeRef<HTMLMediaElement | null>, isEnableRaw: MaybeRef<boolean>) {
   const mediaElement = computed(() => toValue(target));
   const isEnabled = computed(() => toValue(isEnableRaw));
 

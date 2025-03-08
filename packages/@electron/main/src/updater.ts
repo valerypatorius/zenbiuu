@@ -12,8 +12,7 @@ export function createUpdater() {
       return undefined;
     }
 
-    const isUpdateAvailable =
-      autoUpdater.currentVersion.compare(result.updateInfo.version) === -1;
+    const isUpdateAvailable = autoUpdater.currentVersion.compare(result.updateInfo.version) === -1;
 
     return isUpdateAvailable ? result.updateInfo : undefined;
   }

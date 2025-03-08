@@ -1,5 +1,16 @@
 import { TwitchIrcCommand, type TwitchIrcMessage } from '../types';
 
+type TagParseResult =
+  | string
+  | string[]
+  | Record<
+      string,
+      {
+        start: number;
+        end: number;
+      }[]
+    >;
+
 /**
  * Supported message author badges
  */
@@ -9,24 +20,15 @@ const SUPPORTED_BADGES = ['moderator', 'subscriber', 'partner', 'broadcaster'];
  * Returns true, if array of enums includes specified string.
  * Helps to deal with types
  */
-function isEnumArrayIncludesString<T extends string>(
-  str: string,
-  arr: T[],
-): str is T {
+function isEnumArrayIncludesString<T extends string>(str: string, arr: T[]): str is T {
   return arr.includes(str as T);
 }
 
 /**
  * Parse IRC message command
  */
-function parseCommand(
-  source: string,
-): { name: TwitchIrcCommand; channel?: string } | undefined {
-  const globalCommands = [
-    TwitchIrcCommand.Connect,
-    TwitchIrcCommand.Disconnect,
-    TwitchIrcCommand.GlobalUserState,
-  ];
+function parseCommand(source: string): { name: TwitchIrcCommand; channel?: string } | undefined {
+  const globalCommands = [TwitchIrcCommand.Connect, TwitchIrcCommand.Disconnect, TwitchIrcCommand.GlobalUserState];
 
   const roomCommands = [
     TwitchIrcCommand.Join,
@@ -84,9 +86,7 @@ function parseBadges(source: string): string[] {
  * Parse emotes positions in message text.
  * Not really necessary, because in the end all emotes names are simply replaced with String.replace() call
  */
-function parseEmotes(
-  source: string,
-): Record<string, { start: number; end: number }[]> {
+function parseEmotes(source: string): Record<string, { start: number; end: number }[]> {
   const result: Record<string, { start: number; end: number }[]> = {};
   const emotes = source.split('/');
 
@@ -99,19 +99,16 @@ function parseEmotes(
      */
     const positions = occurrences.split(',');
 
-    result[emoteId] = positions.reduce<{ start: number; end: number }[]>(
-      (res, position) => {
-        const [start, end] = position.split('-');
+    result[emoteId] = positions.reduce<{ start: number; end: number }[]>((res, position) => {
+      const [start, end] = position.split('-');
 
-        res.push({
-          start: Number.parseInt(start),
-          end: Number.parseInt(end),
-        });
+      res.push({
+        start: Number.parseInt(start),
+        end: Number.parseInt(end),
+      });
 
-        return res;
-      },
-      [],
-    );
+      return res;
+    }, []);
   }
 
   return result;
@@ -120,8 +117,8 @@ function parseEmotes(
 /**
  * Entry point for message tags parsing
  */
-function parseTags(source: string): Record<string, any> {
-  const result: Record<string, any> = {};
+function parseTags(source: string): Record<string, TagParseResult> {
+  const result: Record<string, TagParseResult> = {};
   const chunks = source.split(';');
 
   for (const chunk of chunks) {
@@ -167,9 +164,7 @@ function parseText(source: string): string | undefined {
  * Parse incoming IRC message
  * @see https://dev.twitch.tv/docs/irc/example-parser/
  */
-export function parseChatMessage(
-  message: string,
-): TwitchIrcMessage | undefined {
+export function parseChatMessage(message: string): TwitchIrcMessage | undefined {
   const DIVIDER = ' ';
 
   /**

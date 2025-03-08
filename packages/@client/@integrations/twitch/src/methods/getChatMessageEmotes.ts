@@ -1,18 +1,14 @@
 import type { EmoteEntity } from '@client/shared';
 import type { TwitchIrcMessage } from '../types';
 
-export function getChatMessageEmotes(
-  message: TwitchIrcMessage,
-): Record<string, EmoteEntity> {
+export function getChatMessageEmotes(message: TwitchIrcMessage): Record<string, EmoteEntity> {
   const text = message.text;
 
   if (text === undefined || message.tags?.emotes === undefined) {
     return {};
   }
 
-  return Object.entries(message.tags.emotes).reduce<
-    Record<string, EmoteEntity>
-  >((result, [id, position]) => {
+  return Object.entries(message.tags.emotes).reduce<Record<string, EmoteEntity>>((result, [id, position]) => {
     const name = text.substring(position[0].start, position[0].end + 1);
 
     result[name] = {

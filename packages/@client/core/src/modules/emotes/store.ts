@@ -11,10 +11,7 @@ export async function createEmotesStore(
     emotesByChannelId: new Map(),
   });
 
-  function addChannelEmotes(
-    channelId: string,
-    emotes: Record<string, EmoteEntity>,
-  ): void {
+  function addChannelEmotes(channelId: string, emotes: Record<string, EmoteEntity>): void {
     let storedEmotes = state.emotesByChannelId.get(channelId);
 
     if (storedEmotes === undefined) {

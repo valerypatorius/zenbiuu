@@ -88,7 +88,7 @@ export function createWindow(store: ReturnType<typeof createStore>) {
     });
   }
 
-  function send(channel: string, ...args: any[]): void {
+  function send(channel: string, ...args: unknown[]): void {
     instance?.webContents.send(channel, ...args);
   }
 

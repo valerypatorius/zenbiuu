@@ -1,9 +1,4 @@
-import type {
-  AccountEntity,
-  LiveStream,
-  ModuleStateFactoryFn,
-  ProvidersInterface,
-} from '@client/shared';
+import type { AccountEntity, LiveStream, ModuleStateFactoryFn, ProvidersInterface } from '@client/shared';
 import { createLibraryStore } from './store';
 import type { ModuleLibrary, ModuleLibraryStoreSchema } from './types';
 
@@ -28,9 +23,7 @@ export async function createLibrary(
       return;
     }
 
-    const names = await providers
-      .getApi(primaryAccount.provider)
-      .getFollowedChannelsNamesByUserId(primaryAccount.id);
+    const names = await providers.getApi(primaryAccount.provider).getFollowedChannelsNamesByUserId(primaryAccount.id);
 
     store.followedChannelsNames = names;
   }
@@ -40,18 +33,13 @@ export async function createLibrary(
       return;
     }
 
-    const streams = await providers
-      .getApi(primaryAccount.provider)
-      .getFollowedStreamsByUserId(primaryAccount.id);
+    const streams = await providers.getApi(primaryAccount.provider).getFollowedStreamsByUserId(primaryAccount.id);
 
-    const streamsByChannelName = streams.reduce<Record<string, LiveStream>>(
-      (result, item) => {
-        result[item.channelName] = item;
+    const streamsByChannelName = streams.reduce<Record<string, LiveStream>>((result, item) => {
+      result[item.channelName] = item;
 
-        return result;
-      },
-      {},
-    );
+      return result;
+    }, {});
 
     store.liveStreamsByChannelName = streamsByChannelName;
   }
@@ -87,10 +75,7 @@ export async function createLibrary(
     }, 300);
   }
 
-  async function playStream(
-    name: string,
-    stream?: LiveStream,
-  ): Promise<string | undefined> {
+  async function playStream(name: string, stream?: LiveStream): Promise<string | undefined> {
     if (primaryAccount === null) {
       return;
     }

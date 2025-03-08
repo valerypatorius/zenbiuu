@@ -20,10 +20,7 @@ export async function createEmotes(
 
   let primaryAccount: AccountEntity | null = null;
 
-  window.addEventListener(
-    ProviderEvent.EmotesReceived,
-    handleEmotesReceivedEvent as EventListener,
-  );
+  window.addEventListener(ProviderEvent.EmotesReceived, handleEmotesReceivedEvent as EventListener);
 
   function handleEmotesReceivedEvent({ detail }: EmotesReceivedEvent): void {
     store.addChannelEmotes(detail.id, detail.emotes);
@@ -34,9 +31,7 @@ export async function createEmotes(
       return;
     }
 
-    providers
-      .getApi(primaryAccount.provider)
-      .requestEmotesForChannelId(channelId);
+    providers.getApi(primaryAccount.provider).requestEmotesForChannelId(channelId);
   }
 
   return {

@@ -25,9 +25,7 @@ const RESTART_SIGNAL = 'SIGKILL';
 /**
  * Provides control over electron process process
  */
-export function createElectronProcess(
-  handlers?: ElectronProcessHandlers,
-): ElectronProcessManager {
+export function createElectronProcess(handlers?: ElectronProcessHandlers): ElectronProcessManager {
   /**
    * Electron import in node returns path to electron process and we're fine with it
    */
@@ -38,10 +36,7 @@ export function createElectronProcess(
    */
   let electronProcess: ReturnType<typeof spawn> | undefined;
 
-  function handleCloseEvent(
-    code: number | null,
-    signal: NodeJS.Signals | null,
-  ): void {
+  function handleCloseEvent(code: number | null, signal: NodeJS.Signals | null): void {
     /**
      * If electron process is being killed after package rebuild, do not stop script
      */

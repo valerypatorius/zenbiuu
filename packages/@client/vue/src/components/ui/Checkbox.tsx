@@ -16,9 +16,7 @@ const Checkbox: FunctionalComponent<
         hidden
         type="checkbox"
         checked={value}
-        onInput={(event) =>
-          emit('update:value', (event.target as HTMLInputElement).checked)
-        }
+        onInput={(event) => emit('update:value', (event.target as HTMLInputElement).checked)}
       />
 
       <span class="checkbox__box">

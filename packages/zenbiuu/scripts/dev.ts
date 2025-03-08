@@ -66,8 +66,6 @@ const config = createConfig({
   },
 });
 
-console.log(config);
-
 /**
  * Workaround for Windows, because it doesn't receive SIGINT event
  * @see https://stackoverflow.com/a/14861513

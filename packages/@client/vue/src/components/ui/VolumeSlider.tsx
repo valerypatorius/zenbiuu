@@ -18,10 +18,7 @@ const VolumeSlider: FunctionalComponent<
       step="0.01"
       value={props.modelValue}
       onInput={(event) => {
-        emit(
-          'update:modelValue',
-          Number.parseFloat((event.target as HTMLInputElement).value),
-        );
+        emit('update:modelValue', Number.parseFloat((event.target as HTMLInputElement).value));
       }}
     />
   );

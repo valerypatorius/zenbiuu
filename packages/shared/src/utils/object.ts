@@ -3,10 +3,7 @@
  * @param obj - object which property should be deleted
  * @param property - property name to delete
  */
-export function deleteObjectProperty<T extends object>(
-  obj: T,
-  property: keyof T,
-): void {
+export function deleteObjectProperty<T extends object>(obj: T, property: keyof T): void {
   if (Object.hasOwn(obj, property)) {
     delete obj[property];
   }

@@ -22,10 +22,7 @@ export async function createAccount(
     connectAccountToProvider(store.primaryAccount);
   }
 
-  window.addEventListener(
-    ProviderEvent.Disconnect,
-    handleDisconnect as EventListener,
-  );
+  window.addEventListener(ProviderEvent.Disconnect, handleDisconnect as EventListener);
 
   function connectAccountToProvider(account: AccountEntity): void {
     providers.getApi(account.provider).connect(account);
@@ -61,10 +58,7 @@ export async function createAccount(
     store.primaryAccount = account;
   }
 
-  async function logout(
-    entity: AccountEntity,
-    isSkipTokenRevoke = false,
-  ): Promise<void> {
+  async function logout(entity: AccountEntity, isSkipTokenRevoke = false): Promise<void> {
     if (isSkipTokenRevoke) {
       providers.getApi(entity.provider).disconnect();
     } else {

@@ -46,9 +46,7 @@ const Message: FunctionalComponent<ChatMessage> = ({
             /**
              * @todo Set size from 1x image to reserve space
              */
-            return word in emotes
-              ? getEmoteImage(word, emotes[word]).outerHTML
-              : word;
+            return word in emotes ? getEmoteImage(word, emotes[word]).outerHTML : word;
           })
           .join(' ')
       : text;
@@ -69,10 +67,7 @@ const Message: FunctionalComponent<ChatMessage> = ({
 
   return (
     <div
-      class={[
-        'chat-message',
-        isEven === true && 'chat-message--with-background',
-      ]}
+      class={['chat-message', isEven === true && 'chat-message--with-background']}
       style={{
         '--color': color,
       }}

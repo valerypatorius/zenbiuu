@@ -16,9 +16,7 @@ export class PlatformsManager implements ProvidersInterface {
   ) {}
 
   public get available(): Record<string, ProviderConfig> {
-    return Object.fromEntries(
-      Object.entries(PlatformProvider).map(([name, fn]) => [name, fn.config]),
-    );
+    return Object.fromEntries(Object.entries(PlatformProvider).map(([name, fn]) => [name, fn.config]));
   }
 
   public getApi(providerName: string): ProviderApiInterface {

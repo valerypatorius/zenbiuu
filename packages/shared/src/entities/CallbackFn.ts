@@ -1,1 +1,1 @@
-export type CallbackFn = (...args: any[]) => void;
+export type CallbackFn = (...args: unknown[]) => void;

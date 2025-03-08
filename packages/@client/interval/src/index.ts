@@ -17,11 +17,7 @@ function handleWorkerMessage(event: MessageEvent<string>): void {
   handler?.();
 }
 
-export function createInterval(
-  fn: CallbackFn,
-  delay: number,
-  options: { immediate?: boolean } = {},
-): StopFn {
+export function createInterval(fn: CallbackFn, delay: number, options: { immediate?: boolean } = {}): StopFn {
   const key = uid();
 
   const data: IntervalPayload = {
