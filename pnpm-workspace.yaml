@@ -3,3 +3,7 @@ packages:
   - 'packages/@client/*'
   - 'packages/@client/@integrations/*'
   - 'packages/@electron/*'
+allowBuilds:
+  '@biomejs/biome': true
+  electron: true
+  esbuild: true
